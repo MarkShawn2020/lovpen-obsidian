@@ -38,7 +38,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 		this.app = app;
 		this.plugin = plugin;
 		this.config = {
-			kitsStoragePath: 'lovpen-kits',
+			kitsStoragePath: 'assets',
 			enableAutoBackup: true,
 			backupRetentionDays: 30,
 			enablePreview: true
@@ -447,34 +447,31 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 	// 私有方法
 
 	private async loadKits(): Promise<void> {
+		try {
+			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
+			const kitsFile = `${pluginDir}/${this.config.kitsStoragePath}/${this.KITS_FILE_NAME}`;
 
-		const adapter = this.app.vault.adapter as any;
-		const kitsFile = adapter.path?.join(
-			adapter.basePath,
-			this.config.kitsStoragePath,
-			this.KITS_FILE_NAME
-		) || `${this.config.kitsStoragePath}/${this.KITS_FILE_NAME}`;
-
-		logger.info(`[TemplateKitManager] Trying to load kits from: ${kitsFile}`);
-		const content = await this.app.vault.adapter.read(kitsFile);
-		this.kitsCollection = JSON.parse(content);
-		logger.info(`[TemplateKitManager] Loaded ${this.kitsCollection.kits.length} kits`);
+			logger.info(`[TemplateKitManager] Trying to load kits from: ${kitsFile}`);
+			const content = await this.app.vault.adapter.read(kitsFile);
+			this.kitsCollection = JSON.parse(content);
+			logger.info(`[TemplateKitManager] Loaded ${this.kitsCollection.kits.length} kits`);
+		} catch (error) {
+			logger.warn(`[TemplateKitManager] Could not load kits, using default collection:`, error);
+			this.kitsCollection = this.getDefaultKitsCollection();
+		}
 	}
 
 	private async saveKits(): Promise<void> {
 		try {
-			const adapter = this.app.vault.adapter as any;
-			const kitsDir = adapter.path?.join(
-				adapter.basePath,
-				this.config.kitsStoragePath
-			) || this.config.kitsStoragePath;
+			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
+			const kitsDir = `${pluginDir}/${this.config.kitsStoragePath}`;
 
 			// 确保目录存在
 			if (!await this.app.vault.adapter.exists(kitsDir)) {
 				await this.app.vault.adapter.mkdir(kitsDir);
 			}
 
-			const kitsFile = adapter.path?.join(kitsDir, this.KITS_FILE_NAME) || `${kitsDir}/${this.KITS_FILE_NAME}`;
+			const kitsFile = `${kitsDir}/${this.KITS_FILE_NAME}`;
 			const content = JSON.stringify(this.kitsCollection, null, 2);
 			await this.app.vault.adapter.write(kitsFile, content);
 
