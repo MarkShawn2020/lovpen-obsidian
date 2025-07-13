@@ -12,7 +12,6 @@ import {NMPSettings} from "./settings";
 import TemplateManager from "./template-manager";
 import TemplateKitManager from "./template-kit-manager";
 import {uevent} from "./utils";
-import {LovpenReactProps} from "@/types";
 import {persistentStorageService} from "@/services/persistentStorage";
 import {logger} from "@lovpen/shared";
 
@@ -64,7 +63,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			logger.debug("获取到主插件的设置实例");
 			return plugin.settings;
 		}
-		
+
 		// 如果主插件尚未加载，使用单例模式
 		logger.warn("主插件尚未加载，使用单例模式");
 		return NMPSettings.getInstance();
@@ -115,7 +114,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					windowLovpenReact: (window as any).LovpenReact,
 					windowLovpenReactDefault: (window as any).LovpenReact?.default,
 				});
-				
+
 				// 立即设置全局API，确保React组件可以访问
 				this.setupGlobalAPI();
 			} else {
@@ -212,7 +211,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			// 只更新文章内容，不重新初始化React组件
 			const newArticleHTML = await this.getArticleContent();
 			this.articleHTML = newArticleHTML;
-			
+
 			// 更新React组件的props但不重新触发onArticleInfoChange
 			await this.updateExternalReactComponent();
 			logger.debug('[updateArticleContentOnly] 更新了文章内容');
@@ -223,16 +222,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	async copyArticle() {
 		let content = await this.getArticleContent();
-
-		// 在复制时将代码块转换为微信格式
-		const {CodeBlocks} = await import("./html-plugins/code-blocks");
-		content = CodeBlocks.convertToWeixinFormat(content);
-		//
-		// // 处理本地图片 - 转换为data URL或移除
-		// content = await this.processLocalImages(content);
-		//
-		// logger.debug("=== 复制内容转换完成 ===");
-		// logger.debug("转换后HTML长度:", content.length);
 
 		// 复制到剪贴板
 		await navigator.clipboard.write([new ClipboardItem({
@@ -251,11 +240,11 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(content, "text/html");
 		const images = doc.querySelectorAll('img');
-		
+
 		for (const img of images) {
 			const src = img.getAttribute('src');
 			if (!src) continue;
-			
+
 			// 检查是否是本地图片路径
 			if (src.startsWith('app://') || src.startsWith('capacitor://') || src.startsWith('file://')) {
 				try {
@@ -277,7 +266,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				}
 			}
 		}
-		
+
 		return doc.body.innerHTML;
 	}
 
@@ -293,14 +282,14 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			if (!response.ok) {
 				return null;
 			}
-			
+
 			const blob = await response.blob();
-			
+
 			// 检查是否是图片
 			if (!blob.type.startsWith('image/')) {
 				return null;
 			}
-			
+
 			// 转换为data URL
 			return new Promise((resolve, reject) => {
 				const reader = new FileReader();
@@ -318,12 +307,12 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		// 在React组件中处理CSS变量更新
 		// 首先尝试在React容器中查找
 		let noteContainer = this.reactContainer?.querySelector(".lovpen") as HTMLElement;
-		
+
 		// 如果React容器中没有找到，则在整个document中查找
 		if (!noteContainer) {
 			noteContainer = document.querySelector(".lovpen") as HTMLElement;
 		}
-		
+
 		if (!noteContainer) {
 			logger.warn("找不到容器，无法更新CSS变量");
 			return;
@@ -360,13 +349,13 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				const templateManager = TemplateManager.getInstance();
 				const file = this.app.workspace.getActiveFile();
 				const meta: Record<string, string | string[] | number | boolean | object | undefined> = {};
-				
+
 				// 首先获取frontmatter
 				if (file) {
 					const metadata = this.app.metadataCache.getFileCache(file);
 					Object.assign(meta, metadata?.frontmatter);
 				}
-				
+
 				// 设置文章标题的优先级：基本信息 > frontmatter > 文件名
 				let finalTitle = '';
 				if (this.toolbarArticleInfo?.articleTitle && this.toolbarArticleInfo.articleTitle.trim() !== '') {
@@ -382,12 +371,12 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					finalTitle = file.basename;
 					logger.debug('[wrapArticleContent] 使用文件名作为标题:', finalTitle);
 				}
-				
+
 				// 设置最终的标题
 				if (finalTitle) {
 					meta.articleTitle = finalTitle;
 				}
-				
+
 				// 设置作者的优先级：基本信息 > frontmatter > 个人信息设置
 				let finalAuthor = '';
 				if (this.toolbarArticleInfo?.author && this.toolbarArticleInfo.author.trim() !== '') {
@@ -403,12 +392,12 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					finalAuthor = this.settings.personalInfo.name.trim();
 					logger.debug('[wrapArticleContent] 使用个人信息设置中的作者:', finalAuthor);
 				}
-				
+
 				// 设置最终的作者
 				if (finalAuthor) {
 					meta.author = finalAuthor;
 				}
-				
+
 				// 设置发布日期的优先级：基本信息 > frontmatter > 当前日期
 				let finalPublishDate = '';
 				if (this.toolbarArticleInfo?.publishDate && this.toolbarArticleInfo.publishDate.trim() !== '') {
@@ -424,7 +413,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					finalPublishDate = new Date().toISOString().split('T')[0];
 					logger.debug('[wrapArticleContent] 使用当前日期作为发布日期:', finalPublishDate);
 				}
-				
+
 				// 设置最终的发布日期
 				if (finalPublishDate) {
 					meta.publishDate = finalPublishDate;
@@ -438,7 +427,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					Object.keys(this.toolbarArticleInfo).forEach(key => {
 						// articleTitle、author、publishDate已经在上面特殊处理了，跳过
 						if (key === 'articleTitle' || key === 'author' || key === 'publishDate') return;
-						
+
 						const value = this.toolbarArticleInfo[key];
 						if (value !== undefined && value !== null && value !== '') {
 							// 对于数组类型的tags，需要特殊处理
@@ -450,7 +439,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 						}
 					});
 				}
-				
+
 				logger.debug("传递至模板的元数据:", meta);
 
 				html = templateManager.applyTemplate(html, this.settings.defaultTemplate, meta);
@@ -492,7 +481,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	getCSS() {
 		logger.debug(`[getCSS] 当前主题: ${this.currentTheme}, 设置中的主题: ${this.settings.defaultStyle}`);
-		
+
 		const theme = this.assetsManager.getTheme(this.currentTheme);
 		const highlight = this.assetsManager.getHighlight(this.currentHighlight);
 		const customCSS = this.settings.useCustomCss ? this.assetsManager.customCSS : "";
@@ -660,7 +649,7 @@ ${customCSS}`;
 					logger.debug(`[onThemeChange] 设置已更新，开始渲染`);
 					await this.renderMarkdown();
 					logger.debug(`[onThemeChange] 渲染完成`);
-					
+
 					// 直接异步调用update
 					await this.update();
 				},
@@ -703,12 +692,12 @@ ${customCSS}`;
 					if (this.isUpdatingFromToolbar) {
 						return;
 					}
-					
+
 					// 将文章信息保存到toolbarArticleInfo中，用于渲染时合并
 					logger.debug('[onArticleInfoChange] 文章信息已更新:', info);
 					this.toolbarArticleInfo = info;
 					logger.debug('[onArticleInfoChange] toolbarArticleInfo已设置:', this.toolbarArticleInfo);
-					
+
 					// 设置标志位并异步更新
 					this.isUpdatingFromToolbar = true;
 					this.updateArticleContentOnly().then(() => {
@@ -727,7 +716,7 @@ ${customCSS}`;
 					logger.debug('[onSettingsChange] 设置已更新:', settingsUpdate);
 					logger.debug('[onSettingsChange] 更新前的authKey:', this.settings.authKey);
 					logger.debug('[onSettingsChange] 更新前的全部设置:', this.settings.getAllSettings());
-					
+
 					// 合并设置更新
 					Object.keys(settingsUpdate).forEach(key => {
 						if (settingsUpdate[key] !== undefined) {
@@ -735,7 +724,7 @@ ${customCSS}`;
 							logger.debug(`[onSettingsChange] 已更新 ${key}:`, settingsUpdate[key]);
 						}
 					});
-					
+
 					logger.debug('[onSettingsChange] 更新后的authKey:', this.settings.authKey);
 					logger.debug('[onSettingsChange] 更新后的全部设置:', this.settings.getAllSettings());
 					this.saveSettingsToPlugin();
@@ -921,7 +910,7 @@ ${customCSS}`;
 				},
 				onSettingsChange: (settingsUpdate: any) => {
 					logger.debug('[onSettingsChange] 设置已更新:', settingsUpdate);
-					
+
 					// 合并设置更新
 					Object.keys(settingsUpdate).forEach(key => {
 						if (settingsUpdate[key] !== undefined) {
@@ -929,7 +918,7 @@ ${customCSS}`;
 							logger.debug(`[onSettingsChange] 已更新 ${key}:`, settingsUpdate[key]);
 						}
 					});
-					
+
 					this.saveSettingsToPlugin();
 				},
 				onPersonalInfoChange: (info: any) => {
@@ -941,10 +930,10 @@ ${customCSS}`;
 					if (this.isUpdatingFromToolbar) {
 						return;
 					}
-					
+
 					logger.debug('[onArticleInfoChange] 文章信息已更新:', info);
 					this.toolbarArticleInfo = info;
-					
+
 					this.isUpdatingFromToolbar = true;
 					this.updateArticleContentOnly().then(() => {
 						this.isUpdatingFromToolbar = false;
@@ -953,7 +942,7 @@ ${customCSS}`;
 				onSaveSettings: () => {
 					this.saveSettingsToPlugin();
 				},
-				
+
 				// 添加持久化存储APIs
 				persistentStorage: {
 					// Template Kit Management
@@ -981,7 +970,7 @@ ${customCSS}`;
 							throw error;
 						}
 					},
-					
+
 					// Plugin Configuration Management
 					savePluginConfig: async (pluginName: string, config: any, metaConfig: any) => {
 						try {
@@ -1007,7 +996,7 @@ ${customCSS}`;
 							throw error;
 						}
 					},
-					
+
 					// Personal Info Management
 					savePersonalInfo: async (info: any) => {
 						try {
@@ -1025,7 +1014,7 @@ ${customCSS}`;
 							throw error;
 						}
 					},
-					
+
 					// Article Info Management
 					saveArticleInfo: async (info: any) => {
 						try {
@@ -1043,7 +1032,7 @@ ${customCSS}`;
 							throw error;
 						}
 					},
-					
+
 					// Style Settings Management
 					saveStyleSettings: async (settings: any) => {
 						try {
@@ -1061,7 +1050,7 @@ ${customCSS}`;
 							throw error;
 						}
 					},
-					
+
 					// File and Cover Management
 					saveFile: async (file: File, customName?: string) => {
 						try {
@@ -1111,7 +1100,7 @@ ${customCSS}`;
 							throw error;
 						}
 					},
-					
+
 					// Utility functions
 					clearAllPersistentData: async () => {
 						try {
@@ -1131,7 +1120,7 @@ ${customCSS}`;
 					}
 				}
 			};
-			
+
 			logger.info('[setupGlobalAPI] 全局API已设置完成，包含持久化存储APIs');
 		} catch (error) {
 			logger.error('[setupGlobalAPI] 设置全局API时出错:', error);
@@ -1223,12 +1212,12 @@ ${customCSS}`;
 			// 确保主插件使用的是当前的设置实例
 			plugin.settings = this.settings;
 			logger.debug("正在保存设置到持久化存储", this.settings.getAllSettings());
-			
+
 			// 重要调试：检查设置实例是否正确
 			logger.debug("当前设置实例:", this.settings);
 			logger.debug("主插件设置实例:", plugin.settings);
 			logger.debug("设置实例是否相同:", this.settings === plugin.settings);
-			
+
 			// 立即同步调用保存
 			plugin.saveSettings();
 		} else {
