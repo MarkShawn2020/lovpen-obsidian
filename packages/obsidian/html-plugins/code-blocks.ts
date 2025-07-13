@@ -1,7 +1,5 @@
 import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
-import {Notice} from "obsidian";
-import {wxUploadImage} from "../weixin-api";
 
 import {logger} from "../../shared/src/logger";
 
@@ -45,53 +43,11 @@ export class CardDataManager {
 	}
 }
 
-const MermaidSectionClassName = "note-mermaid";
-const MermaidImgClassName = "note-mermaid-img";
 
 /**
  * 代码块处理插件 - 处理微信公众号中的代码格式和行号显示
  */
 export class CodeBlocks extends UnifiedHtmlPlugin {
-	/**
-	 * 将base64图片转换为Blob对象
-	 * @param src base64图片数据
-	 * @returns Blob对象
-	 */
-	static srcToBlob(src: string): Blob {
-		const base64 = src.split(",")[1];
-		const byteCharacters = atob(base64);
-		const byteNumbers = new Array(byteCharacters.length);
-		for (let i = 0; i < byteCharacters.length; i++) {
-			byteNumbers[i] = byteCharacters.charCodeAt(i);
-		}
-		const byteArray = new Uint8Array(byteNumbers);
-		return new Blob([byteArray], {type: "image/png"});
-	}
-
-	/**
-	 * 上传Mermaid图片到微信公众号
-	 * @param root HTML根元素
-	 * @param token 微信API令牌
-	 */
-	static async uploadMermaidImages(root: HTMLElement, token: string): Promise<void> {
-		const imgs = root.querySelectorAll("." + MermaidImgClassName);
-		for (let img of imgs) {
-			const src = img.getAttribute("src");
-			if (!src) continue;
-			if (src.startsWith("http")) continue;
-			const blob = CodeBlocks.srcToBlob(img.getAttribute("src")!);
-			const name = img.id + ".png";
-			const res = await wxUploadImage(blob, name, token);
-			if (res.errcode != 0) {
-				const msg = `上传图片失败: ${res.errcode} ${res.errmsg}`;
-				new Notice(msg);
-				console.error(msg);
-				continue;
-			}
-			const url = res.url;
-			img.setAttribute("src", url);
-		}
-	}
 
 	getPluginName(): string {
 		return "代码块处理插件";
@@ -190,59 +146,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		pre.setAttribute('data-language', this.extractLanguage(codeElement));
 		pre.setAttribute('data-wrap-enabled', enableWrap.toString());
 	}
-
-	/**
-	 * 转换为微信原生代码格式
-	 * @param pre pre元素
-	 * @param codeElement 代码元素
-	 * @param showLineNumbers 是否显示行号
-	 * @param enableWrap 是否启用换行
-	 */
-	private convertToWeixinNativeFormat(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, enableWrap: boolean): void {
-		// 获取代码内容
-		let content = codeElement.innerHTML;
-		
-		// 清理内容
-		content = content.replace(/^\n+/, '').replace(/\n+$/, '');
-		
-		// 检查是否有高亮标记
-		const hasHighlight = codeElement.classList.contains('hljs') ||
-			content.includes('<span class="hljs-') ||
-			content.includes('class="hljs-');
-
-		if (hasHighlight) {
-			// 转换高亮样式为内联样式
-			this.convertHighlightToInlineStyles(codeElement);
-			content = codeElement.innerHTML;
-		}
-
-		// 分割行
-		const lines = content.split('\n');
-		
-		// 创建微信原生格式的代码块
-		const wrapClass = enableWrap ? 'code-snippet' : 'code-snippet_nowrap';
-		const lang = this.extractLanguage(codeElement);
-		
-		let codeElements: string[] = [];
-		
-		lines.forEach((line, index) => {
-			let lineContent = line.trim() === '' ? '<br class="ProseMirror-trailingBreak">' : line;
-			
-			if (showLineNumbers) {
-				const lineNumber = index + 1;
-				lineContent = `<span style="color: #999; display: inline-block; width: 2em; text-align: right; padding-right: 1em; margin-right: 1em; border-right: 1px solid #ddd;">${lineNumber}</span>${lineContent}`;
-			}
-			
-			codeElements.push(`<code><span leaf="">${lineContent}</span></code>`);
-		});
-		
-		// 创建新的HTML结构
-		const newHtml = `<section class="code-snippet__js"><pre class="code-snippet__js code-snippet ${wrapClass}" data-lang="${lang}">${codeElements.join('')}</pre></section>`;
-		
-		// 替换原来的pre元素
-		pre.outerHTML = newHtml;
-	}
-
+	
 	/**
 	 * 提取语言标识
 	 * @param codeElement 代码元素
@@ -274,7 +178,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		pre.style.fontFamily = "var(--font-monospace)";
 		pre.style.borderRadius = "4px";
 		pre.style.border = "1px solid var(--background-modifier-border)";
-		
+
 		// 代码元素样式
 		codeElement.style.background = "transparent";
 		codeElement.style.padding = "0";
@@ -291,38 +195,16 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	 */
 	private addObsidianLineNumbers(codeElement: HTMLElement): void {
 		let content = codeElement.innerHTML;
-		
+
 		// 移除开头和结尾的换行符
 		content = content.replace(/^\n+/, '').replace(/\n+$/, '');
-		
+
 		const lines = content.split("\n");
-		
+
 		const numberedLines = lines
 			.map((line, index) => {
 				const lineNumber = index + 1;
 				return `<span style="color: var(--text-faint); display: inline-block; width: 2.5em; text-align: right; padding-right: 1em; margin-right: 0.5em; border-right: 1px solid var(--background-modifier-border); user-select: none;">${lineNumber}</span>${line}`;
-			})
-			.join("\n");
-
-		codeElement.innerHTML = numberedLines;
-	}
-
-	/**
-	 * 添加行号
-	 * @param codeElement 代码元素
-	 */
-	private addLineNumbers(codeElement: HTMLElement): void {
-		let content = codeElement.innerHTML;
-		
-		// 移除开头和结尾的换行符
-		content = content.replace(/^\n+/, '').replace(/\n+$/, '');
-		
-		const lines = content.split("\n");
-		
-		const numberedLines = lines
-			.map((line, index) => {
-				const lineNumber = index + 1;
-				return `<span style="color: #999; display: inline-block; width: 2em; text-align: right; padding-right: 1em; margin-right: 1em; border-right: 1px solid #ddd;">${lineNumber}</span>${line}`;
 			})
 			.join("\n");
 
@@ -342,7 +224,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			pre.style.wordBreak = "break-all";
 			pre.style.overflowX = "visible";
 			pre.style.wordWrap = "break-word";
-			
+
 			codeElement.style.whiteSpace = "pre-wrap";
 			codeElement.style.wordBreak = "break-all";
 			codeElement.style.overflowX = "visible";
@@ -354,7 +236,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			pre.style.overflowX = "auto";
 			pre.style.wordWrap = "normal";
 			pre.style.overflowWrap = "normal";
-			
+
 			codeElement.style.whiteSpace = "pre";
 			codeElement.style.wordBreak = "normal";
 			codeElement.style.overflowX = "auto";
@@ -454,76 +336,6 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		codeElement.innerHTML = html;
 
 		logger.debug("已优化缩进处理，保持格式兼容性");
-	}
-
-	/**
-	 * 将HTML中的代码块转换为微信格式（复制时调用）
-	 * @param html HTML内容
-	 * @returns 转换后的微信格式HTML
-	 */
-	static convertToWeixinFormat(html: string): string {
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(html, "text/html");
-
-		// 查找所有标记为代码块的元素
-		const codeBlocks = doc.querySelectorAll('pre[data-code-block="true"]');
-
-		codeBlocks.forEach((pre) => {
-			const codeElement = pre.querySelector('code');
-			if (!codeElement) return;
-
-			const language = pre.getAttribute('data-language') || 'text';
-			const enableWrap = pre.getAttribute('data-wrap-enabled') === 'true';
-
-			// 克隆代码元素以避免修改原始DOM
-			const clonedCode = codeElement.cloneNode(true) as HTMLElement;
-			
-			// 移除所有行号span元素
-			const lineNumberSpans = clonedCode.querySelectorAll('span[style*="user-select: none"]');
-			lineNumberSpans.forEach(span => span.remove());
-			
-			// 获取处理后的内容
-			let content = clonedCode.innerHTML;
-			
-			// 清理内容
-			content = content.replace(/^\n+/, '').replace(/\n+$/, '');
-			
-			// 分割行并保留缩进
-			const lines = content.split('\n');
-			
-			// 创建微信原生格式的代码块
-			const wrapClass = enableWrap ? 'code-snippet' : 'code-snippet_nowrap';
-			
-			const codeElements = lines.map(line => {
-				if (line.trim() === '') {
-					return `<code><span leaf=""><br class="ProseMirror-trailingBreak"></span></code>`;
-				}
-				
-				// 保留缩进：将行首的空格转换为&nbsp;
-				const processedLine = this.preserveIndentationForWeixin(line);
-				return `<code><span leaf="">${processedLine}</span></code>`;
-			});
-			
-			// 创建新的HTML结构
-			const newHtml = `<section class="code-snippet__js"><pre class="code-snippet__js code-snippet ${wrapClass}" data-lang="${language}">${codeElements.join('')}</pre></section>`;
-			
-			// 替换原来的pre元素
-			pre.outerHTML = newHtml;
-		});
-
-		return doc.body.innerHTML;
-	}
-
-	/**
-	 * 为微信格式保留缩进
-	 * @param line 代码行
-	 * @returns 处理后的代码行
-	 */
-	private static preserveIndentationForWeixin(line: string): string {
-		// 匹配行首的空格和Tab，并转换为&nbsp;
-		return line.replace(/^([ \t]+)/, (match) => {
-			return match.replace(/ /g, '&nbsp;').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
-		});
 	}
 
 }
