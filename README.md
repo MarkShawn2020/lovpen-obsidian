@@ -16,31 +16,28 @@
 
 # 安装
 
-## 1、使用BRAT插件安装
-对于新手用户，推荐使用[BRAT插件](https://github.com/TfTHacker/obsidian42-brat)安装。
+## 1、手动安装（推荐）
 
-在BRAT的设置中
-打开Obsidian的**设置**界面，在底部的**第三方插件**——在**BRAT**中点击**Add Beta plugin**，然后输入本插件地址`https://github.com/markshawn2020/lovpen`，点击**Add Plugin**就可以安装 LovPen 插件了。
-
-
-## 2、手动安装
-
-到[Release](https://github.com/markshawn2020/lovpen/releases)页面下载最新版本，将`main.js`、 `manifest.json`、`styles.css`保存到Obsidian仓库的`.obsidian/plugins/obsidian-lovpen`目录下。
+到[Release](https://github.com/markshawn2020/lovpen/releases)页面下载最新版本的 `lovpen-plugin.zip` 文件，解压到Obsidian仓库的`.obsidian/plugins/`目录下。
 
 打开Obsidian的**设置**界面，点击**第三方插件**，在**已安装插件**中刷新一下，然后启用本插件 **LovPen**。
+
+## 2、使用BRAT插件安装
+
+如果您已经安装了[BRAT插件](https://github.com/TfTHacker/obsidian42-brat)，可以使用这种方式安装。
+
+在BRAT的设置中，打开Obsidian的**设置**界面，在底部的**第三方插件**——在**BRAT**中点击**Add Beta plugin**，然后输入本插件地址`https://github.com/markshawn2020/lovpen`，点击**Add Plugin**就可以安装 LovPen 插件了。
 
 ## 3、主题、代码高亮下载
 
 ### 3.1 通过设置下载
 为了尽可能保证插件符合官方规范，从`1.0.4`版本开始，主题和代码高亮需要在插件的设置——**获取更多主题**手动下载。
 
-### 3.2 手动下载
-也可以直接在[Release](https://github.com/markshawn2020/lovpen/releases)页面下载`assets.zip`文件，解压后放到`.obsidian/plugins/obsidian-lovpen/assets`目录下。
-
-完整的目录结构如下：
+### 3.2 目录结构
+完整安装后的目录结构如下：
 
 ```
-.obsidian/plugins/obsidian-lovpen/
+.obsidian/plugins/lovpen/
 ├── assets
 │   ├── themes.json
 │   ├── highlights.json

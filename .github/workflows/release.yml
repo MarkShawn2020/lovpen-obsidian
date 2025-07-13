@@ -69,11 +69,20 @@ jobs:
 
       - name: Prepare release files
         run: |
+          # 创建完整插件包
+          mkdir -p lovpen-plugin
+          cp packages/obsidian/dist/main.js lovpen-plugin/
+          cp packages/obsidian/dist/manifest.json lovpen-plugin/
+          cp packages/assets/styles.css lovpen-plugin/
+          
+          # 解压 assets 到插件目录
+          cd lovpen-plugin
+          unzip -q ../assets.zip
+          cd ..
+          
+          # 创建完整插件压缩包
           mkdir -p release-files
-          cp packages/obsidian/dist/main.js release-files/
-          cp packages/obsidian/dist/manifest.json release-files/
-          cp packages/assets/styles.css release-files/
-          cp assets.zip release-files/
+          zip -r release-files/lovpen-plugin.zip lovpen-plugin/
 
       - name: Get version from tag or input
         id: get_version
@@ -114,15 +123,13 @@ jobs:
             
             ## 安装方法
             
-            ### 方法一：BRAT 插件安装（推荐）
-            在 BRAT 插件中添加仓库地址：`markshawn2020/lovpen`
+            ### 方法一：一键安装（推荐）
+            1. 下载 `lovpen-plugin.zip` 完整插件包
+            2. 解压到你的 Obsidian 仓库的 `.obsidian/plugins/` 目录下
+            3. 在 Obsidian 设置中启用 LovPen 插件
             
-            ### 方法二：手动安装
-            1. 下载 `main.js`、`manifest.json`、`styles.css` 三个文件
-            2. 在 Obsidian 设置中创建 `.obsidian/plugins/lovpen/` 目录
-            3. 将下载的文件放入该目录
-            4. 下载 `assets.zip` 并解压到 `.obsidian/plugins/lovpen/assets/` 目录
-            5. 在 Obsidian 设置中启用 LovPen 插件
+            ### 方法二：BRAT 插件安装
+            在 BRAT 插件中添加仓库地址：`markshawn2020/lovpen`
             
             ## 主要特性
             - 🚀 一键将 Obsidian 笔记发布到微信公众号、知乎、小红书、Twitter
@@ -131,10 +138,7 @@ jobs:
             - 🔗 智能链接处理，针对微信公众号优化
             - 📝 模板系统，自定义内容渲染
           files: |
-            release-files/main.js
-            release-files/manifest.json
-            release-files/styles.css
-            release-files/assets.zip
+            release-files/lovpen-plugin.zip
           draft: false
           prerelease: false
         env:
