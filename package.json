@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-lovpen",
-	"version": "0.14.16",
+	"version": "0.14.17",
 	"description": "This is a plugin for Obsidian (https://obsidian.md)",
 	"main": "dist/main.js",
 	"scripts": {

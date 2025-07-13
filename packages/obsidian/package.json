@@ -1,6 +1,6 @@
 {
 	"name": "obsidian",
-	"version": "0.14.16",
+	"version": "0.14.17",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
