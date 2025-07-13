@@ -37,21 +37,21 @@ export class Styles extends UnifiedHtmlPlugin {
 			for (let i = 0; i < allElements.length; i++) {
 				const el = allElements[i] as HTMLElement;
 				const tagName = el.tagName.toLowerCase();
-				let inlineStyles = "";
-
-				// 获取基础样式
-				if (basicStyleMap[tagName]) {
-					inlineStyles += basicStyleMap[tagName];
-				}
-
-				// 处理特殊元素
-				inlineStyles += this.getElementSpecificStyles(el);
-
-				// 提取和处理现有样式属性
 				const existingStyle = el.getAttribute("style") || "";
-				const mergedStyles = this.mergeStyles(existingStyle, inlineStyles);
+
+				// 只添加微信必需的样式，保持原有样式
+				let additionalStyles = "";
+
+				// 确保关键元素可见性（微信必需）
+				additionalStyles += this.getWechatEssentialStyles(el);
+
+				// 只有在现有样式不足时才添加基础样式
+				additionalStyles += this.getMinimalRequiredStyles(el, existingStyle);
+
+				// 合并样式，优先保持现有样式
+				const mergedStyles = this.mergeStyles(existingStyle, additionalStyles);
 				
-				if (mergedStyles) {
+				if (mergedStyles && mergedStyles !== existingStyle) {
 					el.setAttribute("style", mergedStyles);
 				}
 			}
@@ -69,47 +69,39 @@ export class Styles extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 获取基础样式映射
+	 * 获取基础样式映射（仅作为后备）
 	 */
 	private getBasicStyleMap(): Record<string, string> {
 		return {
-			'h1': 'font-size: 24px; font-weight: bold; margin: 16px 0 8px 0; line-height: 1.4; display: block;',
-			'h2': 'font-size: 20px; font-weight: bold; margin: 14px 0 6px 0; line-height: 1.4; display: block;',
-			'h3': 'font-size: 18px; font-weight: bold; margin: 12px 0 4px 0; line-height: 1.4; display: block;',
-			'h4': 'font-size: 16px; font-weight: bold; margin: 10px 0 4px 0; line-height: 1.4; display: block;',
-			'h5': 'font-size: 14px; font-weight: bold; margin: 8px 0 2px 0; line-height: 1.4; display: block;',
-			'h6': 'font-size: 12px; font-weight: bold; margin: 6px 0 2px 0; line-height: 1.4; display: block;',
-			'p': 'margin: 8px 0; line-height: 1.6; display: block;',
-			'img': 'max-width: 100%; height: auto; display: block; margin: 8px auto;',
-			'a': 'color: #1e6bb8; text-decoration: none;',
-			'code': 'font-family: Monaco, Consolas, monospace; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px;',
-			'pre': 'background-color: #f8f8f8; padding: 12px; border-radius: 6px; overflow-x: auto; display: block; margin: 12px 0;',
-			'blockquote': 'border-left: 4px solid #ddd; padding-left: 16px; margin: 12px 0; color: #666; display: block;',
-			'ul': 'margin: 12px 0; padding-left: 24px; display: block;',
-			'ol': 'margin: 12px 0; padding-left: 24px; display: block;',
-			'li': 'margin: 4px 0; line-height: 1.6; display: list-item;',
-			'table': 'border-collapse: collapse; width: 100%; margin: 12px 0; display: table;',
-			'th': 'border: 1px solid #ddd; padding: 8px; background-color: #f5f5f5; text-align: left; display: table-cell;',
-			'td': 'border: 1px solid #ddd; padding: 8px; display: table-cell;',
+			'h1': 'font-weight: bold;',
+			'h2': 'font-weight: bold;',
+			'h3': 'font-weight: bold;',
+			'h4': 'font-weight: bold;',
+			'h5': 'font-weight: bold;',
+			'h6': 'font-weight: bold;',
+			'img': 'max-width: 100%; height: auto;',
+			'code': 'font-family: monospace;',
+			'pre': 'font-family: monospace;',
+			'table': 'border-collapse: collapse;',
 		};
 	}
 
 	/**
-	 * 获取元素特定样式
+	 * 获取微信必需的样式（仅关键属性）
 	 */
-	private getElementSpecificStyles(el: HTMLElement): string {
+	private getWechatEssentialStyles(el: HTMLElement): string {
 		let styles = "";
 		const tagName = el.tagName.toLowerCase();
 
-		// 确保图片可见性
+		// 确保图片可见性和基本布局
 		if (tagName === 'img') {
 			const src = el.getAttribute('src');
 			if (src) {
-				styles += 'visibility: visible; opacity: 1; ';
+				styles += 'visibility: visible; opacity: 1; max-width: 100%; height: auto; ';
 			}
 		}
 
-		// 确保标题可见性
+		// 确保标题可见性但不强制布局
 		if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
 			styles += 'visibility: visible; opacity: 1; ';
 		}
@@ -118,20 +110,48 @@ export class Styles extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 合并样式字符串
+	 * 获取最小必需样式（仅在缺失时添加）
+	 */
+	private getMinimalRequiredStyles(el: HTMLElement, existingStyle: string): string {
+		const tagName = el.tagName.toLowerCase();
+		const basicStyles = this.getBasicStyleMap();
+		let styles = "";
+
+		// 只有在现有样式中没有对应属性时才添加
+		if (basicStyles[tagName]) {
+			const basicStyleObj = this.parseStyleString(basicStyles[tagName]);
+			const existingStyleObj = this.parseStyleString(existingStyle);
+
+			for (const [prop, value] of Object.entries(basicStyleObj)) {
+				// 只有在现有样式中没有这个属性时才添加
+				if (!existingStyleObj[prop]) {
+					styles += `${prop}: ${value}; `;
+				}
+			}
+		}
+
+		return styles;
+	}
+
+	/**
+	 * 合并样式字符串（保持原有样式优先级）
 	 */
 	private mergeStyles(existing: string, additional: string): string {
 		if (!existing && !additional) return "";
+		if (!additional) return existing;
+		if (!existing) return additional;
 		
 		const existingStyles = this.parseStyleString(existing);
 		const additionalStyles = this.parseStyleString(additional);
 		
-		// 合并样式，existing 优先级更高
+		// 合并样式，existing 优先级更高，只添加缺失的样式
 		const merged = { ...additionalStyles, ...existingStyles };
 		
-		return Object.entries(merged)
+		const result = Object.entries(merged)
 			.map(([prop, value]) => `${prop}: ${value}`)
-			.join('; ') + (Object.keys(merged).length > 0 ? ';' : '');
+			.join('; ');
+		
+		return result ? result + ';' : '';
 	}
 
 	/**
