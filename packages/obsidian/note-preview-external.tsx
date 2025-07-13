@@ -1,4 +1,4 @@
-import {EventRef, ItemView, Notice, WorkspaceLeaf, requestUrl} from "obsidian";
+import {EventRef, ItemView, Notice, requestUrl, WorkspaceLeaf} from "obsidian";
 import {FRONT_MATTER_REGEX, VIEW_TYPE_NOTE_PREVIEW} from "./constants";
 
 import AssetsManager from "./assets";
@@ -10,22 +10,21 @@ import {MarkedParser} from "./markdown-plugins/parser";
 import {UnifiedPluginManager} from "./shared/unified-plugin-system";
 import {NMPSettings} from "./settings";
 import TemplateManager from "./template-manager";
-import TemplateKitManager from "./template-kit-manager";
 import {ReactAPIService} from "./services/ReactAPIService";
 import {uevent} from "./utils";
 import {persistentStorageService} from "@/services/persistentStorage";
 import {logger} from "@lovpen/shared";
 import {
-	ExternalReactLib,
-	ReactComponentPropsWithCallbacks,
-	ReactSettings,
-	PersonalInfo,
 	ArticleInfo,
-	PluginData,
+	ExternalReactLib,
 	GlobalReactAPI,
-	isValidPersonalInfo,
 	isValidArticleInfo,
-	isValidTemplateKitBasicInfo
+	isValidPersonalInfo,
+	isValidTemplateKitBasicInfo,
+	PersonalInfo,
+	PluginData,
+	ReactComponentPropsWithCallbacks,
+	ReactSettings
 } from "./types/react-api-types";
 import {TemplateKitBasicInfo} from "./template-kit-types";
 
@@ -493,45 +492,6 @@ ${customCSS}`;
 	}
 
 	/**
-	 * 处理本地图片 - 转换为data URL或移除
-	 * @param content HTML内容
-	 * @returns 处理后的HTML内容
-	 */
-	private async processLocalImages(content: string): Promise<string> {
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(content, "text/html");
-		const images = doc.querySelectorAll('img');
-
-		for (const img of images) {
-			const src = img.getAttribute('src');
-			if (!src) continue;
-
-			// 检查是否是本地图片路径
-			if (src.startsWith('app://') || src.startsWith('capacitor://') || src.startsWith('file://')) {
-				try {
-					// 尝试读取本地图片文件并转换为data URL
-					const dataUrl = await this.convertLocalImageToDataUrl(src);
-					if (dataUrl) {
-						img.setAttribute('src', dataUrl);
-						logger.debug(`本地图片已转换为data URL: ${src.substring(0, 50)}...`);
-					} else {
-						// 如果无法转换，移除图片或设置占位符
-						img.setAttribute('src', '');
-						img.setAttribute('alt', '本地图片（复制时无法显示）');
-						logger.warn(`无法转换本地图片: ${src}`);
-					}
-				} catch (error) {
-					logger.error(`处理本地图片时出错: ${src}`, error);
-					img.setAttribute('src', '');
-					img.setAttribute('alt', '本地图片（处理失败）');
-				}
-			}
-		}
-
-		return doc.body.innerHTML;
-	}
-
-	/**
 	 * 将本地图片路径转换为data URL
 	 * @param localPath 本地图片路径
 	 * @returns data URL或null
@@ -672,10 +632,10 @@ ${customCSS}`;
 
 				// 将新的类型映射回React组件期望的类型（按照标准remark/rehype概念）
 				const pluginType = plugin.getType ? plugin.getType() : 'unknown';
-				const mappedType: 'remark' | 'rehype' | 'unknown' = 
-					pluginType === 'html' ? 'rehype' : 
-					pluginType === 'markdown' ? 'remark' : 
-					'unknown';
+				const mappedType: 'remark' | 'rehype' | 'unknown' =
+					pluginType === 'html' ? 'rehype' :
+						pluginType === 'markdown' ? 'remark' :
+							'unknown';
 
 				const pluginData: PluginData = {
 					name: plugin.getName ? plugin.getName() : 'Unknown Plugin',
@@ -1135,7 +1095,7 @@ ${customCSS}`;
 	 */
 	private async handleKitCreate(basicInfo: TemplateKitBasicInfo): Promise<void> {
 		logger.debug(`[handleKitCreate] 创建模板套装:`, basicInfo);
-		
+
 		// 验证输入
 		if (!isValidTemplateKitBasicInfo(basicInfo)) {
 			logger.warn('[handleKitCreate] 无效的套装基本信息:', basicInfo);
