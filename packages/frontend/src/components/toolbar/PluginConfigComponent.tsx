@@ -159,14 +159,14 @@ export const ConfigComponent = <T extends PluginData>({
 	return (
 		<div
 			id={itemId}
-			className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-3 transition-all duration-200 hover:shadow-md"
+			className="bg-white border border-gray-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden mb-2 sm:mb-3 transition-all duration-200 hover:shadow-md"
 		>
 			<div
-				className={`p-4 cursor-pointer transition-colors ${hasConfigOptions ? 'hover:bg-gray-50' : ''}`}
+				className={`p-3 sm:p-4 cursor-pointer transition-colors ${hasConfigOptions ? 'hover:bg-gray-50' : ''}`}
 				onClick={handleToggle}
 			>
 				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
 						<div onClick={(e) => e.stopPropagation()}>
 							<ToggleSwitch
 								checked={item.enabled}
@@ -175,14 +175,14 @@ export const ConfigComponent = <T extends PluginData>({
 							/>
 						</div>
 
-						<div className="flex items-center gap-2">
-							<div className={`p-1.5 rounded-lg ${item.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
-								<Plug className={`h-4 w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`}/>
+						<div className="flex items-center gap-2 flex-1 min-w-0">
+							<div className={`p-1 sm:p-1.5 rounded-lg ${item.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
+								<Plug className={`h-3 w-3 sm:h-4 sm:w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`}/>
 							</div>
-							<div>
-								<div className="font-medium text-gray-900">{item.name}</div>
+							<div className="flex-1 min-w-0">
+								<div className="text-sm sm:text-base font-medium text-gray-900 truncate">{item.name}</div>
 								{item.description && (
-									<div className="text-xs text-gray-500 mt-0.5 max-w-[300px] truncate"
+									<div className="text-xs text-gray-500 mt-0.5 truncate"
 										 title={item.description}>
 										{item.description}
 									</div>
@@ -191,11 +191,11 @@ export const ConfigComponent = <T extends PluginData>({
 						</div>
 					</div>
 
-					<div className="flex items-center gap-2 shrink-0">
+					<div className="flex items-center gap-1 sm:gap-2 shrink-0">
 						{hasConfigOptions && (
 							<div
 								className={`p-1 rounded-lg transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-								<ChevronDown className="h-4 w-4 text-gray-400"/>
+								<ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
 							</div>
 						)}
 					</div>
@@ -203,21 +203,21 @@ export const ConfigComponent = <T extends PluginData>({
 			</div>
 
 			{hasConfigOptions && isExpanded && (
-				<div className="border-t border-gray-100 bg-gray-50/50 p-4">
-					<div className="flex items-center gap-2 mb-4">
-						<Settings className="h-4 w-4 text-blue-600"/>
-						<span className="text-sm font-medium text-gray-900">插件配置</span>
+				<div className="border-t border-gray-100 bg-gray-50/50 p-3 sm:p-4">
+					<div className="flex items-center gap-2 mb-3 sm:mb-4">
+						<Settings className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600"/>
+						<span className="text-xs sm:text-sm font-medium text-gray-900">插件配置</span>
 					</div>
 
-					<div className="space-y-4">
+					<div className="space-y-3 sm:space-y-4">
 						{configEntries.map(([key, meta]) => (
 							<div key={key}
-								 className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+								 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 p-2 sm:p-3 bg-white border border-gray-200 rounded-lg">
 								<div className="flex items-center gap-2">
-									<Info className="h-4 w-4 text-gray-400"/>
-									<span className="text-sm font-medium text-gray-700">{meta.title}</span>
+									<Info className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
+									<span className="text-xs sm:text-sm font-medium text-gray-700">{meta.title}</span>
 								</div>
-								<div onClick={(e) => e.stopPropagation()}>
+								<div onClick={(e) => e.stopPropagation()} className="w-full sm:w-auto">
 									{meta.type === "switch" ? (
 										<ToggleSwitch
 											checked={!!localConfig[key]}
@@ -229,7 +229,7 @@ export const ConfigComponent = <T extends PluginData>({
 											value={String(localConfig[key] || "")}
 											onValueChange={(value) => handleConfigChange(key, value)}
 										>
-											<SelectTrigger className="w-40">
+											<SelectTrigger className="w-full sm:w-40">
 												<SelectValue/>
 											</SelectTrigger>
 											<SelectContent>
@@ -245,7 +245,7 @@ export const ConfigComponent = <T extends PluginData>({
 											type="text"
 											value={String(localConfig[key] || "")}
 											onChange={(e) => handleConfigChange(key, e.target.value)}
-											className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-40"
+											className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-40"
 											placeholder="输入值..."
 										/>
 									) : null}

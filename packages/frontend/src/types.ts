@@ -1,3 +1,7 @@
+// 导入全局API类型定义
+import './types/global';
+export type { LovpenReactAPI } from './types/global';
+
 // Personal info interface
 export interface PersonalInfo {
 	name: string;
@@ -35,67 +39,7 @@ export interface TemplateKit {
 	};
 }
 
-// Global API interface
-interface LovpenReactAPI {
-	loadTemplateKits: () => Promise<TemplateKit[]>;
-	onKitApply?: (kitId: string) => void;
-	onKitCreate?: (basicInfo: any) => void;
-	onKitDelete?: (kitId: string) => void;
-	onSettingsChange?: (settings: Partial<ViteReactSettings>) => void;
-	onPersonalInfoChange?: (info: PersonalInfo) => void;
-	onArticleInfoChange?: (info: any) => void;
-	onSaveSettings?: () => void;
 
-	// Persistent storage APIs
-	persistentStorage?: {
-		// Template Kit Management
-		saveTemplateKit: (kitData: TemplateKit, customName?: string) => Promise<PersistentTemplateKit>;
-		getTemplateKits: () => Promise<PersistentTemplateKit[]>;
-		deleteTemplateKit: (id: string) => Promise<void>;
-
-		// Plugin Configuration Management
-		savePluginConfig: (pluginName: string, config: any, metaConfig: any) => Promise<PersistentPluginConfig>;
-		getPluginConfigs: () => Promise<PersistentPluginConfig[]>;
-		getPluginConfig: (pluginName: string) => Promise<PersistentPluginConfig | null>;
-
-		// Personal Info Management
-		savePersonalInfo: (info: PersonalInfo) => Promise<PersistentPersonalInfo>;
-		getPersonalInfo: () => Promise<PersistentPersonalInfo | null>;
-
-		// Article Info Management
-		saveArticleInfo: (info: ArticleInfoData) => Promise<PersistentArticleInfo>;
-		getArticleInfo: () => Promise<PersistentArticleInfo | null>;
-
-		// Style Settings Management
-		saveStyleSettings: (settings: {
-			defaultStyle: string;
-			defaultHighlight: string;
-			defaultTemplate: string;
-			useTemplate: boolean;
-			enableThemeColor: boolean;
-			themeColor: string;
-		}) => Promise<PersistentStyleSettings>;
-		getStyleSettings: () => Promise<PersistentStyleSettings | null>;
-
-		// File and Cover Management (already available)
-		saveFile: (file: File, customName?: string) => Promise<PersistentFile>;
-		getFiles: () => Promise<PersistentFile[]>;
-		deleteFile: (id: string) => Promise<void>;
-		saveCover: (coverData: any) => Promise<PersistentCover>;
-		getCovers: () => Promise<PersistentCover[]>;
-		deleteCover: (id: string) => Promise<void>;
-
-		// Utility functions
-		clearAllPersistentData: () => Promise<void>;
-		exportAllData: () => Promise<any>;
-	};
-}
-
-declare global {
-	interface Window {
-		lovpenReactAPI: LovpenReactAPI;
-	}
-}
 
 // Settings interface for the Vite React components
 export interface ViteReactSettings {

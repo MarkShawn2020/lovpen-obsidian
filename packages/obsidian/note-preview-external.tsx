@@ -1,4 +1,4 @@
-import {EventRef, ItemView, Notice, WorkspaceLeaf,} from "obsidian";
+import {EventRef, ItemView, Notice, WorkspaceLeaf, requestUrl} from "obsidian";
 import {FRONT_MATTER_REGEX, VIEW_TYPE_NOTE_PREVIEW} from "./constants";
 
 import AssetsManager from "./assets";
@@ -1117,10 +1117,13 @@ ${customCSS}`;
 							throw error;
 						}
 					}
-				}
+				},
+				
+				// 暴露Obsidian API函数
+				requestUrl: requestUrl
 			};
 
-			logger.info('[setupGlobalAPI] 全局API已设置完成，包含持久化存储APIs');
+		logger.info('[setupGlobalAPI] 全局API已设置完成，包含持久化存储APIs');
 		} catch (error) {
 			logger.error('[setupGlobalAPI] 设置全局API时出错:', error);
 		}

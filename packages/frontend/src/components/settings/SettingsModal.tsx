@@ -21,7 +21,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 																onSettingsChange
 															}) => {
 	const {saveStatus} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
-	const [activeTab, setActiveTab] = useState<'personal' | 'ai' | 'general'>('personal');
+	const [activeTab, setActiveTab] = useState<'personal' | 'ai' | 'general'>(() => {
+		try {
+			const saved = localStorage.getItem('lovpen-settings-active-tab') as 'personal' | 'ai' | 'general';
+			return saved || 'personal';
+		} catch {
+			return 'personal';
+		}
+	});
 
 	// 调试信息
 	React.useEffect(() => {
@@ -36,7 +43,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
 			{/* 背景遮罩 */}
 			<div
 				className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -44,10 +51,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 			/>
 
 			{/* 模态框内容 */}
-			<div className="relative z-10 w-full max-w-5xl mx-4 max-h-[95vh] overflow-hidden">
-				<div className="bg-white rounded-2xl shadow-2xl">
+			<div className="relative z-10 w-full max-w-sm sm:max-w-2xl lg:max-w-5xl max-h-[95vh] overflow-hidden">
+				<div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl">
 					{/* 头部 */}
-					<div className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-6 text-white">
+					<div className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-3 sm:px-6 py-4 sm:py-6 text-white">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-3">
 								<div className="p-2 bg-white/20 rounded-lg">
@@ -75,7 +82,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 							].map(({key, label, icon: Icon}) => (
 								<button
 									key={key}
-									onClick={() => setActiveTab(key as any)}
+									onClick={() => {
+										const tabKey = key as 'personal' | 'ai' | 'general';
+										setActiveTab(tabKey);
+										// 持久化保存选中的tab
+										try {
+											localStorage.setItem('lovpen-settings-active-tab', tabKey);
+										} catch (error) {
+											console.warn('Failed to save settings tab to localStorage:', error);
+										}
+									}}
 									className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
 										activeTab === key
 											? 'bg-white text-blue-600 shadow-lg'

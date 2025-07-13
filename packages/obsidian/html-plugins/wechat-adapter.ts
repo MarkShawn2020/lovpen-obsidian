@@ -22,6 +22,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// 依次执行各个适配步骤
 			html = this.processLinks(html, settings);
 			html = this.inlineStyles(html, settings);
+			html = this.preserveStructure(html, settings);
 			html = this.optimizeForWechat(html, settings);
 
 			logger.debug("微信公众号适配处理完成");
@@ -174,6 +175,56 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			logger.error("样式内联化处理出错:", error);
 			return html;
 		}
+	}
+
+	/**
+	 * 保持结构完整性
+	 */
+	private preserveStructure(html: string, settings: NMPSettings): string {
+		try {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(html, "text/html");
+
+			// 确保关键容器元素的结构样式
+			const keyContainers = [
+				'.rich_media_content',
+				'.claude-main-content', 
+				'.claude-epigraph',
+				'.claude-meta-section',
+				'.claude-meta-content',
+				'section.lovpen'
+			];
+
+			keyContainers.forEach(selector => {
+				const elements = doc.querySelectorAll(selector);
+				elements.forEach(element => {
+					const htmlElement = element as HTMLElement;
+					// 强制保持容器结构
+					this.enforceContainerStructure(htmlElement);
+				});
+			});
+
+			return doc.body.innerHTML;
+		} catch (error) {
+			logger.error("保持结构完整性处理出错:", error);
+			return html;
+		}
+	}
+
+	/**
+	 * 强制保持容器结构
+	 */
+	private enforceContainerStructure(element: HTMLElement): void {
+		const existingStyle = element.getAttribute('style') || '';
+		const structuralStyles = [
+			'display: block',
+			'box-sizing: border-box',
+			'position: relative'
+		];
+		
+		// 合并结构样式
+		const mergedStyle = existingStyle + '; ' + structuralStyles.join('; ') + ';';
+		element.setAttribute('style', mergedStyle);
 	}
 
 	/**
@@ -417,29 +468,29 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		// Anthropic Style主题的特定样式
 		switch (tagName) {
 			case 'h1':
-				styles['font-size'] = variables['font-size-h1'];
-				styles['font-weight'] = 'bold';
-				styles['text-align'] = 'center';
-				styles['margin'] = `${variables['spacing-xxl']} auto ${variables['spacing-xl']}`;
-				styles['display'] = 'table';
-				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']}`;
-				styles['background'] = variables['primary-color'];
+				styles['font-size'] = variables['font-size-h1'] + ' !important';
+				styles['font-weight'] = 'bold !important';
+				styles['text-align'] = 'center !important';
+				styles['margin'] = `${variables['spacing-xxl']} auto ${variables['spacing-xl']} !important`;
+				styles['display'] = 'table !important';
+				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']} !important`;
+				styles['background'] = variables['primary-color'] + ' !important';
 				styles['color'] = variables['text-on-primary'] + ' !important';
-				styles['border-radius'] = variables['border-radius-md'];
-				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px';
+				styles['border-radius'] = variables['border-radius-md'] + ' !important';
+				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px !important';
 				break;
 
 			case 'h2':
-				styles['font-size'] = variables['font-size-h2'];
-				styles['font-weight'] = 'bold';
-				styles['text-align'] = 'center';
-				styles['margin'] = `${variables['spacing-xxl']} auto ${variables['spacing-xl']}`;
-				styles['display'] = 'table';
-				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']}`;
-				styles['background'] = variables['primary-color'];
+				styles['font-size'] = variables['font-size-h2'] + ' !important';
+				styles['font-weight'] = 'bold !important';
+				styles['text-align'] = 'center !important';
+				styles['margin'] = `${variables['spacing-xxl']} auto ${variables['spacing-xl']} !important`;
+				styles['display'] = 'table !important';
+				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']} !important`;
+				styles['background'] = variables['primary-color'] + ' !important';
 				styles['color'] = variables['text-on-primary'] + ' !important';
-				styles['border-radius'] = variables['border-radius-md'];
-				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px';
+				styles['border-radius'] = variables['border-radius-md'] + ' !important';
+				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px !important';
 				break;
 
 			case 'h3':
@@ -474,11 +525,11 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				break;
 
 			case 'p':
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-				styles['text-align'] = 'justify';
-				styles['line-height'] = variables['line-height-base'];
-				styles['font-size'] = variables['font-size-base'];
-				styles['color'] = variables['text-primary'];
+				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} !important`;
+				styles['text-align'] = 'justify !important';
+				styles['line-height'] = variables['line-height-base'] + ' !important';
+				styles['font-size'] = variables['font-size-base'] + ' !important';
+				styles['color'] = variables['text-primary'] + ' !important';
 				break;
 
 			case 'strong':
@@ -584,42 +635,42 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				break;
 
 			case 'ul':
-				styles['list-style-type'] = 'disc';
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-				styles['padding-left'] = '2em';
-				styles['color'] = variables['text-primary'];
+				styles['list-style-type'] = 'disc !important';
+				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} !important`;
+				styles['padding-left'] = '2em !important';
+				styles['color'] = variables['text-primary'] + ' !important';
 				break;
 
 			case 'ol':
-				styles['list-style-type'] = 'decimal';
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-				styles['padding-left'] = '2em';
-				styles['color'] = variables['text-primary'];
+				styles['list-style-type'] = 'decimal !important';
+				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} !important`;
+				styles['padding-left'] = '2em !important';
+				styles['color'] = variables['text-primary'] + ' !important';
 				break;
 
 			case 'li':
-				styles['margin'] = '0.25em 0';
-				styles['line-height'] = variables['line-height-base'];
-				styles['color'] = variables['text-primary'];
+				styles['margin'] = '0.25em 0 !important';
+				styles['line-height'] = variables['line-height-base'] + ' !important';
+				styles['color'] = variables['text-primary'] + ' !important';
 				// 设置列表标记颜色
-				styles['list-style-color'] = variables['primary-color'];
+				styles['list-style-color'] = variables['primary-color'] + ' !important';
 				break;
 		}
 
 		// 处理包含rich_media_content类的容器
 		if (element.classList.contains('rich_media_content')) {
-			styles['font-family'] = variables['font-family'];
-			styles['font-size'] = variables['font-size-base'];
-			styles['line-height'] = variables['line-height-base'];
-			styles['color'] = variables['text-primary'];
+			styles['font-family'] = variables['font-family'] + ' !important';
+			styles['font-size'] = variables['font-size-base'] + ' !important';
+			styles['line-height'] = variables['line-height-base'] + ' !important';
+			styles['color'] = variables['text-primary'] + ' !important';
 			// 微信公众号需要使用更强的背景色声明
 			styles['background-color'] = variables['background-primary'] + ' !important';
 			styles['background'] = variables['background-primary'] + ' !important';
-			styles['border-radius'] = variables['border-radius-lg'];
-			styles['padding'] = variables['spacing-md'];
-			styles['box-sizing'] = 'border-box';
-			styles['margin'] = '0 auto';
-			styles['max-width'] = '100%';
+			styles['border-radius'] = variables['border-radius-lg'] + ' !important';
+			styles['padding'] = variables['spacing-md'] + ' !important';
+			styles['box-sizing'] = 'border-box !important';
+			styles['margin'] = '0 auto !important';
+			styles['max-width'] = '100% !important';
 			// 确保容器样式优先级
 			styles['-webkit-background-color'] = variables['background-primary'] + ' !important';
 		}
@@ -646,6 +697,83 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		// 处理高亮文本
 		if (element.classList.contains('note-highlight')) {
 			styles['background-color'] = 'rgba(255, 208, 0, 0.4)';
+		}
+
+		// 处理元信息卡片特殊样式
+		if (element.classList.contains('claude-meta-section')) {
+			styles['display'] = 'block !important';
+			styles['margin'] = '1.5em 0 !important';
+			styles['padding'] = '0 !important';
+			styles['box-sizing'] = 'border-box !important';
+		}
+
+		if (element.classList.contains('claude-meta-content')) {
+			styles['background'] = 'linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(200, 100, 66, 0.03) 100%) !important';
+			styles['border'] = '1px solid rgba(200, 100, 66, 0.15) !important';
+			styles['border-radius'] = '12px !important';
+			styles['padding'] = '1.5em !important';
+			styles['position'] = 'relative !important';
+			styles['overflow'] = 'hidden !important';
+			styles['display'] = 'block !important';
+			styles['box-sizing'] = 'border-box !important';
+			styles['margin'] = '0 !important';
+		}
+
+		if (element.classList.contains('claude-meta-item')) {
+			styles['display'] = 'flex !important';
+			styles['align-items'] = 'center !important';
+			styles['margin-bottom'] = '0.8em !important';
+			styles['font-size'] = '0.9em !important';
+			styles['box-sizing'] = 'border-box !important';
+		}
+
+		if (element.classList.contains('claude-meta-label')) {
+			styles['color'] = 'rgb(200, 100, 66) !important';
+			styles['font-weight'] = '600 !important';
+			styles['min-width'] = '3em !important';
+			styles['margin-right'] = '1em !important';
+			styles['position'] = 'relative !important';
+			styles['display'] = 'inline-block !important';
+		}
+
+		if (element.classList.contains('claude-meta-value')) {
+			styles['color'] = 'rgb(63, 63, 63) !important';
+			styles['font-weight'] = '500 !important';
+			styles['flex'] = '1 !important';
+			styles['display'] = 'inline-block !important';
+		}
+
+		if (element.classList.contains('claude-meta-tags')) {
+			styles['margin-top'] = '1em !important';
+			styles['padding-top'] = '1em !important';
+			styles['border-top'] = '1px solid rgba(200, 100, 66, 0.1) !important';
+			styles['display'] = 'block !important';
+		}
+
+		if (element.classList.contains('claude-meta-tag')) {
+			styles['display'] = 'inline-block !important';
+			styles['background'] = 'rgba(200, 100, 66, 0.1) !important';
+			styles['color'] = 'rgb(200, 100, 66) !important';
+			styles['padding'] = '0.3em 0.8em !important';
+			styles['border-radius'] = '16px !important';
+			styles['font-size'] = '0.8em !important';
+			styles['font-weight'] = '500 !important';
+			styles['margin'] = '0 0.5em 0.5em 0 !important';
+			styles['border'] = '1px solid rgba(200, 100, 66, 0.2) !important';
+		}
+
+		// 处理section容器
+		if (tagName === 'section') {
+			styles['display'] = 'block !important';
+			styles['margin'] = '0 !important';
+			styles['padding'] = '0 !important';
+			styles['box-sizing'] = 'border-box !important';
+		}
+
+		// 处理div容器
+		if (tagName === 'div') {
+			styles['display'] = 'block !important';
+			styles['box-sizing'] = 'border-box !important';
 		}
 
 		return styles;

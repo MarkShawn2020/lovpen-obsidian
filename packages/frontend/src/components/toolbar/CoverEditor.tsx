@@ -49,7 +49,15 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 															generationError,
 															setGenerationError
 														}) => {
-	const [activeTab, setActiveTab] = useState<CoverImageSource>('article');
+	const [activeTab, setActiveTab] = useState<CoverImageSource>(() => {
+		try {
+			const storageKey = `lovpen-cover-editor-active-tab-${coverNumber}`;
+			const saved = localStorage.getItem(storageKey) as CoverImageSource;
+			return saved || 'article';
+		} catch {
+			return 'article';
+		}
+	});
 	const [aiPrompt, setAiPrompt] = useState<string>('');
 	const [aiStyle, setAiStyle] = useState<string>('realistic');
 	const [generatedImages, setGeneratedImages] = useState<string[]>([]);
@@ -193,7 +201,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 		});
 
 		return (
-			<div className="grid grid-cols-2 gap-2 mt-3">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-3">
 				{images.map((imageUrl, index) => (
 					<div
 						key={index}
@@ -202,7 +210,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 						<img
 							src={imageUrl}
 							alt={`Image ${index + 1}`}
-							className="w-full h-20 object-cover cursor-pointer"
+							className="w-full h-16 sm:h-20 object-cover cursor-pointer"
 							onClick={() => onImageClick(imageUrl)}
 							onLoad={(e) => {
 								logger.info(`[CoverEditor] 封面${coverNumber}图片加载成功 ${index + 1}`, {
@@ -218,7 +226,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 								});
 							}}
 						/>
-						<div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white text-xs p-1">
+						<div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white text-xs sm:text-sm p-1">
 							{index + 1}
 						</div>
 						{onImageDelete && (
@@ -227,7 +235,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 									e.stopPropagation();
 									onImageDelete(imageUrl, index);
 								}}
-								className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+								className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
 								title="删除图片"
 							>
 								×
@@ -240,26 +248,34 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 	}, [coverNumber]);
 
 	return (
-		<div>
-			<label className="block text-sm font-medium text-gray-700 mb-2">
+		<div className="space-y-4">
+			<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
 				🖼️ 封面{coverNumber}图片来源
 			</label>
 			<Tabs value={activeTab} onValueChange={(value) => {
-				setActiveTab(value as CoverImageSource);
+				const tabValue = value as CoverImageSource;
+				setActiveTab(tabValue);
+				// 持久化保存选中的tab
+				try {
+					const storageKey = `lovpen-cover-editor-active-tab-${coverNumber}`;
+					localStorage.setItem(storageKey, tabValue);
+				} catch (error) {
+					console.warn('Failed to save cover editor tab to localStorage:', error);
+				}
 				savePersistedData();
 			}}>
-				<TabsList>
-					<TabsTrigger value="article">文中图片</TabsTrigger>
-					<TabsTrigger value="library">我的档案库</TabsTrigger>
-					<TabsTrigger value="ai">AI生成</TabsTrigger>
+				<TabsList className="grid w-full grid-cols-3">
+					<TabsTrigger value="article" className="text-xs sm:text-sm px-2 sm:px-4">文中图片</TabsTrigger>
+					<TabsTrigger value="library" className="text-xs sm:text-sm px-2 sm:px-4">我的档案库</TabsTrigger>
+					<TabsTrigger value="ai" className="text-xs sm:text-sm px-2 sm:px-4">AI生成</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="article">
-					<div className="space-y-4">
-						<p className="text-sm text-gray-600">
+				<TabsContent value="article" className="mt-3 sm:mt-4">
+					<div className="space-y-3 sm:space-y-4">
+						<p className="text-xs sm:text-sm text-gray-600">
 							从文章中选择图片制作封面
 						</p>
-						<div className="mb-2 text-xs text-gray-600">
+						<div className="mb-2 text-xs sm:text-sm text-gray-600">
 							调试信息: 找到 {selectedImages.length} 张图片
 							{selectedImages.length > 0 && (
 								<div className="mt-1">
@@ -274,14 +290,14 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 								async (url) => await onCreateCover(url, 'article')
 							)
 						) : (
-							<div className="text-center py-8 text-gray-500">
+							<div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-gray-500">
 								文章中没有找到图片
 							</div>
 						)}
 					</div>
 				</TabsContent>
 
-				<TabsContent value="library">
+				<TabsContent value="library" className="mt-3 sm:mt-4">
 					<PersistentFileManager
 						onFileSelect={async (fileUrl) => await onCreateCover(fileUrl, 'upload')}
 						acceptedTypes={['image/*']}
@@ -290,29 +306,29 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 				</TabsContent>
 
 
-				<TabsContent value="ai">
-					<div className="space-y-4">
-						<div className="space-y-3">
+				<TabsContent value="ai" className="mt-3 sm:mt-4">
+					<div className="space-y-3 sm:space-y-4">
+						<div className="space-y-3 sm:space-y-4">
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
+								<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
 									描述你想要的封面
 								</label>
 								<textarea
 									value={aiPrompt}
 									onChange={(e) => setAiPrompt(e.target.value)}
 									placeholder="例如：一个现代简约的技术博客封面，蓝色主色调..."
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
+									className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 sm:h-24 resize-none text-xs sm:text-sm"
 								/>
 							</div>
 
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
+								<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
 									风格选择
 								</label>
 								<select
 									value={aiStyle}
 									onChange={(e) => setAiStyle(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+									className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 								>
 									<option value="realistic">写实风格</option>
 									<option value="illustration">插画风格</option>
@@ -322,9 +338,9 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 								</select>
 							</div>
 
-							<div className="grid grid-cols-2 gap-3">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">
+									<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
 										标题
 									</label>
 									<input
@@ -332,11 +348,11 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 										value={title}
 										onChange={(e) => setTitle(e.target.value)}
 										placeholder="封面标题"
-										className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+										className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">
+									<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
 										副标题
 									</label>
 									<input
@@ -344,7 +360,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 										value={description}
 										onChange={(e) => setDescription(e.target.value)}
 										placeholder="副标题或描述"
-										className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+										className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 									/>
 								</div>
 							</div>
@@ -352,7 +368,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 							<button
 								onClick={() => generateAIImage({prompt: aiPrompt, style: aiStyle, aspectRatio})}
 								disabled={generationStatus.isGenerating || !aiPrompt.trim()}
-								className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+								className="w-full px-3 sm:px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm"
 							>
 								{generationStatus.isGenerating ? '正在生成...' : `生成封面${coverNumber}AI图片`}
 							</button>
@@ -365,20 +381,20 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 											style={{width: `${generationStatus.progress}%`}}
 										/>
 									</div>
-									<p className="text-sm text-gray-600 text-center">{generationStatus.message}</p>
+									<p className="text-xs sm:text-sm text-gray-600 text-center">{generationStatus.message}</p>
 								</div>
 							)}
 
 							{generationError && (
-								<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-									<p className="text-sm text-red-600">{generationError}</p>
+								<div className="p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+									<p className="text-xs sm:text-sm text-red-600">{generationError}</p>
 								</div>
 							)}
 						</div>
 
 						{generatedImages.length > 0 && (
 							<div>
-								<h4 className="text-sm font-medium text-gray-700 mb-2">AI生成的图片</h4>
+								<h4 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">AI生成的图片</h4>
 								{renderImageGrid(
 									generatedImages,
 									async (url) => await onCreateCover(url, 'ai'),

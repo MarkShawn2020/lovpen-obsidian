@@ -23,7 +23,14 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 																	}) => {
 	const [customPrompt, setCustomPrompt] = useState<string>(settings.aiPromptTemplate || '');
 	const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-	const [activeTab, setActiveTab] = useState<'templates' | 'editor' | 'variables'>('templates');
+	const [activeTab, setActiveTab] = useState<'templates' | 'editor' | 'variables'>(() => {
+		try {
+			const saved = localStorage.getItem('lovpen-custom-prompt-active-tab') as 'templates' | 'editor' | 'variables';
+			return saved || 'templates';
+		} catch {
+			return 'templates';
+		}
+	});
 
 	useEffect(() => {
 		if (isOpen) {
@@ -42,6 +49,12 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 	const handleUseTemplate = (template: string) => {
 		setCustomPrompt(template);
 		setActiveTab('editor');
+		// 持久化保存选中的tab
+		try {
+			localStorage.setItem('lovpen-custom-prompt-active-tab', 'editor');
+		} catch (error) {
+			console.warn('Failed to save custom prompt tab to localStorage:', error);
+		}
 	};
 
 	const handlePreviewAndAnalyze = () => {
@@ -130,7 +143,16 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 							].map(({key, label, icon: Icon}) => (
 								<button
 									key={key}
-									onClick={() => setActiveTab(key as any)}
+									onClick={() => {
+										const tabKey = key as 'templates' | 'editor' | 'variables';
+										setActiveTab(tabKey);
+										// 持久化保存选中的tab
+										try {
+											localStorage.setItem('lovpen-custom-prompt-active-tab', tabKey);
+										} catch (error) {
+											console.warn('Failed to save custom prompt tab to localStorage:', error);
+										}
+									}}
 									className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
 										activeTab === key
 											? 'bg-white text-blue-600 shadow-lg'

@@ -21,6 +21,7 @@ import {
 	Zap
 } from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
+// import {requestUrl} from "obsidian"; // 移除直接导入，改为动态require
 
 interface AISettingsProps {
 	onClose: () => void;
@@ -77,8 +78,11 @@ export const AISettings: React.FC<AISettingsProps> = ({
 
 		try {
 			// 使用Obsidian的requestUrl API来避免CORS问题
-			const {requestUrl} = require('obsidian');
-
+			// 通过全局API获取requestUrl
+			if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
+				throw new Error('此功能仅在Obsidian环境中可用');
+			}
+			const requestUrl = window.lovpenReactAPI.requestUrl;
 			const response = await requestUrl({
 				url: 'https://api.anthropic.com/v1/messages',
 				method: 'POST',

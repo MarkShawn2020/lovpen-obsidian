@@ -230,7 +230,11 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 
 		try {
 			// 使用Obsidian的requestUrl API来避免CORS问题
-			const {requestUrl} = require('obsidian');
+			// 通过全局API获取requestUrl
+			if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
+				throw new Error('此功能仅在Obsidian环境中可用');
+			}
+			const requestUrl = window.lovpenReactAPI.requestUrl;
 
 			const response = await requestUrl({
 				url: 'https://api.anthropic.com/v1/messages',
@@ -306,10 +310,10 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 	};
 
 	return (
-		<div className="w-full space-y-4">
-			<div className="flex justify-between items-center">
-				<h3 className="text-lg font-semibold">文章基本信息</h3>
-				<div className="flex space-x-2">
+		<div className="w-full space-y-3 sm:space-y-4">
+			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+				<h3 className="text-base sm:text-lg font-semibold">文章基本信息</h3>
+				<div className="flex space-x-1 sm:space-x-2">
 					<AIAnalysisSplitButton
 						isGenerating={isAIGenerating}
 						isDisabled={!settings.authKey || settings.authKey.trim() === ''}
@@ -320,113 +324,113 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 						onClick={handleClearAll}
 						size="sm"
 						variant="outline"
-						className="text-gray-600 hover:text-gray-800"
+						className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm px-2 sm:px-3"
 					>
 						🗑️ 清空
 					</Button>
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 				{/* 作者 */}
 				<div>
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						作者
 					</label>
 					<input
 						type="text"
 						value={articleInfo.author}
 						onChange={(e) => handleInputChange('author', e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 						placeholder="输入作者名称"
 					/>
 				</div>
 
 				{/* 发布日期 */}
 				<div>
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						发布日期
 					</label>
 					<input
 						type="date"
 						value={articleInfo.publishDate}
 						onChange={(e) => handleInputChange('publishDate', e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 					/>
 				</div>
 
 				{/* 文章标题 */}
-				<div className="md:col-span-2">
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+				<div className="sm:col-span-2">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						文章标题
 					</label>
 					<input
 						type="text"
 						value={articleInfo.articleTitle}
 						onChange={(e) => handleInputChange('articleTitle', e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 						placeholder="输入文章标题"
 					/>
 				</div>
 
 				{/* 副标题 */}
-				<div className="md:col-span-2">
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+				<div className="sm:col-span-2">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						副标题
 					</label>
 					<input
 						type="text"
 						value={articleInfo.articleSubtitle}
 						onChange={(e) => handleInputChange('articleSubtitle', e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 						placeholder="输入副标题"
 					/>
 				</div>
 
 				{/* 期数 */}
 				<div>
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						期数
 					</label>
 					<input
 						type="text"
 						value={articleInfo.episodeNum}
 						onChange={(e) => handleInputChange('episodeNum', e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 						placeholder="如：第 51 期"
 					/>
 				</div>
 
 				{/* 系列名称 */}
 				<div>
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						系列名称
 					</label>
 					<input
 						type="text"
 						value={articleInfo.seriesName}
 						onChange={(e) => handleInputChange('seriesName', e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 						placeholder="如：人文与科技"
 					/>
 				</div>
 
 				{/* 标签 */}
-				<div className="md:col-span-2">
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+				<div className="sm:col-span-2">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
 						标签
 					</label>
 					<textarea
 						value={articleInfo.tags.join(', ')}
 						onChange={(e) => handleTagsChange(e.target.value)}
-						className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-16 sm:h-20 resize-none text-xs sm:text-sm"
 						placeholder="输入标签，支持逗号、换行、分号分隔"
 					/>
-					<div className="mt-2 flex flex-wrap gap-1">
+					<div className="mt-2 flex flex-wrap gap-1 sm:gap-2">
 						{articleInfo.tags.map((tag, index) => (
 							<span
 								key={index}
-								className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+								className="inline-block bg-blue-100 text-blue-800 text-xs sm:text-sm px-2 py-1 rounded-full"
 							>
 								{tag}
 							</span>

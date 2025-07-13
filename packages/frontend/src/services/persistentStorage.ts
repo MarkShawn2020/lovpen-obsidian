@@ -82,9 +82,14 @@ export class PersistentStorageService {
 			let arrayBuffer: ArrayBuffer;
 
 			if (url.startsWith('http://') || url.startsWith('https://')) {
-				const {requestUrl} = require('obsidian');
-				const response = await requestUrl({url, method: 'GET'});
-				arrayBuffer = response.arrayBuffer;
+				// 在Obsidian环境中使用requestUrl，否则使用fetch
+				if (window.lovpenReactAPI && typeof window.lovpenReactAPI.requestUrl !== 'undefined') {
+					const response = await window.lovpenReactAPI.requestUrl({url, method: 'GET'});
+					arrayBuffer = response.arrayBuffer;
+				} else {
+					const response = await fetch(url);
+					arrayBuffer = await response.arrayBuffer();
+				}
 			} else if (url.startsWith('blob:') || url.startsWith('data:')) {
 				const response = await fetch(url);
 				arrayBuffer = await response.arrayBuffer();

@@ -69,12 +69,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 	// 使用本地状态管理当前选中的tab
 	const [activeTab, setActiveTab] = useState<string>(() => {
-		// 默认选择基础tab
-		return 'basic';
+		try {
+			return localStorage.getItem('lovpen-toolbar-active-tab') || 'basic';
+		} catch {
+			return 'basic';
+		}
 	});
 
 	// 插件管理中的子tab状态
 	const [pluginTab, setPluginTab] = useState<string>(() => {
+		try {
+			const saved = localStorage.getItem('lovpen-toolbar-plugin-tab');
+			if (saved) return saved;
+		} catch {}
+		
 		// 默认选择第一个有插件的类型
 		const remarkPlugins = plugins.filter(plugin => plugin.type === 'remark');
 		const rehypePlugins = plugins.filter(plugin => plugin.type === 'rehype');
@@ -105,6 +113,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 	const handleTabChange = (value: string) => {
 		setActiveTab(value);
+		// 持久化保存选中的tab
+		try {
+			localStorage.setItem('lovpen-toolbar-active-tab', value);
+		} catch (error) {
+			console.warn('Failed to save active tab to localStorage:', error);
+		}
 		// 保存当前选中的tab到settings
 		const newSections = [value];
 		if (onExpandedSectionsChange) {
@@ -166,7 +180,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				if (cover.imageUrl.startsWith('http://') || cover.imageUrl.startsWith('https://')) {
 					// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
 					const app = (window as any).app;
-					const {requestUrl} = require('obsidian');
+					if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
+						throw new Error('此功能仅在Obsidian环境中可用');
+					}
+					const requestUrl = window.lovpenReactAPI.requestUrl;
 
 					const response = await requestUrl({
 						url: cover.imageUrl,
@@ -224,7 +241,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
 					// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
 					const app = (window as any).app;
-					const {requestUrl} = require('obsidian');
+					if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
+						throw new Error('此功能仅在Obsidian环境中可用');
+					}
+					const requestUrl = window.lovpenReactAPI.requestUrl;
 					const response = await requestUrl({url: imageUrl, method: 'GET'});
 					return response.arrayBuffer;
 				} else if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
@@ -411,7 +431,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								<div
 									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-3 sm:p-6 shadow-sm">
 									{plugins.length > 0 ? (
-										<Tabs value={pluginTab} onValueChange={setPluginTab}>
+										<Tabs value={pluginTab} onValueChange={(value) => {
+											setPluginTab(value);
+											// 持久化保存插件tab选择
+											try {
+												localStorage.setItem('lovpen-toolbar-plugin-tab', value);
+											} catch (error) {
+												console.warn('Failed to save plugin tab to localStorage:', error);
+											}
+										}}>
 											<div className="mb-3 sm:mb-4">
 												<h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">插件管理</h3>
 												<p className="text-xs sm:text-sm text-gray-600">配置和管理Markdown处理插件</p>

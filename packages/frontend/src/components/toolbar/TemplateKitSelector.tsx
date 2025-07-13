@@ -25,19 +25,19 @@ const Card: React.FC<{ className?: string; children: React.ReactNode }> = ({clas
 );
 
 const CardHeader: React.FC<{ className?: string; children: React.ReactNode }> = ({className = '', children}) => (
-	<div className={`p-6 pb-0 ${className}`}>
+	<div className={`p-3 sm:p-6 pb-0 ${className}`}>
 		{children}
 	</div>
 );
 
 const CardTitle: React.FC<{ className?: string; children: React.ReactNode }> = ({className = '', children}) => (
-	<h3 className={`text-lg font-semibold leading-none tracking-tight ${className}`}>
+	<h3 className={`text-base sm:text-lg font-semibold leading-none tracking-tight ${className}`}>
 		{children}
 	</h3>
 );
 
 const CardContent: React.FC<{ className?: string; children: React.ReactNode }> = ({className = '', children}) => (
-	<div className={`p-6 pt-0 ${className}`}>
+	<div className={`p-3 sm:p-6 pt-0 ${className}`}>
 		{children}
 	</div>
 );
@@ -155,11 +155,11 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 
 	if (loading) {
 		return (
-			<div className="w-full p-6 text-center">
-				<div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-					<Loader className="animate-spin w-8 h-8 text-gray-600 mx-auto mb-3"/>
-					<h3 className="text-lg font-medium text-gray-900 mb-2">加载模板套装</h3>
-					<p className="text-sm text-gray-600">正在加载可用的模板套装...</p>
+			<div className="w-full p-3 sm:p-6 text-center">
+				<div className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6">
+					<Loader className="animate-spin w-6 h-6 sm:w-8 sm:h-8 text-gray-600 mx-auto mb-3"/>
+					<h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">加载模板套装</h3>
+					<p className="text-xs sm:text-sm text-gray-600">正在加载可用的模板套装...</p>
 				</div>
 			</div>
 		);
@@ -167,13 +167,13 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 
 	if (error) {
 		return (
-			<div className="w-full p-6 text-center">
-				<div className="bg-red-50 border border-red-200 rounded-xl p-6">
-					<AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-3"/>
-					<h3 className="text-lg font-medium text-gray-900 mb-2">加载失败</h3>
-					<p className="text-sm text-red-600 mb-4">{error}</p>
-					<Button onClick={loadKits} variant="outline" size="sm">
-						<RefreshCw className="w-4 h-4 mr-2"/>
+			<div className="w-full p-3 sm:p-6 text-center">
+				<div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-6">
+					<AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600 mx-auto mb-3"/>
+					<h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">加载失败</h3>
+					<p className="text-xs sm:text-sm text-red-600 mb-4">{error}</p>
+					<Button onClick={loadKits} variant="outline" size="sm" className="text-xs sm:text-sm">
+						<RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-2"/>
 						重试
 					</Button>
 				</div>
@@ -182,10 +182,10 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 sm:space-y-6">
 			{/* 套装选择器头部 */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+				<div className="flex items-center gap-2 sm:gap-3">
 					<div className="p-2 bg-purple-100 rounded-lg">
 						<Package className="w-5 h-5 text-purple-600"/>
 					</div>
