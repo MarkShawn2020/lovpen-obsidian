@@ -4,6 +4,7 @@ import {App, Notice} from 'obsidian';
 
 import {logger} from "../shared/src/logger";
 import {TemplateKit, TemplateKitOperationResult} from './template-kit-types';
+import TemplateKitManager from "./template-kit-manager";
 
 // 定义模板数据类型
 export interface TemplateData {
@@ -238,15 +239,10 @@ export default class TemplateManager {
 	/**
 	 * 获取模板套装管理器
 	 */
-	private getTemplateKitManager(): any {
+	private getTemplateKitManager(): TemplateKitManager {
 		// 延迟导入避免循环依赖
-		try {
-			const TemplateKitManager = require('./template-kit-manager').default;
-			return TemplateKitManager.getInstance();
-		} catch (error) {
-			logger.error('[TemplateManager] Failed to get TemplateKitManager:', error);
-			return null;
-		}
+		return TemplateKitManager.getInstance();
+
 	}
 
 

@@ -447,27 +447,18 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 	// 私有方法
 
 	private async loadKits(): Promise<void> {
-		try {
-			const adapter = this.app.vault.adapter as any;
-			const kitsFile = adapter.path?.join(
-				adapter.basePath,
-				this.config.kitsStoragePath,
-				this.KITS_FILE_NAME
-			) || `${this.config.kitsStoragePath}/${this.KITS_FILE_NAME}`;
 
-			if (await this.app.vault.adapter.exists(kitsFile)) {
-				const content = await this.app.vault.adapter.read(kitsFile);
-				this.kitsCollection = JSON.parse(content);
-				logger.info(`[TemplateKitManager] Loaded ${this.kitsCollection.kits.length} kits`);
-			} else {
-				// 初始化默认套装
-				await this.initializeDefaultKits();
-			}
-		} catch (error) {
-			logger.error('[TemplateKitManager] Error loading kits:', error);
-			// 加载失败时初始化空集合
-			this.kitsCollection = {version: '1.0.0', kits: []};
-		}
+		const adapter = this.app.vault.adapter as any;
+		const kitsFile = adapter.path?.join(
+			adapter.basePath,
+			this.config.kitsStoragePath,
+			this.KITS_FILE_NAME
+		) || `${this.config.kitsStoragePath}/${this.KITS_FILE_NAME}`;
+
+		logger.info(`[TemplateKitManager] Trying to load kits from: ${kitsFile}`);
+		const content = await this.app.vault.adapter.read(kitsFile);
+		this.kitsCollection = JSON.parse(content);
+		logger.info(`[TemplateKitManager] Loaded ${this.kitsCollection.kits.length} kits`);
 	}
 
 	private async saveKits(): Promise<void> {
@@ -494,51 +485,6 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 		}
 	}
 
-	private async initializeDefaultKits(): Promise<void> {
-		logger.info('[TemplateKitManager] Initializing default kits');
-
-		try {
-			// 尝试从资源文件中加载预定义套装，使用多个可能的路径
-			const assetsManager = AssetsManager.getInstance();
-			const possiblePaths = [
-				assetsManager.manifest.dir + '/assets/template-kits.json',
-				assetsManager.manifest.dir + '/../assets/template-kits.json',
-				assetsManager.manifest.dir + '/packages/assets/template-kits.json'
-			];
-
-			let loadedKits = false;
-			for (const templateKitsPath of possiblePaths) {
-				logger.debug(`[TemplateKitManager] Trying to load kits from: ${templateKitsPath}`);
-
-				if (await this.app.vault.adapter.exists(templateKitsPath)) {
-					const content = await this.app.vault.adapter.read(templateKitsPath);
-					const defaultKits = JSON.parse(content);
-					this.kitsCollection = defaultKits;
-					logger.info(`[TemplateKitManager] Loaded ${this.kitsCollection.kits.length} default kits from: ${templateKitsPath}`);
-					loadedKits = true;
-					break;
-				}
-			}
-
-			if (!loadedKits) {
-				// 如果资源文件不存在，创建空集合
-				this.kitsCollection = {
-					version: '1.0.0',
-					kits: []
-				};
-				logger.warn('[TemplateKitManager] No default kits file found in any location, created empty collection');
-			}
-		} catch (error) {
-			logger.error('[TemplateKitManager] Error loading default kits:', error);
-			// 出错时创建空集合
-			this.kitsCollection = {
-				version: '1.0.0',
-				kits: []
-			};
-		}
-
-		await this.saveKits();
-	}
 
 	private async applyStyleConfig(kit: TemplateKit, settingsManager: NMPSettings, assetsManager: any): Promise<void> {
 		const styleConfig = kit.styleConfig;
