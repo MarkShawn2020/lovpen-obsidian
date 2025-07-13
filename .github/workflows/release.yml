@@ -72,7 +72,7 @@ jobs:
           mkdir -p release-files
           cp packages/obsidian/dist/main.js release-files/
           cp packages/obsidian/dist/manifest.json release-files/
-          cp packages/obsidian/dist/styles.css release-files/
+          cp packages/assets/styles.css release-files/
           cp assets.zip release-files/
 
       - name: Get version from tag or input
