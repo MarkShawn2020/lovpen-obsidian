@@ -323,46 +323,48 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				/>
 
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">
-					<div className="p-6" style={{minWidth: '320px'}}>
+					<div className="p-3 sm:p-6" style={{minWidth: '280px'}}>
 						{/* 工具栏标题 */}
-						<div className="mb-6">
-							<h2 className="text-xl font-bold text-gray-900 mb-2">内容工具栏</h2>
-							<p className="text-sm text-gray-600">管理文章信息、样式和插件配置</p>
+						<div className="mb-4 sm:mb-6">
+							<h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">内容工具栏</h2>
+							<p className="text-xs sm:text-sm text-gray-600">管理文章信息、样式和插件配置</p>
 						</div>
 
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
 							<TabsList
-								className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-1">
+								className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-0.5 sm:p-1 gap-0.5 sm:gap-1">
 								<TabsTrigger
 									value="basic"
-									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+									className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm px-1 sm:px-3 py-1.5 sm:py-2"
 								>
-									<FileText className="h-4 w-4"/>
-									<span className="hidden sm:inline">基础</span>
+									<FileText className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
+									<span className="truncate">基础</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="kits"
-									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm"
+									className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm px-1 sm:px-3 py-1.5 sm:py-2"
 								>
-									<Package className="h-4 w-4"/>
-									<span className="hidden sm:inline">套装</span>
+									<Package className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
+									<span className="truncate">套装</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="plugins"
-									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-sm"
+									className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-sm px-1 sm:px-3 py-1.5 sm:py-2 relative"
 								>
-									<Plug className="h-4 w-4"/>
-									<span className="hidden sm:inline">插件</span>
-									<span className="bg-gray-200 text-gray-700 text-xs px-1.5 py-0.5 rounded-full ml-1">
-										{plugins.length}
-									</span>
+									<Plug className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
+									<span className="truncate">插件</span>
+									{plugins.length > 0 && (
+										<span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center leading-none text-[10px] sm:static sm:bg-gray-200 sm:text-gray-700 sm:px-1.5 sm:py-0.5 sm:ml-1 sm:w-auto sm:h-auto">
+											{plugins.length > 99 ? '99+' : plugins.length}
+										</span>
+									)}
 								</TabsTrigger>
 							</TabsList>
 
-							<TabsContent value="basic" className="mt-6 space-y-6">
+							<TabsContent value="basic" className="mt-3 sm:mt-6 space-y-3 sm:space-y-6">
 								{/* 基本信息 */}
 								<div
-									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-3 sm:p-6 shadow-sm">
 									<ArticleInfo
 										settings={settings}
 										onSaveSettings={onSaveSettings}
@@ -375,7 +377,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 								{/* 封面设计 */}
 								<div
-									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-3 sm:p-6 shadow-sm">
 									<CoverDesigner
 										articleHTML={articleHTML}
 										onDownloadCovers={handleDownloadCovers}
@@ -386,9 +388,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 							</TabsContent>
 
 
-							<TabsContent value="kits" className="mt-6">
+							<TabsContent value="kits" className="mt-3 sm:mt-6">
 								<div
-									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-3 sm:p-6 shadow-sm">
 									<TemplateKitSelector
 										settings={settings}
 										onKitApply={onKitApply}
@@ -404,26 +406,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								</div>
 							</TabsContent>
 
-							<TabsContent value="plugins" className="mt-6">
+							<TabsContent value="plugins" className="mt-3 sm:mt-6">
 								<div
-									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-3 sm:p-6 shadow-sm">
 									{plugins.length > 0 ? (
 										<Tabs value={pluginTab} onValueChange={setPluginTab}>
-											<div className="mb-4">
-												<h3 className="text-lg font-semibold text-gray-900 mb-2">插件管理</h3>
-												<p className="text-sm text-gray-600">配置和管理Markdown处理插件</p>
+											<div className="mb-3 sm:mb-4">
+												<h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">插件管理</h3>
+												<p className="text-xs sm:text-sm text-gray-600">配置和管理Markdown处理插件</p>
 											</div>
 
-											<TabsList className="bg-gray-100 rounded-lg p-1">
+											<TabsList className="bg-gray-100 rounded-lg p-0.5 sm:p-1">
 												{remarkPlugins.length > 0 && (
 													<TabsTrigger
 														value="remark"
-														className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+														className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-2 sm:px-3 py-1.5 sm:py-2"
 													>
-														<Plug className="h-4 w-4"/>
-														Remark
+														<Plug className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
+														<span className="hidden sm:inline">Remark</span>
+														<span className="sm:hidden">R</span>
 														<span
-															className="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">
+															className="bg-blue-100 text-blue-700 text-xs px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs">
 															{remarkPlugins.length}
 														</span>
 													</TabsTrigger>
@@ -431,12 +434,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 												{rehypePlugins.length > 0 && (
 													<TabsTrigger
 														value="rehype"
-														className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+														className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-2 sm:px-3 py-1.5 sm:py-2"
 													>
-														<Zap className="h-4 w-4"/>
-														Rehype
+														<Zap className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
+														<span className="hidden sm:inline">Rehype</span>
+														<span className="sm:hidden">H</span>
 														<span
-															className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded-full">
+															className="bg-purple-100 text-purple-700 text-xs px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs">
 															{rehypePlugins.length}
 														</span>
 													</TabsTrigger>
@@ -447,26 +451,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 												<TabsContent value="remark" className="mt-6">
 													<div className="space-y-4">
 														<div
-															className="flex justify-between items-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+															className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg gap-3 sm:gap-0">
 															<div>
 																<h4 className="font-semibold text-blue-900">Remark
 																	插件</h4>
 																<p className="text-sm text-blue-700">Markdown语法解析插件
 																	({remarkPlugins.length}个)</p>
 															</div>
-															<div className="flex space-x-2">
+															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
 																<button
 																	onClick={() => handleBatchToggle('remark', true)}
-																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
 																>
-																	<CheckCircle2 className="h-4 w-4"/>
+																	<CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部启用
 																</button>
 																<button
 																	onClick={() => handleBatchToggle('remark', false)}
-																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
 																>
-																	<XCircle className="h-4 w-4"/>
+																	<XCircle className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部关闭
 																</button>
 															</div>
@@ -509,26 +513,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 												<TabsContent value="rehype" className="mt-6">
 													<div className="space-y-4">
 														<div
-															className="flex justify-between items-center p-4 bg-purple-50 border border-purple-200 rounded-lg">
+															className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 bg-purple-50 border border-purple-200 rounded-lg gap-3 sm:gap-0">
 															<div>
 																<h4 className="font-semibold text-purple-900">Rehype
 																	插件</h4>
 																<p className="text-sm text-purple-700">HTML处理和转换插件
 																	({rehypePlugins.length}个)</p>
 															</div>
-															<div className="flex space-x-2">
+															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
 																<button
 																	onClick={() => handleBatchToggle('rehype', true)}
-																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
 																>
-																	<CheckCircle2 className="h-4 w-4"/>
+																	<CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部启用
 																</button>
 																<button
 																	onClick={() => handleBatchToggle('rehype', false)}
-																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
 																>
-																	<XCircle className="h-4 w-4"/>
+																	<XCircle className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部关闭
 																</button>
 															</div>

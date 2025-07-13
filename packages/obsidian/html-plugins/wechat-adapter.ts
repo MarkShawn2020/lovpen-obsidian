@@ -225,7 +225,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			}
 		}
 
-		// 添加Claude Style主题的默认变量
+		// 添加Anthropic Style主题的默认变量
 		const defaultVariables = {
 			'primary-color': 'rgb(200, 100, 66)',
 			'primary-color-hover': 'rgb(180, 85, 50)',
@@ -411,7 +411,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		const tagName = element.tagName.toLowerCase();
 		const styles: Record<string, string> = {};
 
-		// Claude Style主题的特定样式
+		// Anthropic Style主题的特定样式
 		switch (tagName) {
 			case 'h1':
 				styles['font-size'] = variables['font-size-h1'];
@@ -460,15 +460,14 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['font-size'] = '1em';
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} ${variables['spacing-sm']}`;
+				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
 				break;
 			
 			case 'h6':
 				styles['font-size'] = '0.9em';
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
-				styles['margin'] = `${variables['spacing-lg']} 0px ${variables['spacing-sm']}`;
-				styles['padding-left'] = '0';
+				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
 				break;
 			
 			case 'p':

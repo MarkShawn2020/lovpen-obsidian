@@ -4,9 +4,9 @@
   "kits": [
     {
       "basicInfo": {
-        "id": "claude-style",
-        "name": "Claude Style",
-        "description": "基于微信公众号Claude风格的优雅模板套装，采用温暖的橙红色主题和圆角设计，适合技术文章和知识分享",
+        "id": "anthropic-style",
+        "name": "Anthropic Style",
+        "description": "基于微信公众号 Anthropic 风格的优雅模板套装，采用温暖的橙红色主题和圆角设计，适合技术文章和知识分享",
         "author": "Lovpen Team",
         "version": "1.0.0",
         "createdAt": "2025-01-11T10:00:00.000Z",
@@ -15,7 +15,7 @@
         "previewImage": ""
       },
       "styleConfig": {
-        "theme": "claude-style",
+        "theme": "anthropic-style",
         "codeHighlight": "github",
         "cssVariables": {
           "--primary-color": "rgb(200, 100, 66)",
@@ -42,7 +42,7 @@
         "customCSS": ""
       },
       "templateConfig": {
-        "templateFileName": "Claude Style.html",
+        "templateFileName": "Anthropic Style.html",
         "useTemplate": true
       },
       "pluginConfig": {
