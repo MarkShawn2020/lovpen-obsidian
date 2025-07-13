@@ -93,6 +93,8 @@ if (prod) {
 	process.exit(0);
 } else {
 	await context.watch();
+	// 初始构建完成后立即同步
+	syncToObsidian();
 
 	let rebuildTimeout;
 	const debounceRebuild = () => {
