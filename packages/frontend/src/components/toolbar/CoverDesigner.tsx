@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select.tsx';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select';
 import {CoverPreview} from "@/components/toolbar/CoverPreview";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {CoverEditor} from "@/components/toolbar/CoverEditor";
@@ -405,7 +405,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	}, [clearCoverPreview]);
 
 	return (
-		<div className="space-y-6">
+		<div className="@container space-y-6">
 			{/* 头部说明 */}
 			<div className="text-center">
 				<h3 className="text-lg font-semibold text-gray-900 mb-2">封面设计工作室</h3>
@@ -462,7 +462,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							disabled={cover1PreviewCovers.length === 0 && cover2PreviewCovers.length === 0}
 						>
 							<Download className="h-4 w-4"/>
-							<span className="text-sm font-medium hidden sm:block">
+							<span className="text-sm font-medium hidden [@container(min-width:500px)]:block">
 								下载封面 ({(cover1PreviewCovers.length > 0 ? 1 : 0) + (cover2PreviewCovers.length > 0 ? 1 : 0)})
 							</span>
 						</button>
@@ -472,7 +472,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<RotateCcw className="h-4 w-4"/>
-							<span className="text-sm font-medium hidden sm:block">清空全部</span>
+							<span className="text-sm font-medium hidden [@container(min-width:500px)]:block">清空全部</span>
 						</button>
 					</div>
 				</div>

@@ -191,7 +191,6 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 					</div>
 					<div>
 						<h3 className="text-lg font-semibold text-gray-900">模板套装</h3>
-						<p className="text-sm text-gray-600">一键应用完整的样式解决方案</p>
 					</div>
 				</div>
 				<div className="flex gap-2">
