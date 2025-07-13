@@ -120,8 +120,8 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	if (!isOpen) return null;
 
 	const modalContent = (
-		<div className="fixed inset-0 z-[9999] bg-white flex flex-col">
-			{/* 模态框内容 - 全屏 */}
+		<div className="absolute inset-0 z-50 bg-white flex flex-col">
+			{/* 模态框内容 - 工具栏容器内全屏 */}
 			<div className="flex flex-col h-full">
 				{/* 头部 */}
 				<div className="flex items-center justify-between p-4 sm:p-6 border-b bg-gray-50 shrink-0">
@@ -282,5 +282,12 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 		</div>
 	);
 
-	return createPortal(modalContent, document.body);
+	// 渲染到工具栏容器
+	const toolbarContainer = document.getElementById('lovpen-toolbar-container');
+	if (!toolbarContainer) {
+		console.warn('[ImageSelectionModal] 找不到工具栏容器，使用默认渲染');
+		return modalContent;
+	}
+
+	return createPortal(modalContent, toolbarContainer);
 };

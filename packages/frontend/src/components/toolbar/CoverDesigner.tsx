@@ -441,7 +441,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	}, [clearCoverPreview]);
 
 	return (
-		<div className="@container space-y-3 sm:space-y-4">
+		<div className="@container space-y-3 sm:space-y-4 relative">
 			{/* 头部和操作按钮 */}
 			<div className="w-full space-y-3 sm:space-y-4">
 				<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">

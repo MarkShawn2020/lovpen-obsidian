@@ -331,11 +331,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 	try {
 		return (
-			<div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-blue-50" style={{
-				minWidth: '320px',
-				width: '100%',
-				overflow: 'hidden'
-			}}>
+			<div 
+				id="lovpen-toolbar-container"
+				className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 relative" 
+				style={{
+					minWidth: '320px',
+					width: '100%',
+					overflow: 'hidden'
+				}}>
 				<BrandSection
 					onCopy={onCopy}
 					onDistribute={onDistribute}
