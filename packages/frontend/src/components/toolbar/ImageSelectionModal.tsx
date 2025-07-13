@@ -12,6 +12,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from '../ui/tabs';
 import {Button} from '../ui/button';
 import {ImageGrid} from './ImageGrid';
 import {PersistentFileManager} from './PersistentFileManager';
+import {ImageCropModal, CropArea} from './ImageCropModal';
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from './cover/types';
 import {X, Palette, Sparkles, Image as ImageIcon} from 'lucide-react';
 import {imageGenerationService} from '@/services/imageGenerationService';
@@ -39,6 +40,11 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	const [activeTab, setActiveTab] = useState<CoverImageSource>('article');
 	const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
 	
+	// 图片裁切相关状态
+	const [showCropModal, setShowCropModal] = useState<boolean>(false);
+	const [imageToProcess, setImageToProcess] = useState<string>('');
+	const [croppedImageUrl, setCroppedImageUrl] = useState<string>('');
+	
 	// AI 生成相关状态
 	const [aiPrompt, setAiPrompt] = useState<string>('');
 	const [aiStyle, setAiStyle] = useState<string>('realistic');
@@ -55,11 +61,26 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 		if (!isOpen) {
 			setSelectedImageUrl('');
 			setGenerationError('');
+			setShowCropModal(false);
+			setImageToProcess('');
+			setCroppedImageUrl('');
 		}
 	}, [isOpen]);
 
 	const handleImageSelect = (imageUrl: string) => {
-		setSelectedImageUrl(imageUrl);
+		setImageToProcess(imageUrl);
+		setShowCropModal(true);
+	};
+
+	const handleCropComplete = (croppedUrl: string, cropArea: CropArea) => {
+		setCroppedImageUrl(croppedUrl);
+		setSelectedImageUrl(croppedUrl);
+		setShowCropModal(false);
+	};
+
+	const handleCropCancel = () => {
+		setShowCropModal(false);
+		setImageToProcess('');
 	};
 
 	const handleConfirm = () => {
@@ -134,14 +155,15 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	}
 
 	return (
-		<Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-			<DrawerPortal container={toolbarContainer}>
-				<DrawerOverlay className="absolute inset-0 bg-black/50" />
-				<div 
-					className="absolute bottom-0 left-0 right-0 z-50 bg-white flex flex-col max-h-[85vh] rounded-t-lg border-t shadow-lg transition-transform"
-					data-vaul-drawer-direction="bottom"
-					data-slot="drawer-content"
-				>
+		<>
+			<Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+				<DrawerPortal container={toolbarContainer}>
+					<DrawerOverlay className="absolute inset-0 bg-black/50" />
+					<div 
+						className="absolute bottom-0 left-0 right-0 z-50 bg-white flex flex-col max-h-[85vh] rounded-t-lg border-t shadow-lg transition-transform"
+						data-vaul-drawer-direction="bottom"
+						data-slot="drawer-content"
+					>
 					{/* 拖拽手柄 */}
 					<div className="mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-gray-300" />
 					
@@ -274,26 +296,57 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 				</div>
 
 				{/* 底部操作栏 */}
-				<div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50 mt-auto shrink-0">
-					<div className="text-sm text-gray-500">
-						{selectedImageUrl ? '已选择图片' : '请选择一张图片'}
-					</div>
-					<div className="flex gap-3">
-						<Button variant="outline" onClick={onClose} size="sm">
-							取消
-						</Button>
-						<Button 
-							onClick={handleConfirm}
-							disabled={!selectedImageUrl}
-							className="bg-blue-600 hover:bg-blue-700"
-							size="sm"
-						>
-							确定使用
-						</Button>
+				<div className="px-4 sm:px-6 py-4 border-t bg-gray-50 mt-auto shrink-0">
+					{/* 选中图片预览 */}
+					{selectedImageUrl && (
+						<div className="mb-4 p-3 bg-white rounded-lg border border-gray-200">
+							<div className="flex items-center gap-3">
+								<img 
+									src={selectedImageUrl}
+									alt="选中的图片"
+									className="w-16 h-16 object-cover rounded-md border"
+								/>
+								<div className="flex-1">
+									<p className="text-sm font-medium text-gray-900">已选择并裁切完成</p>
+									<p className="text-xs text-gray-500">
+										{aspectRatio === '2.25:1' ? '公众号封面比例 (900×400)' : '正方形比例 (400×400)'}
+									</p>
+								</div>
+							</div>
+						</div>
+					)}
+					
+					<div className="flex items-center justify-between">
+						<div className="text-sm text-gray-500">
+							{selectedImageUrl ? '已选择并裁切图片' : '请选择一张图片进行裁切'}
+						</div>
+						<div className="flex gap-3">
+							<Button variant="outline" onClick={onClose} size="sm">
+								取消
+							</Button>
+							<Button 
+								onClick={handleConfirm}
+								disabled={!selectedImageUrl}
+								className="bg-blue-600 hover:bg-blue-700"
+								size="sm"
+							>
+								确定使用
+							</Button>
+						</div>
 					</div>
 				</div>
 				</div>
 			</DrawerPortal>
 		</Drawer>
+
+		{/* 图片裁切模态框 */}
+		<ImageCropModal
+			isOpen={showCropModal}
+			onClose={handleCropCancel}
+			imageUrl={imageToProcess}
+			onCropComplete={handleCropComplete}
+			title={`裁切封面${coverNumber} - ${aspectRatio}`}
+		/>
+		</>
 	);
 };
