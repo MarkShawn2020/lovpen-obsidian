@@ -1,5 +1,5 @@
 import React from "react";
-import packageJson from "../../../package.json";
+import packageJson from "../../../../package.json";
 import {Copy, Settings, Upload} from "lucide-react";
 
 interface BrandSectionProps {
