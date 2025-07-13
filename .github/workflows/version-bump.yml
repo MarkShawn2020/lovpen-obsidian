@@ -1,0 +1,78 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          # 使用 npm version 命令自动更新版本号
+          NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
+          NEW_VERSION=${NEW_VERSION#v}  # 移除 v 前缀
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # 同步版本到所有包
+          pnpm version
+
+      - name: Commit version changes
+        run: |
+          git add .
+          git commit -m "bump version to v${{ steps.bump_version.outputs.new }}"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag "v${{ steps.bump_version.outputs.new }}"
+          git push origin "v${{ steps.bump_version.outputs.new }}"
+
+      - name: Summary
+        run: |
+          echo "✅ Version bumped from ${{ steps.current_version.outputs.current }} to ${{ steps.bump_version.outputs.new }}"
+          echo "🏷️ Tag v${{ steps.bump_version.outputs.new }} created and pushed"
+          echo "🚀 Release workflow will be triggered automatically"

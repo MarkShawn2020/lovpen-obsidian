@@ -1,42 +1,137 @@
-name: Release Obsidian plugin
+name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'Test scenario tags'
-        required: true
-        type: string
   push:
     tags:
-      - "*"
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Use Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
 
-      - name: Build plugin
+      - name: Get pnpm store directory
+        shell: bash
         run: |
-          npm install
-          npm run build
-          npm run download
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - name: Create release
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm check
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Download highlights
+        run: pnpm download-highlights
+
+      - name: Create assets package
+        run: |
+          cd packages/assets
+          zip -r ../../assets.zip themes/ highlights/ themes.json highlights.json
+          cd ../..
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          cp packages/obsidian/dist/main.js release-files/
+          cp packages/obsidian/dist/manifest.json release-files/
+          cp packages/obsidian/dist/styles.css release-files/
+          cp assets.zip release-files/
+
+      - name: Get version from tag or input
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # 获取上一个标签
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG="Initial release"
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s" $PREV_TAG..HEAD | head -20)
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          body: |
+            ## 更新内容
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ## 安装方法
+            
+            ### 方法一：BRAT 插件安装（推荐）
+            在 BRAT 插件中添加仓库地址：`markshawn2020/lovpen`
+            
+            ### 方法二：手动安装
+            1. 下载 `main.js`、`manifest.json`、`styles.css` 三个文件
+            2. 在 Obsidian 设置中创建 `.obsidian/plugins/lovpen/` 目录
+            3. 将下载的文件放入该目录
+            4. 下载 `assets.zip` 并解压到 `.obsidian/plugins/lovpen/assets/` 目录
+            5. 在 Obsidian 设置中启用 LovPen 插件
+            
+            ## 主要特性
+            - 🚀 一键将 Obsidian 笔记发布到微信公众号、知乎、小红书、Twitter
+            - 🎨 30+ 精美主题，完美保持格式
+            - 💻 专业代码高亮和行号显示
+            - 🔗 智能链接处理，针对微信公众号优化
+            - 📝 模板系统，自定义内容渲染
+          files: |
+            release-files/main.js
+            release-files/manifest.json
+            release-files/styles.css
+            release-files/assets.zip
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tag="${GITHUB_REF#refs/tags/}"
-
-          zip -r assets.zip themes.json themes/ highlights.json highlights/
-
-          gh release create "$tag" \
-            --title="$tag" \
-            --draft assets.zip main.js manifest.json styles.css
