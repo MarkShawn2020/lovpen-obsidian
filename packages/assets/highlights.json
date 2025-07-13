@@ -48,10 +48,6 @@
 		"url": "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/brown-paper.css"
 	},
 	{
-		"name": "brown-papersq.png",
-		"url": "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/brown-papersq.png.css"
-	},
-	{
 		"name": "codepen-embed",
 		"url": "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/codepen-embed.css"
 	},
