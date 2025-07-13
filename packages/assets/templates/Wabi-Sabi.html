@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        /* Wabi-Sabi 模板 - 日式极简美学的体现 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif CJK JP", serif;
+            background: linear-gradient(145deg, #fefcf8 0%, #f7f5f1 100%);
+            color: #2a2a2a;
+            line-height: 1.75;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            
+            /* 营造纸张质感的背景纹理 */
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(139, 115, 85, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(90, 108, 87, 0.02) 1px, transparent 1px);
+            background-size: 120px 120px, 80px 80px;
+        }
+
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(145deg, #1a1816 0%, #211e1c 100%);
+                color: #e8e6e3;
+                background-image: 
+                    radial-gradient(circle at 25% 25%, rgba(166, 139, 106, 0.05) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(106, 124, 103, 0.03) 1px, transparent 1px);
+            }
+        }
+
+        /* 主容器：创造不对称的视觉平衡 */
+        .wabi-sabi-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            background: transparent;
+            position: relative;
+        }
+
+        /* 顶部装饰条：模拟传统书法中的天头 */
+        .top-accent {
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(139, 115, 85, 0.3) 15%, 
+                rgba(107, 76, 58, 0.5) 50%, 
+                rgba(139, 115, 85, 0.3) 85%, 
+                transparent 100%);
+            margin-bottom: 3em;
+            border-radius: 2px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .top-accent {
+                background: linear-gradient(90deg, 
+                    transparent 0%, 
+                    rgba(166, 139, 106, 0.4) 15%, 
+                    rgba(139, 107, 90, 0.6) 50%, 
+                    rgba(166, 139, 106, 0.4) 85%, 
+                    transparent 100%);
+            }
+        }
+
+        /* 文章头部：标题区域的诗意布局 */
+        .article-header {
+            text-align: center;
+            padding: 2em 2em 3em;
+            margin-bottom: 2em;
+            position: relative;
+            background: rgba(247, 245, 241, 0.6);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(224, 221, 214, 0.5);
+            box-shadow: 0 2px 20px rgba(42, 42, 42, 0.04);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-header {
+                background: rgba(33, 30, 28, 0.8);
+                border: 1px solid rgba(58, 55, 52, 0.5);
+                box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        /* 装饰性元素：在标题周围添加传统的装饰线 */
+        .article-header::before,
+        .article-header::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(to right, 
+                transparent, 
+                rgba(139, 115, 85, 0.6), 
+                transparent);
+        }
+
+        .article-header::before {
+            top: 0.8em;
+        }
+
+        .article-header::after {
+            bottom: 0.8em;
+        }
+
+        /* 主标题：体现侘寂美学的不对称平衡 */
+        .article-title {
+            font-size: 2.2em;
+            font-weight: 400;
+            color: #333f48;
+            margin-bottom: 0.8em;
+            font-family: "Hiragino Kaku Gothic ProN", "Helvetica Neue", Arial, sans-serif;
+            letter-spacing: 0.05em;
+            line-height: 1.4;
+            text-shadow: 0 1px 2px rgba(42, 42, 42, 0.05);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-title {
+                color: #a68b6a;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        /* 副标题或描述 */
+        .article-subtitle {
+            font-size: 1.1em;
+            color: #595959;
+            font-style: italic;
+            margin-bottom: 1.5em;
+            opacity: 0.8;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-subtitle {
+                color: #c8c6c3;
+            }
+        }
+
+        /* 元信息：作者、日期等 */
+        .article-meta {
+            font-size: 0.9em;
+            color: #8a8a8a;
+            letter-spacing: 0.1em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5em;
+            flex-wrap: wrap;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-meta {
+                color: #a8a6a3;
+            }
+        }
+
+        .article-meta span {
+            position: relative;
+            padding: 0.3em 0.8em;
+            background: rgba(139, 115, 85, 0.08);
+            border-radius: 16px;
+            border: 1px solid rgba(139, 115, 85, 0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-meta span {
+                background: rgba(166, 139, 106, 0.12);
+                border: 1px solid rgba(166, 139, 106, 0.2);
+            }
+        }
+
+        /* 正文内容区域 */
+        .article-content {
+            padding: 0 2em 3em;
+            background: transparent;
+            position: relative;
+        }
+
+        /* 为内容添加微妙的侧边装饰 */
+        .article-content::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(139, 115, 85, 0.2) 20%,
+                rgba(107, 76, 58, 0.3) 50%,
+                rgba(139, 115, 85, 0.2) 80%,
+                transparent 100%);
+            border-radius: 2px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-content::before {
+                background: linear-gradient(to bottom,
+                    transparent 0%,
+                    rgba(166, 139, 106, 0.3) 20%,
+                    rgba(139, 107, 90, 0.4) 50%,
+                    rgba(166, 139, 106, 0.3) 80%,
+                    transparent 100%);
+            }
+        }
+
+        /* 文章底部：署名和日期的雅致呈现 */
+        .article-footer {
+            text-align: center;
+            padding: 3em 2em 2em;
+            margin-top: 3em;
+            position: relative;
+        }
+
+        /* 底部装饰线 */
+        .article-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(to right,
+                transparent,
+                rgba(139, 115, 85, 0.4),
+                transparent);
+        }
+
+        .article-signature {
+            font-size: 0.95em;
+            color: #8a8a8a;
+            font-style: italic;
+            margin-bottom: 1em;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-signature {
+                color: #a8a6a3;
+            }
+        }
+
+        .article-date {
+            font-size: 0.85em;
+            color: #b8b8b8;
+            letter-spacing: 0.1em;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .article-date {
+                color: #888683;
+            }
+        }
+
+        /* 底部装饰条：呼应顶部设计 */
+        .bottom-accent {
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(139, 115, 85, 0.3) 15%, 
+                rgba(107, 76, 58, 0.5) 50%, 
+                rgba(139, 115, 85, 0.3) 85%, 
+                transparent 100%);
+            margin-top: 3em;
+            border-radius: 2px;
+            margin-bottom: 2em;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .bottom-accent {
+                background: linear-gradient(90deg, 
+                    transparent 0%, 
+                    rgba(166, 139, 106, 0.4) 15%, 
+                    rgba(139, 107, 90, 0.6) 50%, 
+                    rgba(166, 139, 106, 0.4) 85%, 
+                    transparent 100%);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .wabi-sabi-container {
+                margin: 0 1em;
+            }
+
+            .article-header,
+            .article-content {
+                padding-left: 1.5em;
+                padding-right: 1.5em;
+            }
+
+            .article-title {
+                font-size: 1.8em;
+            }
+
+            .article-meta {
+                flex-direction: column;
+                gap: 0.8em;
+            }
+
+            .article-content::before {
+                left: 0.5em;
+            }
+        }
+
+        /* 为特殊内容类型提供样式支持 */
+        .wabi-sabi-quote {
+            margin: 2em 0;
+            padding: 1.5em 2em;
+            background: rgba(139, 115, 85, 0.05);
+            border-left: 4px solid rgba(139, 115, 85, 0.3);
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            position: relative;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .wabi-sabi-quote {
+                background: rgba(166, 139, 106, 0.08);
+                border-left-color: rgba(166, 139, 106, 0.4);
+            }
+        }
+
+        .wabi-sabi-quote::before {
+            content: '"';
+            position: absolute;
+            left: 0.5em;
+            top: 0.3em;
+            font-size: 2em;
+            color: rgba(139, 115, 85, 0.3);
+            font-family: serif;
+        }
+
+        /* 印刷样式优化 */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .article-header {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+            }
+
+            .top-accent,
+            .bottom-accent,
+            .article-content::before {
+                display: none;
+            }
+
+            .article-title {
+                color: black !important;
+            }
+
+            .article-meta,
+            .article-signature,
+            .article-date {
+                color: #666 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wabi-sabi-container">
+        <!-- 顶部装饰条 -->
+        <div class="top-accent"></div>
+        
+        <!-- 文章头部 -->
+        <header class="article-header">
+            {{#if title}}
+            <h1 class="article-title">{{title}}</h1>
+            {{/if}}
+            
+            {{#if subtitle}}
+            <p class="article-subtitle">{{subtitle}}</p>
+            {{/if}}
+            
+            <div class="article-meta">
+                {{#if author}}
+                <span>{{author}}</span>
+                {{/if}}
+                
+                {{#if date}}
+                <span>{{date}}</span>
+                {{/if}}
+                
+                {{#if category}}
+                <span>{{category}}</span>
+                {{/if}}
+            </div>
+        </header>
+        
+        <!-- 正文内容 -->
+        <main class="article-content">
+            {{{content}}}
+        </main>
+        
+        <!-- 文章底部 -->
+        <footer class="article-footer">
+            {{#if signature}}
+            <div class="article-signature">{{signature}}</div>
+            {{/if}}
+            
+            {{#if publishDate}}
+            <div class="article-date">{{publishDate}}</div>
+            {{/if}}
+        </footer>
+        
+        <!-- 底部装饰条 -->
+        <div class="bottom-accent"></div>
+    </div>
+</body>
+</html>

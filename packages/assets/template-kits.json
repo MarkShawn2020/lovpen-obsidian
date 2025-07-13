@@ -105,35 +105,49 @@
 		{
 			"basicInfo": {
 				"id": "minimal-clean",
-				"name": "Minimal Clean",
-				"description": "简约清新的模板套装，采用极简设计理念，适合学术论文和正式文档",
+				"name": "Wabi-Sabi 侘寂",
+				"description": "日式极简美学模板套装，体现侘寂之美的朴素自然风格，追求不完美中的完美，适合文学创作和思考沉淀",
 				"author": "Lovpen Team",
-				"version": "1.0.0",
+				"version": "2.0.0",
 				"createdAt": "2025-01-11T10:00:00.000Z",
-				"updatedAt": "2025-01-11T10:00:00.000Z",
+				"updatedAt": "2025-07-13T10:00:00.000Z",
 				"tags": [
-					"极简",
-					"学术",
-					"正式",
-					"清新",
-					"黑白"
+					"日式美学",
+					"侘寂",
+					"极简主义",
+					"自然",
+					"文学",
+					"禅意",
+					"不对称美"
 				],
 				"previewImage": ""
 			},
 			"styleConfig": {
-				"theme": "bento",
-				"codeHighlight": "vs",
+				"theme": "wabi-sabi",
+				"codeHighlight": "wabi-sabi",
 				"cssVariables": {
-					"--primary-color": "#333333",
-					"--background-primary": "#ffffff",
-					"--text-primary": "#333333"
+					"--primary-color": "#333f48",
+					"--text-primary": "#2a2a2a",
+					"--text-secondary": "#595959",
+					"--text-tertiary": "#8a8a8a",
+					"--background-primary": "#fefcf8",
+					"--background-secondary": "#f7f5f1",
+					"--background-tertiary": "#f0ede7",
+					"--border-primary": "#e0ddd6",
+					"--accent-warm": "#8b7355",
+					"--accent-earth": "#6b4c3a",
+					"--accent-green": "#5a6c57",
+					"--font-family-main": "\"Hiragino Mincho ProN\", \"Yu Mincho\", \"YuMincho\", \"Noto Serif CJK JP\", serif",
+					"--font-family-sans": "\"Hiragino Kaku Gothic ProN\", \"Helvetica Neue\", Arial, sans-serif",
+					"--line-height-base": "1.75",
+					"--letter-spacing-base": "0.025em"
 				},
-				"enableCustomThemeColor": false,
-				"customThemeColor": "",
-				"customCSS": ""
+				"enableCustomThemeColor": true,
+				"customThemeColor": "#8b7355",
+				"customCSS": "/* 自定义侘寂美学增强样式 */\n.note-to-mp .wabi-sabi-accent {\n\tposition: relative;\n\tpadding: 1em 1.5em;\n\tmargin: 1.5em 0;\n\tbackground: linear-gradient(135deg, var(--background-tertiary) 0%, var(--background-accent) 100%);\n\tborder-radius: 6px;\n\tborder: 1px solid var(--border-secondary);\n}"
 			},
 			"templateConfig": {
-				"templateFileName": "Bento 1.html",
+				"templateFileName": "Wabi-Sabi.html",
 				"useTemplate": true
 			},
 			"pluginConfig": {
@@ -141,7 +155,8 @@
 					"CodeHighlight",
 					"LinkRenderer",
 					"FootnoteRenderer",
-					"MathRenderer"
+					"MathRenderer",
+					"CalloutRenderer"
 				],
 				"enabledHtmlPlugins": [
 					"Images",
@@ -152,31 +167,52 @@
 				"pluginSettings": {
 					"CodeHighlight": {
 						"enabled": true,
-						"theme": "vs",
-						"showLineNumbers": true
+						"theme": "wabi-sabi",
+						"showLineNumbers": false
 					},
 					"Images": {
 						"enabled": true,
-						"addShadow": false,
-						"roundCorners": false
+						"addShadow": true,
+						"roundCorners": true,
+						"borderRadius": "6px",
+						"naturalAlignment": true
 					},
 					"Tables": {
 						"enabled": true,
 						"stripedRows": false,
-						"hover": false
+						"hover": true,
+						"responsive": true,
+						"borderStyle": "subtle"
+					},
+					"CalloutRenderer": {
+						"enabled": true,
+						"useCustomStyles": true,
+						"style": "wabi-sabi"
+					},
+					"Headings": {
+						"enabled": true,
+						"addAnchors": false,
+						"useCustomStyles": true,
+						"asymmetricAlignment": true
+					},
+					"LinkRenderer": {
+						"enabled": true,
+						"openInNewTab": false,
+						"underlineStyle": "gradient",
+						"hoverEffect": "subtle"
 					}
 				}
 			}
 		}
 	],
 	"metadata": {
-		"totalKits": 3,
+		"totalKits": 2,
 		"categories": [
 			"极简主义",
+			"日式美学",
 			"Anthropic 风格"
 		],
-
-		"lastUpdated": "2025-01-11T10:00:00.000Z",
+		"lastUpdated": "2025-07-13T10:00:00.000Z",
 		"schemaVersion": "1.0"
 	}
 }

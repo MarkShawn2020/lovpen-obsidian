@@ -1,0 +1,580 @@
+/*
+ * Wabi-Sabi (侘寂) 主题 - 日式极简美学
+ * 追求不完美之美、朴素自然、时间沉淀的韵味
+ * 体现物哀、寂、佗的日式美学概念
+ */
+
+/* 根色彩变量 - 取自日式传统色谱 */
+:root {
+	/* 主色调：墨染(sumizome) - 温润的深灰 */
+	--primary-color: #333f48;
+	
+	/* 文字色调：传统的纸墨层次 */
+	--text-primary: #2a2a2a;      /* 漆黑(urushi-guro) */
+	--text-secondary: #595959;     /* 濡羽色(nurebairo) */
+	--text-tertiary: #8a8a8a;      /* 鼠色(nezumi-iro) */
+	--text-quaternary: #b8b8b8;    /* 白鼠色(shira-nezumi) */
+	
+	/* 背景色调：和纸的自然层次 */
+	--background-primary: #fefcf8;   /* 生成り(kinari) - 未漂白棉布色 */
+	--background-secondary: #f7f5f1; /* 象牙色(zou-ge-iro) */
+	--background-tertiary: #f0ede7;  /* 胡粉色(gofun-iro) - 传统白颜料 */
+	--background-accent: #ebe7e0;    /* 練色(neri-iro) - 练丝色 */
+	
+	/* 边框与分割线：自然界的细腻层次 */
+	--border-primary: #e0ddd6;      /* 白茶色(shira-cha-iro) */
+	--border-secondary: #d4d0c8;    /* 砂色(suna-iro) */
+	--border-accent: #a89c94;       /* 茶鼠色(cha-nezumi) */
+	
+	/* 强调色：从自然中来的温润色调 */
+	--accent-warm: #8b7355;         /* 黄橡色(ki-kashiwa) */
+	--accent-earth: #6b4c3a;        /* 栗色(kuri-iro) */
+	--accent-green: #5a6c57;        /* 海松色(miru-iro) */
+	--accent-blue: #4a5a6a;         /* 藍鼠色(ai-nezumi) */
+	
+	/* 功能色彩：低调而温和 */
+	--mark-bg: rgba(139, 115, 85, 0.08);      /* 极淡的黄橡色 */
+	--code-bg: rgba(240, 237, 231, 0.6);      /* 半透明胡粉色 */
+	--blockquote-border: var(--accent-warm);
+	--link-color: var(--accent-earth);
+	
+	/* 字体设置：追求自然的不完美 */
+	--font-family-main: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif CJK JP", serif;
+	--font-family-sans: "Hiragino Kaku Gothic ProN", "Helvetica Neue", Arial, sans-serif;
+	--font-family-mono: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
+	
+	/* 尺寸与间距：黄金比例的变形应用 */
+	--font-size-base: 16px;
+	--font-size-small: 14px;
+	--font-size-large: 18px;
+	--line-height-base: 1.75;      /* 接近黄金比例，更适合中文阅读 */
+	--line-height-tight: 1.5;
+	--letter-spacing-base: 0.025em; /* 微妙的字间距，增加呼吸感 */
+	--letter-spacing-wide: 0.05em;
+	
+	/* 圆角：柔和的自然曲线 */
+	--border-radius-sm: 2px;
+	--border-radius-md: 4px;
+	--border-radius-lg: 6px;
+	
+	/* 阴影：如晨雾般轻柔 */
+	--shadow-soft: 0 1px 3px rgba(42, 42, 42, 0.04), 0 1px 2px rgba(42, 42, 42, 0.02);
+	--shadow-medium: 0 2px 6px rgba(42, 42, 42, 0.06), 0 2px 4px rgba(42, 42, 42, 0.03);
+	
+	/* 过渡效果：缓慢而温和 */
+	--transition-gentle: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	--transition-smooth: all 0.3s ease-out;
+}
+
+/* 深色模式：夜晚的静谧与沉思 */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--primary-color: #4a5a6a;
+		
+		--text-primary: #e8e6e3;      /* 月白色(geppaku) */
+		--text-secondary: #c8c6c3;    /* 白練色(shira-neri) */
+		--text-tertiary: #a8a6a3;     /* 薄鼠色(usu-nezumi) */
+		--text-quaternary: #888683;   /* 鈍色(nibi-iro) */
+		
+		--background-primary: #1a1816;   /* 墨色(sumi-iro) */
+		--background-secondary: #211e1c; /* 黒橡色(kuro-tsurubami) */
+		--background-tertiary: #2a2825;  /* 消炭色(keshi-zumi) */
+		--background-accent: #353128;    /* 煤竹色(susutake-iro) */
+		
+		--border-primary: #3a3734;
+		--border-secondary: #444138;
+		--border-accent: #585248;
+		
+		--accent-warm: #a68b6a;
+		--accent-earth: #8b6b5a;
+		--accent-green: #6a7c67;
+		--accent-blue: #5a6a7a;
+		
+		--mark-bg: rgba(166, 139, 106, 0.12);
+		--code-bg: rgba(42, 40, 37, 0.8);
+		--blockquote-border: var(--accent-warm);
+		--link-color: var(--accent-warm);
+		
+		--shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+		--shadow-medium: 0 2px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+	}
+}
+
+/* 基础容器：营造沉浸式的阅读氛围 */
+.note-to-mp {
+	font-family: var(--font-family-main);
+	font-size: var(--font-size-base);
+	color: var(--text-secondary);
+	background-color: var(--background-primary);
+	line-height: var(--line-height-base);
+	letter-spacing: var(--letter-spacing-base);
+	-webkit-text-size-adjust: 100%;
+	margin: 0;
+	padding: 2em 1.5em;
+	transition: var(--transition-gentle);
+	
+	/* 营造纸张质感 */
+	background-image: 
+		radial-gradient(circle at 20px 50px, var(--background-secondary) 1px, transparent 1px),
+		radial-gradient(circle at 40px 80px, var(--background-tertiary) 0.5px, transparent 0.5px);
+	background-size: 100px 100px, 60px 60px;
+	background-position: 0 0, 30px 30px;
+}
+
+/* 基础元素优化：确保每个元素都有呼吸感 */
+.note-to-mp * {
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+.note-to-mp > *:first-child {
+	margin-top: 0 !important;
+}
+
+.note-to-mp > *:last-child {
+	margin-bottom: 0 !important;
+}
+
+/* 段落：自然的不均匀间距，模拟手工排版 */
+.note-to-mp p,
+.note-to-mp pre,
+.note-to-mp dl,
+.note-to-mp form,
+.note-to-mp details,
+.note-to-mp blockquote,
+.note-to-mp table,
+.note-to-mp figure {
+	margin: 1.2em 0 0.8em;
+	text-align: justify;
+	text-justify: inter-ideograph;
+}
+
+/* 分割线：如水墨画中的留白 */
+.note-to-mp hr {
+	margin: 2.5em auto;
+	height: 1px;
+	border: 0;
+	background: linear-gradient(to right, 
+		transparent 0%, 
+		var(--border-accent) 20%, 
+		var(--border-accent) 80%, 
+		transparent 100%);
+	transition: var(--transition-smooth);
+}
+
+/* 标题：层次分明而不张扬 */
+.note-to-mp h1,
+.note-to-mp h2,
+.note-to-mp h3,
+.note-to-mp h4,
+.note-to-mp h5,
+.note-to-mp h6 {
+	font-family: var(--font-family-sans);
+	font-weight: 500;
+	line-height: var(--line-height-tight);
+	letter-spacing: var(--letter-spacing-wide);
+	color: var(--text-primary);
+	margin-top: 2em;
+	margin-bottom: 0.8em;
+	transition: var(--transition-smooth);
+	
+	/* 为每个标题添加微妙的不对称感 */
+	text-align: left;
+	position: relative;
+}
+
+.note-to-mp h1 {
+	font-size: 1.8em;
+	margin-top: 1.5em;
+	padding-left: 0.1em; /* 微妙的缩进变化 */
+}
+
+.note-to-mp h2 {
+	font-size: 1.5em;
+	padding-left: 0.05em;
+}
+
+.note-to-mp h3 {
+	font-size: 1.25em;
+	padding-left: 0.15em;
+}
+
+.note-to-mp h4,
+.note-to-mp h5,
+.note-to-mp h6 {
+	font-size: 1.1em;
+	color: var(--accent-warm);
+	padding-left: 0.2em;
+}
+
+/* 为h2添加传统的装饰线 */
+.note-to-mp h2::before {
+	content: '';
+	position: absolute;
+	left: -0.5em;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 3px;
+	height: 1.2em;
+	background: linear-gradient(to bottom, var(--accent-warm), var(--accent-earth));
+	border-radius: var(--border-radius-sm);
+}
+
+/* 段落：自然的文字流动 */
+.note-to-mp p {
+	text-indent: 2em; /* 传统的段落首行缩进 */
+	margin-left: 0;
+	margin-right: 0;
+}
+
+/* 首段不缩进 */
+.note-to-mp h1 + p,
+.note-to-mp h2 + p,
+.note-to-mp h3 + p,
+.note-to-mp h4 + p,
+.note-to-mp h5 + p,
+.note-to-mp h6 + p,
+.note-to-mp > p:first-child {
+	text-indent: 0;
+}
+
+/* 引用块：如古籍中的注释 */
+.note-to-mp blockquote {
+	position: relative;
+	padding: 1.2em 1.5em 1.2em 2em;
+	margin: 1.5em 0;
+	background-color: var(--background-tertiary);
+	border-left: 4px solid var(--blockquote-border);
+	border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+	color: var(--text-secondary);
+	font-style: italic;
+	box-shadow: var(--shadow-soft);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp blockquote::before {
+	content: '"';
+	position: absolute;
+	left: 0.5em;
+	top: 0.3em;
+	font-size: 2em;
+	color: var(--accent-warm);
+	opacity: 0.3;
+	font-family: var(--font-family-sans);
+}
+
+.note-to-mp blockquote > :first-child {
+	margin-top: 0;
+}
+
+.note-to-mp blockquote > :last-child {
+	margin-bottom: 0;
+}
+
+/* 列表：有机的排列方式 */
+.note-to-mp ul {
+	padding-left: 1.8em;
+	list-style: none;
+}
+
+.note-to-mp ul li {
+	position: relative;
+	margin: 0.5em 0;
+	padding-left: 0.5em;
+}
+
+.note-to-mp ul li::before {
+	content: '◦'; /* 使用更柔和的圆点 */
+	position: absolute;
+	left: -1em;
+	color: var(--accent-warm);
+	font-size: 1.2em;
+	line-height: 1;
+	top: 0.1em;
+}
+
+.note-to-mp ol {
+	padding-left: 1.8em;
+	counter-reset: list-counter;
+}
+
+.note-to-mp ol li {
+	position: relative;
+	margin: 0.5em 0;
+	padding-left: 0.5em;
+	counter-increment: list-counter;
+}
+
+.note-to-mp ol li::before {
+	content: counter(list-counter) '.';
+	position: absolute;
+	left: -1.5em;
+	color: var(--accent-earth);
+	font-weight: 500;
+	min-width: 1.2em;
+	text-align: right;
+}
+
+.note-to-mp li > p {
+	margin: 0.3em 0;
+	text-indent: 0;
+}
+
+/* 链接：温润而内敛的交互 */
+.note-to-mp a {
+	color: var(--link-color);
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	transition: var(--transition-smooth);
+	position: relative;
+}
+
+.note-to-mp a::after {
+	content: '';
+	position: absolute;
+	bottom: -1px;
+	left: 0;
+	width: 0;
+	height: 1px;
+	background: linear-gradient(to right, var(--link-color), var(--accent-warm));
+	transition: width 0.3s ease-out;
+}
+
+.note-to-mp a:hover::after,
+.note-to-mp a:focus::after {
+	width: 100%;
+}
+
+.note-to-mp a:hover,
+.note-to-mp a:focus {
+	color: var(--accent-warm);
+}
+
+/* 文本强调：自然的层次感 */
+.note-to-mp b,
+.note-to-mp strong {
+	font-weight: 600;
+	color: var(--text-primary);
+	letter-spacing: var(--letter-spacing-base);
+}
+
+.note-to-mp i,
+.note-to-mp cite,
+.note-to-mp em,
+.note-to-mp var,
+.note-to-mp address,
+.note-to-mp dfn {
+	font-style: italic;
+	color: var(--accent-earth);
+}
+
+.note-to-mp del,
+.note-to-mp s {
+	color: var(--text-quaternary);
+	text-decoration: line-through;
+	opacity: 0.7;
+}
+
+/* 代码：如墨香般的等宽字体 */
+.note-to-mp pre,
+.note-to-mp code,
+.note-to-mp kbd,
+.note-to-mp tt,
+.note-to-mp samp {
+	font-family: var(--font-family-mono);
+	font-size: 0.9em;
+}
+
+.note-to-mp code {
+	display: inline;
+	color: var(--text-primary);
+	background-color: var(--code-bg);
+	padding: 0.2em 0.5em;
+	border-radius: var(--border-radius-sm);
+	border: 1px solid var(--border-primary);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp .code-section {
+	display: block;
+	background-color: var(--background-tertiary);
+	border: 1px solid var(--border-secondary);
+	border-radius: var(--border-radius-lg);
+	margin: 1.5em 0;
+	overflow: hidden;
+	box-shadow: var(--shadow-soft);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp .code-section:hover {
+	box-shadow: var(--shadow-medium);
+}
+
+.note-to-mp .code-section pre {
+	margin: 0;
+	overflow-x: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-accent) transparent;
+}
+
+.note-to-mp .code-section code {
+	display: block;
+	padding: 1.2em 1.5em;
+	font-size: 0.85em;
+	line-height: 1.6;
+	white-space: pre;
+	background-color: transparent;
+	border: none;
+	color: var(--text-secondary);
+}
+
+/* 高亮标记：如传统的朱批 */
+.note-to-mp mark {
+	color: var(--text-primary);
+	background: linear-gradient(120deg, var(--mark-bg) 0%, var(--mark-bg) 100%);
+	background-repeat: no-repeat;
+	background-size: 100% 0.3em;
+	background-position: 0 88%;
+	padding: 0.1em 0.3em;
+	border-radius: var(--border-radius-sm);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp mark:hover {
+	background-size: 100% 1.2em;
+	background-position: 0 0;
+}
+
+/* 表格：简洁而功能性的设计 */
+.note-to-mp table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	background-color: var(--background-secondary);
+	border: 1px solid var(--border-primary);
+	border-radius: var(--border-radius-lg);
+	margin: 1.5em 0;
+	overflow: hidden;
+	box-shadow: var(--shadow-soft);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp th,
+.note-to-mp td {
+	padding: 0.8em 1.2em;
+	text-align: left;
+	border-bottom: 1px solid var(--border-primary);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp th {
+	background-color: var(--background-accent);
+	color: var(--text-primary);
+	font-weight: 500;
+	letter-spacing: var(--letter-spacing-wide);
+	position: relative;
+}
+
+.note-to-mp td {
+	color: var(--text-secondary);
+}
+
+.note-to-mp tr:last-child th,
+.note-to-mp tr:last-child td {
+	border-bottom: none;
+}
+
+.note-to-mp tr:hover td {
+	background-color: var(--background-tertiary);
+}
+
+/* 下划线：传统书法的韵味 */
+.note-to-mp u {
+	text-decoration: none;
+	background-image: linear-gradient(to right, 
+		transparent 0%, 
+		var(--accent-warm) 20%, 
+		var(--accent-earth) 80%, 
+		transparent 100%);
+	background-repeat: no-repeat;
+	background-size: 100% 1px;
+	background-position: 0 1.1em;
+	transition: var(--transition-smooth);
+}
+
+/* 特殊元素：侘寂美学的体现 */
+.note-to-mp .wabi-sabi-accent {
+	position: relative;
+	padding: 1em 1.5em;
+	margin: 1.5em 0;
+	background: linear-gradient(135deg, 
+		var(--background-tertiary) 0%, 
+		var(--background-accent) 100%);
+	border-radius: var(--border-radius-lg);
+	border: 1px solid var(--border-secondary);
+	transition: var(--transition-smooth);
+}
+
+.note-to-mp .wabi-sabi-accent::before {
+	content: '';
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	right: -2px;
+	bottom: -2px;
+	background: linear-gradient(45deg, var(--accent-warm), var(--accent-earth));
+	border-radius: var(--border-radius-lg);
+	z-index: -1;
+	opacity: 0.1;
+}
+
+/* 响应式设计：保持在不同设备上的和谐 */
+@media (max-width: 768px) {
+	.note-to-mp {
+		padding: 1.5em 1em;
+		font-size: 15px;
+	}
+	
+	.note-to-mp h1 {
+		font-size: 1.6em;
+	}
+	
+	.note-to-mp h2 {
+		font-size: 1.4em;
+	}
+	
+	.note-to-mp .code-section code {
+		padding: 1em;
+		font-size: 0.8em;
+	}
+	
+	.note-to-mp table {
+		font-size: 0.9em;
+	}
+	
+	.note-to-mp th,
+	.note-to-mp td {
+		padding: 0.6em 0.8em;
+	}
+}
+
+/* 打印样式：保持纸质媒体的美感 */
+@media print {
+	.note-to-mp {
+		background: white;
+		color: black;
+		box-shadow: none;
+		padding: 0;
+	}
+	
+	.note-to-mp a {
+		color: black;
+		text-decoration: underline;
+	}
+	
+	.note-to-mp .code-section {
+		border: 1px solid #ccc;
+		box-shadow: none;
+	}
+}

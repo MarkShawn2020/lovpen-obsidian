@@ -1,0 +1,296 @@
+/*
+ * Wabi-Sabi 代码高亮主题
+ * 基于日式美学的柔和配色方案
+ * 追求自然、朴素、时间沉淀的视觉效果
+ */
+
+.hljs {
+	color: #595959;                    /* 濡羽色 - 主文字 */
+	background: #f7f5f1;               /* 象牙色 - 背景 */
+	padding: 1.2em 1.5em;
+	border-radius: 6px;
+	overflow-x: auto;
+	font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
+	font-size: 0.85em;
+	line-height: 1.6;
+	letter-spacing: 0.02em;
+	border: 1px solid #e0ddd6;        /* 白茶色 - 边框 */
+	box-shadow: 0 1px 3px rgba(42, 42, 42, 0.04);
+}
+
+/* 深色模式 */
+@media (prefers-color-scheme: dark) {
+	.hljs {
+		color: #c8c6c3;               /* 白練色 - 主文字 */
+		background: #211e1c;          /* 黒橡色 - 背景 */
+		border: 1px solid #3a3734;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	}
+}
+
+/* 注释 - 如古籍中的小字注释 */
+.hljs-comment,
+.hljs-quote {
+	color: #8a8a8a;                   /* 鼠色 */
+	font-style: italic;
+	opacity: 0.8;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-comment,
+	.hljs-quote {
+		color: #888683;               /* 鈍色 */
+	}
+}
+
+/* 关键字 - 墨染的深沉 */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+	color: #333f48;                   /* 墨染 */
+	font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-keyword,
+	.hljs-selector-tag,
+	.hljs-subst {
+		color: #6a7c67;               /* 海松色 */
+	}
+}
+
+/* 字符串 - 温润的栗色 */
+.hljs-string,
+.hljs-doctag {
+	color: #6b4c3a;                   /* 栗色 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-string,
+	.hljs-doctag {
+		color: #8b6b5a;               /* 深色栗色 */
+	}
+}
+
+/* 数字 - 黄橡的暖意 */
+.hljs-number,
+.hljs-literal {
+	color: #8b7355;                   /* 黄橡色 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-number,
+	.hljs-literal {
+		color: #a68b6a;               /* 亮黄橡色 */
+	}
+}
+
+/* 标题和重要元素 - 藍鼠的沉稳 */
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+	color: #4a5a6a;                   /* 藍鼠色 */
+	font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-title,
+	.hljs-section,
+	.hljs-selector-id {
+		color: #5a6a7a;               /* 亮藍鼠色 */
+	}
+}
+
+/* 函数名 - 海松的自然 */
+.hljs-function,
+.hljs-built_in,
+.hljs-builtin-name {
+	color: #5a6c57;                   /* 海松色 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-function,
+	.hljs-built_in,
+	.hljs-builtin-name {
+		color: #6a7c67;               /* 亮海松色 */
+	}
+}
+
+/* 类型和属性 - 茶鼠的典雅 */
+.hljs-type,
+.hljs-class .hljs-title,
+.hljs-attr {
+	color: #a89c94;                   /* 茶鼠色 */
+	font-style: italic;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-type,
+	.hljs-class .hljs-title,
+	.hljs-attr {
+		color: #b8ac9a;               /* 亮茶鼠色 */
+	}
+}
+
+/* 变量 - 濡羽的深邃 */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+	color: #595959;                   /* 濡羽色 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-variable,
+	.hljs-template-variable,
+	.hljs-tag .hljs-attr {
+		color: #a8a6a3;               /* 薄鼠色 */
+	}
+}
+
+/* 操作符和符号 - 砂色的细腻 */
+.hljs-operator,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+	color: #d4d0c8;                   /* 砂色 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-operator,
+	.hljs-symbol,
+	.hljs-bullet,
+	.hljs-link {
+		color: #585248;               /* 深砂色 */
+	}
+}
+
+/* 正则表达式 - 練色的朴素 */
+.hljs-regexp {
+	color: #ebe7e0;                   /* 練色 */
+	background-color: rgba(139, 115, 85, 0.1);
+	padding: 0.1em 0.3em;
+	border-radius: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-regexp {
+		color: #353128;               /* 煤竹色 */
+		background-color: rgba(166, 139, 106, 0.15);
+	}
+}
+
+/* 标签 - 保持主色调 */
+.hljs-tag {
+	color: #333f48;                   /* 墨染 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-tag {
+		color: #6a7c67;               /* 海松色 */
+	}
+}
+
+/* 标签名 - 更深的层次 */
+.hljs-name {
+	color: #2a2a2a;                   /* 漆黑 */
+	font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-name {
+		color: #e8e6e3;               /* 月白色 */
+	}
+}
+
+/* 元信息 - 低调的存在 */
+.hljs-meta {
+	color: #b8b8b8;                   /* 白鼠色 */
+	font-style: italic;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-meta {
+		color: #888683;               /* 鈍色 */
+	}
+}
+
+/* 删除线 - 褪色效果 */
+.hljs-deletion {
+	background: rgba(139, 115, 85, 0.1);
+	text-decoration: line-through;
+	opacity: 0.6;
+}
+
+/* 添加线 - 突出效果 */
+.hljs-addition {
+	background: rgba(90, 108, 87, 0.1);
+}
+
+/* 强调 */
+.hljs-emphasis {
+	font-style: italic;
+	color: #6b4c3a;                   /* 栗色 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-emphasis {
+		color: #8b6b5a;
+	}
+}
+
+/* 加粗强调 */
+.hljs-strong {
+	font-weight: bold;
+	color: #333f48;                   /* 墨染 */
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-strong {
+		color: #6a7c67;               /* 海松色 */
+	}
+}
+
+/* 特殊情况：代码块中的行号 */
+.hljs-ln-numbers {
+	color: #b8b8b8;                   /* 白鼠色 */
+	border-right: 1px solid #e0ddd6;  /* 白茶色 */
+	padding-right: 1em;
+	margin-right: 1em;
+	text-align: right;
+	user-select: none;
+}
+
+@media (prefers-color-scheme: dark) {
+	.hljs-ln-numbers {
+		color: #888683;               /* 鈍色 */
+		border-right-color: #3a3734;
+	}
+}
+
+/* 滚动条样式 - 与主题一致 */
+.hljs::-webkit-scrollbar {
+	height: 8px;
+}
+
+.hljs::-webkit-scrollbar-track {
+	background: var(--background-tertiary, #f0ede7);
+	border-radius: 4px;
+}
+
+.hljs::-webkit-scrollbar-thumb {
+	background: var(--border-accent, #a89c94);
+	border-radius: 4px;
+}
+
+.hljs::-webkit-scrollbar-thumb:hover {
+	background: var(--accent-warm, #8b7355);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+	.hljs {
+		padding: 1em;
+		font-size: 0.8em;
+		border-radius: 4px;
+	}
+}

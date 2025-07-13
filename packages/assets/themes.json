@@ -12,6 +12,12 @@
 		"author": "Mark Shawn"
 	},
 	{
+		"name": "Wabi-Sabi",
+		"className": "wabi-sabi",
+		"desc": "日式极简美学主题，体现侘寂之美的朴素自然风格",
+		"author": "Lovpen Team"
+	},
+	{
 		"name": "MWeb Ayu",
 		"className": "mweb-ayu",
 		"desc": "MWeb-Themes https://github.com/imageslr/mweb-themes",
