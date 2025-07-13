@@ -13,9 +13,8 @@ import TemplateManager from "./template-manager";
 import TemplateKitManager from "./template-kit-manager";
 import {uevent} from "./utils";
 import {LovpenReactProps} from "@/types";
-import {persistentStorageService} from "../frontend/src/services/persistentStorage";
-
-import {logger} from "../shared/src/logger";
+import {persistentStorageService} from "@/services/persistentStorage";
+import {logger} from "@lovpen/shared";
 
 // External React App Interface
 interface ExternalReactLib {

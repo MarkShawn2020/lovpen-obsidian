@@ -1,5 +1,6 @@
 import {
 	PersistentFile,
+	PersistentCover,
 	PersistentTemplateKit,
 	PersistentPluginConfig,
 	PersistentPersonalInfo,
@@ -12,6 +13,7 @@ import {
 
 const STORAGE_KEYS = {
 	FILES: 'lovpen-persistent-files',
+	COVERS: 'lovpen-persistent-covers',
 	TEMPLATE_KITS: 'lovpen-persistent-template-kits',
 	PLUGIN_CONFIGS: 'lovpen-persistent-plugin-configs',
 	PERSONAL_INFO: 'lovpen-persistent-personal-info',
@@ -480,6 +482,53 @@ export class PersistentStorageService {
 		}
 	}
 
+	// Cover Management
+	async saveCover(coverData: any): Promise<PersistentCover> {
+		try {
+			const id = this.generateId();
+			const persistentCover: PersistentCover = {
+				id,
+				name: coverData.name || `封面-${id}`,
+				coverData,
+				createdAt: new Date().toISOString(),
+				lastUsed: new Date().toISOString()
+			};
+			
+			await this.addCoverToIndex(persistentCover);
+			return persistentCover;
+		} catch (error) {
+			console.error('保存封面失败:', error);
+			throw error;
+		}
+	}
+
+	async getCovers(): Promise<PersistentCover[]> {
+		try {
+			const stored = localStorage.getItem(STORAGE_KEYS.COVERS);
+			return stored ? JSON.parse(stored) : [];
+		} catch (error) {
+			console.error('获取封面列表失败:', error);
+			return [];
+		}
+	}
+
+	async deleteCover(id: string): Promise<void> {
+		try {
+			const covers = await this.getCovers();
+			const updatedCovers = covers.filter(cover => cover.id !== id);
+			localStorage.setItem(STORAGE_KEYS.COVERS, JSON.stringify(updatedCovers));
+		} catch (error) {
+			console.error('删除封面失败:', error);
+			throw error;
+		}
+	}
+
+	private async addCoverToIndex(cover: PersistentCover): Promise<void> {
+		const covers = await this.getCovers();
+		covers.push(cover);
+		localStorage.setItem(STORAGE_KEYS.COVERS, JSON.stringify(covers));
+	}
+
 	// Clear all persistent data
 	async clearAllPersistentData(): Promise<void> {
 		try {
@@ -498,6 +547,7 @@ export class PersistentStorageService {
 		try {
 			const data = {
 				files: await this.getFiles(),
+				covers: await this.getCovers(),
 				templateKits: await this.getTemplateKits(),
 				pluginConfigs: await this.getPluginConfigs(),
 				personalInfo: await this.getPersonalInfo(),
