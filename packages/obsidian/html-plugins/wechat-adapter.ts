@@ -467,7 +467,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['font-size'] = '0.9em';
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
-				styles['margin'] = `${variables['spacing-md']} ${variables['spacing-md']} ${variables['spacing-sm']}`;
+				styles['margin'] = `${variables['spacing-lg']} 0px ${variables['spacing-sm']}`;
+				styles['padding-left'] = '0';
 				break;
 			
 			case 'p':
@@ -514,13 +515,46 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					styles['margin'] = '1em 0 !important';
 					styles['text-indent'] = '0 !important';
 				} else {
-					styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-					styles['padding'] = variables['spacing-md'];
-					styles['background'] = variables['primary-color-light'];
-					styles['border-left'] = `4px solid ${variables['primary-color']}`;
-					styles['border-radius'] = variables['border-radius-sm'];
-					styles['color'] = variables['text-primary'];
-					styles['font-style'] = 'italic';
+					// 检查嵌套层级
+					let nestingLevel = 0;
+					let parent = element.parentElement;
+					while (parent) {
+						if (parent.tagName.toLowerCase() === 'blockquote') {
+							nestingLevel++;
+						}
+						parent = parent.parentElement;
+					}
+					
+					// 根据嵌套层级设置不同样式
+					if (nestingLevel === 0) {
+						// 一级引用
+						styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
+						styles['padding'] = variables['spacing-md'];
+						styles['background'] = variables['primary-color-light'];
+						styles['border-left'] = `4px solid ${variables['primary-color']}`;
+						styles['border-radius'] = variables['border-radius-sm'];
+						styles['color'] = variables['text-primary'];
+						styles['font-style'] = 'italic';
+					} else if (nestingLevel === 1) {
+						// 二级引用
+						styles['margin'] = '1em 0 !important';
+						styles['padding'] = '0.8em !important';
+						styles['background'] = 'rgba(200, 100, 66, 0.05) !important';
+						styles['border-left'] = '3px solid rgba(200, 100, 66, 0.7) !important';
+						styles['font-style'] = 'italic !important';
+					} else if (nestingLevel === 2) {
+						// 三级引用
+						styles['margin'] = '0.8em 0 !important';
+						styles['padding'] = '0.6em !important';
+						styles['background'] = 'rgba(200, 100, 66, 0.03) !important';
+						styles['border-left'] = '2px solid rgba(200, 100, 66, 0.5) !important';
+					} else {
+						// 四级及以上引用
+						styles['margin'] = '0.5em 0 !important';
+						styles['padding'] = '0.4em !important';
+						styles['background'] = 'rgba(200, 100, 66, 0.01) !important';
+						styles['border-left'] = '1px solid rgba(200, 100, 66, 0.3) !important';
+					}
 				}
 				break;
 			

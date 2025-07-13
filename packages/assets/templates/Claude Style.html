@@ -202,7 +202,8 @@
 	font-size: 0.9em;
 	font-weight: bold;
 	color: rgb(200, 100, 66);
-	margin: 1em 8px 0.5em; /* 减少h6的上边距 */
+	margin: 1.5em 0px 0.5em; /* 与h3保持左对齐，调整上边距 */
+	padding-left: 0; /* 确保与h3-h5左对齐 */
 }
 
 .claude-main-content strong, .claude-main-content b {
@@ -310,19 +311,35 @@
 	font-style: italic;
 }
 
-/* 修复多层嵌套引用 */
+/* 修复多层嵌套引用 - 支持更深层级 */
 .claude-main-content blockquote blockquote {
-	margin: 1em 0;
-	border-left: 3px solid rgba(200, 100, 66, 0.7);
-	background: rgba(200, 100, 66, 0.05);
-	padding: 0.8em;
+	margin: 1em 0 !important;
+	border-left: 3px solid rgba(200, 100, 66, 0.7) !important;
+	background: rgba(200, 100, 66, 0.05) !important;
+	padding: 0.8em !important;
+	font-style: italic !important;
 }
 
 .claude-main-content blockquote blockquote blockquote {
-	margin: 0.8em 0;
-	border-left: 2px solid rgba(200, 100, 66, 0.5);
-	background: rgba(200, 100, 66, 0.03);
-	padding: 0.6em;
+	margin: 0.8em 0 !important;
+	border-left: 2px solid rgba(200, 100, 66, 0.5) !important;
+	background: rgba(200, 100, 66, 0.03) !important;
+	padding: 0.6em !important;
+}
+
+.claude-main-content blockquote blockquote blockquote blockquote {
+	margin: 0.6em 0 !important;
+	border-left: 2px solid rgba(200, 100, 66, 0.4) !important;
+	background: rgba(200, 100, 66, 0.02) !important;
+	padding: 0.5em !important;
+}
+
+/* 通用深层嵌套引用处理 */
+.claude-main-content blockquote blockquote blockquote blockquote blockquote {
+	margin: 0.5em 0 !important;
+	border-left: 1px solid rgba(200, 100, 66, 0.3) !important;
+	background: rgba(200, 100, 66, 0.01) !important;
+	padding: 0.4em !important;
 }
 
 /* 修复嵌套在引用中的列表 */
