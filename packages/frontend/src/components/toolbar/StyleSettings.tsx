@@ -85,12 +85,6 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 
 	return (
 		<div className="space-y-6">
-			{/* 头部说明 */}
-			<div className="text-center">
-				<h3 className="text-lg font-semibold text-gray-900 mb-2">样式配置</h3>
-				<p className="text-gray-600">自定义您的内容展示样式和主题</p>
-			</div>
-
 			{/* 样式选择卡片 */}
 			<div className="grid grid-cols-1 gap-4">
 				{/* 模板选择器 */}

@@ -1,11 +1,10 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select';
-import {CoverPreview} from "@/components/toolbar/CoverPreview";
 import {CoverData} from "@/components/toolbar/CoverData";
-import {CoverEditor} from "@/components/toolbar/CoverEditor";
+import {CoverCard} from "@/components/toolbar/CoverCard";
+import {ImageSelectionModal} from "@/components/toolbar/ImageSelectionModal";
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from "@/components/toolbar/cover/types";
 import {logger} from "../../../../shared/src/logger";
-import {Download, Image, Layers, RotateCcw, Settings} from "lucide-react";
+import {Download, RotateCcw} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
 
 interface CoverDesignerProps {
@@ -20,12 +19,13 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 																onDownloadCovers,
 																onClose
 															}) => {
-	// 当前选中的封面 (1 或 2)
-	const [selectedCover, setSelectedCover] = useState<1 | 2>(1);
-
 	// 封面预览状态
-	const [cover1PreviewCovers, setCover1PreviewCovers] = useState<CoverData[]>([]);
-	const [cover2PreviewCovers, setCover2PreviewCovers] = useState<CoverData[]>([]);
+	const [cover1Data, setCover1Data] = useState<CoverData | undefined>(undefined);
+	const [cover2Data, setCover2Data] = useState<CoverData | undefined>(undefined);
+
+	// 模态框状态
+	const [selectedCoverNumber, setSelectedCoverNumber] = useState<1 | 2 | null>(null);
+	const [showImageSelection, setShowImageSelection] = useState(false);
 
 	// 共享状态
 	const [selectedImages, setSelectedImages] = useState<ExtractedImage[]>([]);
@@ -365,10 +365,46 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		await saveCoverData(coverNum, coverData, source, imageUrl);
 	}, [getDimensions, setCoverPreview, saveCoverData]);
 
+	// 处理封面卡片点击
+	const handleCoverCardClick = (coverNumber: 1 | 2) => {
+		setSelectedCoverNumber(coverNumber);
+		setShowImageSelection(true);
+	};
+
+	// 处理图片选择
+	const handleImageSelect = async (imageUrl: string, source: CoverImageSource) => {
+		if (!selectedCoverNumber) return;
+
+		try {
+			const coverData = await createCover(imageUrl, source, selectedCoverNumber);
+			if (selectedCoverNumber === 1) {
+				setCover1Data(coverData);
+			} else {
+				setCover2Data(coverData);
+			}
+
+			await saveCoverData(selectedCoverNumber, coverData, source, imageUrl);
+			setShowImageSelection(false);
+			setSelectedCoverNumber(null);
+		} catch (error) {
+			logger.error('[CoverDesigner] Error creating cover:', error);
+		}
+	};
+
+	// 清空封面
+	const handleClearCover = (coverNumber: 1 | 2) => {
+		if (coverNumber === 1) {
+			setCover1Data(undefined);
+		} else {
+			setCover2Data(undefined);
+		}
+		clearCoverPreview(coverNumber);
+	};
+
 	const handleDownloadCovers = useCallback(async () => {
-		const covers = [...cover1PreviewCovers, ...cover2PreviewCovers];
+		const covers = [cover1Data, cover2Data].filter(Boolean) as CoverData[];
 		onDownloadCovers(covers);
-	}, [cover1PreviewCovers, cover2PreviewCovers, onDownloadCovers]);
+	}, [cover1Data, cover2Data, onDownloadCovers]);
 
 
 	// 通用的清空封面预览函数
@@ -406,108 +442,77 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 	return (
 		<div className="@container space-y-3 sm:space-y-4">
-
-			{/* 封面配置 */}
+			{/* 头部和操作按钮 */}
 			<div className="w-full space-y-3 sm:space-y-4">
 				<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
 					<h3 className="text-base sm:text-lg font-semibold">封面设计</h3>
-				</div>
-
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-					{/* 封面选择 */}
-					<div>
-						<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-							选择封面类型
-						</label>
-						<Select value={selectedCover.toString()}
-								onValueChange={(value) => setSelectedCover(parseInt(value) as 1 | 2)}>
-							<SelectTrigger className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
-								<SelectValue placeholder="选择要设置的封面"/>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="1">
-									<div className="flex items-center gap-2">
-										<Layers className="h-4 w-4 text-blue-600"/>
-										<span>封面1 (2.25:1 横版)</span>
-									</div>
-								</SelectItem>
-								<SelectItem value="2">
-									<div className="flex items-center gap-2">
-										<Image className="h-4 w-4 text-purple-600"/>
-										<span>封面2 (1:1 方形)</span>
-									</div>
-								</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-
-					{/* 操作按钮 */}
-					<div>
-						<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-							封面操作
-						</label>
-						<div className="flex space-x-1 sm:space-x-2">
-							<button
-								onClick={() => handleClearPreviews(selectedCover)}
-								className="px-2 sm:px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors text-xs sm:text-sm border border-gray-300"
-								title={`清空封面${selectedCover}预览`}
-							>
-								<RotateCcw className="h-3 w-3 sm:h-4 sm:w-4"/>
-							</button>
-							<button
-								onClick={handleDownloadCovers}
-								className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
-								disabled={cover1PreviewCovers.length === 0 && cover2PreviewCovers.length === 0}
-							>
-								<Download className="h-3 w-3 sm:h-4 sm:w-4"/>
-								<span className="hidden @md:inline">
-									下载 ({(cover1PreviewCovers.length > 0 ? 1 : 0) + (cover2PreviewCovers.length > 0 ? 1 : 0)})
-								</span>
-							</button>
-							<button
-								disabled={cover1PreviewCovers.length === 0 && cover2PreviewCovers.length === 0}
-								onClick={clearAllPreviews}
-								className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm border border-gray-300"
-							>
-								<RotateCcw className="h-3 w-3 sm:h-4 sm:w-4"/>
-								<span className="hidden @md:inline">清空</span>
-							</button>
-						</div>
+					<div className="flex space-x-1 sm:space-x-2">
+						<button
+							onClick={handleDownloadCovers}
+							className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+							disabled={!cover1Data && !cover2Data}
+						>
+							<Download className="h-3 w-3 sm:h-4 sm:w-4"/>
+							<span className="hidden @md:inline">
+								下载封面 ({(cover1Data ? 1 : 0) + (cover2Data ? 1 : 0)})
+							</span>
+						</button>
+						<button
+							disabled={!cover1Data && !cover2Data}
+							onClick={() => {
+								setCover1Data(undefined);
+								setCover2Data(undefined);
+								clearCoverPreview(1);
+								clearCoverPreview(2);
+							}}
+							className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm border border-gray-300"
+						>
+							<RotateCcw className="h-3 w-3 sm:h-4 sm:w-4"/>
+							<span className="hidden @md:inline">清空全部</span>
+						</button>
 					</div>
 				</div>
 			</div>
 
-
-			{/* 预览区域 */}
+			{/* 封面卡片区域 */}
 			<div className="grid grid-cols-[2.25fr_1fr] gap-3 sm:gap-6 w-full">
-				<CoverPreview
-					coverData={cover1PreviewCovers[0]}
+				<CoverCard
+					coverData={cover1Data}
 					aspectRatio={2.25}
-					label="封面1"
-					onClear={() => handleClearPreviews(1)}
-					placeholder="暂无封面1预览"
+					label="封面1 (2.25:1 横版)"
+					placeholder="点击添加封面1"
+					isGenerating={generationStatus.isGenerating && selectedCoverNumber === 1}
+					generationProgress={generationStatus.progress}
+					onClick={() => handleCoverCardClick(1)}
+					onClear={() => handleClearCover(1)}
 				/>
-				<CoverPreview
-					coverData={cover2PreviewCovers[0]}
+				<CoverCard
+					coverData={cover2Data}
 					aspectRatio={1}
-					label="封面2"
-					onClear={() => handleClearPreviews(2)}
-					placeholder="暂无封面2预览"
+					label="封面2 (1:1 方形)"
+					placeholder="点击添加封面2"
+					isGenerating={generationStatus.isGenerating && selectedCoverNumber === 2}
+					generationProgress={generationStatus.progress}
+					onClick={() => handleCoverCardClick(2)}
+					onClear={() => handleClearCover(2)}
 				/>
 			</div>
 
-			{/* 图片来源选择 */}
-			<CoverEditor
-				coverNumber={selectedCover}
-				aspectRatio={selectedCover === 1 ? '2.25:1' : '1:1'}
-				selectedImages={selectedImages}
-				onCreateCover={async (imageUrl, source) => await createCover(imageUrl, source, selectedCover)}
-				getDimensions={() => getDimensions(selectedCover)}
-				generationStatus={generationStatus}
-				setGenerationStatus={setGenerationStatus}
-				generationError={generationError}
-				setGenerationError={setGenerationError}
-			/>
+			{/* 图片选择模态框 */}
+			{showImageSelection && selectedCoverNumber && (
+				<ImageSelectionModal
+					isOpen={showImageSelection}
+					onClose={() => {
+						setShowImageSelection(false);
+						setSelectedCoverNumber(null);
+					}}
+					onImageSelect={handleImageSelect}
+					coverNumber={selectedCoverNumber}
+					aspectRatio={selectedCoverNumber === 1 ? '2.25:1' : '1:1'}
+					selectedImages={selectedImages}
+					getDimensions={() => getDimensions(selectedCoverNumber)}
+				/>
+			)}
 
 			{/* 隐藏的 canvas 元素 */}
 			<canvas ref={canvasRef} style={{display: 'none'}}/>

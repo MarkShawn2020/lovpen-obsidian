@@ -4,7 +4,7 @@ import {Button} from '../ui/button';
 import {TemplateKit, ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {StyleSettings} from './StyleSettings';
-import {AlertCircle, Eye, Loader, Package, Palette, Plus, RefreshCw, Settings, Sparkles} from 'lucide-react';
+import {AlertCircle, Eye, Loader, Package, Palette, Plus, RefreshCw, Settings, Sparkles, X} from 'lucide-react';
 
 // 简单的Badge组件
 const Badge: React.FC<{ variant?: string; className?: string; children: React.ReactNode }> = ({
@@ -76,6 +76,7 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 	const [error, setError] = useState<string>('');
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [previewKit, setPreviewKit] = useState<TemplateKit | null>(null);
+	const [showPreviewModal, setShowPreviewModal] = useState(false);
 
 	// 加载可用套装
 	useEffect(() => {
@@ -107,8 +108,6 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 		setSelectedKitId(kitId);
 		const kit = kits.find(k => k.basicInfo.id === kitId);
 		if (kit) {
-			setPreviewKit(kit);
-
 			// 直接应用套装
 			try {
 				logger.info('[TemplateKitSelector] Applying kit directly:', kit.basicInfo.name);
@@ -118,11 +117,50 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 					await window.lovpenReactAPI.onKitApply(kitId);
 				}
 
+				// 同步高级样式配置：将套装的配置反映到高级样式选择器中
+				syncKitToAdvancedSettings(kit);
+
 				logger.info('[TemplateKitSelector] Kit applied directly:', kit.basicInfo.name);
 			} catch (error) {
 				logger.error('[TemplateKitSelector] Error applying kit directly:', error);
 			}
 		}
+	};
+
+	// 同步套装配置到高级样式设置
+	const syncKitToAdvancedSettings = (kit: TemplateKit) => {
+		// 同步模板选择
+		if (onTemplateChange && kit.templateConfig.templateFileName) {
+			// 移除 .html 扩展名
+			const templateName = kit.templateConfig.templateFileName.replace('.html', '');
+			onTemplateChange(templateName);
+		}
+
+		// 同步主题选择
+		if (onThemeChange && kit.styleConfig.theme) {
+			onThemeChange(kit.styleConfig.theme);
+		}
+
+		// 同步代码高亮选择
+		if (onHighlightChange && kit.styleConfig.codeHighlight) {
+			onHighlightChange(kit.styleConfig.codeHighlight);
+		}
+
+		// 同步主题颜色设置
+		if (onThemeColorToggle) {
+			onThemeColorToggle(kit.styleConfig.enableCustomThemeColor || false);
+		}
+
+		if (onThemeColorChange && kit.styleConfig.customThemeColor) {
+			onThemeColorChange(kit.styleConfig.customThemeColor);
+		}
+
+		logger.info('[TemplateKitSelector] Synced kit config to advanced settings', {
+			template: kit.templateConfig.templateFileName,
+			theme: kit.styleConfig.theme,
+			highlight: kit.styleConfig.codeHighlight,
+			customThemeColor: kit.styleConfig.customThemeColor
+		});
 	};
 
 
@@ -229,97 +267,6 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 				{/* 套装已在选择时直接应用 */}
 			</div>
 
-			{/* 套装预览 */}
-			{previewKit && (
-				<Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
-					<CardHeader className="pb-3">
-						<div className="flex items-start justify-between">
-							<div className="flex-1">
-								<CardTitle className="text-lg text-gray-900 mb-1">
-									{previewKit.basicInfo.name}
-								</CardTitle>
-								<p className="text-sm text-gray-600 mb-3">
-									{previewKit.basicInfo.description}
-								</p>
-								<div className="flex items-center gap-2 mb-2">
-									<span className="text-xs text-gray-500">作者:</span>
-									<span className="text-xs text-gray-700">{previewKit.basicInfo.author}</span>
-									<span className="text-xs text-gray-500">版本:</span>
-									<span className="text-xs text-gray-700">{previewKit.basicInfo.version}</span>
-								</div>
-								<div className="flex flex-wrap gap-1">
-									{previewKit.basicInfo.tags.map((tag, index) => (
-										<Badge key={index} variant="secondary" className="text-xs">
-											{tag}
-										</Badge>
-									))}
-									{getKitStatusBadge(previewKit)}
-								</div>
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="pt-0">
-						<div className="space-y-4">
-							{/* 样式预览 */}
-							<div className="bg-white/80 border border-gray-200 rounded-lg p-4">
-								<h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-									<Eye className="w-4 h-4 text-blue-600"/>
-									样式预览
-								</h4>
-								<div className="border border-gray-200 rounded-md p-3 bg-white text-sm">
-									<div className="space-y-2">
-										<h5 className="font-semibold text-gray-900">文章标题示例</h5>
-										<p className="text-gray-700">这是一段示例文本，展示当前套装的样式效果。</p>
-										<pre className="bg-gray-100 p-2 rounded text-xs">
-											<code>{`function example() {
-  console.log("Hello World");
-}`}</code>
-										</pre>
-										<blockquote className="border-l-4 border-blue-500 pl-3 text-gray-600 italic">
-											这是一个引用块的示例
-										</blockquote>
-									</div>
-								</div>
-							</div>
-
-							{/* 配置详情 */}
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-								<div className="bg-white/60 border border-purple-200 rounded-lg p-3">
-									<div className="flex items-center gap-2 mb-2">
-										<Palette className="w-3 h-3 text-purple-600"/>
-										<span className="font-medium text-gray-800">主题样式</span>
-									</div>
-									<p className="text-gray-600">主题: {previewKit.styleConfig.theme}</p>
-									<p className="text-gray-600">高亮: {previewKit.styleConfig.codeHighlight}</p>
-									{previewKit.styleConfig.enableCustomThemeColor && (
-										<p className="text-gray-600">主题色: {previewKit.styleConfig.customThemeColor || '默认'}</p>
-									)}
-								</div>
-								<div className="bg-white/60 border border-blue-200 rounded-lg p-3">
-									<div className="flex items-center gap-2 mb-2">
-										<Package className="w-3 h-3 text-blue-600"/>
-										<span className="font-medium text-gray-800">模板配置</span>
-									</div>
-									<p className="text-gray-600">模板: {previewKit.templateConfig.templateFileName}</p>
-									<p className="text-gray-600">启用: {previewKit.templateConfig.useTemplate ? '是' : '否'}</p>
-								</div>
-								<div className="bg-white/60 border border-green-200 rounded-lg p-3">
-									<div className="flex items-center gap-2 mb-2">
-										<Settings className="w-3 h-3 text-green-600"/>
-										<span className="font-medium text-gray-800">插件配置</span>
-									</div>
-									<p className="text-gray-600">
-										Markdown: {previewKit.pluginConfig.enabledMarkdownPlugins.length}个
-									</p>
-									<p className="text-gray-600">
-										HTML: {previewKit.pluginConfig.enabledHtmlPlugins.length}个
-									</p>
-								</div>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			)}
 
 			{/* 套装列表 */}
 			<div className="space-y-3">
@@ -378,6 +325,7 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 										onClick={(e) => {
 											e.stopPropagation();
 											setPreviewKit(kit);
+											setShowPreviewModal(true);
 										}}
 									>
 										<Eye className="w-3 h-3"/>
@@ -401,22 +349,166 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 					</div>
 				</div>
 
-				<div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-					<StyleSettings
-						settings={settings}
-						onTemplateChange={onTemplateChange || (() => {
-						})}
-						onThemeChange={onThemeChange || (() => {
-						})}
-						onHighlightChange={onHighlightChange || (() => {
-						})}
-						onThemeColorToggle={onThemeColorToggle || (() => {
-						})}
-						onThemeColorChange={onThemeColorChange || (() => {
-						})}
-					/>
-				</div>
+				<StyleSettings
+					settings={settings}
+					onTemplateChange={onTemplateChange || (() => {
+					})}
+					onThemeChange={onThemeChange || (() => {
+					})}
+					onHighlightChange={onHighlightChange || (() => {
+					})}
+					onThemeColorToggle={onThemeColorToggle || (() => {
+					})}
+					onThemeColorChange={onThemeColorChange || (() => {
+					})}
+				/>
 			</div>
+
+			{/* 预览模态框 */}
+			{showPreviewModal && previewKit && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+					{/* 背景遮罩 */}
+					<div 
+						className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+						onClick={() => setShowPreviewModal(false)}
+					/>
+
+					{/* 模态框内容 */}
+					<div className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden">
+						{/* 头部 */}
+						<div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+							<div>
+								<h3 className="text-lg font-semibold text-gray-900">
+									{previewKit.basicInfo.name}
+								</h3>
+								<p className="text-sm text-gray-600 mt-1">
+									{previewKit.basicInfo.description}
+								</p>
+							</div>
+							<button
+								onClick={() => setShowPreviewModal(false)}
+								className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+							>
+								<X className="h-5 w-5 text-gray-500"/>
+							</button>
+						</div>
+
+						{/* 内容区域 */}
+						<div className="p-6 max-h-[70vh] overflow-y-auto">
+							<div className="space-y-6">
+								{/* 基本信息 */}
+								<div className="grid grid-cols-2 gap-4 text-sm">
+									<div>
+										<span className="text-gray-500">作者:</span>
+										<span className="ml-2 text-gray-700">{previewKit.basicInfo.author}</span>
+									</div>
+									<div>
+										<span className="text-gray-500">版本:</span>
+										<span className="ml-2 text-gray-700">{previewKit.basicInfo.version}</span>
+									</div>
+								</div>
+
+								{/* 标签 */}
+								<div className="flex flex-wrap gap-2">
+									{previewKit.basicInfo.tags.map((tag, index) => (
+										<Badge key={index} variant="secondary" className="text-xs">
+											{tag}
+										</Badge>
+									))}
+									{getKitStatusBadge(previewKit)}
+								</div>
+
+								{/* 样式预览 */}
+								<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+									<h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+										<Eye className="w-4 h-4 text-blue-600"/>
+										样式预览
+									</h4>
+									<div className="border border-gray-200 rounded-md p-4 bg-white text-sm">
+										<div className="space-y-3">
+											<h5 className="font-semibold text-gray-900">文章标题示例</h5>
+											<p className="text-gray-700">这是一段示例文本，展示当前套装的样式效果。</p>
+											<pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
+												<code>{`function example() {
+  console.log("Hello World");
+}`}</code>
+											</pre>
+											<blockquote className="border-l-4 border-blue-500 pl-3 text-gray-600 italic">
+												这是一个引用块的示例
+											</blockquote>
+										</div>
+									</div>
+								</div>
+
+								{/* 配置详情 */}
+								<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+									<div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+										<div className="flex items-center gap-2 mb-3">
+											<Palette className="w-4 h-4 text-purple-600"/>
+											<span className="font-medium text-gray-800">主题样式</span>
+										</div>
+										<div className="space-y-1 text-sm">
+											<p className="text-gray-600">主题: {previewKit.styleConfig.theme}</p>
+											<p className="text-gray-600">高亮: {previewKit.styleConfig.codeHighlight}</p>
+											{previewKit.styleConfig.enableCustomThemeColor && (
+												<p className="text-gray-600">主题色: {previewKit.styleConfig.customThemeColor || '默认'}</p>
+											)}
+										</div>
+									</div>
+									<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+										<div className="flex items-center gap-2 mb-3">
+											<Package className="w-4 h-4 text-blue-600"/>
+											<span className="font-medium text-gray-800">模板配置</span>
+										</div>
+										<div className="space-y-1 text-sm">
+											<p className="text-gray-600">模板: {previewKit.templateConfig.templateFileName}</p>
+											<p className="text-gray-600">启用: {previewKit.templateConfig.useTemplate ? '是' : '否'}</p>
+										</div>
+									</div>
+									<div className="bg-green-50 border border-green-200 rounded-lg p-4">
+										<div className="flex items-center gap-2 mb-3">
+											<Settings className="w-4 h-4 text-green-600"/>
+											<span className="font-medium text-gray-800">插件配置</span>
+										</div>
+										<div className="space-y-1 text-sm">
+											<p className="text-gray-600">
+												Markdown: {previewKit.pluginConfig.enabledMarkdownPlugins.length}个
+											</p>
+											<p className="text-gray-600">
+												HTML: {previewKit.pluginConfig.enabledHtmlPlugins.length}个
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{/* 底部操作栏 */}
+						<div className="flex items-center justify-between p-4 border-t bg-gray-50">
+							<div className="text-sm text-gray-600">
+								点击"应用套装"将使用此套装的所有配置
+							</div>
+							<div className="flex gap-3">
+								<button
+									onClick={() => setShowPreviewModal(false)}
+									className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+								>
+									关闭
+								</button>
+								<button
+									onClick={() => {
+										handleKitSelect(previewKit.basicInfo.id);
+										setShowPreviewModal(false);
+									}}
+									className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+								>
+									应用套装
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
