@@ -1,7 +1,7 @@
 {
 	"id": "lovpen",
 	"name": "Lovpen",
-	"version": "0.14.44",
+	"version": "0.14.45",
 	"minAppVersion": "1.4.5",
 	"description": "All-in-one content distribution platform for Obsidian. Publish content to WeChat, Zhihu, XiaoHongShu, Twitter and more, with perfect format preservation and rich customization options.",
 	"author": "Mark Shawn",
