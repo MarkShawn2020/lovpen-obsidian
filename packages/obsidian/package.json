@@ -1,5 +1,5 @@
 {
-	"name": "obsidian",
+	"name": "@lovpen/obsidian",
 	"version": "0.14.32",
 	"description": "",
 	"main": "index.js",
@@ -8,5 +8,8 @@
 		"dev": "node esbuild.config.mjs",
 		"check": "tsc --noEmit",
 		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"@lovpen/frontend": "workspace:*"
 	}
 }

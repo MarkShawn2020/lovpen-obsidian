@@ -1,5 +1,5 @@
 {
-	"name": "lovpen-vite-react",
+	"name": "@lovpen/frontend",
 	"version": "0.14.32",
 	"type": "module",
 	"scripts": {
