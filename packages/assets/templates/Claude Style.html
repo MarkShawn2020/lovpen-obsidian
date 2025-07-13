@@ -20,25 +20,38 @@
 		</div>
 		{{/if}}
 
-		<!-- 文章元信息 - 移到文章开头 -->
-		<div class="claude-article-meta">
-			{{#if author}}
-			<p><strong>作者：</strong>{{author}}</p>
-			{{/if}}
-			{{#if publishDate}}
-			<p><strong>发布时间：</strong>{{publishDate}}</p>
-			{{/if}}
-			{{#if tags}}
-			<p><strong>标签：</strong>
-			{{#each tags}}
-				<span class="claude-tag">{{this}}</span>{{#unless @last}}、{{/unless}}
-			{{/each}}
-			</p>
-			{{/if}}
-			{{#if seriesName}}
-			<p><strong>系列：</strong>{{seriesName}}{{#if episodeNum}} - {{episodeNum}}{{/if}}</p>
-			{{/if}}
+		<!-- 文章元信息 - Claude风格的优雅显示 -->
+		{{#if (or author publishDate tags seriesName)}}
+		<div class="claude-meta-section">
+			<div class="claude-meta-content">
+				{{#if author}}
+				<div class="claude-meta-item">
+					<span class="claude-meta-label">作者</span>
+					<span class="claude-meta-value">{{author}}</span>
+				</div>
+				{{/if}}
+				{{#if publishDate}}
+				<div class="claude-meta-item">
+					<span class="claude-meta-label">时间</span>
+					<span class="claude-meta-value">{{publishDate}}</span>
+				</div>
+				{{/if}}
+				{{#if seriesName}}
+				<div class="claude-meta-item">
+					<span class="claude-meta-label">系列</span>
+					<span class="claude-meta-value">{{seriesName}}{{#if episodeNum}} · {{episodeNum}}{{/if}}</span>
+				</div>
+				{{/if}}
+				{{#if tags}}
+				<div class="claude-meta-tags">
+					{{#each tags}}
+					<span class="claude-meta-tag">#{{this}}</span>
+					{{/each}}
+				</div>
+				{{/if}}
+			</div>
 		</div>
+		{{/if}}
 
 		<!-- 文章内容 -->
 		<section class="lovpen" id="article-section">
@@ -228,17 +241,63 @@
 	color: rgb(34, 34, 34);
 }
 
-.claude-main-content li {
-	margin: 0.25em 0; /* 减少列表项间距 */
-	line-height: 1.75;
+/* 设置列表标记颜色与主题色一致 */
+.claude-main-content ul {
+	list-style-type: disc;
 }
 
-/* 修复嵌套列表间距 */
+.claude-main-content ul li::marker {
+	color: rgb(200, 100, 66);
+}
+
+.claude-main-content ol {
+	list-style-type: decimal;
+}
+
+.claude-main-content ol li::marker {
+	color: rgb(200, 100, 66);
+	font-weight: bold;
+}
+
+.claude-main-content li {
+	margin: 0.25em 0;
+	line-height: 1.75;
+	color: rgb(34, 34, 34);
+}
+
+/* 修复多层嵌套列表样式 */
 .claude-main-content ul ul,
 .claude-main-content ol ol,
 .claude-main-content ul ol,
 .claude-main-content ol ul {
-	margin: 0.5em 0; /* 减少嵌套列表的上下边距 */
+	margin: 0.5em 0;
+	padding-left: 1.5em;
+}
+
+/* 二级列表标记 */
+.claude-main-content ul ul {
+	list-style-type: circle;
+}
+
+.claude-main-content ul ul li::marker {
+	color: rgba(200, 100, 66, 0.8);
+}
+
+.claude-main-content ol ol li::marker {
+	color: rgba(200, 100, 66, 0.8);
+}
+
+/* 三级列表标记 */
+.claude-main-content ul ul ul {
+	list-style-type: square;
+}
+
+.claude-main-content ul ul ul li::marker {
+	color: rgba(200, 100, 66, 0.6);
+}
+
+.claude-main-content ol ol ol li::marker {
+	color: rgba(200, 100, 66, 0.6);
 }
 
 .claude-main-content blockquote {
@@ -251,12 +310,36 @@
 	font-style: italic;
 }
 
-/* 修复嵌套引用 */
+/* 修复多层嵌套引用 */
 .claude-main-content blockquote blockquote {
 	margin: 1em 0;
 	border-left: 3px solid rgba(200, 100, 66, 0.7);
 	background: rgba(200, 100, 66, 0.05);
 	padding: 0.8em;
+}
+
+.claude-main-content blockquote blockquote blockquote {
+	margin: 0.8em 0;
+	border-left: 2px solid rgba(200, 100, 66, 0.5);
+	background: rgba(200, 100, 66, 0.03);
+	padding: 0.6em;
+}
+
+/* 修复嵌套在引用中的列表 */
+.claude-main-content blockquote ul,
+.claude-main-content blockquote ol {
+	margin: 1em 0;
+	padding-left: 1.5em;
+}
+
+.claude-main-content blockquote li {
+	margin: 0.2em 0;
+}
+
+/* 修复引用中的列表标记颜色 */
+.claude-main-content blockquote ul li::marker,
+.claude-main-content blockquote ol li::marker {
+	color: rgba(200, 100, 66, 0.8);
 }
 
 .claude-main-content code {
@@ -364,19 +447,78 @@
 	border: 1px solid rgba(200, 100, 66, 0.2);
 }
 
-/* 文章元信息样式 */
-.claude-article-meta {
-	margin: 1.5em 8px 2em;
-	padding: 1em;
-	background: rgba(200, 100, 66, 0.05);
-	border-radius: 6px;
-	border-left: 4px solid rgb(200, 100, 66);
+/* 文章元信息样式 - Claude风格 */
+.claude-meta-section {
+	margin: 2em 8px 3em;
+	position: relative;
 }
 
-.claude-article-meta p {
-	margin: 0.5em 0;
+.claude-meta-content {
+	background: linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(200, 100, 66, 0.03) 100%);
+	border: 1px solid rgba(200, 100, 66, 0.15);
+	border-radius: 12px;
+	padding: 1.5em;
+	position: relative;
+	overflow: hidden;
+}
+
+.claude-meta-content::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 4px;
+	height: 100%;
+	background: linear-gradient(to bottom, rgb(200, 100, 66), rgba(200, 100, 66, 0.6));
+}
+
+.claude-meta-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.8em;
 	font-size: 0.9em;
-	line-height: 1.5;
+}
+
+.claude-meta-item:last-of-type {
+	margin-bottom: 0;
+}
+
+.claude-meta-label {
+	color: rgb(200, 100, 66);
+	font-weight: 600;
+	min-width: 3em;
+	margin-right: 1em;
+	position: relative;
+}
+
+.claude-meta-label::after {
+	content: '·';
+	margin-left: 0.5em;
+	color: rgba(200, 100, 66, 0.5);
+}
+
+.claude-meta-value {
+	color: rgb(63, 63, 63);
+	font-weight: 500;
+	flex: 1;
+}
+
+.claude-meta-tags {
+	margin-top: 1em;
+	padding-top: 1em;
+	border-top: 1px solid rgba(200, 100, 66, 0.1);
+}
+
+.claude-meta-tag {
+	display: inline-block;
+	background: rgba(200, 100, 66, 0.1);
+	color: rgb(200, 100, 66);
+	padding: 0.3em 0.8em;
+	border-radius: 16px;
+	font-size: 0.8em;
+	font-weight: 500;
+	margin: 0 0.5em 0.5em 0;
+	border: 1px solid rgba(200, 100, 66, 0.2);
 }
 
 .claude-footer {

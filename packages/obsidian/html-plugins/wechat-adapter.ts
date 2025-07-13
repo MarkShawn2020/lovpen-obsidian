@@ -546,6 +546,28 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['font-size'] = 'smaller';
 				styles['vertical-align'] = 'super';
 				break;
+			
+			case 'ul':
+				styles['list-style-type'] = 'disc';
+				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
+				styles['padding-left'] = '2em';
+				styles['color'] = variables['text-primary'];
+				break;
+				
+			case 'ol':
+				styles['list-style-type'] = 'decimal';
+				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
+				styles['padding-left'] = '2em';
+				styles['color'] = variables['text-primary'];
+				break;
+				
+			case 'li':
+				styles['margin'] = '0.25em 0';
+				styles['line-height'] = variables['line-height-base'];
+				styles['color'] = variables['text-primary'];
+				// 设置列表标记颜色
+				styles['list-style-color'] = variables['primary-color'];
+				break;
 		}
 
 		// 处理包含rich_media_content类的容器
