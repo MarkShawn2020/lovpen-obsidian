@@ -50,8 +50,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	const styleElRef = useRef<HTMLStyleElement>(null);
 	const articleDivRef = useRef<HTMLDivElement>(null);
 
-	// 工具栏宽度状态 - 固定默认宽度
-	const [toolbarWidth, setToolbarWidth] = useState<string>("420px");
+	// 工具栏宽度状态 - 从localStorage恢复或使用默认宽度
+	const [toolbarWidth, setToolbarWidth] = useState<string>(() => {
+		try {
+			return localStorage.getItem('lovpen-toolbar-width') || "420px";
+		} catch {
+			return "420px";
+		}
+	});
 
 	// 强制触发标记，确保 useEffect 能被调用
 	const [cssUpdateTrigger, setCssUpdateTrigger] = useState(0);
@@ -184,7 +190,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 			const maxWidth = 800; // 工具栏最大宽度
 
 			if (newWidth >= minWidth && newWidth <= maxWidth) {
-				setToolbarWidth(`${newWidth}px`);
+				const widthPx = `${newWidth}px`;
+				setToolbarWidth(widthPx);
+				// 持久化保存宽度
+				try {
+					localStorage.setItem('lovpen-toolbar-width', widthPx);
+				} catch (error) {
+					console.warn('Failed to save toolbar width to localStorage:', error);
+				}
 			}
 		};
 
