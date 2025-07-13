@@ -118,7 +118,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 			const assetsManager = AssetsManager.getInstance();
 
 			// 确保模板文件存在并重新加载
-			await assetsManager.loadTemplates();
+			// await assetsManager.loadTemplates();
 			await templateManager.loadTemplates();
 
 			// 应用样式配置
