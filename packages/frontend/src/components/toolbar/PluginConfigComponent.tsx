@@ -190,12 +190,7 @@ export const ConfigComponent = <T extends PluginData>({
 						</div>
 					</div>
 
-					<div className="flex items-center gap-2">
-						{item.enabled && (
-							<div className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-								已启用
-							</div>
-						)}
+					<div className="flex items-center gap-2 shrink-0">
 						{hasConfigOptions && (
 							<div className={`p-1 rounded-lg transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
 								<ChevronDown className="h-4 w-4 text-gray-400" />

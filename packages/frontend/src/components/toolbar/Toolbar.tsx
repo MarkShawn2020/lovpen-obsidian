@@ -1,26 +1,15 @@
 import React, {useEffect, useState} from "react";
 import {BrandSection} from "./BrandSection";
-import {StyleSettings} from "./StyleSettings";
 import {TemplateKitSelector} from "./TemplateKitSelector";
 import {CoverDesigner} from "./CoverDesigner";
 import {ArticleInfo, ArticleInfoData} from "./ArticleInfo";
-import {Tabs, TabsList, TabsTrigger, TabsContent} from "../ui/tabs";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ConfigComponent} from "./PluginConfigComponent";
 import {SettingsModal} from "../settings/SettingsModal";
-import {UnifiedPluginData, ViteReactSettings, PersonalInfo} from "../../types";
+import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import { 
-	FileText, 
-	Palette, 
-	Plug, 
-	Image, 
-	CheckCircle2, 
-	XCircle, 
-	Zap, 
-	Download,
-	Package
-} from "lucide-react";
+import {CheckCircle2, FileText, Package, Plug, XCircle, Zap} from "lucide-react";
 
 interface ToolbarProps {
 	settings: ViteReactSettings;
@@ -89,10 +78,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		// 默认选择第一个有插件的类型
 		const remarkPlugins = plugins.filter(plugin => plugin.type === 'remark');
 		const rehypePlugins = plugins.filter(plugin => plugin.type === 'rehype');
-		
-		if (remarkPlugins.length > 0) return 'remark';
+
 		if (rehypePlugins.length > 0) return 'rehype';
-		return 'remark';
+		if (remarkPlugins.length > 0) return 'remark';
+		return 'rehype';
 	});
 
 	// 插件展开状态管理
@@ -150,10 +139,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		} else {
 			newSections = pluginExpandedSections.filter(id => id !== sectionId);
 		}
-		
+
 		// 更新本地状态
 		setPluginExpandedSections(newSections);
-		
+
 		// 通过回调函数更新外部settings
 		if (onExpandedSectionsChange) {
 			onExpandedSectionsChange(newSections);
@@ -163,27 +152,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 	// 处理封面下载
 	const handleDownloadCovers = async (covers: CoverData[]) => {
-		logger.info("[Toolbar] 下载封面", { count: covers.length });
-		
+		logger.info("[Toolbar] 下载封面", {count: covers.length});
+
 		const cover1 = covers.find(c => c.aspectRatio === '2.25:1');
 		const cover2 = covers.find(c => c.aspectRatio === '1:1');
-		
+
 		// 下载单独的封面
 		for (const [index, cover] of covers.entries()) {
 			try {
 				let arrayBuffer: ArrayBuffer;
-				
+
 				// 检查URL类型并相应处理
 				if (cover.imageUrl.startsWith('http://') || cover.imageUrl.startsWith('https://')) {
 					// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
 					const app = (window as any).app;
-					const { requestUrl } = require('obsidian');
-					
+					const {requestUrl} = require('obsidian');
+
 					const response = await requestUrl({
 						url: cover.imageUrl,
 						method: 'GET'
 					});
-					
+
 					arrayBuffer = response.arrayBuffer;
 				} else if (cover.imageUrl.startsWith('blob:') || cover.imageUrl.startsWith('data:')) {
 					// Blob URL 或 Data URL - 使用fetch API
@@ -196,10 +185,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					console.error(`封面 ${index + 1} URL协议不支持: ${cover.imageUrl}`);
 					continue;
 				}
-				
+
 				const uint8Array = new Uint8Array(arrayBuffer);
 				const fileName = `cover-${index + 1}-${cover.aspectRatio}.jpg`;
-				
+
 				// 使用Obsidian的文件系统API保存文件
 				const app = (window as any).app;
 				if (app?.vault?.adapter?.write) {
@@ -212,7 +201,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				console.error(`下载封面 ${index + 1} 失败:`, error);
 			}
 		}
-		
+
 		// 如果有两个封面，创建拼接图
 		if (cover1 && cover2) {
 			try {
@@ -221,7 +210,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				console.error("创建拼接封面失败:", error);
 			}
 		}
-		
+
 		if (covers.length > 0) {
 			alert(`已下载 ${covers.length} 个封面到vault根目录${cover1 && cover2 ? '，并创建了拼接图' : ''}`);
 		}
@@ -235,8 +224,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
 					// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
 					const app = (window as any).app;
-					const { requestUrl } = require('obsidian');
-					const response = await requestUrl({ url: imageUrl, method: 'GET' });
+					const {requestUrl} = require('obsidian');
+					const response = await requestUrl({url: imageUrl, method: 'GET'});
 					return response.arrayBuffer;
 				} else if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
 					// Blob URL 或 Data URL - 使用fetch API
@@ -249,32 +238,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					throw new Error(`不支持的URL协议: ${imageUrl}`);
 				}
 			};
-			
+
 			// 下载两张图片的数据
 			const [arrayBuffer1, arrayBuffer2] = await Promise.all([
 				getImageData(cover1.imageUrl),
 				getImageData(cover2.imageUrl)
 			]);
-			
+
 			// 创建blob URL
-			const blob1 = new Blob([arrayBuffer1], { type: 'image/jpeg' });
-			const blob2 = new Blob([arrayBuffer2], { type: 'image/jpeg' });
+			const blob1 = new Blob([arrayBuffer1], {type: 'image/jpeg'});
+			const blob2 = new Blob([arrayBuffer2], {type: 'image/jpeg'});
 			const url1 = URL.createObjectURL(blob1);
 			const url2 = URL.createObjectURL(blob2);
-			
+
 			const canvas = document.createElement('canvas');
 			const ctx = canvas.getContext('2d');
-			
+
 			// 设置画布尺寸 (3.25:1 比例，高度600px，提高分辨率)
 			const height = 600;
 			const width = height * 3.25;
 			canvas.width = width;
 			canvas.height = height;
-			
+
 			// 加载图片
 			const img1 = document.createElement('img');
 			const img2 = document.createElement('img');
-			
+
 			const loadImage = (img: HTMLImageElement, url: string): Promise<void> => {
 				return new Promise((resolve, reject) => {
 					img.onload = () => resolve();
@@ -282,31 +271,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					img.src = url;
 				});
 			};
-			
+
 			await Promise.all([
 				loadImage(img1, url1),
 				loadImage(img2, url2)
 			]);
-			
+
 			// 绘制第一张图 (2.25:1 比例)
 			const img1Width = height * 2.25;
 			ctx?.drawImage(img1, 0, 0, img1Width, height);
-			
+
 			// 绘制第二张图 (1:1 比例)
 			const img2Width = height;
 			ctx?.drawImage(img2, img1Width, 0, img2Width, height);
-			
+
 			// 清理blob URL
 			URL.revokeObjectURL(url1);
 			URL.revokeObjectURL(url2);
-			
+
 			// 转换为blob并保存（提高JPEG质量到95%）
 			canvas.toBlob(async (blob) => {
 				if (blob) {
 					const arrayBuffer = await blob.arrayBuffer();
 					const uint8Array = new Uint8Array(arrayBuffer);
 					const fileName = `cover-combined-3.25-1.jpg`;
-					
+
 					const app = (window as any).app;
 					if (app?.vault?.adapter?.write) {
 						await app.vault.adapter.write(fileName, uint8Array);
@@ -314,7 +303,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					}
 				}
 			}, 'image/jpeg', 0.95);
-			
+
 		} catch (error) {
 			console.error("创建拼接封面失败:", error);
 		}
@@ -327,73 +316,79 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				width: '100%',
 				overflow: 'hidden'
 			}}>
-				<BrandSection 
-					onCopy={onCopy} 
+				<BrandSection
+					onCopy={onCopy}
 					onDistribute={onDistribute}
 					onSettings={() => setIsSettingsModalOpen(true)}
 				/>
 
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">
-					<div className="p-6" style={{ minWidth: '320px' }}>
+					<div className="p-6" style={{minWidth: '320px'}}>
 						{/* 工具栏标题 */}
 						<div className="mb-6">
 							<h2 className="text-xl font-bold text-gray-900 mb-2">内容工具栏</h2>
 							<p className="text-sm text-gray-600">管理文章信息、样式和插件配置</p>
 						</div>
-						
+
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
-							<TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-1">
-								<TabsTrigger 
+							<TabsList
+								className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-1">
+								<TabsTrigger
 									value="basic"
 									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
 								>
-									<FileText className="h-4 w-4" />
+									<FileText className="h-4 w-4"/>
 									<span className="hidden sm:inline">基础</span>
 								</TabsTrigger>
-								<TabsTrigger 
+								<TabsTrigger
 									value="kits"
 									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm"
 								>
-									<Package className="h-4 w-4" />
+									<Package className="h-4 w-4"/>
 									<span className="hidden sm:inline">套装</span>
 								</TabsTrigger>
-								<TabsTrigger 
+								<TabsTrigger
 									value="plugins"
 									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-sm"
 								>
-									<Plug className="h-4 w-4" />
+									<Plug className="h-4 w-4"/>
 									<span className="hidden sm:inline">插件</span>
 									<span className="bg-gray-200 text-gray-700 text-xs px-1.5 py-0.5 rounded-full ml-1">
 										{plugins.length}
 									</span>
 								</TabsTrigger>
 							</TabsList>
-							
+
 							<TabsContent value="basic" className="mt-6 space-y-6">
 								{/* 基本信息 */}
-								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+								<div
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
 									<ArticleInfo
 										settings={settings}
 										onSaveSettings={onSaveSettings}
-										onInfoChange={onArticleInfoChange || (() => {})}
+										onInfoChange={onArticleInfoChange || (() => {
+										})}
 										onRenderArticle={onRenderArticle}
 										onSettingsChange={onSettingsChange}
 									/>
 								</div>
-								
+
 								{/* 封面设计 */}
-								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+								<div
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
 									<CoverDesigner
 										articleHTML={articleHTML}
 										onDownloadCovers={handleDownloadCovers}
-										onClose={() => {}}
+										onClose={() => {
+										}}
 									/>
 								</div>
 							</TabsContent>
-							
+
 
 							<TabsContent value="kits" className="mt-6">
-								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+								<div
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
 									<TemplateKitSelector
 										settings={settings}
 										onKitApply={onKitApply}
@@ -410,62 +405,68 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 							</TabsContent>
 
 							<TabsContent value="plugins" className="mt-6">
-								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+								<div
+									className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
 									{plugins.length > 0 ? (
 										<Tabs value={pluginTab} onValueChange={setPluginTab}>
 											<div className="mb-4">
 												<h3 className="text-lg font-semibold text-gray-900 mb-2">插件管理</h3>
 												<p className="text-sm text-gray-600">配置和管理Markdown处理插件</p>
 											</div>
-											
+
 											<TabsList className="bg-gray-100 rounded-lg p-1">
 												{remarkPlugins.length > 0 && (
-													<TabsTrigger 
+													<TabsTrigger
 														value="remark"
 														className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
 													>
-														<Plug className="h-4 w-4" />
-														Remark 
-														<span className="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">
+														<Plug className="h-4 w-4"/>
+														Remark
+														<span
+															className="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">
 															{remarkPlugins.length}
 														</span>
 													</TabsTrigger>
 												)}
 												{rehypePlugins.length > 0 && (
-													<TabsTrigger 
+													<TabsTrigger
 														value="rehype"
 														className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
 													>
-														<Zap className="h-4 w-4" />
-														Rehype 
-														<span className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded-full">
+														<Zap className="h-4 w-4"/>
+														Rehype
+														<span
+															className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded-full">
 															{rehypePlugins.length}
 														</span>
 													</TabsTrigger>
 												)}
 											</TabsList>
-											
+
 											{remarkPlugins.length > 0 && (
 												<TabsContent value="remark" className="mt-6">
 													<div className="space-y-4">
-														<div className="flex justify-between items-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+														<div
+															className="flex justify-between items-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
 															<div>
-																<h4 className="font-semibold text-blue-900">Remark 插件</h4>
-																<p className="text-sm text-blue-700">Markdown语法解析插件 ({remarkPlugins.length}个)</p>
+																<h4 className="font-semibold text-blue-900">Remark
+																	插件</h4>
+																<p className="text-sm text-blue-700">Markdown语法解析插件
+																	({remarkPlugins.length}个)</p>
 															</div>
 															<div className="flex space-x-2">
 																<button
 																	onClick={() => handleBatchToggle('remark', true)}
 																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
 																>
-																	<CheckCircle2 className="h-4 w-4" />
+																	<CheckCircle2 className="h-4 w-4"/>
 																	全部启用
 																</button>
 																<button
 																	onClick={() => handleBatchToggle('remark', false)}
 																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
 																>
-																	<XCircle className="h-4 w-4" />
+																	<XCircle className="h-4 w-4"/>
 																	全部关闭
 																</button>
 															</div>
@@ -507,24 +508,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 											{rehypePlugins.length > 0 && (
 												<TabsContent value="rehype" className="mt-6">
 													<div className="space-y-4">
-														<div className="flex justify-between items-center p-4 bg-purple-50 border border-purple-200 rounded-lg">
+														<div
+															className="flex justify-between items-center p-4 bg-purple-50 border border-purple-200 rounded-lg">
 															<div>
-																<h4 className="font-semibold text-purple-900">Rehype 插件</h4>
-																<p className="text-sm text-purple-700">HTML处理和转换插件 ({rehypePlugins.length}个)</p>
+																<h4 className="font-semibold text-purple-900">Rehype
+																	插件</h4>
+																<p className="text-sm text-purple-700">HTML处理和转换插件
+																	({rehypePlugins.length}个)</p>
 															</div>
 															<div className="flex space-x-2">
 																<button
 																	onClick={() => handleBatchToggle('rehype', true)}
 																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
 																>
-																	<CheckCircle2 className="h-4 w-4" />
+																	<CheckCircle2 className="h-4 w-4"/>
 																	全部启用
 																</button>
 																<button
 																	onClick={() => handleBatchToggle('rehype', false)}
 																	className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
 																>
-																	<XCircle className="h-4 w-4" />
+																	<XCircle className="h-4 w-4"/>
 																	全部关闭
 																</button>
 															</div>
@@ -565,7 +569,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 									) : (
 										<div className="text-center py-12">
 											<div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
-												<Plug className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+												<Plug className="h-12 w-12 text-gray-400 mx-auto mb-3"/>
 												<h3 className="text-lg font-medium text-gray-900 mb-2">暂无插件</h3>
 												<p className="text-sm text-gray-500">当前没有可用的Markdown处理插件</p>
 											</div>
@@ -577,7 +581,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 						</Tabs>
 					</div>
 				</div>
-				
+
 				{/* 设置模态框 */}
 				<SettingsModal
 					isOpen={isSettingsModalOpen}

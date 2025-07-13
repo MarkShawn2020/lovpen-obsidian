@@ -542,7 +542,7 @@
 	margin-top: 2em;
 }
 
-/* LaTeX数学公式支持 */
+/* LaTeX数学公式支持 - MathJax 3.x优化 */
 .claude-main-content .block-math-svg {
 	display: flex;
 	justify-content: center;
@@ -553,6 +553,53 @@
 .claude-main-content .katex {
 	font-size: 1.1em;
 	color: rgb(34, 34, 34);
+}
+
+/* MathJax 3.x 主要容器样式 */
+.claude-main-content mjx-container {
+	font-size: 1.1em;
+	color: rgb(34, 34, 34);
+}
+
+/* 行内数学公式 */
+.claude-main-content mjx-container:not([display]) {
+	display: inline-block;
+	margin: 0 0.1em;
+	vertical-align: middle;
+}
+
+/* 块级数学公式 */
+.claude-main-content mjx-container[display="block"] {
+	display: block;
+	margin: 1.5em 8px;
+	text-align: center;
+}
+
+/* SVG元素优化 */
+.claude-main-content mjx-container svg {
+	max-width: 100%;
+	height: auto;
+	vertical-align: middle;
+}
+
+/* 确保行内公式与文本正确对齐 */
+.claude-main-content p mjx-container {
+	display: inline-block;
+	margin: 0;
+	vertical-align: baseline;
+}
+
+/* 兼容旧版本结构 */
+.claude-main-content .MathJax_SVG {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.claude-main-content .MathJax_SVG_Display {
+	display: block;
+	margin: 1.5em 8px;
+	text-align: center;
 }
 
 /* Mermaid图表样式 */

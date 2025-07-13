@@ -141,6 +141,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		}
 	});
 
+	// 暂时移除MathJax自动加载，避免与现有数学公式渲染冲突
+	// 等原有渲染恢复正常后再考虑如何集成
+
 	// 显示加载消息
 	const showLoading = useCallback((msg: string) => {
 		setMessageTitle(msg);
