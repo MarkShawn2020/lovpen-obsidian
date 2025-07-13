@@ -144,6 +144,14 @@ export default class TemplateManager {
 			return options.data.last ? options.fn(this) : options.inverse(this);
 		});
 
+		// 注册 or 辅助函数，用于条件判断
+		Handlebars.registerHelper('or', function (...args) {
+			// 移除最后一个参数（Handlebars options对象）
+			const values = args.slice(0, -1);
+			// 检查是否有任何值为真值
+			return values.some(value => !!value);
+		});
+
 		const data = compiledTemplate(templateData, {
 			data: {  // 这里可以传递一些额外的上下文数据
 				root: templateData
