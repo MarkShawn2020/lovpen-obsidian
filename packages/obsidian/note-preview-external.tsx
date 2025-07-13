@@ -224,15 +224,15 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	async copyArticle() {
 		let content = await this.getArticleContent();
 
-		// 在复制时将代码块转换为微信格式
-		const {CodeBlocks} = await import("./html-plugins/code-blocks");
-		content = CodeBlocks.convertToWeixinFormat(content);
-
-		// 处理本地图片 - 转换为data URL或移除
-		content = await this.processLocalImages(content);
-
-		logger.debug("=== 复制内容转换完成 ===");
-		logger.debug("转换后HTML长度:", content.length);
+		// // 在复制时将代码块转换为微信格式
+		// const {CodeBlocks} = await import("./html-plugins/code-blocks");
+		// content = CodeBlocks.convertToWeixinFormat(content);
+		//
+		// // 处理本地图片 - 转换为data URL或移除
+		// content = await this.processLocalImages(content);
+		//
+		// logger.debug("=== 复制内容转换完成 ===");
+		// logger.debug("转换后HTML长度:", content.length);
 
 		// 复制到剪贴板
 		await navigator.clipboard.write([new ClipboardItem({

@@ -58,9 +58,9 @@ export class PluginRegistry {
             new CodeBlocks(),
             new Headings(),
             new Lists(),
-            new Styles(),
             new Tables(),
             new WechatLink(),
+            new Styles(),  // 样式插件应该最后执行，确保处理所有其他插件的输出
         ];
         
         this.pluginManager.registerPlugins(htmlPlugins as any);
