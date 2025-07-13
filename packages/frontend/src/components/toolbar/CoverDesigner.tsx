@@ -6,6 +6,7 @@ import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} fr
 import {logger} from "../../../../shared/src/logger";
 import {Download, RotateCcw} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
+import {PersistentFile} from '../../types';
 
 interface CoverDesignerProps {
 	articleHTML: string;
@@ -323,7 +324,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					const imageFiles = files.filter(f => f.type.startsWith('image/'));
 					
 					// 尝试通过URL匹配找到对应的文件
-					let matchedFile = null;
+					let matchedFile: PersistentFile | null = null;
 					for (const file of imageFiles) {
 						try {
 							const fileUrl = await persistentStorageService.getFileUrl(file);
@@ -339,9 +340,10 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					
 					// 如果没找到匹配的，使用最近使用的文件作为备选
 					if (!matchedFile && imageFiles.length > 0) {
-						matchedFile = imageFiles.sort((a, b) =>
+						const sortedFiles = imageFiles.sort((a, b) =>
 							new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime()
-						)[0];
+						);
+						matchedFile = sortedFiles[0];
 					}
 					
 					if (matchedFile) {

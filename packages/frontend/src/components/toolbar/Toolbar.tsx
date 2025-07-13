@@ -10,6 +10,7 @@ import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
 import {CheckCircle2, FileText, Package, Plug, XCircle, Zap} from "lucide-react";
+import JSZip from 'jszip';
 
 interface ToolbarProps {
 	settings: ViteReactSettings;
@@ -81,8 +82,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		try {
 			const saved = localStorage.getItem('lovpen-toolbar-plugin-tab');
 			if (saved) return saved;
-		} catch {}
-		
+		} catch {
+		}
+
 		// 默认选择第一个有插件的类型
 		const remarkPlugins = plugins.filter(plugin => plugin.type === 'remark');
 		const rehypePlugins = plugins.filter(plugin => plugin.type === 'rehype');
@@ -172,7 +174,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				throw new Error('此功能仅在Obsidian环境中可用');
 			}
 			const requestUrl = window.lovpenReactAPI.requestUrl;
-			const response = await requestUrl({ url: imageUrl, method: 'GET' });
+			const response = await requestUrl({url: imageUrl, method: 'GET'});
 			return response.arrayBuffer;
 		} else if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
 			// Blob URL 或 Data URL - 使用fetch API
@@ -186,119 +188,75 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		}
 	};
 
-	// 回退到vault保存的函数
-	const downloadToVault = async (covers: CoverData[]) => {
-		const cover1 = covers.find(c => c.aspectRatio === '2.25:1');
-		const cover2 = covers.find(c => c.aspectRatio === '1:1');
-
-		// 下载单独的封面
-		for (const [index, cover] of covers.entries()) {
-			try {
-				const arrayBuffer = await getImageArrayBuffer(cover.imageUrl);
-				const uint8Array = new Uint8Array(arrayBuffer);
-				const aspectStr = cover.aspectRatio.replace(':', '-').replace('.', '_');
-				const fileName = `lovpen-cover-${index + 1}-${aspectStr}.jpg`;
-
-				// 使用Obsidian的文件系统API保存文件
-				const app = (window as any).app;
-				if (app?.vault?.adapter?.write) {
-					await app.vault.adapter.write(fileName, uint8Array);
-					console.log(`封面 ${index + 1} 已保存到vault: ${fileName} (${uint8Array.length} bytes)`);
-				} else {
-					throw new Error("无法访问Obsidian文件系统API");
-				}
-			} catch (error) {
-				console.error(`下载封面 ${index + 1} 失败:`, error);
-			}
-		}
-
-		// 如果有两个封面，创建拼接图
-		if (cover1 && cover2) {
-			try {
-				await createCombinedCover(cover1, cover2);
-			} catch (error) {
-				console.error("创建拼接封面失败:", error);
-			}
-		}
-
-		alert(`已下载 ${covers.length} 个封面到 Obsidian vault 根目录${cover1 && cover2 ? '，并创建了拼接图' : ''}`);
-	};
-
-	// 使用浏览器传统下载方式 - 延时下载避免多次弹窗
+	// 使用zip打包下载所有封面
 	const downloadWithBrowserDownload = async (covers: CoverData[]) => {
 		const cover1 = covers.find(c => c.aspectRatio === '2.25:1');
 		const cover2 = covers.find(c => c.aspectRatio === '1:1');
 
-		// 准备所有下载数据
-		const downloads: Array<{ blob: Blob; fileName: string }> = [];
+		try {
+			const zip = new JSZip();
+			let fileCount = 0;
 
-		// 准备单独的封面
-		for (const [index, cover] of covers.entries()) {
-			try {
-				const arrayBuffer = await getImageArrayBuffer(cover.imageUrl);
-				const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
-				const aspectStr = cover.aspectRatio.replace(':', '-').replace('.', '_');
-				const timestamp = Date.now();
-				const fileName = `lovpen-cover-${index + 1}-${aspectStr}-${timestamp}.jpg`;
-				downloads.push({ blob, fileName });
-			} catch (error) {
-				console.error(`准备封面 ${index + 1} 失败:`, error);
-			}
-		}
-
-		// 如果有两个封面，准备拼接图
-		if (cover1 && cover2) {
-			try {
-				const combinedBlob = await createCombinedCoverBlob(cover1, cover2);
-				const timestamp = Date.now();
-				const fileName = `lovpen-cover-combined-3_25_1-${timestamp}.jpg`;
-				downloads.push({ blob: combinedBlob, fileName });
-			} catch (error) {
-				console.error("准备拼接封面失败:", error);
-			}
-		}
-
-		// 依次下载，每次下载间隔1秒避免浏览器弹窗冲突和文件覆盖
-		for (const [index, download] of downloads.entries()) {
-			try {
-				const url = URL.createObjectURL(download.blob);
-				
-				// 创建下载链接
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = download.fileName;
-				a.style.display = 'none';
-				
-				// 添加唯一ID避免冲突
-				a.id = `download-link-${Date.now()}-${Math.random()}`;
-				
-				document.body.appendChild(a);
-				
-				// 模拟用户交互来触发下载
-				a.dispatchEvent(new MouseEvent('click', {
-					bubbles: true,
-					cancelable: true,
-					view: window
-				}));
-				
-				// 延时移除元素和清理URL
-				setTimeout(() => {
-					document.body.removeChild(a);
-					URL.revokeObjectURL(url);
-				}, 2000);
-				
-				console.log(`开始下载: ${download.fileName} (${index + 1}/${downloads.length})`);
-				
-				// 除最后一个文件外，都等待1秒
-				if (index < downloads.length - 1) {
-					await new Promise(resolve => setTimeout(resolve, 1000));
+			// 添加单独的封面到zip
+			for (const [index, cover] of covers.entries()) {
+				try {
+					const arrayBuffer = await getImageArrayBuffer(cover.imageUrl);
+					const aspectStr = cover.aspectRatio.replace(':', '-').replace('.', '_');
+					const fileName = `lovpen-cover-${index + 1}-${aspectStr}.jpg`;
+					zip.file(fileName, arrayBuffer);
+					fileCount++;
+					console.log(`添加封面到zip: ${fileName}`);
+				} catch (error) {
+					console.error(`准备封面 ${index + 1} 失败:`, error);
 				}
-			} catch (error) {
-				console.error(`下载 ${download.fileName} 失败:`, error);
 			}
-		}
 
-		alert(`已开始下载 ${downloads.length} 个文件，请检查浏览器下载文件夹`);
+			// 如果有两个封面，添加拼接图到zip
+			if (cover1 && cover2) {
+				try {
+					const combinedBlob = await createCombinedCoverBlob(cover1, cover2);
+					const arrayBuffer = await combinedBlob.arrayBuffer();
+					const fileName = 'lovpen-cover-combined-3_25_1.jpg';
+					zip.file(fileName, arrayBuffer);
+					fileCount++;
+					console.log(`添加拼接封面到zip: ${fileName}`);
+				} catch (error) {
+					console.error("准备拼接封面失败:", error);
+				}
+			}
+
+			if (fileCount === 0) {
+				alert('没有有效的封面可以下载');
+				return;
+			}
+
+			// 生成zip文件
+			console.log('开始生成zip文件...');
+			const zipBlob = await zip.generateAsync({type: 'blob'});
+
+			// 创建下载链接
+			const url = URL.createObjectURL(zipBlob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `lovpen-covers-${Date.now()}.zip`;
+			a.style.display = 'none';
+
+			document.body.appendChild(a);
+			a.click();
+
+			// 清理
+			setTimeout(() => {
+				// document.body.removeChild(a);
+				// URL.revokeObjectURL(url);
+				// console.log(`zip文件下载完成，包含 ${fileCount} 个文件`);
+				// alert(`已下载包含 ${fileCount} 个封面的zip文件`);
+			}, 2000);
+
+
+		} catch (error) {
+			console.error('创建zip文件失败:', error);
+			alert('下载失败，请重试');
+		}
 	};
 
 	// 处理封面下载
@@ -307,7 +265,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		// 直接使用简单的下载方式，避免复杂的弹窗和权限问题
 		await downloadWithBrowserDownload(covers);
 	};
-
 
 	// 创建拼接封面Blob的通用函数
 	const createCombinedCoverBlob = async (cover1: CoverData, cover2: CoverData): Promise<Blob> => {
@@ -369,29 +326,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		});
 	};
 
-	// 创建拼接封面（vault版本）
-	const createCombinedCover = async (cover1: CoverData, cover2: CoverData) => {
-		try {
-			const combinedBlob = await createCombinedCoverBlob(cover1, cover2);
-			const arrayBuffer = await combinedBlob.arrayBuffer();
-			const uint8Array = new Uint8Array(arrayBuffer);
-			const fileName = 'lovpen-cover-combined-3_25_1.jpg';
-
-			const app = (window as any).app;
-			if (app?.vault?.adapter?.write) {
-				await app.vault.adapter.write(fileName, uint8Array);
-				console.log(`拼接封面已保存到vault: ${fileName} (${uint8Array.length} bytes)`);
-			}
-		} catch (error) {
-			console.error("创建拼接封面失败:", error);
-		}
-	};
-
 	try {
 		return (
-			<div 
+			<div
 				id="lovpen-toolbar-container"
-				className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 relative" 
+				className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 relative"
 				style={{
 					minWidth: '320px',
 					width: '100%',
