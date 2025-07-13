@@ -74,18 +74,18 @@ class LocalResourceLoader implements ResourceLoader {
 	async loadTemplates(): Promise<TemplateOption[]> {
 		try {
 			logger.debug('Loading templates dynamically from backend API');
-			
+
 			// 尝试从后端API加载模板
 			if (window.lovpenReactAPI && window.lovpenReactAPI.loadTemplates) {
 				try {
 					const templateNames = await window.lovpenReactAPI.loadTemplates();
 					logger.info('Loaded templates from backend:', templateNames);
-					
+
 					// 转换为前端需要的格式，添加"不使用模板"选项
 					const templates: TemplateOption[] = [
 						{name: "不使用模板", filename: "none"}
 					];
-					
+
 					// 添加从后端获取的模板
 					templateNames.forEach((templateName: string) => {
 						templates.push({
@@ -93,14 +93,14 @@ class LocalResourceLoader implements ResourceLoader {
 							filename: templateName
 						});
 					});
-					
+
 					return templates;
 				} catch (apiError) {
 					logger.error('Failed to load templates from backend API:', apiError);
 					// 继续使用静态列表作为后备
 				}
 			}
-			
+
 			// 后备：使用静态列表
 			logger.debug('Using static template list as fallback');
 			return [

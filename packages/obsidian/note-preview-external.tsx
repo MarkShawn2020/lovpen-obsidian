@@ -759,6 +759,7 @@ ${customCSS}`;
 			onKitCreate: this.handleKitCreate.bind(this),
 			onKitDelete: this.handleKitDelete.bind(this),
 			loadTemplateKits: this.reactAPIService.loadTemplateKits.bind(this.reactAPIService),
+			loadTemplates: this.reactAPIService.loadTemplates.bind(this.reactAPIService),
 			persistentStorage: this.buildPersistentStorageAPI(),
 			requestUrl: requestUrl
 		};
@@ -889,6 +890,14 @@ ${customCSS}`;
 					return await persistentStorageService.getFiles();
 				} catch (error) {
 					logger.error('[persistentStorage.getFiles] Error:', error);
+					throw error;
+				}
+			},
+			getFileUrl: async (file: any) => {
+				try {
+					return await persistentStorageService.getFileUrl(file);
+				} catch (error) {
+					logger.error('[persistentStorage.getFileUrl] Error:', error);
 					throw error;
 				}
 			},

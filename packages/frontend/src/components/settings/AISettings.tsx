@@ -21,6 +21,7 @@ import {
 	Zap
 } from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
+
 // import {requestUrl} from "obsidian"; // 移除直接导入，改为动态require
 
 interface AISettingsProps {

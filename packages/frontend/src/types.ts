@@ -1,6 +1,7 @@
 // 导入全局API类型定义
 import './types/global';
-export type { LovpenReactAPI } from './types/global';
+
+export type {LovpenReactAPI} from './types/global';
 
 // Personal info interface
 export interface PersonalInfo {
@@ -38,7 +39,6 @@ export interface TemplateKit {
 		pluginSettings: Record<string, any>;
 	};
 }
-
 
 
 // Settings interface for the Vite React components

@@ -54,7 +54,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 			<div className="relative z-10 w-full max-w-sm sm:max-w-2xl lg:max-w-5xl max-h-[95vh] overflow-hidden">
 				<div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl">
 					{/* 头部 */}
-					<div className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-3 sm:px-6 py-4 sm:py-6 text-white">
+					<div
+						className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-3 sm:px-6 py-4 sm:py-6 text-white">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-3">
 								<div className="p-2 bg-white/20 rounded-lg">

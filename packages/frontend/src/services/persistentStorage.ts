@@ -177,7 +177,7 @@ export class PersistentStorageService {
 			if (cachedUrl) {
 				// 验证 blob URL 是否仍然有效
 				try {
-					const response = await fetch(cachedUrl, { method: 'HEAD' });
+					const response = await fetch(cachedUrl, {method: 'HEAD'});
 					if (response.ok) {
 						console.log(`[PersistentStorage] 使用缓存的URL`);
 						return cachedUrl;
@@ -262,10 +262,10 @@ export class PersistentStorageService {
 
 			const url = URL.createObjectURL(blob);
 			console.log(`[PersistentStorage] 成功创建文件URL`);
-			
+
 			// 将新的 URL 加入缓存
 			this.urlCache.set(file.path, url);
-			
+
 			return url;
 
 		} catch (error) {
@@ -288,7 +288,7 @@ export class PersistentStorageService {
 		try {
 			const files = await this.getFiles();
 			console.log(`[PersistentStorage] 预加载 ${files.length} 个文件的URL`);
-			
+
 			// 并发加载所有文件URL
 			await Promise.allSettled(
 				files.map(async (file) => {

@@ -1,8 +1,8 @@
-import { Notice } from "obsidian";
+import {Notice} from "obsidian";
 import TemplateManager from "../template-manager";
 import TemplateKitManager from "../template-kit-manager";
-import { logger } from "@lovpen/shared";
-import { TemplateKit, TemplateKitBasicInfo, TemplateKitOperationResult } from "../template-kit-types";
+import {logger} from "@lovpen/shared";
+import {TemplateKit, TemplateKitBasicInfo, TemplateKitOperationResult} from "../template-kit-types";
 
 /**
  * React API服务类
@@ -12,7 +12,8 @@ import { TemplateKit, TemplateKitBasicInfo, TemplateKitOperationResult } from ".
 export class ReactAPIService {
 	private static instance: ReactAPIService;
 
-	private constructor() {}
+	private constructor() {
+	}
 
 	public static getInstance(): ReactAPIService {
 		if (!ReactAPIService.instance) {
@@ -23,6 +24,7 @@ export class ReactAPIService {
 
 	/**
 	 * 加载所有模板套装
+	 * @implements {TemplateKitAPI.loadTemplateKits} 从 @lovpen/shared
 	 */
 	async loadTemplateKits(): Promise<TemplateKit[]> {
 		logger.debug(`[ReactAPIService.loadTemplateKits] 加载模板套装列表`);
@@ -39,6 +41,7 @@ export class ReactAPIService {
 
 	/**
 	 * 加载所有模板
+	 * @implements {TemplateKitAPI.loadTemplates} 从 @lovpen/shared
 	 */
 	async loadTemplates(): Promise<string[]> {
 		logger.debug(`[ReactAPIService.loadTemplates] 加载模板列表`);
@@ -57,7 +60,7 @@ export class ReactAPIService {
 	 * 应用模板套装
 	 */
 	async applyTemplateKit(
-		kitId: string, 
+		kitId: string,
 		onRenderMarkdown?: () => Promise<void>,
 		onUpdateReactComponent?: () => Promise<void>
 	): Promise<TemplateKitOperationResult> {
@@ -74,7 +77,7 @@ export class ReactAPIService {
 
 			if (result.success) {
 				logger.info(`[ReactAPIService.applyTemplateKit] 套装 ${kitId} 应用成功`);
-				
+
 				// 执行回调函数
 				if (onRenderMarkdown) {
 					await onRenderMarkdown();
@@ -82,7 +85,7 @@ export class ReactAPIService {
 				if (onUpdateReactComponent) {
 					await onUpdateReactComponent();
 				}
-				
+
 				new Notice(`模板套装应用成功！`);
 			} else {
 				logger.error(`[ReactAPIService.applyTemplateKit] 套装应用失败:`, result.error);

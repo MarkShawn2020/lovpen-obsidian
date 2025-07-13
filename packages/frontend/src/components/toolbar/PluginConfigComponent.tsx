@@ -177,10 +177,12 @@ export const ConfigComponent = <T extends PluginData>({
 
 						<div className="flex items-center gap-2 flex-1 min-w-0">
 							<div className={`p-1 sm:p-1.5 rounded-lg ${item.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
-								<Plug className={`h-3 w-3 sm:h-4 sm:w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`}/>
+								<Plug
+									className={`h-3 w-3 sm:h-4 sm:w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`}/>
 							</div>
 							<div className="flex-1 min-w-0">
-								<div className="text-sm sm:text-base font-medium text-gray-900 truncate">{item.name}</div>
+								<div
+									className="text-sm sm:text-base font-medium text-gray-900 truncate">{item.name}</div>
 								{item.description && (
 									<div className="text-xs text-gray-500 mt-0.5 truncate"
 										 title={item.description}>

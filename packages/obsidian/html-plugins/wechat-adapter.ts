@@ -188,7 +188,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// 确保关键容器元素的结构样式
 			const keyContainers = [
 				'.rich_media_content',
-				'.claude-main-content', 
+				'.claude-main-content',
 				'.claude-epigraph',
 				'.claude-meta-section',
 				'.claude-meta-content',
@@ -221,7 +221,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			'box-sizing: border-box',
 			'position: relative'
 		];
-		
+
 		// 合并结构样式
 		const mergedStyle = existingStyle + '; ' + structuralStyles.join('; ') + ';';
 		element.setAttribute('style', mergedStyle);

@@ -222,8 +222,8 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	const restoreCoverFromData = useCallback(async (cover: CoverData, data: any, coverNumber: number): Promise<CoverData> => {
 		try {
 			// 检查是否需要恢复图片URL
-			const needsRestore = cover.imageUrl.startsWith('blob:') || 
-								(data.source === 'upload' && data.originalFileName);
+			const needsRestore = cover.imageUrl.startsWith('blob:') ||
+				(data.source === 'upload' && data.originalFileName);
 
 			if (!needsRestore) {
 				return cover;
@@ -285,7 +285,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				localStorage.removeItem('cover-designer-preview-2');
 				return;
 			}
-			
+
 			await Promise.all([
 				loadCoverData(1),
 				loadCoverData(2)
@@ -322,7 +322,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				try {
 					const files = await persistentStorageService.getFiles();
 					const imageFiles = files.filter(f => f.type.startsWith('image/'));
-					
+
 					// 尝试通过URL匹配找到对应的文件
 					let matchedFile: PersistentFile | null = null;
 					for (const file of imageFiles) {
@@ -334,10 +334,10 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							}
 						} catch (error) {
 							// 忽略单个文件的错误
-							continue;
+
 						}
 					}
-					
+
 					// 如果没找到匹配的，使用最近使用的文件作为备选
 					if (!matchedFile && imageFiles.length > 0) {
 						const sortedFiles = imageFiles.sort((a, b) =>
@@ -345,7 +345,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 						);
 						matchedFile = sortedFiles[0];
 					}
-					
+
 					if (matchedFile) {
 						originalFileName = matchedFile.name;
 						logger.info(`[CoverDesigner] 匹配到档案库文件: ${originalFileName}`);
@@ -415,7 +415,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			showImageSelection: true,
 			selectedCoverNumber: coverNumber
 		});
-			setSelectedCoverNumber(coverNumber);
+		setSelectedCoverNumber(coverNumber);
 		setShowImageSelection(true);
 	};
 

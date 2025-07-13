@@ -1,4 +1,5 @@
-import { TemplateKit, TemplateKitBasicInfo, TemplateKitOperationResult } from "../template-kit-types";
+import {TemplateKit, TemplateKitBasicInfo} from "../template-kit-types";
+import {PersistentStorageAPI, RequestUrlFunction, SettingsAPI, TemplateKitAPI} from "@lovpen/shared";
 
 /**
  * 外部React库接口定义
@@ -31,6 +32,7 @@ export interface ReactSettings {
 	showStyleUI: boolean;
 	personalInfo: PersonalInfo;
 	aiPromptTemplate: string;
+
 	[key: string]: any; // 添加索引签名以支持动态属性访问
 }
 
@@ -56,6 +58,7 @@ export interface ArticleInfo {
 	seriesName?: string;
 	episodeNum?: string;
 	tags?: string[];
+
 	[key: string]: any;
 }
 
@@ -71,49 +74,11 @@ export interface PluginData {
 	metaConfig: Record<string, any>;
 }
 
-/**
- * 持久化存储API接口
- */
-export interface PersistentStorageAPI {
-	// Template Kit Management
-	saveTemplateKit: (kitData: any, customName?: string) => Promise<any>;
-	getTemplateKits: () => Promise<any[]>;
-	deleteTemplateKit: (id: string) => Promise<any>;
-
-	// Plugin Configuration Management
-	savePluginConfig: (pluginName: string, config: any, metaConfig: any) => Promise<any>;
-	getPluginConfigs: () => Promise<Record<string, any>>;
-	getPluginConfig: (pluginName: string) => Promise<any>;
-
-	// Personal Info Management
-	savePersonalInfo: (info: any) => Promise<any>;
-	getPersonalInfo: () => Promise<any>;
-
-	// Article Info Management
-	saveArticleInfo: (info: any) => Promise<any>;
-	getArticleInfo: () => Promise<any>;
-
-	// Style Settings Management
-	saveStyleSettings: (settings: any) => Promise<any>;
-	getStyleSettings: () => Promise<any>;
-
-	// File and Cover Management
-	saveFile: (file: File, customName?: string) => Promise<any>;
-	getFiles: () => Promise<any[]>;
-	deleteFile: (id: string) => Promise<any>;
-	saveCover: (coverData: any) => Promise<any>;
-	getCovers: () => Promise<any[]>;
-	deleteCover: (id: string) => Promise<any>;
-
-	// Utility functions
-	clearAllPersistentData: () => Promise<any>;
-	exportAllData: () => Promise<any>;
-}
 
 /**
- * React API回调函数接口
+ * UI特定的回调函数接口 - 仅包含UI交互相关的回调
  */
-export interface ReactAPICallbacks {
+export interface UISpecificCallbacks {
 	onRefresh: () => Promise<void>;
 	onCopy: () => Promise<void>;
 	onDistribute: () => Promise<void>;
@@ -123,18 +88,37 @@ export interface ReactAPICallbacks {
 	onThemeColorToggle: (enabled: boolean) => Promise<void>;
 	onThemeColorChange: (color: string) => Promise<void>;
 	onRenderArticle: () => Promise<void>;
-	onSaveSettings: () => void;
 	onUpdateCSSVariables: () => void;
 	onPluginToggle: (pluginName: string, enabled: boolean) => void;
 	onPluginConfigChange: (pluginName: string, key: string, value: string | boolean) => void;
 	onExpandedSectionsChange: (sections: string[]) => void;
-	onArticleInfoChange: (info: ArticleInfo) => void;
-	onPersonalInfoChange: (info: PersonalInfo) => void;
-	onSettingsChange: (settingsUpdate: Partial<ReactSettings>) => void;
-	onKitApply: (kitId: string) => Promise<void>;
-	onKitCreate: (basicInfo: TemplateKitBasicInfo) => Promise<void>;
-	onKitDelete: (kitId: string) => Promise<void>;
+}
+
+/**
+ * 类型增强的模板套装API - 提供更具体的TypeScript类型
+ * 扩展shared包的基础类型，提供obsidian包特有的详细类型
+ */
+export interface EnhancedTemplateKitAPI extends TemplateKitAPI {
+	// 重写以提供更具体的类型
 	loadTemplateKits: () => Promise<TemplateKit[]>;
+	onKitCreate: (basicInfo: TemplateKitBasicInfo) => Promise<void>;
+}
+
+/**
+ * 类型增强的设置API - 提供更具体的TypeScript类型
+ * 扩展shared包的基础类型，提供obsidian包特有的详细类型
+ */
+export interface EnhancedSettingsAPI extends SettingsAPI {
+	// 重写以提供更具体的类型
+	onSettingsChange: (settingsUpdate: Partial<ReactSettings>) => void;
+	onPersonalInfoChange: (info: PersonalInfo) => void;
+	onArticleInfoChange: (info: ArticleInfo) => void;
+}
+
+/**
+ * React API回调函数接口 - 组合UI回调和增强的业务API
+ */
+export interface ReactAPICallbacks extends UISpecificCallbacks, EnhancedTemplateKitAPI, EnhancedSettingsAPI {
 }
 
 /**
@@ -152,32 +136,40 @@ export interface ReactComponentProps {
 /**
  * React组件Props包含回调函数
  */
-export interface ReactComponentPropsWithCallbacks extends ReactComponentProps, ReactAPICallbacks {}
+export interface ReactComponentPropsWithCallbacks extends ReactComponentProps, ReactAPICallbacks {
+}
 
 /**
  * 全局API接口
+ * 专门用于window.lovpenReactAPI，只包含核心业务方法和存储/请求功能
+ * 与ReactAPICallbacks分离，避免UI回调污染全局API
  */
 export interface GlobalReactAPI {
+	// 模板套装相关API (更具体的类型)
 	loadTemplateKits: () => Promise<TemplateKit[]>;
 	loadTemplates: () => Promise<string[]>;
 	onKitApply: (kitId: string) => Promise<void>;
 	onKitCreate: (basicInfo: TemplateKitBasicInfo) => Promise<void>;
 	onKitDelete: (kitId: string) => Promise<void>;
+
+	// 设置相关API (更具体的类型)
 	onSettingsChange: (settingsUpdate: Partial<ReactSettings>) => void;
 	onPersonalInfoChange: (info: PersonalInfo) => void;
 	onArticleInfoChange: (info: ArticleInfo) => void;
 	onSaveSettings: () => void;
+
+	// 全局API特有的功能
 	persistentStorage: PersistentStorageAPI;
-	requestUrl: (url: string) => Promise<any>;
+	requestUrl: RequestUrlFunction;
 }
 
 /**
  * 类型守卫函数
  */
 export function isValidPersonalInfo(obj: any): obj is PersonalInfo {
-	return obj && 
-		typeof obj.name === 'string' && 
-		typeof obj.avatar === 'string' && 
+	return obj &&
+		typeof obj.name === 'string' &&
+		typeof obj.avatar === 'string' &&
 		typeof obj.bio === 'string';
 }
 
@@ -186,8 +178,8 @@ export function isValidArticleInfo(obj: any): obj is ArticleInfo {
 }
 
 export function isValidTemplateKitBasicInfo(obj: any): obj is TemplateKitBasicInfo {
-	return obj && 
-		typeof obj.id === 'string' && 
-		typeof obj.name === 'string' && 
+	return obj &&
+		typeof obj.id === 'string' &&
+		typeof obj.name === 'string' &&
 		typeof obj.description === 'string';
 }

@@ -476,14 +476,14 @@ interface GridFileCardProps {
 }
 
 const GridFileCard: React.FC<GridFileCardProps> = ({
-	file,
-	onSelect,
-	onTogglePin,
-	onDelete,
-	formatFileSize,
-	formatDate,
-	isSelected = false
-}) => {
+													   file,
+													   onSelect,
+													   onTogglePin,
+													   onDelete,
+													   formatFileSize,
+													   formatDate,
+													   isSelected = false
+												   }) => {
 	const [imageUrl, setImageUrl] = useState<string>('');
 	const [imageLoading, setImageLoading] = useState(true);
 	const [imageError, setImageError] = useState(false);
@@ -546,10 +546,10 @@ const GridFileCard: React.FC<GridFileCardProps> = ({
 			onClick={onSelect}
 			className={`
 				relative aspect-square border-2 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 group
-				${isSelected 
-					? 'border-blue-500 shadow-lg' 
-					: 'border-gray-200 hover:border-blue-300 hover:shadow-md'
-				}
+				${isSelected
+				? 'border-blue-500 shadow-lg'
+				: 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+			}
 			`}
 		>
 			{/* Pin指示器 */}
@@ -562,7 +562,8 @@ const GridFileCard: React.FC<GridFileCardProps> = ({
 			)}
 
 			{/* 操作按钮 */}
-			<div className="absolute top-1 right-1 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+			<div
+				className="absolute top-1 right-1 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 				<button
 					onClick={onTogglePin}
 					className={`p-1 rounded-full transition-all text-xs ${
@@ -626,14 +627,17 @@ const GridFileCard: React.FC<GridFileCardProps> = ({
 				<div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
 					<div className="bg-blue-500 rounded-full p-1">
 						<svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-							<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+							<path fillRule="evenodd"
+								  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+								  clipRule="evenodd"/>
 						</svg>
 					</div>
 				</div>
 			)}
 
 			{/* 文件名提示 */}
-			<div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
+			<div
+				className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
 				{file.name}
 			</div>
 		</div>

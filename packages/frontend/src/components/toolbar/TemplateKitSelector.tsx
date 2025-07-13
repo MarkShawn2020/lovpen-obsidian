@@ -4,7 +4,7 @@ import {Drawer, DrawerDescription, DrawerHeader, DrawerOverlay, DrawerPortal, Dr
 import {TemplateKit, ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {StyleSettings} from './StyleSettings';
-import {AlertCircle, Eye, Loader, Package, Palette, Plus, RefreshCw, Settings, Edit3} from 'lucide-react';
+import {AlertCircle, Edit3, Eye, Loader, Package, Palette, Plus, RefreshCw, Settings} from 'lucide-react';
 import {Badge} from '../ui/badge';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select';
 import {ToggleSwitch} from '../ui/ToggleSwitch';
@@ -39,7 +39,7 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																		}) => {
 	const [kits, setKits] = useState<TemplateKit[]>([]);
 	const [selectedKitId, setSelectedKitId] = useState<string>('');
-	
+
 	// 加载资源数据
 	const {themes, highlights, templates, loading: resourcesLoading} = useResources();
 	const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [previewKit, setPreviewKit] = useState<TemplateKit | null>(null);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
-	
+
 	// 套装配置编辑状态
 	const [editingKit, setEditingKit] = useState<TemplateKit | null>(null);
 	const [hasChanges, setHasChanges] = useState(false);
@@ -65,7 +65,8 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 			// 直接调用全局的template kit加载函数
 			if (window.lovpenReactAPI && window.lovpenReactAPI.loadTemplateKits) {
 				const loadedKits = await window.lovpenReactAPI.loadTemplateKits();
-				setKits(loadedKits);
+				// Type assertion to handle compatibility between shared and frontend types
+				setKits(loadedKits as TemplateKit[]);
 				logger.info('[TemplateKitSelector] Loaded template kits:', loadedKits.length);
 			} else {
 				throw new Error('Template kit API not available');
@@ -85,7 +86,7 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 			setHasChanges(false);
 		}
 	}, [showPreviewModal]);
-	
+
 	// 初始化编辑状态
 	useEffect(() => {
 		if (previewKit && showPreviewModal) {
@@ -97,25 +98,25 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 	// 检测配置变更
 	const checkForChanges = (newKit: TemplateKit) => {
 		if (!previewKit) return false;
-		
-		const hasStyleChanges = 
+
+		const hasStyleChanges =
 			newKit.styleConfig.theme !== previewKit.styleConfig.theme ||
 			newKit.styleConfig.codeHighlight !== previewKit.styleConfig.codeHighlight ||
 			newKit.styleConfig.enableCustomThemeColor !== previewKit.styleConfig.enableCustomThemeColor ||
 			newKit.styleConfig.customThemeColor !== previewKit.styleConfig.customThemeColor;
-			
-		const hasTemplateChanges = 
+
+		const hasTemplateChanges =
 			newKit.templateConfig.templateFileName !== previewKit.templateConfig.templateFileName ||
 			newKit.templateConfig.useTemplate !== previewKit.templateConfig.useTemplate;
-			
+
 		return hasStyleChanges || hasTemplateChanges;
 	};
 
 	// 更新编辑中的套装配置
 	const updateEditingKit = (updates: Partial<TemplateKit>) => {
 		if (!editingKit) return;
-		
-		const newKit = { ...editingKit, ...updates };
+
+		const newKit = {...editingKit, ...updates};
 		setEditingKit(newKit);
 		setHasChanges(checkForChanges(newKit));
 	};
@@ -432,20 +433,26 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 												{editingKit && !resourcesLoading && (
 													<div className="grid grid-cols-1 gap-3 sm:gap-4">
 														{/* 主题样式配置 */}
-														<div className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4">
+														<div
+															className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4">
 															<div className="flex items-center gap-2 mb-4">
 																<Palette className="w-4 h-4 text-purple-600"/>
-																<span className="font-medium text-gray-800">主题样式</span>
+																<span
+																	className="font-medium text-gray-800">主题样式</span>
 																<Edit3 className="w-3 h-3 text-gray-400"/>
 															</div>
 															<div className="space-y-4">
 																{/* 主题选择 */}
 																<div>
-																	<label className="block text-sm font-medium text-gray-700 mb-2">主题</label>
-																	<Select 
-																		value={editingKit.styleConfig.theme} 
+																	<label
+																		className="block text-sm font-medium text-gray-700 mb-2">主题</label>
+																	<Select
+																		value={editingKit.styleConfig.theme}
 																		onValueChange={(value) => updateEditingKit({
-																			styleConfig: { ...editingKit.styleConfig, theme: value }
+																			styleConfig: {
+																				...editingKit.styleConfig,
+																				theme: value
+																			}
 																		})}
 																	>
 																		<SelectTrigger className="w-full">
@@ -453,21 +460,26 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																		</SelectTrigger>
 																		<SelectContent>
 																			{themes.map((theme) => (
-																				<SelectItem key={theme.className} value={theme.className}>
+																				<SelectItem key={theme.className}
+																							value={theme.className}>
 																					{theme.name}
 																				</SelectItem>
 																			))}
 																		</SelectContent>
 																	</Select>
 																</div>
-																
+
 																{/* 代码高亮选择 */}
 																<div>
-																	<label className="block text-sm font-medium text-gray-700 mb-2">代码高亮</label>
-																	<Select 
-																		value={editingKit.styleConfig.codeHighlight} 
+																	<label
+																		className="block text-sm font-medium text-gray-700 mb-2">代码高亮</label>
+																	<Select
+																		value={editingKit.styleConfig.codeHighlight}
 																		onValueChange={(value) => updateEditingKit({
-																			styleConfig: { ...editingKit.styleConfig, codeHighlight: value }
+																			styleConfig: {
+																				...editingKit.styleConfig,
+																				codeHighlight: value
+																			}
 																		})}
 																	>
 																		<SelectTrigger className="w-full">
@@ -475,25 +487,28 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																		</SelectTrigger>
 																		<SelectContent>
 																			{highlights.map((highlight) => (
-																				<SelectItem key={highlight.name} value={highlight.name}>
+																				<SelectItem key={highlight.name}
+																							value={highlight.name}>
 																					{highlight.name}
 																				</SelectItem>
 																			))}
 																		</SelectContent>
 																	</Select>
 																</div>
-																
+
 																{/* 主题色设置 */}
 																<div>
-																	<div className="flex items-center justify-between mb-2">
-																		<label className="text-sm font-medium text-gray-700">自定义主题色</label>
+																	<div
+																		className="flex items-center justify-between mb-2">
+																		<label
+																			className="text-sm font-medium text-gray-700">自定义主题色</label>
 																		<ToggleSwitch
 																			size="small"
 																			checked={editingKit.styleConfig.enableCustomThemeColor}
 																			onChange={(enabled) => updateEditingKit({
-																				styleConfig: { 
-																					...editingKit.styleConfig, 
-																					enableCustomThemeColor: enabled 
+																				styleConfig: {
+																					...editingKit.styleConfig,
+																					enableCustomThemeColor: enabled
 																				}
 																			})}
 																		/>
@@ -504,9 +519,9 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																				type="color"
 																				value={editingKit.styleConfig.customThemeColor || "#7852ee"}
 																				onChange={(e) => updateEditingKit({
-																					styleConfig: { 
-																						...editingKit.styleConfig, 
-																						customThemeColor: e.target.value 
+																					styleConfig: {
+																						...editingKit.styleConfig,
+																						customThemeColor: e.target.value
 																					}
 																				})}
 																				className="w-12 h-8 rounded border border-gray-300"
@@ -515,9 +530,9 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																				type="text"
 																				value={editingKit.styleConfig.customThemeColor || "#7852ee"}
 																				onChange={(e) => updateEditingKit({
-																					styleConfig: { 
-																						...editingKit.styleConfig, 
-																						customThemeColor: e.target.value 
+																					styleConfig: {
+																						...editingKit.styleConfig,
+																						customThemeColor: e.target.value
 																					}
 																				})}
 																				className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded font-mono"
@@ -528,22 +543,28 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																</div>
 															</div>
 														</div>
-														
+
 														{/* 模板配置 */}
-														<div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+														<div
+															className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
 															<div className="flex items-center gap-2 mb-4">
 																<Package className="w-4 h-4 text-blue-600"/>
-																<span className="font-medium text-gray-800">模板配置</span>
+																<span
+																	className="font-medium text-gray-800">模板配置</span>
 																<Edit3 className="w-3 h-3 text-gray-400"/>
 															</div>
 															<div className="space-y-4">
 																{/* 模板选择 */}
 																<div>
-																	<label className="block text-sm font-medium text-gray-700 mb-2">模板文件</label>
-																	<Select 
-																		value={editingKit.templateConfig.templateFileName} 
+																	<label
+																		className="block text-sm font-medium text-gray-700 mb-2">模板文件</label>
+																	<Select
+																		value={editingKit.templateConfig.templateFileName}
 																		onValueChange={(value) => updateEditingKit({
-																			templateConfig: { ...editingKit.templateConfig, templateFileName: value }
+																			templateConfig: {
+																				...editingKit.templateConfig,
+																				templateFileName: value
+																			}
 																		})}
 																	>
 																		<SelectTrigger className="w-full">
@@ -551,48 +572,54 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																		</SelectTrigger>
 																		<SelectContent>
 																			{templates.map((template) => (
-																				<SelectItem key={template.filename} value={template.filename}>
+																				<SelectItem key={template.filename}
+																							value={template.filename}>
 																					{template.name}
 																				</SelectItem>
 																			))}
 																		</SelectContent>
 																	</Select>
 																</div>
-																
+
 																{/* 启用模板 */}
 																<div className="flex items-center justify-between">
-																	<label className="text-sm font-medium text-gray-700">启用模板</label>
+																	<label
+																		className="text-sm font-medium text-gray-700">启用模板</label>
 																	<ToggleSwitch
 																		size="small"
 																		checked={editingKit.templateConfig.useTemplate}
 																		onChange={(enabled) => updateEditingKit({
-																			templateConfig: { 
-																				...editingKit.templateConfig, 
-																				useTemplate: enabled 
+																			templateConfig: {
+																				...editingKit.templateConfig,
+																				useTemplate: enabled
 																			}
 																		})}
 																	/>
 																</div>
 															</div>
 														</div>
-														
+
 														{/* 插件配置（只读显示）*/}
-														<div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+														<div
+															className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
 															<div className="flex items-center gap-2 mb-3">
 																<Settings className="w-4 h-4 text-green-600"/>
-																<span className="font-medium text-gray-800">插件配置</span>
+																<span
+																	className="font-medium text-gray-800">插件配置</span>
 																<span className="text-xs text-gray-500">(只读)</span>
 															</div>
 															<div className="space-y-2 text-sm">
 																<div className="flex items-center gap-2">
 																	<span className="text-gray-500">Markdown插件:</span>
-																	<span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+																	<span
+																		className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
 																		{editingKit.pluginConfig.enabledMarkdownPlugins.length}个
 																	</span>
 																</div>
 																<div className="flex items-center gap-2">
 																	<span className="text-gray-500">HTML插件:</span>
-																	<span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+																	<span
+																		className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
 																		{editingKit.pluginConfig.enabledHtmlPlugins.length}个
 																	</span>
 																</div>
@@ -606,22 +633,25 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 										{/* 底部操作栏 */}
 										<div className="px-4 sm:px-6 py-4 border-t bg-gray-50 mt-auto shrink-0">
 											{hasChanges && (
-												<div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+												<div
+													className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
 													<div className="flex items-center gap-2 text-sm text-yellow-800">
 														<div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
 														<span>检测到配置变更，你可以保存为新套装或直接应用当前修改</span>
 													</div>
 												</div>
 											)}
-											<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+											<div
+												className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
 												<div className="text-sm text-gray-600">
-													{hasChanges 
-														? "配置已修改，选择操作" 
+													{hasChanges
+														? "配置已修改，选择操作"
 														: "点击\"应用套装\"将使用此套装的所有配置"
 													}
 												</div>
 												<div className="flex gap-2">
-													<Button variant="outline" onClick={() => setShowPreviewModal(false)} size="sm">
+													<Button variant="outline" onClick={() => setShowPreviewModal(false)}
+															size="sm">
 														关闭
 													</Button>
 													{hasChanges && (
