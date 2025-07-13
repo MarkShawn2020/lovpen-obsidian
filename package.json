@@ -8,7 +8,8 @@
 		"build": "pnpm -r build",
 		"check": "pnpm -r check",
 		"download-highlights": "node scripts/download-highlights.mjs",
-		"version": "node scripts/sync-version.mjs"
+		"version": "node scripts/sync-version.mjs",
+		"release": "bash scripts/release.sh"
 	},
 	"keywords": [],
 	"author": "",
