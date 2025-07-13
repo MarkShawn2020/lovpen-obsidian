@@ -83,18 +83,29 @@ const context = await esbuild.context({
 			],
 			verbose: false, // 输出复制操作的日志
 		}),
+		// 构建完成后自动同步插件
+		{
+			name: 'obsidian-sync',
+			setup(build) {
+				build.onEnd((result) => {
+					if (result.errors.length === 0) {
+						// 构建成功后立即同步
+						syncToObsidian();
+					}
+				});
+			},
+		},
 	],
 });
 
 
 if (prod) {
 	await context.rebuild();
-	syncToObsidian();
+	// syncToObsidian(); // 已在 onEnd 钩子中处理
 	process.exit(0);
 } else {
 	await context.watch();
-	// 初始构建完成后立即同步
-	syncToObsidian();
+	// 初始构建完成后的同步已在 onEnd 钩子中处理
 
 	let rebuildTimeout;
 	const debounceRebuild = () => {
@@ -104,7 +115,7 @@ if (prod) {
 				console.log('🔄 Frontend assets changed, rebuilding...');
 				await context.rebuild();
 				console.log('✅ Rebuild completed');
-				syncToObsidian();
+				// syncToObsidian(); // 已在 onEnd 钩子中处理
 			} catch (error) {
 				console.error('❌ Rebuild failed:', error);
 			}

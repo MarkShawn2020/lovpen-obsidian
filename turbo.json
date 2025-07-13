@@ -4,11 +4,13 @@
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["OBSIDIAN_VAULT_PATH", "OBSIDIAN_PLUGIN_PATH"]
     },
     "build": {
       "outputs": ["dist/**"],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "env": ["OBSIDIAN_VAULT_PATH", "OBSIDIAN_PLUGIN_PATH"]
     },
     "check": {
       "dependsOn": ["^build"]
