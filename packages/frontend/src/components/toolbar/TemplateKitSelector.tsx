@@ -4,8 +4,11 @@ import {Drawer, DrawerDescription, DrawerHeader, DrawerOverlay, DrawerPortal, Dr
 import {TemplateKit, ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {StyleSettings} from './StyleSettings';
-import {AlertCircle, Eye, Loader, Package, Palette, Plus, RefreshCw, Settings} from 'lucide-react';
+import {AlertCircle, Eye, Loader, Package, Palette, Plus, RefreshCw, Settings, Edit3} from 'lucide-react';
 import {Badge} from '../ui/badge';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select';
+import {ToggleSwitch} from '../ui/ToggleSwitch';
+import {useResources} from '../../hooks/useResources';
 
 
 interface TemplateKitSelectorProps {
@@ -36,11 +39,18 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 																		}) => {
 	const [kits, setKits] = useState<TemplateKit[]>([]);
 	const [selectedKitId, setSelectedKitId] = useState<string>('');
+	
+	// 加载资源数据
+	const {themes, highlights, templates, loading: resourcesLoading} = useResources();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string>('');
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [previewKit, setPreviewKit] = useState<TemplateKit | null>(null);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
+	
+	// 套装配置编辑状态
+	const [editingKit, setEditingKit] = useState<TemplateKit | null>(null);
+	const [hasChanges, setHasChanges] = useState(false);
 
 	// 加载可用套装
 	useEffect(() => {
@@ -66,6 +76,48 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	// 重置编辑状态
+	useEffect(() => {
+		if (!showPreviewModal) {
+			setEditingKit(null);
+			setHasChanges(false);
+		}
+	}, [showPreviewModal]);
+	
+	// 初始化编辑状态
+	useEffect(() => {
+		if (previewKit && showPreviewModal) {
+			setEditingKit(JSON.parse(JSON.stringify(previewKit))); // 深拷贝
+			setHasChanges(false);
+		}
+	}, [previewKit, showPreviewModal]);
+
+	// 检测配置变更
+	const checkForChanges = (newKit: TemplateKit) => {
+		if (!previewKit) return false;
+		
+		const hasStyleChanges = 
+			newKit.styleConfig.theme !== previewKit.styleConfig.theme ||
+			newKit.styleConfig.codeHighlight !== previewKit.styleConfig.codeHighlight ||
+			newKit.styleConfig.enableCustomThemeColor !== previewKit.styleConfig.enableCustomThemeColor ||
+			newKit.styleConfig.customThemeColor !== previewKit.styleConfig.customThemeColor;
+			
+		const hasTemplateChanges = 
+			newKit.templateConfig.templateFileName !== previewKit.templateConfig.templateFileName ||
+			newKit.templateConfig.useTemplate !== previewKit.templateConfig.useTemplate;
+			
+		return hasStyleChanges || hasTemplateChanges;
+	};
+
+	// 更新编辑中的套装配置
+	const updateEditingKit = (updates: Partial<TemplateKit>) => {
+		if (!editingKit) return;
+		
+		const newKit = { ...editingKit, ...updates };
+		setEditingKit(newKit);
+		setHasChanges(checkForChanges(newKit));
 	};
 
 	const handleKitSelect = async (kitId: string) => {
@@ -376,73 +428,231 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 													</div>
 												</div>
 
-												{/* 配置详情 */}
-												<div className="grid grid-cols-1 gap-3 sm:gap-4">
-													<div
-														className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4">
-														<div className="flex items-center gap-2 mb-3">
-															<Palette className="w-4 h-4 text-purple-600"/>
-															<span className="font-medium text-gray-800">主题样式</span>
+												{/* 可编辑配置 */}
+												{editingKit && !resourcesLoading && (
+													<div className="grid grid-cols-1 gap-3 sm:gap-4">
+														{/* 主题样式配置 */}
+														<div className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4">
+															<div className="flex items-center gap-2 mb-4">
+																<Palette className="w-4 h-4 text-purple-600"/>
+																<span className="font-medium text-gray-800">主题样式</span>
+																<Edit3 className="w-3 h-3 text-gray-400"/>
+															</div>
+															<div className="space-y-4">
+																{/* 主题选择 */}
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-2">主题</label>
+																	<Select 
+																		value={editingKit.styleConfig.theme} 
+																		onValueChange={(value) => updateEditingKit({
+																			styleConfig: { ...editingKit.styleConfig, theme: value }
+																		})}
+																	>
+																		<SelectTrigger className="w-full">
+																			<SelectValue placeholder="选择主题"/>
+																		</SelectTrigger>
+																		<SelectContent>
+																			{themes.map((theme) => (
+																				<SelectItem key={theme.className} value={theme.className}>
+																					{theme.name}
+																				</SelectItem>
+																			))}
+																		</SelectContent>
+																	</Select>
+																</div>
+																
+																{/* 代码高亮选择 */}
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-2">代码高亮</label>
+																	<Select 
+																		value={editingKit.styleConfig.codeHighlight} 
+																		onValueChange={(value) => updateEditingKit({
+																			styleConfig: { ...editingKit.styleConfig, codeHighlight: value }
+																		})}
+																	>
+																		<SelectTrigger className="w-full">
+																			<SelectValue placeholder="选择高亮样式"/>
+																		</SelectTrigger>
+																		<SelectContent>
+																			{highlights.map((highlight) => (
+																				<SelectItem key={highlight.name} value={highlight.name}>
+																					{highlight.name}
+																				</SelectItem>
+																			))}
+																		</SelectContent>
+																	</Select>
+																</div>
+																
+																{/* 主题色设置 */}
+																<div>
+																	<div className="flex items-center justify-between mb-2">
+																		<label className="text-sm font-medium text-gray-700">自定义主题色</label>
+																		<ToggleSwitch
+																			size="small"
+																			checked={editingKit.styleConfig.enableCustomThemeColor}
+																			onChange={(enabled) => updateEditingKit({
+																				styleConfig: { 
+																					...editingKit.styleConfig, 
+																					enableCustomThemeColor: enabled 
+																				}
+																			})}
+																		/>
+																	</div>
+																	{editingKit.styleConfig.enableCustomThemeColor && (
+																		<div className="flex items-center gap-3">
+																			<input
+																				type="color"
+																				value={editingKit.styleConfig.customThemeColor || "#7852ee"}
+																				onChange={(e) => updateEditingKit({
+																					styleConfig: { 
+																						...editingKit.styleConfig, 
+																						customThemeColor: e.target.value 
+																					}
+																				})}
+																				className="w-12 h-8 rounded border border-gray-300"
+																			/>
+																			<input
+																				type="text"
+																				value={editingKit.styleConfig.customThemeColor || "#7852ee"}
+																				onChange={(e) => updateEditingKit({
+																					styleConfig: { 
+																						...editingKit.styleConfig, 
+																						customThemeColor: e.target.value 
+																					}
+																				})}
+																				className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded font-mono"
+																				placeholder="#7852ee"
+																			/>
+																		</div>
+																	)}
+																</div>
+															</div>
 														</div>
-														<div className="space-y-1 text-sm">
-															<p className="text-gray-600">主题: {previewKit.styleConfig.theme}</p>
-															<p className="text-gray-600">高亮: {previewKit.styleConfig.codeHighlight}</p>
-															{previewKit.styleConfig.enableCustomThemeColor && (
-																<p className="text-gray-600">主题色: {previewKit.styleConfig.customThemeColor || '默认'}</p>
-															)}
+														
+														{/* 模板配置 */}
+														<div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+															<div className="flex items-center gap-2 mb-4">
+																<Package className="w-4 h-4 text-blue-600"/>
+																<span className="font-medium text-gray-800">模板配置</span>
+																<Edit3 className="w-3 h-3 text-gray-400"/>
+															</div>
+															<div className="space-y-4">
+																{/* 模板选择 */}
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-2">模板文件</label>
+																	<Select 
+																		value={editingKit.templateConfig.templateFileName} 
+																		onValueChange={(value) => updateEditingKit({
+																			templateConfig: { ...editingKit.templateConfig, templateFileName: value }
+																		})}
+																	>
+																		<SelectTrigger className="w-full">
+																			<SelectValue placeholder="选择模板"/>
+																		</SelectTrigger>
+																		<SelectContent>
+																			{templates.map((template) => (
+																				<SelectItem key={template.filename} value={template.filename}>
+																					{template.name}
+																				</SelectItem>
+																			))}
+																		</SelectContent>
+																	</Select>
+																</div>
+																
+																{/* 启用模板 */}
+																<div className="flex items-center justify-between">
+																	<label className="text-sm font-medium text-gray-700">启用模板</label>
+																	<ToggleSwitch
+																		size="small"
+																		checked={editingKit.templateConfig.useTemplate}
+																		onChange={(enabled) => updateEditingKit({
+																			templateConfig: { 
+																				...editingKit.templateConfig, 
+																				useTemplate: enabled 
+																			}
+																		})}
+																	/>
+																</div>
+															</div>
+														</div>
+														
+														{/* 插件配置（只读显示）*/}
+														<div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+															<div className="flex items-center gap-2 mb-3">
+																<Settings className="w-4 h-4 text-green-600"/>
+																<span className="font-medium text-gray-800">插件配置</span>
+																<span className="text-xs text-gray-500">(只读)</span>
+															</div>
+															<div className="space-y-2 text-sm">
+																<div className="flex items-center gap-2">
+																	<span className="text-gray-500">Markdown插件:</span>
+																	<span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+																		{editingKit.pluginConfig.enabledMarkdownPlugins.length}个
+																	</span>
+																</div>
+																<div className="flex items-center gap-2">
+																	<span className="text-gray-500">HTML插件:</span>
+																	<span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+																		{editingKit.pluginConfig.enabledHtmlPlugins.length}个
+																	</span>
+																</div>
+															</div>
 														</div>
 													</div>
-													<div
-														className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-														<div className="flex items-center gap-2 mb-3">
-															<Package className="w-4 h-4 text-blue-600"/>
-															<span className="font-medium text-gray-800">模板配置</span>
-														</div>
-														<div className="space-y-1 text-sm">
-															<p className="text-gray-600">模板: {previewKit.templateConfig.templateFileName}</p>
-															<p className="text-gray-600">启用: {previewKit.templateConfig.useTemplate ? '是' : '否'}</p>
-														</div>
-													</div>
-													<div
-														className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
-														<div className="flex items-center gap-2 mb-3">
-															<Settings className="w-4 h-4 text-green-600"/>
-															<span className="font-medium text-gray-800">插件配置</span>
-														</div>
-														<div className="space-y-1 text-sm">
-															<p className="text-gray-600">
-																Markdown: {previewKit.pluginConfig.enabledMarkdownPlugins.length}个
-															</p>
-															<p className="text-gray-600">
-																HTML: {previewKit.pluginConfig.enabledHtmlPlugins.length}个
-															</p>
-														</div>
-													</div>
-												</div>
+												)}
 											</div>
 										</div>
 
 										{/* 底部操作栏 */}
 										<div className="px-4 sm:px-6 py-4 border-t bg-gray-50 mt-auto shrink-0">
-											<div
-												className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-												<div className="text-sm text-gray-600">
-													点击"应用套装"将使用此套装的所有配置
+											{hasChanges && (
+												<div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+													<div className="flex items-center gap-2 text-sm text-yellow-800">
+														<div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+														<span>检测到配置变更，你可以保存为新套装或直接应用当前修改</span>
+													</div>
 												</div>
-												<div className="flex gap-3">
-													<Button variant="outline" onClick={() => setShowPreviewModal(false)}
-															size="sm">
+											)}
+											<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+												<div className="text-sm text-gray-600">
+													{hasChanges 
+														? "配置已修改，选择操作" 
+														: "点击\"应用套装\"将使用此套装的所有配置"
+													}
+												</div>
+												<div className="flex gap-2">
+													<Button variant="outline" onClick={() => setShowPreviewModal(false)} size="sm">
 														关闭
 													</Button>
+													{hasChanges && (
+														<Button
+															variant="outline"
+															onClick={() => {
+																// TODO: 实现保存为新套装
+																console.log('保存为新套装:', editingKit);
+															}}
+															size="sm"
+															className="border-green-300 text-green-700 hover:bg-green-50"
+														>
+															另存为新套装
+														</Button>
+													)}
 													<Button
 														onClick={() => {
-															handleKitSelect(previewKit.basicInfo.id);
+															if (hasChanges && editingKit) {
+																// 使用修改后的配置应用
+																console.log('应用修改后的配置:', editingKit);
+																// TODO: 应用修改后的套装配置
+															} else {
+																// 应用原始套装
+																handleKitSelect(previewKit.basicInfo.id);
+															}
 															setShowPreviewModal(false);
 														}}
 														className="bg-purple-600 hover:bg-purple-700"
 														size="sm"
 													>
-														应用套装
+														{hasChanges ? "应用修改" : "应用套装"}
 													</Button>
 												</div>
 											</div>

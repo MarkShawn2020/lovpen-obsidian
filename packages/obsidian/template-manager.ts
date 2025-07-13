@@ -86,11 +86,6 @@ export default class TemplateManager {
 		return Array.from(this.templates.keys());
 	}
 
-	// 获取指定模板
-	public getTemplate(name: string): Template | undefined {
-		return this.templates.get(name);
-	}
-
 	// 应用模板到内容
 	public applyTemplate(content: string, templateName: string, meta: TemplateData = {}): string {
 		logger.info(`[TemplateManager] 尝试应用模板: "${templateName}"`);
@@ -160,46 +155,6 @@ export default class TemplateManager {
 
 		logger.debug('使用模板数据渲染:', {templateName, templateData});
 		return data;
-	}
-
-	// 创建新模板
-	public async createTemplate(name: string, content: string): Promise<void> {
-		try {
-			const fileName = `${name}.html`;
-			const filePath = `${this.templateDir}${fileName}`;
-
-			await this.app.vault.adapter.write(filePath, content);
-
-			this.templates.set(name, {
-				name: name,
-				path: filePath,
-				content: content
-			});
-
-			new Notice(`模板 ${name} 创建成功！`);
-		} catch (error) {
-			console.error('Error creating template:', error);
-			new Notice('创建模板失败！');
-		}
-	}
-
-	// 删除模板
-	public async deleteTemplate(name: string): Promise<void> {
-		try {
-			const template = this.templates.get(name);
-			if (!template) {
-				new Notice(`模板 ${name} 不存在！`);
-				return;
-			}
-
-			await this.app.vault.adapter.remove(template.path);
-			this.templates.delete(name);
-
-			new Notice(`模板 ${name} 删除成功！`);
-		} catch (error) {
-			console.error('Error deleting template:', error);
-			new Notice('删除模板失败！');
-		}
 	}
 
 	// === 模板套装支持方法 ===
@@ -281,126 +236,6 @@ export default class TemplateManager {
 	}
 
 	/**
-	 * 验证模板是否适用于套装
-	 * @param templateName 模板名称
-	 * @param kitId 套装ID
-	 */
-	public async validateTemplateForKit(templateName: string, kitId: string): Promise<boolean> {
-		try {
-			const template = this.getTemplate(templateName);
-			if (!template) {
-				logger.warn(`[TemplateManager] Template ${templateName} not found`);
-				return false;
-			}
-
-			const kits = await this.getAvailableKits();
-			const kit = kits.find(k => k.basicInfo.id === kitId);
-			if (!kit) {
-				logger.warn(`[TemplateManager] Kit ${kitId} not found`);
-				return false;
-			}
-
-			// 验证模板是否与套装配置匹配
-			return kit.templateConfig.templateFileName === `${templateName}.html`;
-		} catch (error) {
-			logger.error('[TemplateManager] Error validating template for kit:', error);
-			return false;
-		}
-	}
-
-	/**
-	 * 获取套装的模板预览
-	 * @param kitId 套装ID
-	 * @param sampleContent 示例内容
-	 */
-	public async getKitPreview(kitId: string, sampleContent: string = ''): Promise<string> {
-		try {
-			const kitManager = this.getTemplateKitManager();
-			if (!kitManager) {
-				logger.warn('[TemplateManager] TemplateKitManager not available');
-				return sampleContent;
-			}
-
-			const preview = await kitManager.generatePreview(kitId, sampleContent);
-			return preview.previewHtml;
-		} catch (error) {
-			logger.error('[TemplateManager] Error generating kit preview:', error);
-			return sampleContent;
-		}
-	}
-
-	/**
-	 * 检查模板是否为套装专用模板
-	 * @param templateName 模板名称
-	 */
-	public async isKitTemplate(templateName: string): Promise<boolean> {
-		try {
-			const kits = await this.getAvailableKits();
-			return kits.some(kit =>
-				kit.templateConfig.templateFileName === `${templateName}.html`
-			);
-		} catch (error) {
-			logger.error('[TemplateManager] Error checking if template is kit template:', error);
-			return false;
-		}
-	}
-
-	/**
-	 * 获取模板关联的套装信息
-	 * @param templateName 模板名称
-	 */
-	public async getTemplateKitInfo(templateName: string): Promise<TemplateKit[]> {
-		try {
-			const kits = await this.getAvailableKits();
-			return kits.filter(kit =>
-				kit.templateConfig.templateFileName === `${templateName}.html`
-			);
-		} catch (error) {
-			logger.error('[TemplateManager] Error getting template kit info:', error);
-			return [];
-		}
-	}
-
-	/**
-	 * 应用模板时自动应用套装样式
-	 * @param content 内容
-	 * @param templateName 模板名称
-	 * @param meta 模板数据
-	 * @param autoApplyKitStyles 是否自动应用套装样式
-	 */
-	public async applyTemplateWithKitSupport(
-		content: string,
-		templateName: string,
-		meta: TemplateData = {},
-		autoApplyKitStyles: boolean = true
-	): Promise<string> {
-		try {
-			// 先应用基础模板
-			let result = this.applyTemplate(content, templateName, meta);
-
-			// 如果启用了自动应用套装样式，查找并应用对应套装
-			if (autoApplyKitStyles) {
-				const kitInfo = await this.getTemplateKitInfo(templateName);
-				if (kitInfo.length > 0) {
-					const kit = kitInfo[0]; // 使用第一个匹配的套装
-					logger.info(`[TemplateManager] Auto-applying kit styles for: ${kit.basicInfo.name}`);
-
-					// 这里可以添加样式注入逻辑
-					// 将套装的CSS变量和自定义样式注入到结果中
-					if (kit.styleConfig.cssVariables || kit.styleConfig.customCSS) {
-						result = this.injectKitStyles(result, kit);
-					}
-				}
-			}
-
-			return result;
-		} catch (error) {
-			logger.error('[TemplateManager] Error applying template with kit support:', error);
-			return this.applyTemplate(content, templateName, meta);
-		}
-	}
-
-	/**
 	 * 获取模板套装管理器
 	 */
 	private getTemplateKitManager(): any {
@@ -414,47 +249,5 @@ export default class TemplateManager {
 		}
 	}
 
-	/**
-	 * 向HTML结果中注入套装样式
-	 * @param html HTML内容
-	 * @param kit 模板套装
-	 */
-	private injectKitStyles(html: string, kit: TemplateKit): string {
-		try {
-			let styles = '';
 
-			// 添加CSS变量
-			if (kit.styleConfig.cssVariables) {
-				styles += ':root {\n';
-				for (const [key, value] of Object.entries(kit.styleConfig.cssVariables)) {
-					styles += `  ${key}: ${value};\n`;
-				}
-				styles += '}\n';
-			}
-
-			// 添加自定义CSS
-			if (kit.styleConfig.customCSS) {
-				styles += kit.styleConfig.customCSS;
-			}
-
-			// 注入样式到HTML
-			if (styles) {
-				const styleTag = `<style>\n${styles}\n</style>`;
-
-				// 尝试在head标签中插入，如果没有head则在开头插入
-				if (html.includes('<head>')) {
-					html = html.replace('<head>', `<head>\n${styleTag}`);
-				} else if (html.includes('</head>')) {
-					html = html.replace('</head>', `${styleTag}\n</head>`);
-				} else {
-					html = styleTag + '\n' + html;
-				}
-			}
-
-			return html;
-		} catch (error) {
-			logger.error('[TemplateManager] Error injecting kit styles:', error);
-			return html;
-		}
-	}
 }
