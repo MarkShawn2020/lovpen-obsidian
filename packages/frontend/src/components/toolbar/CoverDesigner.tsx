@@ -254,10 +254,12 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				data.covers.map((cover: CoverData) => restoreCoverFromData(cover, data, coverNumber))
 			);
 
-			if (coverNumber === 1) {
-				setCover1PreviewCovers(restoredCovers);
-			} else {
-				setCover2PreviewCovers(restoredCovers);
+			if (restoredCovers.length > 0) {
+				if (coverNumber === 1) {
+					setCover1Data(restoredCovers[0]);
+				} else {
+					setCover2Data(restoredCovers[0]);
+				}
 			}
 		} catch (error) {
 			logger.error(`[CoverDesigner] 加载封面${coverNumber}持久化数据失败:`, error);
@@ -333,9 +335,9 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// 通用的设置封面预览函数
 	const setCoverPreview = useCallback((coverNum: 1 | 2, coverData: CoverData) => {
 		if (coverNum === 1) {
-			setCover1PreviewCovers([coverData]);
+			setCover1Data(coverData);
 		} else {
-			setCover2PreviewCovers([coverData]);
+			setCover2Data(coverData);
 		}
 	}, []);
 
@@ -367,7 +369,12 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 	// 处理封面卡片点击
 	const handleCoverCardClick = (coverNumber: 1 | 2) => {
-		setSelectedCoverNumber(coverNumber);
+		logger.info(`[CoverDesigner] 封面卡片点击事件触发: 封面${coverNumber}`);
+		console.log(`[CoverDesigner] 点击封面${coverNumber}，设置状态:`, {
+			showImageSelection: true,
+			selectedCoverNumber: coverNumber
+		});
+			setSelectedCoverNumber(coverNumber);
 		setShowImageSelection(true);
 	};
 
@@ -376,14 +383,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		if (!selectedCoverNumber) return;
 
 		try {
-			const coverData = await createCover(imageUrl, source, selectedCoverNumber);
-			if (selectedCoverNumber === 1) {
-				setCover1Data(coverData);
-			} else {
-				setCover2Data(coverData);
-			}
-
-			await saveCoverData(selectedCoverNumber, coverData, source, imageUrl);
+			await createCover(imageUrl, source, selectedCoverNumber);
 			setShowImageSelection(false);
 			setSelectedCoverNumber(null);
 		} catch (error) {
@@ -411,9 +411,9 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	const clearCoverPreview = useCallback((coverNumber: 1 | 2) => {
 		// 清空状态
 		if (coverNumber === 1) {
-			setCover1PreviewCovers([]);
+			setCover1Data(undefined);
 		} else {
-			setCover2PreviewCovers([]);
+			setCover2Data(undefined);
 		}
 
 		// 清空持久化数据
@@ -507,10 +507,10 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 						setSelectedCoverNumber(null);
 					}}
 					onImageSelect={handleImageSelect}
-					coverNumber={selectedCoverNumber}
+					coverNumber={selectedCoverNumber!}
 					aspectRatio={selectedCoverNumber === 1 ? '2.25:1' : '1:1'}
 					selectedImages={selectedImages}
-					getDimensions={() => getDimensions(selectedCoverNumber)}
+					getDimensions={() => getDimensions(selectedCoverNumber!)}
 				/>
 			)}
 

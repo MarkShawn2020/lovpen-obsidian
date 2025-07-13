@@ -48,6 +48,7 @@ export interface PersistentStorageAPI {
 // 模板套装相关API
 export interface TemplateKitAPI {
 	loadTemplateKits: () => Promise<any[]>;
+	loadTemplates: () => Promise<string[]>;
 	onKitApply: (kitId: string) => Promise<void>;
 	onKitCreate: (basicInfo: any) => Promise<void>;
 	onKitDelete: (kitId: string) => Promise<void>;

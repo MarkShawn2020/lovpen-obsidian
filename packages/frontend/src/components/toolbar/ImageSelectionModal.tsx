@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import {createPortal} from 'react-dom';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '../ui/tabs';
 import {Button} from '../ui/button';
 import {ImageGrid} from './ImageGrid';
@@ -118,8 +119,8 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 
 	if (!isOpen) return null;
 
-	return (
-		<div className="fixed inset-0 z-50 bg-white flex flex-col">
+	const modalContent = (
+		<div className="fixed inset-0 z-[9999] bg-white flex flex-col">
 			{/* 模态框内容 - 全屏 */}
 			<div className="flex flex-col h-full">
 				{/* 头部 */}
@@ -280,4 +281,6 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 			</div>
 		</div>
 	);
+
+	return createPortal(modalContent, document.body);
 };

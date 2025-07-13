@@ -843,6 +843,18 @@ ${customCSS}`;
 						throw error;
 					}
 				},
+				loadTemplates: async () => {
+					logger.debug(`[loadTemplates] 加载模板列表`);
+					try {
+						const templateManager = TemplateManager.getInstance();
+						const templateNames = templateManager.getTemplateNames();
+						logger.info(`[loadTemplates] 加载到 ${templateNames.length} 个模板:`, templateNames);
+						return templateNames;
+					} catch (error) {
+						logger.error(`[loadTemplates] 加载模板时出错:`, error);
+						throw error;
+					}
+				},
 				onKitApply: async (kitId: string) => {
 					logger.debug(`[onKitApply] 应用模板套装: ${kitId}`);
 					try {

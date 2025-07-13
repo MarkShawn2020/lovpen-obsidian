@@ -221,7 +221,7 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 									onDelete={(e) => handleDeleteFile(file, e)}
 									formatFileSize={formatFileSize}
 									formatDate={formatDate}
-									isSelected={selectedFileUrl && selectedFileUrl.includes(file.name)}
+									isSelected={!!(selectedFileUrl && selectedFileUrl.includes(file.name))}
 								/>
 							))}
 						</div>

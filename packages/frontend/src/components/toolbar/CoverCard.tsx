@@ -1,5 +1,5 @@
 import React from 'react';
-import {CoverData} from './cover/types';
+import {CoverData} from './CoverData';
 import {Edit2, Plus, Trash2, X} from 'lucide-react';
 
 interface CoverCardProps {
@@ -54,12 +54,12 @@ export const CoverCard: React.FC<CoverCardProps> = ({
 				style={containerStyle}
 				onClick={onClick}
 				className={`
-					relative border-2 rounded-lg overflow-hidden cursor-pointer transition-all duration-200
+					relative border-2 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 z-10
 					${isEmpty 
 						? 'border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50' 
 						: 'border-solid border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-md'
 					}
-					${isGenerating ? 'pointer-events-none' : ''}
+					${isGenerating ? 'pointer-events-none' : 'pointer-events-auto'}
 				`}
 			>
 				{isEmpty ? (
