@@ -20,38 +20,31 @@
 		</div>
 		{{/if}}
 
-		<!-- 文章内容 -->
-		{{{content}}}
-
-		<!-- 作者信息 -->
-		{{#if author}}
-		<div class="claude-author-info">
-			<hr>
+		<!-- 文章元信息 - 移到文章开头 -->
+		<div class="claude-article-meta">
+			{{#if author}}
 			<p><strong>作者：</strong>{{author}}</p>
+			{{/if}}
 			{{#if publishDate}}
 			<p><strong>发布时间：</strong>{{publishDate}}</p>
 			{{/if}}
-		</div>
-		{{/if}}
-
-		<!-- 标签 -->
-		{{#if tags}}
-		<div class="claude-tags">
+			{{#if tags}}
 			<p><strong>标签：</strong>
 			{{#each tags}}
 				<span class="claude-tag">{{this}}</span>{{#unless @last}}、{{/unless}}
 			{{/each}}
 			</p>
-		</div>
-		{{/if}}
-
-		<!-- 系列信息 -->
-		{{#if seriesName}}
-		<div class="claude-series-info">
-			<hr>
+			{{/if}}
+			{{#if seriesName}}
 			<p><strong>系列：</strong>{{seriesName}}{{#if episodeNum}} - {{episodeNum}}{{/if}}</p>
+			{{/if}}
 		</div>
-		{{/if}}
+
+		<!-- 文章内容 -->
+		<section class="lovpen" id="article-section">
+		{{{content}}}
+		</section>
+
 	</section>
 
 	<!-- 页脚信息 -->
@@ -131,7 +124,8 @@
 	font-size: 15px;
 	letter-spacing: 0.1em;
 	color: rgb(34, 34, 34);
-	word-break: break-all;
+	word-break: break-word; /* 改为break-word，支持连接符 */
+	hyphens: auto; /* 添加连接符支持 */
 	box-sizing: border-box;
 }
 
@@ -184,11 +178,18 @@
 	color: rgb(200, 100, 66);
 }
 
-.claude-main-content h5, .claude-main-content h6 {
+.claude-main-content h5 {
 	font-size: 1em;
 	font-weight: bold;
 	color: rgb(200, 100, 66);
 	margin: 1.5em 8px 0.5em;
+}
+
+.claude-main-content h6 {
+	font-size: 0.9em;
+	font-weight: bold;
+	color: rgb(200, 100, 66);
+	margin: 1em 8px 0.5em; /* 减少h6的上边距 */
 }
 
 .claude-main-content strong, .claude-main-content b {
@@ -228,8 +229,16 @@
 }
 
 .claude-main-content li {
-	margin: 0.5em 0;
+	margin: 0.25em 0; /* 减少列表项间距 */
 	line-height: 1.75;
+}
+
+/* 修复嵌套列表间距 */
+.claude-main-content ul ul,
+.claude-main-content ol ol,
+.claude-main-content ul ol,
+.claude-main-content ol ul {
+	margin: 0.5em 0; /* 减少嵌套列表的上下边距 */
 }
 
 .claude-main-content blockquote {
@@ -240,6 +249,14 @@
 	border-radius: 6px;
 	color: rgb(34, 34, 34);
 	font-style: italic;
+}
+
+/* 修复嵌套引用 */
+.claude-main-content blockquote blockquote {
+	margin: 1em 0;
+	border-left: 3px solid rgba(200, 100, 66, 0.7);
+	background: rgba(200, 100, 66, 0.05);
+	padding: 0.8em;
 }
 
 .claude-main-content code {
@@ -276,8 +293,23 @@
 
 .claude-main-content th, .claude-main-content td {
 	padding: 0.5em 1em;
-	text-align: left;
 	border-bottom: 1px solid rgb(229, 229, 229);
+}
+
+/* 修复表格对齐 */
+.claude-main-content td[align="center"],
+.claude-main-content th[align="center"] {
+	text-align: center;
+}
+
+.claude-main-content td[align="right"],
+.claude-main-content th[align="right"] {
+	text-align: right;
+}
+
+.claude-main-content td[align="left"],
+.claude-main-content th[align="left"] {
+	text-align: left;
 }
 
 .claude-main-content th {
@@ -332,8 +364,46 @@
 	border: 1px solid rgba(200, 100, 66, 0.2);
 }
 
+/* 文章元信息样式 */
+.claude-article-meta {
+	margin: 1.5em 8px 2em;
+	padding: 1em;
+	background: rgba(200, 100, 66, 0.05);
+	border-radius: 6px;
+	border-left: 4px solid rgb(200, 100, 66);
+}
+
+.claude-article-meta p {
+	margin: 0.5em 0;
+	font-size: 0.9em;
+	line-height: 1.5;
+}
+
 .claude-footer {
 	margin-top: 2em;
+}
+
+/* LaTeX数学公式支持 */
+.claude-main-content .block-math-svg {
+	display: flex;
+	justify-content: center;
+	margin: 1.5em 0;
+}
+
+.claude-main-content .MathJax,
+.claude-main-content .katex {
+	font-size: 1.1em;
+	color: rgb(34, 34, 34);
+}
+
+/* Mermaid图表样式 */
+.claude-main-content .mermaid {
+	text-align: center;
+	margin: 1.5em 8px;
+	background: rgb(255, 255, 255);
+	border-radius: 8px;
+	padding: 1em;
+	border: 1px solid rgb(229, 229, 229);
 }
 
 /* 响应式设计 */

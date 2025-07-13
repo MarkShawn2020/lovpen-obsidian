@@ -456,6 +456,20 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
 				break;
 			
+			case 'h5':
+				styles['font-size'] = '1em';
+				styles['font-weight'] = 'bold';
+				styles['color'] = variables['primary-color'];
+				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} ${variables['spacing-sm']}`;
+				break;
+			
+			case 'h6':
+				styles['font-size'] = '0.9em';
+				styles['font-weight'] = 'bold';
+				styles['color'] = variables['primary-color'];
+				styles['margin'] = `${variables['spacing-md']} ${variables['spacing-md']} ${variables['spacing-sm']}`;
+				break;
+			
 			case 'p':
 				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				styles['text-align'] = 'justify';
@@ -540,12 +554,23 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			styles['font-size'] = variables['font-size-base'];
 			styles['line-height'] = variables['line-height-base'];
 			styles['color'] = variables['text-primary'];
+			// 微信公众号需要使用更强的背景色声明
+			styles['background-color'] = variables['background-primary'] + ' !important';
 			styles['background'] = variables['background-primary'] + ' !important';
 			styles['border-radius'] = variables['border-radius-lg'];
 			styles['padding'] = variables['spacing-md'];
 			styles['box-sizing'] = 'border-box';
 			styles['margin'] = '0 auto';
 			styles['max-width'] = '100%';
+			// 确保容器样式优先级
+			styles['-webkit-background-color'] = variables['background-primary'] + ' !important';
+		}
+
+		// 处理主要内容容器
+		if (element.classList.contains('claude-main-content')) {
+			styles['background'] = variables['background-primary'] + ' !important';
+			styles['background-color'] = variables['background-primary'] + ' !important';
+			styles['-webkit-background-color'] = variables['background-primary'] + ' !important';
 		}
 
 		// 处理图片说明文字样式
@@ -606,8 +631,31 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				if (!pre.hasAttribute('style')) {
 					pre.setAttribute('style', 'background: #f5f5f5; padding: 1em; border-radius: 4px; overflow-x: auto;');
 				}
+				
+				// 处理代码缩进问题
+				this.fixCodeIndentation(code as HTMLElement);
 			}
 		});
+	}
+
+	/**
+	 * 修复代码缩进问题
+	 */
+	private fixCodeIndentation(codeElement: HTMLElement): void {
+		let html = codeElement.innerHTML;
+		
+		// 将制表符转换为4个空格
+		html = html.replace(/\t/g, '    ');
+		
+		// 处理行首的空格缩进，转换为&nbsp;确保在微信中正确显示
+		html = html.replace(/^( {2,})/gm, (match) => {
+			return '&nbsp;'.repeat(match.length);
+		});
+		
+		// 处理代码中的多个连续空格
+		html = html.replace(/  /g, '&nbsp;&nbsp;');
+		
+		codeElement.innerHTML = html;
 	}
 
 	/**
