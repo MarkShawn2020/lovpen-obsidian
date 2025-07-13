@@ -1,5 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {createPortal} from 'react-dom';
+import {
+	Drawer,
+	DrawerContent,
+	DrawerDescription,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerPortal,
+	DrawerOverlay,
+} from '../ui/drawer';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '../ui/tabs';
 import {Button} from '../ui/button';
 import {ImageGrid} from './ImageGrid';
@@ -117,32 +125,36 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 		}
 	}, [aiPrompt, aiStyle, aspectRatio, getDimensions, coverNumber]);
 
-	if (!isOpen) return null;
+	const toolbarContainer = document.getElementById('lovpen-toolbar-container');
+	
+	if (!toolbarContainer) {
+		console.warn('[ImageSelectionModal] 找不到工具栏容器');
+		return null;
+	}
 
-	const modalContent = (
-		<div className="absolute inset-0 z-50 bg-white flex flex-col">
-			{/* 模态框内容 - 工具栏容器内全屏 */}
-			<div className="flex flex-col h-full">
-				{/* 头部 */}
-				<div className="flex items-center justify-between p-4 sm:p-6 border-b bg-gray-50 shrink-0">
-					<div>
-						<h3 className="text-xl sm:text-2xl font-semibold text-gray-900">
+	return (
+		<Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<DrawerPortal container={toolbarContainer}>
+				<DrawerOverlay className="absolute inset-0 bg-black/50" />
+				<div 
+					className="absolute bottom-0 left-0 right-0 z-50 bg-white flex flex-col max-h-[85vh] rounded-t-lg border-t shadow-lg transition-transform"
+					data-vaul-drawer-direction="bottom"
+					data-slot="drawer-content"
+				>
+					{/* 拖拽手柄 */}
+					<div className="mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-gray-300" />
+					
+					<DrawerHeader className="pb-4">
+						<DrawerTitle className="text-lg sm:text-xl">
 							选择封面图片 - 封面{coverNumber} ({aspectRatio})
-						</h3>
-						<p className="text-sm sm:text-base text-gray-600 mt-1">
+						</DrawerTitle>
+						<DrawerDescription className="text-sm text-gray-600">
 							选择图片来源，点击图片预览效果
-						</p>
-					</div>
-					<button
-						onClick={onClose}
-						className="p-2 sm:p-3 hover:bg-gray-200 rounded-lg transition-colors"
-					>
-						<X className="h-6 w-6 text-gray-500"/>
-					</button>
-				</div>
-
+						</DrawerDescription>
+					</DrawerHeader>
+				
 				{/* 内容区域 */}
-				<div className="flex-1 p-4 sm:p-6 overflow-y-auto">
+				<div className="flex-1 px-4 sm:px-6 overflow-y-auto min-h-0">
 					<Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as CoverImageSource)}>
 						<TabsList className="grid w-full grid-cols-3 mb-4">
 							<TabsTrigger value="article" className="flex items-center gap-2">
@@ -261,33 +273,26 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 				</div>
 
 				{/* 底部操作栏 */}
-				<div className="flex items-center justify-between p-4 border-t bg-gray-50">
+				<div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50 mt-auto shrink-0">
 					<div className="text-sm text-gray-500">
 						{selectedImageUrl ? '已选择图片' : '请选择一张图片'}
 					</div>
 					<div className="flex gap-3">
-						<Button variant="outline" onClick={onClose}>
+						<Button variant="outline" onClick={onClose} size="sm">
 							取消
 						</Button>
 						<Button 
 							onClick={handleConfirm}
 							disabled={!selectedImageUrl}
 							className="bg-blue-600 hover:bg-blue-700"
+							size="sm"
 						>
 							确定使用
 						</Button>
 					</div>
 				</div>
-			</div>
-		</div>
+				</div>
+			</DrawerPortal>
+		</Drawer>
 	);
-
-	// 渲染到工具栏容器
-	const toolbarContainer = document.getElementById('lovpen-toolbar-container');
-	if (!toolbarContainer) {
-		console.warn('[ImageSelectionModal] 找不到工具栏容器，使用默认渲染');
-		return modalContent;
-	}
-
-	return createPortal(modalContent, toolbarContainer);
 };
