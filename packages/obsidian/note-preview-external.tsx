@@ -57,18 +57,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		return this.app.workspace;
 	}
 
-	private getPluginSettings(): NMPSettings {
-		const plugin = (this.app as any).plugins.plugins["lovpen"];
-		if (plugin && plugin.settings) {
-			logger.debug("获取到主插件的设置实例");
-			return plugin.settings;
-		}
-
-		// 如果主插件尚未加载，使用单例模式
-		logger.warn("主插件尚未加载，使用单例模式");
-		return NMPSettings.getInstance();
-	}
-
 	getViewType() {
 		return VIEW_TYPE_NOTE_PREVIEW;
 	}
@@ -79,88 +67,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	getDisplayText() {
 		return "笔记预览";
-	}
-
-	private async loadExternalReactApp() {
-		try {
-			const adapter = this.app.vault.adapter;
-			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
-			const scriptPath = `${pluginDir}/frontend/lovpen-react.iife.js`;
-
-			logger.debug("加载React应用:", scriptPath);
-			const scriptContent = await adapter.read(scriptPath);
-
-			// 创建script标签并执行
-			const script = document.createElement('script');
-			script.textContent = scriptContent;
-			document.head.appendChild(script);
-
-			// 加载对应的CSS文件
-			await this.loadExternalCSS(pluginDir);
-
-			// 获取全局对象
-			this.externalReactLib = (window as any).LovpenReactLib ||
-				(window as any).LovpenReact ||
-				(window as any).LovpenReact?.default ||
-				(window as any).lovpenReact;
-
-			if (this.externalReactLib) {
-				logger.debug("外部React应用加载成功", {
-					availableMethods: Object.keys(this.externalReactLib),
-					hasMount: typeof this.externalReactLib.mount === 'function',
-					hasUpdate: typeof this.externalReactLib.update === 'function',
-					hasUnmount: typeof this.externalReactLib.unmount === 'function',
-					actualObject: this.externalReactLib,
-					windowLovpenReact: (window as any).LovpenReact,
-					windowLovpenReactDefault: (window as any).LovpenReact?.default,
-				});
-
-				// 立即设置全局API，确保React组件可以访问
-				this.setupGlobalAPI();
-			} else {
-				logger.error("找不到外部React应用的全局对象", {
-					windowKeys: Object.keys(window).filter(key => key.includes('Omni') || key.includes('React') || key.includes('react')),
-					lovpenReact: !!(window as any).LovpenReact,
-					lovpenReactLib: !!(window as any).LovpenReactLib,
-					lovpenReactLowerCase: !!(window as any).lovpenReact
-				});
-			}
-		} catch (error) {
-			logger.error("加载外部React应用失败:", error);
-			this.loadFallbackComponent();
-		}
-	}
-
-
-	private async loadExternalCSS(pluginDir: string) {
-		try {
-			const cssPath = `${pluginDir}/frontend/style.css`;
-			const adapter = this.app.vault.adapter;
-			const cssContent = await adapter.read(cssPath);
-
-			// 检查是否已经有这个CSS
-			const existingStyle = document.querySelector('style[data-lovpen-react]');
-			if (existingStyle) {
-				existingStyle.remove();
-			}
-
-			// 创建style标签并插入CSS
-			const style = document.createElement('style');
-			style.setAttribute('data-lovpen-react', 'true');
-			style.textContent = cssContent;
-			document.head.appendChild(style);
-
-			logger.debug("成功加载外部CSS:", cssPath);
-
-		} catch (error) {
-			logger.warn("加载外部CSS失败:", error.message);
-		}
-	}
-
-	private loadFallbackComponent() {
-		logger.debug("使用回退方案：原始React组件");
-		// 这里可以导入原始的React组件作为备用
-		// 暂时不实现，仅记录日志
 	}
 
 	async onOpen() {
@@ -229,78 +135,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		}),]);
 
 		new Notice(`已复制到剪贴板！`);
-	}
-
-	/**
-	 * 处理本地图片 - 转换为data URL或移除
-	 * @param content HTML内容
-	 * @returns 处理后的HTML内容
-	 */
-	private async processLocalImages(content: string): Promise<string> {
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(content, "text/html");
-		const images = doc.querySelectorAll('img');
-
-		for (const img of images) {
-			const src = img.getAttribute('src');
-			if (!src) continue;
-
-			// 检查是否是本地图片路径
-			if (src.startsWith('app://') || src.startsWith('capacitor://') || src.startsWith('file://')) {
-				try {
-					// 尝试读取本地图片文件并转换为data URL
-					const dataUrl = await this.convertLocalImageToDataUrl(src);
-					if (dataUrl) {
-						img.setAttribute('src', dataUrl);
-						logger.debug(`本地图片已转换为data URL: ${src.substring(0, 50)}...`);
-					} else {
-						// 如果无法转换，移除图片或设置占位符
-						img.setAttribute('src', '');
-						img.setAttribute('alt', '本地图片（复制时无法显示）');
-						logger.warn(`无法转换本地图片: ${src}`);
-					}
-				} catch (error) {
-					logger.error(`处理本地图片时出错: ${src}`, error);
-					img.setAttribute('src', '');
-					img.setAttribute('alt', '本地图片（处理失败）');
-				}
-			}
-		}
-
-		return doc.body.innerHTML;
-	}
-
-	/**
-	 * 将本地图片路径转换为data URL
-	 * @param localPath 本地图片路径
-	 * @returns data URL或null
-	 */
-	private async convertLocalImageToDataUrl(localPath: string): Promise<string | null> {
-		try {
-			// 通过Obsidian的资源路径获取文件内容
-			const response = await fetch(localPath);
-			if (!response.ok) {
-				return null;
-			}
-
-			const blob = await response.blob();
-
-			// 检查是否是图片
-			if (!blob.type.startsWith('image/')) {
-				return null;
-			}
-
-			// 转换为data URL
-			return new Promise((resolve, reject) => {
-				const reader = new FileReader();
-				reader.onloadend = () => resolve(reader.result as string);
-				reader.onerror = reject;
-				reader.readAsDataURL(blob);
-			});
-		} catch (error) {
-			logger.error('转换本地图片为data URL失败:', error);
-			return null;
-		}
 	}
 
 	updateCSSVariables() {
@@ -554,6 +388,171 @@ ${customCSS}`;
 
 		// 渲染外部React组件
 		await this.updateExternalReactComponent();
+	}
+
+	private getPluginSettings(): NMPSettings {
+		const plugin = (this.app as any).plugins.plugins["lovpen"];
+		if (plugin && plugin.settings) {
+			logger.debug("获取到主插件的设置实例");
+			return plugin.settings;
+		}
+
+		// 如果主插件尚未加载，使用单例模式
+		logger.warn("主插件尚未加载，使用单例模式");
+		return NMPSettings.getInstance();
+	}
+
+	private async loadExternalReactApp() {
+		try {
+			const adapter = this.app.vault.adapter;
+			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
+			const scriptPath = `${pluginDir}/frontend/lovpen-react.iife.js`;
+
+			logger.debug("加载React应用:", scriptPath);
+			const scriptContent = await adapter.read(scriptPath);
+
+			// 创建script标签并执行
+			const script = document.createElement('script');
+			script.textContent = scriptContent;
+			document.head.appendChild(script);
+
+			// 加载对应的CSS文件
+			await this.loadExternalCSS(pluginDir);
+
+			// 获取全局对象
+			this.externalReactLib = (window as any).LovpenReactLib ||
+				(window as any).LovpenReact ||
+				(window as any).LovpenReact?.default ||
+				(window as any).lovpenReact;
+
+			if (this.externalReactLib) {
+				logger.debug("外部React应用加载成功", {
+					availableMethods: Object.keys(this.externalReactLib),
+					hasMount: typeof this.externalReactLib.mount === 'function',
+					hasUpdate: typeof this.externalReactLib.update === 'function',
+					hasUnmount: typeof this.externalReactLib.unmount === 'function',
+					actualObject: this.externalReactLib,
+					windowLovpenReact: (window as any).LovpenReact,
+					windowLovpenReactDefault: (window as any).LovpenReact?.default,
+				});
+
+				// 立即设置全局API，确保React组件可以访问
+				this.setupGlobalAPI();
+			} else {
+				logger.error("找不到外部React应用的全局对象", {
+					windowKeys: Object.keys(window).filter(key => key.includes('Omni') || key.includes('React') || key.includes('react')),
+					lovpenReact: !!(window as any).LovpenReact,
+					lovpenReactLib: !!(window as any).LovpenReactLib,
+					lovpenReactLowerCase: !!(window as any).lovpenReact
+				});
+			}
+		} catch (error) {
+			logger.error("加载外部React应用失败:", error);
+			this.loadFallbackComponent();
+		}
+	}
+
+	private async loadExternalCSS(pluginDir: string) {
+		try {
+			const cssPath = `${pluginDir}/frontend/style.css`;
+			const adapter = this.app.vault.adapter;
+			const cssContent = await adapter.read(cssPath);
+
+			// 检查是否已经有这个CSS
+			const existingStyle = document.querySelector('style[data-lovpen-react]');
+			if (existingStyle) {
+				existingStyle.remove();
+			}
+
+			// 创建style标签并插入CSS
+			const style = document.createElement('style');
+			style.setAttribute('data-lovpen-react', 'true');
+			style.textContent = cssContent;
+			document.head.appendChild(style);
+
+			logger.debug("成功加载外部CSS:", cssPath);
+
+		} catch (error) {
+			logger.warn("加载外部CSS失败:", error.message);
+		}
+	}
+
+	private loadFallbackComponent() {
+		logger.debug("使用回退方案：原始React组件");
+		// 这里可以导入原始的React组件作为备用
+		// 暂时不实现，仅记录日志
+	}
+
+	/**
+	 * 处理本地图片 - 转换为data URL或移除
+	 * @param content HTML内容
+	 * @returns 处理后的HTML内容
+	 */
+	private async processLocalImages(content: string): Promise<string> {
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(content, "text/html");
+		const images = doc.querySelectorAll('img');
+
+		for (const img of images) {
+			const src = img.getAttribute('src');
+			if (!src) continue;
+
+			// 检查是否是本地图片路径
+			if (src.startsWith('app://') || src.startsWith('capacitor://') || src.startsWith('file://')) {
+				try {
+					// 尝试读取本地图片文件并转换为data URL
+					const dataUrl = await this.convertLocalImageToDataUrl(src);
+					if (dataUrl) {
+						img.setAttribute('src', dataUrl);
+						logger.debug(`本地图片已转换为data URL: ${src.substring(0, 50)}...`);
+					} else {
+						// 如果无法转换，移除图片或设置占位符
+						img.setAttribute('src', '');
+						img.setAttribute('alt', '本地图片（复制时无法显示）');
+						logger.warn(`无法转换本地图片: ${src}`);
+					}
+				} catch (error) {
+					logger.error(`处理本地图片时出错: ${src}`, error);
+					img.setAttribute('src', '');
+					img.setAttribute('alt', '本地图片（处理失败）');
+				}
+			}
+		}
+
+		return doc.body.innerHTML;
+	}
+
+	/**
+	 * 将本地图片路径转换为data URL
+	 * @param localPath 本地图片路径
+	 * @returns data URL或null
+	 */
+	private async convertLocalImageToDataUrl(localPath: string): Promise<string | null> {
+		try {
+			// 通过Obsidian的资源路径获取文件内容
+			const response = await fetch(localPath);
+			if (!response.ok) {
+				return null;
+			}
+
+			const blob = await response.blob();
+
+			// 检查是否是图片
+			if (!blob.type.startsWith('image/')) {
+				return null;
+			}
+
+			// 转换为data URL
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onloadend = () => resolve(reader.result as string);
+				reader.onerror = reject;
+				reader.readAsDataURL(blob);
+			});
+		} catch (error) {
+			logger.error('转换本地图片为data URL失败:', error);
+			return null;
+		}
 	}
 
 	private async updateExternalReactComponent() {

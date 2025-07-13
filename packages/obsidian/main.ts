@@ -89,7 +89,7 @@ export default class LovpenPlugin extends Plugin {
 			logger.info("准备保存的设置数据:", settingsToSave);
 			await this.saveData(settingsToSave);
 			logger.info("Settings saved successfully");
-			
+
 			// 验证保存是否成功
 			const savedData = await this.loadData();
 			logger.info("验证保存后的数据:", savedData);

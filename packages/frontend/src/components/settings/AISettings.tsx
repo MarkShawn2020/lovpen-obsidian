@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { FormInput } from '../ui/FormInput';
-import { ViteReactSettings } from '../../types';
-import { logger } from '../../../../shared/src/logger';
-import { 
-	Bot, 
-	Key, 
-	Zap, 
-	CheckCircle, 
-	XCircle, 
-	Info, 
-	Code, 
-	RefreshCw, 
-	Save, 
-	RotateCcw,
+import React, {useEffect, useState} from 'react';
+import {Button} from '../ui/button';
+import {FormInput} from '../ui/FormInput';
+import {ViteReactSettings} from '../../types';
+import {logger} from '../../../../shared/src/logger';
+import {
+	Bot,
+	CheckCircle,
+	Code,
 	ExternalLink,
-	Sparkles,
 	FileText,
+	Info,
+	Key,
+	RefreshCw,
+	RotateCcw,
+	Save,
+	Sparkles,
 	Tag,
-	User
+	User,
+	XCircle,
+	Zap
 } from 'lucide-react';
-import { useSettings } from '../../hooks/useSettings';
+import {useSettings} from '../../hooks/useSettings';
 
 interface AISettingsProps {
 	onClose: () => void;
@@ -29,11 +29,16 @@ interface AISettingsProps {
 }
 
 export const AISettings: React.FC<AISettingsProps> = ({
-	onClose,
-	onSettingsChange,
-	onSaveSettings
-}) => {
-	const { settings, saveStatus, updateSettings, saveSettings } = useSettings(onSaveSettings, undefined, onSettingsChange);
+														  onClose,
+														  onSettingsChange,
+														  onSaveSettings
+													  }) => {
+	const {
+		settings,
+		saveStatus,
+		updateSettings,
+		saveSettings
+	} = useSettings(onSaveSettings, undefined, onSettingsChange);
 	const [claudeApiKey, setClaudeApiKey] = useState<string>(settings.authKey || '');
 	const [aiPromptTemplate, setAiPromptTemplate] = useState<string>(settings.aiPromptTemplate || '');
 	const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -50,13 +55,13 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setConnectionStatus('idle');
 		setErrorMessage('');
 		// 实时更新 Jotai 状态
-		updateSettings({ authKey: value.trim() });
+		updateSettings({authKey: value.trim()});
 	};
 
 	const handlePromptTemplateChange = (value: string) => {
 		setAiPromptTemplate(value);
 		// 实时更新 Jotai 状态
-		updateSettings({ aiPromptTemplate: value.trim() });
+		updateSettings({aiPromptTemplate: value.trim()});
 	};
 
 	const testConnection = async () => {
@@ -72,8 +77,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 
 		try {
 			// 使用Obsidian的requestUrl API来避免CORS问题
-			const { requestUrl } = require('obsidian');
-			
+			const {requestUrl} = require('obsidian');
+
 			const response = await requestUrl({
 				url: 'https://api.anthropic.com/v1/messages',
 				method: 'POST',
@@ -111,7 +116,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 
 	const handleSave = () => {
 		// 使用jotai更新设置
-		updateSettings({ 
+		updateSettings({
 			authKey: claudeApiKey.trim(),
 			aiPromptTemplate: aiPromptTemplate.trim()
 		});
@@ -189,32 +194,32 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			<div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
 				<div className="flex items-center gap-3 mb-4">
 					<div className="p-2 bg-blue-100 rounded-lg">
-						<Bot className="h-6 w-6 text-blue-600" />
+						<Bot className="h-6 w-6 text-blue-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">Claude AI 智能助手</h4>
 						<p className="text-sm text-gray-600">强大的AI助手，为您的内容创作提供智能支持</p>
 					</div>
 				</div>
-				
+
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 					<div className="bg-white/60 backdrop-blur-sm border border-blue-200 rounded-lg p-3">
 						<div className="flex items-center gap-2 mb-2">
-							<Sparkles className="h-4 w-4 text-blue-600" />
+							<Sparkles className="h-4 w-4 text-blue-600"/>
 							<h5 className="text-sm font-medium text-gray-800">智能分析</h5>
 						</div>
 						<p className="text-xs text-gray-600">自动分析文章内容，提取关键信息</p>
 					</div>
 					<div className="bg-white/60 backdrop-blur-sm border border-purple-200 rounded-lg p-3">
 						<div className="flex items-center gap-2 mb-2">
-							<FileText className="h-4 w-4 text-purple-600" />
+							<FileText className="h-4 w-4 text-purple-600"/>
 							<h5 className="text-sm font-medium text-gray-800">内容建议</h5>
 						</div>
 						<p className="text-xs text-gray-600">智能建议标题、副标题等元数据</p>
 					</div>
 					<div className="bg-white/60 backdrop-blur-sm border border-indigo-200 rounded-lg p-3">
 						<div className="flex items-center gap-2 mb-2">
-							<Tag className="h-4 w-4 text-indigo-600" />
+							<Tag className="h-4 w-4 text-indigo-600"/>
 							<h5 className="text-sm font-medium text-gray-800">自动标签</h5>
 						</div>
 						<p className="text-xs text-gray-600">基于内容主题生成相关标签</p>
@@ -226,14 +231,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
 				<div className="flex items-center gap-3 mb-4">
 					<div className="p-2 bg-green-100 rounded-lg">
-						<Key className="h-5 w-5 text-green-600" />
+						<Key className="h-5 w-5 text-green-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">API 密钥配置</h4>
 						<p className="text-sm text-gray-600">安全配置您的 Claude AI API 访问凭证</p>
 					</div>
 				</div>
-				
+
 				<div className="space-y-4">
 					<FormInput
 						label="Claude API 密钥"
@@ -245,7 +250,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						icon={Key}
 						className="font-mono text-sm"
 					/>
-					
+
 					<div className="flex items-center justify-between">
 						<Button
 							onClick={testConnection}
@@ -255,45 +260,45 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						>
 							{isTestingConnection ? (
 								<>
-									<RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+									<RefreshCw className="w-4 h-4 mr-2 animate-spin"/>
 									测试连接中...
 								</>
 							) : (
 								<>
-									<Zap className="w-4 h-4 mr-2" />
+									<Zap className="w-4 h-4 mr-2"/>
 									测试连接
 								</>
 							)}
 						</Button>
-						
+
 						{connectionStatus === 'success' && (
 							<div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-								<CheckCircle className="w-4 h-4" />
+								<CheckCircle className="w-4 h-4"/>
 								<span className="text-sm font-medium">连接成功</span>
 							</div>
 						)}
-						
+
 						{connectionStatus === 'error' && (
 							<div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-								<XCircle className="w-4 h-4" />
+								<XCircle className="w-4 h-4"/>
 								<span className="text-sm font-medium">连接失败</span>
 							</div>
 						)}
 					</div>
-					
+
 					{errorMessage && (
 						<div className="bg-red-50 border border-red-200 rounded-lg p-3">
 							<p className="text-red-600 text-sm flex items-center gap-2">
-								<XCircle className="w-4 h-4" />
+								<XCircle className="w-4 h-4"/>
 								{errorMessage}
 							</p>
 						</div>
 					)}
-					
+
 					{/* API密钥安全说明 */}
 					<div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
 						<div className="flex items-start gap-2">
-							<Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+							<Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
 							<div className="text-sm text-amber-800">
 								<p className="font-medium">安全提醒</p>
 								<p className="mt-1">API密钥仅在本地存储，不会上传到任何服务器。请妥善保管您的密钥。</p>
@@ -308,7 +313,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-purple-100 rounded-lg">
-							<Code className="h-5 w-5 text-purple-600" />
+							<Code className="h-5 w-5 text-purple-600"/>
 						</div>
 						<div>
 							<h4 className="font-semibold text-gray-900">提示词模板</h4>
@@ -321,11 +326,11 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						variant="outline"
 						className="text-purple-600 border-purple-300 hover:bg-purple-50"
 					>
-						<RefreshCw className="w-4 h-4 mr-2" />
+						<RefreshCw className="w-4 h-4 mr-2"/>
 						恢复默认
 					</Button>
 				</div>
-				
+
 				<div className="space-y-4">
 					<textarea
 						value={aiPromptTemplate}
@@ -333,23 +338,24 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						placeholder="输入自定义的AI提示词模板..."
 						className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-0 h-40 resize-y font-mono text-sm transition-colors"
 					/>
-					
+
 					{/* 模板变量说明 */}
-					<div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
+					<div
+						className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
 						<div className="flex items-center gap-2 mb-3">
-							<Code className="h-4 w-4 text-yellow-600" />
+							<Code className="h-4 w-4 text-yellow-600"/>
 							<h5 className="text-sm font-medium text-yellow-800">可用的模板变量</h5>
 						</div>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
 							{[
-								{ var: '{{content}}', desc: '文章正文内容（已移除frontmatter）' },
-								{ var: '{{filename}}', desc: '当前文件名（不含扩展名）' },
-								{ var: '{{personalInfo.name}}', desc: '个人信息中的姓名' },
-								{ var: '{{personalInfo.bio}}', desc: '个人信息中的简介' },
-								{ var: '{{personalInfo.email}}', desc: '个人信息中的邮箱' },
-								{ var: '{{personalInfo.website}}', desc: '个人信息中的网站' },
-								{ var: '{{frontmatter}}', desc: '当前文档的frontmatter对象' },
-								{ var: '{{today}}', desc: '当前日期（YYYY-MM-DD格式）' }
+								{var: '{{content}}', desc: '文章正文内容（已移除frontmatter）'},
+								{var: '{{filename}}', desc: '当前文件名（不含扩展名）'},
+								{var: '{{personalInfo.name}}', desc: '个人信息中的姓名'},
+								{var: '{{personalInfo.bio}}', desc: '个人信息中的简介'},
+								{var: '{{personalInfo.email}}', desc: '个人信息中的邮箱'},
+								{var: '{{personalInfo.website}}', desc: '个人信息中的网站'},
+								{var: '{{frontmatter}}', desc: '当前文档的frontmatter对象'},
+								{var: '{{today}}', desc: '当前日期（YYYY-MM-DD格式）'}
 							].map((item, index) => (
 								<div key={index} className="bg-white/60 border border-yellow-200 rounded-lg p-2">
 									<code className="text-yellow-700 font-medium">{item.var}</code>
@@ -359,7 +365,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						</div>
 						<div className="mt-3 pt-3 border-t border-yellow-300">
 							<p className="text-xs text-yellow-700 flex items-center gap-2">
-								<Info className="w-3 h-3" />
+								<Info className="w-3 h-3"/>
 								支持Handlebars语法：条件判断 <code>{'{{#if variable}}'}</code>，循环遍历 <code>{'{{#each array}}'}</code>
 							</p>
 						</div>
@@ -371,43 +377,45 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
 				<div className="flex items-center gap-3 mb-4">
 					<div className="p-2 bg-blue-100 rounded-lg">
-						<ExternalLink className="h-5 w-5 text-blue-600" />
+						<ExternalLink className="h-5 w-5 text-blue-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">获取API密钥</h4>
 						<p className="text-sm text-gray-600">简单几步，获取您的Claude AI访问密钥</p>
 					</div>
 				</div>
-				
+
 				<div className="grid grid-cols-1 md:grid-cols-5 gap-3">
 					{[
-						{ step: '1', icon: ExternalLink, title: '访问控制台', desc: '前往Anthropic官网' },
-						{ step: '2', icon: User, title: '注册登录', desc: '创建或登录账户' },
-						{ step: '3', icon: Key, title: '创建密钥', desc: '生成新的API密钥' },
-						{ step: '4', icon: Save, title: '复制密钥', desc: '保存到剪贴板' },
-						{ step: '5', icon: CheckCircle, title: '配置完成', desc: '粘贴到上方输入框' }
+						{step: '1', icon: ExternalLink, title: '访问控制台', desc: '前往Anthropic官网'},
+						{step: '2', icon: User, title: '注册登录', desc: '创建或登录账户'},
+						{step: '3', icon: Key, title: '创建密钥', desc: '生成新的API密钥'},
+						{step: '4', icon: Save, title: '复制密钥', desc: '保存到剪贴板'},
+						{step: '5', icon: CheckCircle, title: '配置完成', desc: '粘贴到上方输入框'}
 					].map((step, index) => (
-						<div key={index} className="group bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all">
+						<div key={index}
+							 className="group bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all">
 							<div className="flex items-center gap-2 mb-2">
-								<div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+								<div
+									className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
 									{step.step}
 								</div>
-								<step.icon className="w-4 h-4 text-blue-600" />
+								<step.icon className="w-4 h-4 text-blue-600"/>
 							</div>
 							<h5 className="text-sm font-medium text-gray-800">{step.title}</h5>
 							<p className="text-xs text-gray-600 mt-1">{step.desc}</p>
 						</div>
 					))}
 				</div>
-				
+
 				<div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
 					<p className="text-sm text-blue-800 flex items-center gap-2">
-						<Info className="w-4 h-4" />
+						<Info className="w-4 h-4"/>
 						立即访问：
-						<a 
-							href="https://console.anthropic.com/" 
-							target="_blank" 
-							rel="noopener noreferrer" 
+						<a
+							href="https://console.anthropic.com/"
+							target="_blank"
+							rel="noopener noreferrer"
 							className="text-blue-600 hover:text-blue-800 underline font-medium"
 						>
 							https://console.anthropic.com/
@@ -423,14 +431,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 					variant="outline"
 					className="text-red-600 border-red-300 hover:bg-red-50"
 				>
-					<RotateCcw className="w-4 h-4 mr-2" />
+					<RotateCcw className="w-4 h-4 mr-2"/>
 					清空设置
 				</Button>
 				<Button
 					onClick={handleSave}
 					className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
 				>
-					<Save className="w-4 h-4 mr-2" />
+					<Save className="w-4 h-4 mr-2"/>
 					保存设置
 				</Button>
 			</div>

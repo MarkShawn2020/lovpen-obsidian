@@ -1,14 +1,14 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useCallback, useEffect } from 'react';
-import { 
-	personalInfoAtom, 
-	settingsAtom, 
-	settingsSaveStatusAtom,
+import {useAtom, useAtomValue, useSetAtom} from 'jotai';
+import {useCallback, useEffect} from 'react';
+import {
+	personalInfoAtom,
+	settingsAtom,
 	settingsInitializedAtom,
-	updateSettingsAtom,
-	updatePersonalInfoAtom
+	settingsSaveStatusAtom,
+	updatePersonalInfoAtom,
+	updateSettingsAtom
 } from '../store/atoms';
-import { PersonalInfo, ViteReactSettings } from '../types';
+import {PersonalInfo, ViteReactSettings} from '../types';
 
 export interface UseSettingsReturn {
 	personalInfo: PersonalInfo;
@@ -62,7 +62,7 @@ export const useSettings = (
 				console.warn('[useSettings] onSaveSettings is not provided');
 			}
 			setSaveStatus('saved');
-			
+
 			// 2秒后重置状态
 			setTimeout(() => {
 				setSaveStatus('idle');
@@ -80,7 +80,7 @@ export const useSettings = (
 
 	// 确保设置和个人信息保持同步
 	useEffect(() => {
-		if (settings.personalInfo && 
+		if (settings.personalInfo &&
 			JSON.stringify(settings.personalInfo) !== JSON.stringify(personalInfo)) {
 			setPersonalInfo(settings.personalInfo);
 		}

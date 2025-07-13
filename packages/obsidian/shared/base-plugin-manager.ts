@@ -20,14 +20,14 @@ export abstract class BasePluginManager<T> {
 	 */
 	public registerPlugin(plugin: T): this {
 		const pluginName = this.getPluginName(plugin);
-		
+
 		// 检查插件是否已经注册
 		const existingPlugin = this.plugins.find(p => this.getPluginName(p) === pluginName);
 		if (existingPlugin) {
 			logger.debug(`插件 ${pluginName} 已存在，跳过注册`);
 			return this;
 		}
-		
+
 		logger.debug(`注册${this.getManagerName()}插件: ${pluginName}`);
 		this.plugins.push(plugin);
 		return this;

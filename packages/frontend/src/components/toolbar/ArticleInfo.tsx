@@ -4,8 +4,8 @@ import {ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {persistentStorageService} from '../../services/persistentStorage';
 import Handlebars from 'handlebars';
-import { AIAnalysisSplitButton, AIStyle } from '../ui/ai-analysis-split-button';
-import { CustomPromptModal } from '../ui/custom-prompt-modal';
+import {AIAnalysisSplitButton, AIStyle} from '../ui/ai-analysis-split-button';
+import {CustomPromptModal} from '../ui/custom-prompt-modal';
 
 interface ArticleInfoProps {
 	settings: ViteReactSettings;
@@ -111,10 +111,10 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		persistentStorageService.saveArticleInfo(articleInfo).catch(error => {
 			logger.error('[ArticleInfo] Failed to save article info:', error);
 		});
-		
+
 		// 保存到localStorage作为备份
 		localStorage.setItem('lovpen-article-info', JSON.stringify(articleInfo));
-		
+
 		// 通知父组件
 		onInfoChange(articleInfo);
 	}, [articleInfo, onInfoChange]);
@@ -164,18 +164,18 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		try {
 			// 读取文档内容
 			const content = await app.vault.read(activeFile);
-			
+
 			// 移除frontmatter，只分析正文内容
 			const cleanContent = content.replace(/^---\n[\s\S]*?\n---\n?/, '');
-			
+
 			if (cleanContent.trim().length < 50) {
 				alert('文章内容太短，无法进行有效分析');
 				return;
 			}
-			
+
 			// 调用Claude AI分析，使用指定的风格
 			const aiSuggestion = await analyzeContentWithClaude(cleanContent, activeFile.basename, style);
-			
+
 			// 合并现有信息和AI建议
 			const finalSuggestion = {
 				author: aiSuggestion.author || articleInfo.author || getDefaultAuthor(settings),
@@ -204,7 +204,7 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		const app = (window as any).app;
 		const activeFile = app.workspace.getActiveFile();
 		let frontmatter = {};
-		
+
 		if (activeFile) {
 			const metadata = app.metadataCache.getFileCache(activeFile);
 			frontmatter = metadata?.frontmatter || {};
@@ -225,13 +225,13 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		// 使用Handlebars渲染模板
 		const template = Handlebars.compile(promptTemplate);
 		const prompt = template(templateData);
-		
+
 		logger.info(`Generated AI prompt for ${style.name}:`, prompt);
 
 		try {
 			// 使用Obsidian的requestUrl API来避免CORS问题
-			const { requestUrl } = require('obsidian');
-			
+			const {requestUrl} = require('obsidian');
+
 			const response = await requestUrl({
 				url: 'https://api.anthropic.com/v1/messages',
 				method: 'POST',
@@ -258,7 +258,7 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 
 			const result = response.json;
 			const aiResponse = result.content[0].text;
-			
+
 			// 解析JSON响应
 			try {
 				const parsedResult = JSON.parse(aiResponse);
@@ -440,7 +440,8 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 				isOpen={isCustomPromptModalOpen}
 				onClose={() => setIsCustomPromptModalOpen(false)}
 				settings={settings}
-				onSettingsChange={onSettingsChange || (() => {})}
+				onSettingsChange={onSettingsChange || (() => {
+				})}
 				onSaveSettings={onSaveSettings}
 				onAnalyze={handleAIAnalyze}
 			/>

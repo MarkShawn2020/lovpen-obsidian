@@ -3,7 +3,7 @@ import {AspectRatio} from "@/components/ui/aspect-ratio";
 import {XIcon} from "@/components/ui/XIcon";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import { Save } from "lucide-react";
+import {Save} from "lucide-react";
 
 interface CoverPreviewProps {
 	coverData?: CoverData;
@@ -56,12 +56,19 @@ export const CoverPreview: React.FC<CoverPreviewProps> = ({
 						>
 							图片加载失败
 						</div>
-						<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+						<div
+							className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 							{onSave && (
 								<button
 									onClick={onSave}
 									className="bg-green-600 bg-opacity-80 text-white flex items-center justify-center hover:bg-opacity-100 transition-all"
-									style={{width: '24px', height: '24px', borderRadius: '50%', padding: 0, border: 'none'}}
+									style={{
+										width: '24px',
+										height: '24px',
+										borderRadius: '50%',
+										padding: 0,
+										border: 'none'
+									}}
 									title={`保存${label}到封面库`}
 								>
 									<Save className="h-3 w-3"/>

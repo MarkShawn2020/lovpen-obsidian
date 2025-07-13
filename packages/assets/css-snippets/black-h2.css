@@ -1,73 +1,73 @@
 /* 基础h2样式 - 对两个平台通用的基础样式 */
 h2 {
-    margin: 30px 0px 15px;
-    align-items: unset;
-    background: none 0% 0% / auto no-repeat scroll padding-box border-box transparent;
-    border-style: none;
-    border-width: 1px;
-    border-color: rgb(0, 0, 0);
-    border-radius: 0px;
-    box-shadow: none;
-    display: flex;
-    flex-direction: unset;
-    float: unset;
-    height: auto;
-    justify-content: center;
-    line-height: 1.5em;
-    overflow: unset;
-    padding: 0px;
-    position: relative;
-    text-align: left;
-    text-shadow: none;
-    transform: none;
-    width: auto;
-    -webkit-box-reflect: unset;
+	margin: 30px 0px 15px;
+	align-items: unset;
+	background: none 0% 0% / auto no-repeat scroll padding-box border-box transparent;
+	border-style: none;
+	border-width: 1px;
+	border-color: rgb(0, 0, 0);
+	border-radius: 0px;
+	box-shadow: none;
+	display: flex;
+	flex-direction: unset;
+	float: unset;
+	height: auto;
+	justify-content: center;
+	line-height: 1.5em;
+	overflow: unset;
+	padding: 0px;
+	position: relative;
+	text-align: left;
+	text-shadow: none;
+	transform: none;
+	width: auto;
+	-webkit-box-reflect: unset;
 }
 
 h2 .prefix {
-    display: none;
+	display: none;
 }
 
 h2 .suffix {
-    display: none;
+	display: none;
 }
 
 h2 .content {
-    font-size: 18px;
-    color: rgb(255, 255, 255);
-    background: none 0% 0% / auto no-repeat scroll padding-box border-box rgb(0, 0, 0);
-    line-height: 1.5em;
-    letter-spacing: 0em;
-    padding: 2px 10px;
-    align-items: unset;
-    border-style: none;
-    border-width: 1px;
-    border-color: rgb(0, 0, 0);
-    border-radius: 0px;
-    box-shadow: none;
-    content: unset;
-    display: block;
-    font-weight: bold;
-    flex-direction: unset;
-    float: unset;
-    height: auto;
-    justify-content: unset;
-    margin: 0px;
-    overflow: unset;
-    position: relative;
-    text-align: left;
-    text-indent: 0em;
-    text-shadow: none;
-    transform: none;
-    width: auto;
-    -webkit-box-reflect: unset;
+	font-size: 18px;
+	color: rgb(255, 255, 255);
+	background: none 0% 0% / auto no-repeat scroll padding-box border-box rgb(0, 0, 0);
+	line-height: 1.5em;
+	letter-spacing: 0em;
+	padding: 2px 10px;
+	align-items: unset;
+	border-style: none;
+	border-width: 1px;
+	border-color: rgb(0, 0, 0);
+	border-radius: 0px;
+	box-shadow: none;
+	content: unset;
+	display: block;
+	font-weight: bold;
+	flex-direction: unset;
+	float: unset;
+	height: auto;
+	justify-content: unset;
+	margin: 0px;
+	overflow: unset;
+	position: relative;
+	text-align: left;
+	text-indent: 0em;
+	text-shadow: none;
+	transform: none;
+	width: auto;
+	-webkit-box-reflect: unset;
 }
 
 
 .note-to-mp element.style {
-    margin-left: 0px !important;
+	margin-left: 0px !important;
 }
 
 element.style {
-    margin-left: 0px !important;
+	margin-left: 0px !important;
 }

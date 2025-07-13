@@ -42,16 +42,6 @@ export abstract class RehypePlugin {
 	}
 
 	/**
-	 * 获取配置管理器（延迟初始化）
-	 */
-	protected getConfigManager(): PluginConfigManager {
-		if (!this.configManager) {
-			this.configManager = new PluginConfigManager(this.getName(), { enabled: true });
-		}
-		return this.configManager;
-	}
-
-	/**
 	 * 获取插件名称 - 子类必须实现
 	 */
 	abstract getName(): string;
@@ -109,5 +99,15 @@ export abstract class RehypePlugin {
 	}
 
 	abstract markedExtension(): MarkedExtension
+
+	/**
+	 * 获取配置管理器（延迟初始化）
+	 */
+	protected getConfigManager(): PluginConfigManager {
+		if (!this.configManager) {
+			this.configManager = new PluginConfigManager(this.getName(), {enabled: true});
+		}
+		return this.configManager;
+	}
 
 }

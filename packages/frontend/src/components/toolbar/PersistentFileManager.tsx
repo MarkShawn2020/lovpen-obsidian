@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Masonry from 'react-masonry-css';
-import { PersistentFile } from '../../types';
-import { persistentStorageService } from '../../services/persistentStorage';
-import { Trash2, Upload, Clock, FileText, Image, FolderOpen, Pin, PinOff } from 'lucide-react';
+import {PersistentFile} from '../../types';
+import {persistentStorageService} from '../../services/persistentStorage';
+import {Clock, FileText, FolderOpen, Image, Pin, PinOff, Trash2, Upload} from 'lucide-react';
 
 interface PersistentFileManagerProps {
 	onFileSelect: (fileUrl: string) => void;
@@ -11,10 +11,10 @@ interface PersistentFileManagerProps {
 }
 
 export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
-	onFileSelect,
-	acceptedTypes = ['image/*'],
-	title = '文件管理器'
-}) => {
+																				onFileSelect,
+																				acceptedTypes = ['image/*'],
+																				title = '文件管理器'
+																			}) => {
 	const [files, setFiles] = useState<PersistentFile[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string>('');
@@ -28,7 +28,7 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 		try {
 			setLoading(true);
 			const allFiles = await persistentStorageService.getFiles();
-			
+
 			const filteredFiles = allFiles.filter(file => {
 				if (acceptedTypes.includes('*')) return true;
 				return acceptedTypes.some(type => {
@@ -45,7 +45,7 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 				// 如果都是pin或都不是pin，按使用时间排序
 				return new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime();
 			});
-			
+
 			setFiles(filteredFiles);
 		} catch (err) {
 			setError('加载文件失败');
@@ -142,7 +142,10 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 			<div className="p-4 bg-red-50 border border-red-200 rounded-lg">
 				<p className="text-red-700 text-sm">{error}</p>
 				<button
-					onClick={() => { setError(''); loadFiles(); }}
+					onClick={() => {
+						setError('');
+						loadFiles();
+					}}
 					className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
 				>
 					重试
@@ -155,12 +158,13 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<FolderOpen className="h-5 w-5 text-blue-600" />
+					<FolderOpen className="h-5 w-5 text-blue-600"/>
 					<h4 className="font-medium text-gray-900">{title}</h4>
 					<span className="text-sm text-gray-500">({files.length})</span>
 					{files.filter(f => f.isPinned).length > 0 && (
-						<span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
-							<Pin className="h-3 w-3" />
+						<span
+							className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+							<Pin className="h-3 w-3"/>
 							{files.filter(f => f.isPinned).length}/3
 						</span>
 					)}
@@ -169,7 +173,7 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 					onClick={() => fileInputRef.current?.click()}
 					className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
 				>
-					<Upload className="h-4 w-4" />
+					<Upload className="h-4 w-4"/>
 					上传文件
 				</button>
 			</div>
@@ -191,7 +195,7 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 
 			{!loading && files.length === 0 && (
 				<div className="text-center py-8 text-gray-500">
-					<FolderOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+					<FolderOpen className="h-12 w-12 mx-auto mb-3 text-gray-400"/>
 					<p>暂无文件</p>
 					<p className="text-sm mt-1">点击上传文件按钮添加文件</p>
 				</div>
@@ -251,21 +255,21 @@ interface FileCardProps {
 }
 
 const FileCard: React.FC<FileCardProps> = ({
-	file,
-	onSelect,
-	onTogglePin,
-	onDelete,
-	formatFileSize,
-	formatDate
-}) => {
+											   file,
+											   onSelect,
+											   onTogglePin,
+											   onDelete,
+											   formatFileSize,
+											   formatDate
+										   }) => {
 	const [imageUrl, setImageUrl] = useState<string>('');
 	const [imageLoading, setImageLoading] = useState(true);
 	const [imageError, setImageError] = useState(false);
-	const [imageDimensions, setImageDimensions] = useState<{width: number, height: number} | null>(null);
+	const [imageDimensions, setImageDimensions] = useState<{ width: number, height: number } | null>(null);
 
 	useEffect(() => {
 		let mounted = true;
-		
+
 		const loadImage = async () => {
 			if (file.type.startsWith('image/')) {
 				try {
@@ -278,7 +282,7 @@ const FileCard: React.FC<FileCardProps> = ({
 						const img = document.createElement('img');
 						img.onload = () => {
 							if (mounted) {
-								setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+								setImageDimensions({width: img.naturalWidth, height: img.naturalHeight});
 								setImageLoading(false);
 							}
 						};
@@ -313,19 +317,19 @@ const FileCard: React.FC<FileCardProps> = ({
 	}, [file]);
 
 	const getFileIcon = (type: string) => {
-		if (type.startsWith('image/')) return <Image className="h-8 w-8" />;
-		return <FileText className="h-8 w-8" />;
+		if (type.startsWith('image/')) return <Image className="h-8 w-8"/>;
+		return <FileText className="h-8 w-8"/>;
 	};
 
 	// 计算显示尺寸，让图片保持原始比例
 	const getDisplayDimensions = () => {
-		if (!imageDimensions) return { width: '100%', height: 120 }; // 默认尺寸
-		
+		if (!imageDimensions) return {width: '100%', height: 120}; // 默认尺寸
+
 		// 计算容器宽度（约为工具栏的一半减去间距）
 		const containerWidth = 180; // 大概的容器宽度
 		const ratio = imageDimensions.height / imageDimensions.width;
 		const displayHeight = Math.min(containerWidth * ratio, 300); // 最大高度300px
-		
+
 		return {
 			width: '100%',
 			height: displayHeight
@@ -338,43 +342,44 @@ const FileCard: React.FC<FileCardProps> = ({
 		<div
 			onClick={onSelect}
 			className="relative bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-md transition-all duration-200 group"
-			style={{ width: '100%' }}
+			style={{width: '100%'}}
 		>
 			{/* Pin指示器 */}
 			{file.isPinned && (
 				<div className="absolute top-2 left-2 z-10">
 					<div className="bg-orange-500 text-white rounded-full p-1">
-						<Pin className="h-3 w-3" />
+						<Pin className="h-3 w-3"/>
 					</div>
 				</div>
 			)}
 
 			{/* 操作按钮 */}
-			<div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+			<div
+				className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 				<button
 					onClick={onTogglePin}
 					className={`p-1.5 rounded-full transition-all ${
-						file.isPinned 
-							? 'bg-orange-500 bg-opacity-80 text-white hover:bg-opacity-100' 
+						file.isPinned
+							? 'bg-orange-500 bg-opacity-80 text-white hover:bg-opacity-100'
 							: 'bg-black bg-opacity-60 text-white hover:bg-opacity-80'
 					}`}
 					title={file.isPinned ? '取消置顶' : '置顶'}
 				>
-					{file.isPinned ? <Pin className="h-3 w-3" /> : <PinOff className="h-3 w-3" />}
+					{file.isPinned ? <Pin className="h-3 w-3"/> : <PinOff className="h-3 w-3"/>}
 				</button>
 				<button
 					onClick={onDelete}
 					className="p-1.5 bg-red-500 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all"
 					title="删除文件"
 				>
-					<Trash2 className="h-3 w-3" />
+					<Trash2 className="h-3 w-3"/>
 				</button>
 			</div>
 
 			{/* 图片预览区域 */}
-			<div 
+			<div
 				className="bg-gray-50 relative"
-				style={{ 
+				style={{
 					height: file.type.startsWith('image/') ? displayDimensions.height : '120px'
 				}}
 			>
@@ -396,7 +401,7 @@ const FileCard: React.FC<FileCardProps> = ({
 						{!imageLoading && (imageError || !imageUrl) && (
 							<div className="w-full h-full flex items-center justify-center text-gray-400">
 								<div className="text-center">
-									<Image className="h-8 w-8 mx-auto mb-1" />
+									<Image className="h-8 w-8 mx-auto mb-1"/>
 									<p className="text-xs">预览失败</p>
 								</div>
 							</div>
@@ -422,7 +427,7 @@ const FileCard: React.FC<FileCardProps> = ({
 				<div className="flex items-center justify-between text-xs text-gray-500">
 					<span>{formatFileSize(file.size)}</span>
 					<div className="flex items-center gap-1">
-						<Clock className="h-3 w-3" />
+						<Clock className="h-3 w-3"/>
 						<span>{formatDate(file.lastUsed)}</span>
 					</div>
 				</div>

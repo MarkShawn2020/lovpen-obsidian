@@ -1,14 +1,14 @@
 import {
-	PersistentFile,
-	PersistentCover,
-	PersistentTemplateKit,
-	PersistentPluginConfig,
-	PersistentPersonalInfo,
+	ArticleInfoData,
 	PersistentArticleInfo,
+	PersistentCover,
+	PersistentFile,
+	PersistentPersonalInfo,
+	PersistentPluginConfig,
 	PersistentStyleSettings,
-	TemplateKit,
+	PersistentTemplateKit,
 	PersonalInfo,
-	ArticleInfoData
+	TemplateKit
 } from '../types';
 
 const STORAGE_KEYS = {
@@ -36,35 +36,22 @@ export class PersistentStorageService {
 		return PersistentStorageService.instance;
 	}
 
-	private async ensureDirectoryExists(dirPath: string): Promise<void> {
-		try {
-			if (this.obsidianVault?.adapter?.exists) {
-				const exists = await this.obsidianVault.adapter.exists(dirPath);
-				if (!exists && this.obsidianVault?.adapter?.mkdir) {
-					await this.obsidianVault.adapter.mkdir(dirPath);
-				}
-			}
-		} catch (error) {
-			console.warn('创建目录失败:', dirPath, error);
-		}
-	}
-
 	async saveFile(file: File, customName?: string): Promise<PersistentFile> {
 		const id = this.generateId();
 		const name = customName || file.name;
 		const fileName = `lovpen-files/${id}-${name}`;
-		
+
 		try {
 			// 确保目录存在
 			await this.ensureDirectoryExists('lovpen-files');
-			
+
 			const arrayBuffer = await file.arrayBuffer();
 			const uint8Array = new Uint8Array(arrayBuffer);
-			
+
 			if (this.obsidianVault?.adapter?.write) {
 				await this.obsidianVault.adapter.write(fileName, uint8Array);
 			}
-			
+
 			const persistentFile: PersistentFile = {
 				id,
 				name,
@@ -75,7 +62,7 @@ export class PersistentStorageService {
 				lastUsed: new Date().toISOString()
 				// 不保存 blob，因为它无法序列化到 localStorage
 			};
-			
+
 			await this.addFileToIndex(persistentFile);
 			return persistentFile;
 		} catch (error) {
@@ -87,16 +74,16 @@ export class PersistentStorageService {
 	async saveFileFromUrl(url: string, name: string, type: string): Promise<PersistentFile> {
 		const id = this.generateId();
 		const fileName = `lovpen-files/${id}-${name}`;
-		
+
 		try {
 			// 确保目录存在
 			await this.ensureDirectoryExists('lovpen-files');
-			
+
 			let arrayBuffer: ArrayBuffer;
-			
+
 			if (url.startsWith('http://') || url.startsWith('https://')) {
-				const { requestUrl } = require('obsidian');
-				const response = await requestUrl({ url, method: 'GET' });
+				const {requestUrl} = require('obsidian');
+				const response = await requestUrl({url, method: 'GET'});
 				arrayBuffer = response.arrayBuffer;
 			} else if (url.startsWith('blob:') || url.startsWith('data:')) {
 				const response = await fetch(url);
@@ -104,13 +91,13 @@ export class PersistentStorageService {
 			} else {
 				throw new Error('不支持的URL类型');
 			}
-			
+
 			const uint8Array = new Uint8Array(arrayBuffer);
-			
+
 			if (this.obsidianVault?.adapter?.write) {
 				await this.obsidianVault.adapter.write(fileName, uint8Array);
 			}
-			
+
 			const persistentFile: PersistentFile = {
 				id,
 				name,
@@ -120,7 +107,7 @@ export class PersistentStorageService {
 				createdAt: new Date().toISOString(),
 				lastUsed: new Date().toISOString()
 			};
-			
+
 			await this.addFileToIndex(persistentFile);
 			return persistentFile;
 		} catch (error) {
@@ -128,7 +115,6 @@ export class PersistentStorageService {
 			throw error;
 		}
 	}
-
 
 	async getFiles(): Promise<PersistentFile[]> {
 		try {
@@ -140,16 +126,15 @@ export class PersistentStorageService {
 		}
 	}
 
-
 	async deleteFile(id: string): Promise<void> {
 		try {
 			const files = await this.getFiles();
 			const fileToDelete = files.find(f => f.id === id);
-			
+
 			if (fileToDelete && this.obsidianVault?.adapter?.remove) {
 				await this.obsidianVault.adapter.remove(fileToDelete.path);
 			}
-			
+
 			const updatedFiles = files.filter(f => f.id !== id);
 			localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(updatedFiles));
 		} catch (error) {
@@ -157,7 +142,6 @@ export class PersistentStorageService {
 			throw error;
 		}
 	}
-
 
 	async getFileUrl(file: PersistentFile): Promise<string> {
 		try {
@@ -168,15 +152,15 @@ export class PersistentStorageService {
 				type: file.type,
 				size: file.size
 			});
-			
+
 			if (!file.path) {
 				throw new Error('文件路径不存在');
 			}
-			
+
 			if (!this.obsidianVault?.adapter?.read) {
 				throw new Error('Obsidian adapter 不可用');
 			}
-			
+
 			// 检查文件是否存在
 			if (this.obsidianVault?.adapter?.exists) {
 				const exists = await this.obsidianVault.adapter.exists(file.path);
@@ -185,18 +169,18 @@ export class PersistentStorageService {
 					throw new Error(`文件不存在: ${file.path}`);
 				}
 			}
-			
+
 			// 尝试以二进制方式读取文件
 			let data: any;
 			console.log(`[PersistentStorage] 尝试读取文件:`, file.path);
-			
+
 			// 检查 Obsidian adapter 的可用方法
 			console.log(`[PersistentStorage] Adapter 方法:`, {
 				hasRead: !!this.obsidianVault?.adapter?.read,
 				hasReadBinary: !!this.obsidianVault?.adapter?.readBinary,
 				adapterType: this.obsidianVault?.adapter?.constructor?.name
 			});
-			
+
 			// 尝试使用 readBinary 方法（如果可用）
 			if (this.obsidianVault?.adapter?.readBinary) {
 				console.log(`[PersistentStorage] 使用 readBinary 方法`);
@@ -205,7 +189,7 @@ export class PersistentStorageService {
 				console.log(`[PersistentStorage] 使用 read 方法`);
 				data = await this.obsidianVault.adapter.read(file.path);
 			}
-			
+
 			console.log(`[PersistentStorage] 读取文件成功:`, {
 				dataType: typeof data,
 				constructor: data?.constructor?.name,
@@ -214,7 +198,7 @@ export class PersistentStorageService {
 				isUint8Array: data instanceof Uint8Array,
 				isString: typeof data === 'string'
 			});
-			
+
 			// 处理不同的数据格式
 			let binaryData: ArrayBuffer | Uint8Array;
 			if (data instanceof ArrayBuffer) {
@@ -237,29 +221,28 @@ export class PersistentStorageService {
 				console.log(`[PersistentStorage] 其他数据类型，尝试转换`);
 				binaryData = new Uint8Array(data);
 			}
-			
-			const blob = new Blob([binaryData], { type: file.type || 'application/octet-stream' });
-			console.log(`[PersistentStorage] 创建 blob:`, { size: blob.size, type: blob.type });
-			
+
+			const blob = new Blob([binaryData], {type: file.type || 'application/octet-stream'});
+			console.log(`[PersistentStorage] 创建 blob:`, {size: blob.size, type: blob.type});
+
 			if (blob.size === 0) {
 				throw new Error('创建的 blob 为空');
 			}
-			
+
 			const url = URL.createObjectURL(blob);
 			console.log(`[PersistentStorage] 成功创建文件URL`);
 			return url;
-			
+
 		} catch (error) {
 			console.error(`[PersistentStorage] 获取文件URL失败:`, error);
 			throw error;
 		}
 	}
 
-
 	async updateFileUsage(id: string): Promise<void> {
 		const files = await this.getFiles();
 		const fileIndex = files.findIndex(f => f.id === id);
-		
+
 		if (fileIndex !== -1) {
 			files[fileIndex].lastUsed = new Date().toISOString();
 			localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(files));
@@ -269,7 +252,7 @@ export class PersistentStorageService {
 	async pinFile(id: string): Promise<void> {
 		const files = await this.getFiles();
 		const fileIndex = files.findIndex(f => f.id === id);
-		
+
 		if (fileIndex === -1) {
 			throw new Error('文件不存在');
 		}
@@ -288,7 +271,7 @@ export class PersistentStorageService {
 	async unpinFile(id: string): Promise<void> {
 		const files = await this.getFiles();
 		const fileIndex = files.findIndex(f => f.id === id);
-		
+
 		if (fileIndex !== -1) {
 			files[fileIndex].isPinned = false;
 			delete files[fileIndex].pinnedAt;
@@ -296,19 +279,11 @@ export class PersistentStorageService {
 		}
 	}
 
-
-	private async addFileToIndex(file: PersistentFile): Promise<void> {
-		const files = await this.getFiles();
-		files.push(file);
-		localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(files));
-	}
-
-
 	// Template Kit Management
 	async saveTemplateKit(kitData: TemplateKit, customName?: string): Promise<PersistentTemplateKit> {
 		const id = this.generateId();
 		const name = customName || kitData.basicInfo.name;
-		
+
 		try {
 			const persistentKit: PersistentTemplateKit = {
 				id,
@@ -321,7 +296,7 @@ export class PersistentStorageService {
 				createdAt: new Date().toISOString(),
 				lastUsed: new Date().toISOString()
 			};
-			
+
 			await this.addTemplateKitToIndex(persistentKit);
 			return persistentKit;
 		} catch (error) {
@@ -356,7 +331,7 @@ export class PersistentStorageService {
 		try {
 			const configs = await this.getPluginConfigs();
 			const existingIndex = configs.findIndex(c => c.pluginName === pluginName);
-			
+
 			const persistentConfig: PersistentPluginConfig = {
 				id: existingIndex >= 0 ? configs[existingIndex].id : this.generateId(),
 				pluginName,
@@ -364,13 +339,13 @@ export class PersistentStorageService {
 				metaConfig,
 				updatedAt: new Date().toISOString()
 			};
-			
+
 			if (existingIndex >= 0) {
 				configs[existingIndex] = persistentConfig;
 			} else {
 				configs.push(persistentConfig);
 			}
-			
+
 			localStorage.setItem(STORAGE_KEYS.PLUGIN_CONFIGS, JSON.stringify(configs));
 			return persistentConfig;
 		} catch (error) {
@@ -402,7 +377,7 @@ export class PersistentStorageService {
 				data: info,
 				updatedAt: new Date().toISOString()
 			};
-			
+
 			localStorage.setItem(STORAGE_KEYS.PERSONAL_INFO, JSON.stringify(persistentInfo));
 			return persistentInfo;
 		} catch (error) {
@@ -429,7 +404,7 @@ export class PersistentStorageService {
 				data: info,
 				updatedAt: new Date().toISOString()
 			};
-			
+
 			localStorage.setItem(STORAGE_KEYS.ARTICLE_INFO, JSON.stringify(persistentInfo));
 			return persistentInfo;
 		} catch (error) {
@@ -463,7 +438,7 @@ export class PersistentStorageService {
 				...settings,
 				updatedAt: new Date().toISOString()
 			};
-			
+
 			localStorage.setItem(STORAGE_KEYS.STYLE_SETTINGS, JSON.stringify(persistentSettings));
 			return persistentSettings;
 		} catch (error) {
@@ -493,7 +468,7 @@ export class PersistentStorageService {
 				createdAt: new Date().toISOString(),
 				lastUsed: new Date().toISOString()
 			};
-			
+
 			await this.addCoverToIndex(persistentCover);
 			return persistentCover;
 		} catch (error) {
@@ -521,12 +496,6 @@ export class PersistentStorageService {
 			console.error('删除封面失败:', error);
 			throw error;
 		}
-	}
-
-	private async addCoverToIndex(cover: PersistentCover): Promise<void> {
-		const covers = await this.getCovers();
-		covers.push(cover);
-		localStorage.setItem(STORAGE_KEYS.COVERS, JSON.stringify(covers));
 	}
 
 	// Clear all persistent data
@@ -560,6 +529,31 @@ export class PersistentStorageService {
 			console.error('导出数据失败:', error);
 			throw error;
 		}
+	}
+
+	private async ensureDirectoryExists(dirPath: string): Promise<void> {
+		try {
+			if (this.obsidianVault?.adapter?.exists) {
+				const exists = await this.obsidianVault.adapter.exists(dirPath);
+				if (!exists && this.obsidianVault?.adapter?.mkdir) {
+					await this.obsidianVault.adapter.mkdir(dirPath);
+				}
+			}
+		} catch (error) {
+			console.warn('创建目录失败:', dirPath, error);
+		}
+	}
+
+	private async addFileToIndex(file: PersistentFile): Promise<void> {
+		const files = await this.getFiles();
+		files.push(file);
+		localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(files));
+	}
+
+	private async addCoverToIndex(cover: PersistentCover): Promise<void> {
+		const covers = await this.getCovers();
+		covers.push(cover);
+		localStorage.setItem(STORAGE_KEYS.COVERS, JSON.stringify(covers));
 	}
 
 	private async addTemplateKitToIndex(kit: PersistentTemplateKit): Promise<void> {

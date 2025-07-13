@@ -5,7 +5,7 @@ import {persistentStorageService} from '../../services/persistentStorage';
 
 import {CoverAspectRatio, CoverImageSource} from "@/components/toolbar/cover/types";
 import {logger} from "../../../../shared/src/logger";
-import { imageGenerationService } from '@/services/imageGenerationService';
+import {imageGenerationService} from '@/services/imageGenerationService';
 
 interface ExtractedImage {
 	src: string;

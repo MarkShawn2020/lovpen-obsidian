@@ -13,46 +13,51 @@
 -->
 
 <!-- 开头 Section - 专注内容本身 -->
-<section style="max-width: 1280px; margin: 16px 0px; background-color: #000000; padding: 16px; box-sizing: border-box; font-family: sans-serif; color: #d1d5db; line-height: 1.6;">
-    <!-- 使用单一section并添加边框和背景样式，避免嵌套定位 -->
-    <section style="border: 1px solid #E31937; padding: 24px; margin-bottom: 24px; border-radius: 8px; background-color: #000000; background-image: linear-gradient(to bottom right, rgba(227, 25, 55, 0.4), transparent);">
-        <!-- 内容容器，不使用z-index -->
-            <!-- 系列标识和期数 -->
-            <section style="margin-bottom: 16px;">
-                <p style="font-size: 14px; color: #E31937; margin: 0; text-transform: uppercase;">{{seriesName}}</p>
-                <p style="font-size: 16px; color: #ffffff; margin: 4px 0 0 0; font-weight: bold;">{{episodeNum}}</p>
-            </section>
-            
-            <!-- 文章标题 -->
-            <h1 style="font-size: 32px; font-weight: bold; color: #ffffff; margin: 0 0 8px 0; line-height: 1.2;">{{articleTitle}}</h1>
-            
-            <!-- 文章副标题 -->
-            <p style="font-size: 18px; color: #d1d5db; margin: 0 0 24px 0; line-height: 1.4;">{{articleSubtitle}}</p>
-            
-            <!-- 作者和日期信息 -->
-            <section style="margin-bottom: 16px; color: #a0a0a0; font-size: 14px;">
-                <span>作者：{{author}}</span>
-                <span style="color: #666; margin: 0 8px;">·</span>
-                <span>{{publishDate}}</span>
-            </section>
-            
-            <!-- 封面图片（可选） -->
-            {{#if coverImage}}
-            <section style="margin: 24px 0;">
-                <img src="{{coverImage}}" alt="文章封面" style="width: 100%; border-radius: 6px; display: block; background-color: rgba(255, 255, 255, 0.1);">
-            </section>
-            {{/if}}
-            
-            <!-- 可选的标签区域 -->
-            {{#if tags}}
-            <section style="margin-top: 16px;">
-                {{#each tags}}
-                <span style="display: inline-block; background-color: rgba(255, 255, 255, 0.1); color: #E31937; padding: 4px 12px; margin: 0 8px 8px 0; border-radius: 16px; font-size: 14px;">#{{this}}</span>
-                {{/each}}
-            </section>
-            {{/if}}
-        </section>
-    </section>
+<section
+	style="max-width: 1280px; margin: 16px 0px; background-color: #000000; padding: 16px; box-sizing: border-box; font-family: sans-serif; color: #d1d5db; line-height: 1.6;">
+	<!-- 使用单一section并添加边框和背景样式，避免嵌套定位 -->
+	<section
+		style="border: 1px solid #E31937; padding: 24px; margin-bottom: 24px; border-radius: 8px; background-color: #000000; background-image: linear-gradient(to bottom right, rgba(227, 25, 55, 0.4), transparent);">
+		<!-- 内容容器，不使用z-index -->
+		<!-- 系列标识和期数 -->
+		<section style="margin-bottom: 16px;">
+			<p style="font-size: 14px; color: #E31937; margin: 0; text-transform: uppercase;">{{seriesName}}</p>
+			<p style="font-size: 16px; color: #ffffff; margin: 4px 0 0 0; font-weight: bold;">{{episodeNum}}</p>
+		</section>
+
+		<!-- 文章标题 -->
+		<h1 style="font-size: 32px; font-weight: bold; color: #ffffff; margin: 0 0 8px 0; line-height: 1.2;">
+			{{articleTitle}}</h1>
+
+		<!-- 文章副标题 -->
+		<p style="font-size: 18px; color: #d1d5db; margin: 0 0 24px 0; line-height: 1.4;">{{articleSubtitle}}</p>
+
+		<!-- 作者和日期信息 -->
+		<section style="margin-bottom: 16px; color: #a0a0a0; font-size: 14px;">
+			<span>作者：{{author}}</span>
+			<span style="color: #666; margin: 0 8px;">·</span>
+			<span>{{publishDate}}</span>
+		</section>
+
+		<!-- 封面图片（可选） -->
+		{{#if coverImage}}
+		<section style="margin: 24px 0;">
+			<img alt="文章封面" src="{{coverImage}}"
+				 style="width: 100%; border-radius: 6px; display: block; background-color: rgba(255, 255, 255, 0.1);">
+		</section>
+		{{/if}}
+
+		<!-- 可选的标签区域 -->
+		{{#if tags}}
+		<section style="margin-top: 16px;">
+			{{#each tags}}
+			<span
+				style="display: inline-block; background-color: rgba(255, 255, 255, 0.1); color: #E31937; padding: 4px 12px; margin: 0 8px 8px 0; border-radius: 16px; font-size: 14px;">#{{this}}</span>
+			{{/each}}
+		</section>
+		{{/if}}
+	</section>
+</section>
 </section>
 
 <!-- ===================================================== -->
@@ -65,91 +70,109 @@
 <!-- ===================================================== -->
 
 <section style="text-align: center; margin: 16px 0px;">
-<a href="https://mp.weixin.qq.com/s?__biz=Mzg2OTg5NDg3Mg==&amp;mid=2247487048&amp;idx=1&amp;sn=2f8c447da4feb670a3a94edff0bb4ff3&amp;scene=21#wechat_redirect" target="_blank">
-    <img alt="手工川的产品哲学" src="https://mmbiz.qpic.cn/sz_mmbiz_gif/2niaYkVLHpnGI7oTqr1SPDbWJH43RJ5CThcRPyxibARYI48jicrtzbd9tw46KAyMeh0K53cxeb9Q9XHaIykBkCPqQ/640?wx_fmt=gif" style="max-width: 100%; border-radius: 4px;">
-</a>
+	<a href="https://mp.weixin.qq.com/s?__biz=Mzg2OTg5NDg3Mg==&amp;mid=2247487048&amp;idx=1&amp;sn=2f8c447da4feb670a3a94edff0bb4ff3&amp;scene=21#wechat_redirect"
+	   target="_blank">
+		<img alt="手工川的产品哲学"
+			 src="https://mmbiz.qpic.cn/sz_mmbiz_gif/2niaYkVLHpnGI7oTqr1SPDbWJH43RJ5CThcRPyxibARYI48jicrtzbd9tw46KAyMeh0K53cxeb9Q9XHaIykBkCPqQ/640?wx_fmt=gif"
+			 style="max-width: 100%; border-radius: 4px;">
+	</a>
 </section>
 
 <!-- 结尾 Section - 公众号推广 -->
-<section style="max-width: 1280px; margin: 16px 0px; background-color: #000000; padding: 16px; box-sizing: border-box; font-family: sans-serif; color: #d1d5db; line-height: 1.6;">
-    <section style="border: 1px solid #E31937; border-radius: 8px; background-color: #000000; padding: 24px;">
-        <!-- 头部区域 - 公众号标识 -->
-        <section style="text-align: center; margin-bottom: 24px;">
-            <section style="font-size: 28px; font-weight: bold; color: #E31937; margin: 0 0 8px 0; font-family: sans-serif;">手工川</section>
-            <p style="font-size: 14px; color: #a0a0a0; margin: 0; letter-spacing: 0.5px;">Stay Fool, Stay Hungry.</p>
-        </section>
-        
-        <!-- 核心价值 -->
-        <section style="text-align: center; margin-bottom: 24px;">
-            <p style="font-size: 20px; color: #ffffff; margin: 0 0 16px 0; line-height: 1.6;">精选<strong style="color: #E31937;">真正有价值的内容</strong></p>
-            <p style="font-size: 16px; color: #d1d5db; margin: 0;">为对的人，带来对的启发</p>
-            <p style="font-size: 16px; color: #d1d5db; margin: 0;">在这里遇见高质量的思考</p>
-        </section>
-        
-        <!-- 社群与活动 -->
-        <section style="margin-bottom: 24px;">
-            <!-- 在线社群 -->
-            <section style="background-color: rgba(227, 25, 55, 0.1); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                <p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 16px;">🌐 在线社群</p>
-                <p style="color: #d1d5db; margin: 0 0 8px 0; font-size: 14px; line-height: 1.6;">免费微信交流社区，汇聚 AI 领域创始人、投资人、产品经理、工程师、设计师、运营增长等专业人士</p>
-                <p style="color: #E31937; font-size: 14px; margin: 0; line-height: 1.6; text-align: center;">后台回复“申请加入手工川读者群”</p>
-            </section>
-            
-            <!-- 线下活动 -->
-            <section style="background-color: rgba(227, 25, 55, 0.1); border-radius: 8px; padding: 16px;">
-                <p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 16px;">🎓 线下学习</p>
-                <p style="color: #d1d5db; margin: 0 0 8px 0; font-size: 14px; line-height: 1.6;">每周日下午，北京海淀 AI 通识/编程/实战训练营，与创业者、律师、自媒体博主等各行各业的朋友一起学习</p>
-                <p style="color: #E31937; font-size: 14px; margin: 0; line-height: 1.6; text-align: center;">后台回复“申请北京线下组团学习AI”</p>
-            </section>
-        </section>
-        
-        <!-- 三大主题 - 精致排版样式 -->
-        <section style="text-align: center; margin-bottom: 24px; padding: 16px 0; display: flex; align-items: center;">
-            <!-- 使用内联元素和分隔线替代表格 -->
-            <section style="display: inline-block; text-align: center; width: 32%; vertical-align: top;">
-                <p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">工程</p>
-                <p style="color: #d1d5db; font-size: 14px; margin: 0;">技术实践</p>
-            </section>
-            
-            <!-- 第一条分隔线 -->
-            <section style="display: inline-block; width: 1px; height: 40px; background-color: rgba(227, 25, 55, 0.5); margin: 0 1%; vertical-align: middle;"></section>
-            
-            <!-- 产品区块 -->
-            <section style="display: inline-block; text-align: center; width: 32%; vertical-align: top;">
-                <p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">产品</p>
-                <p style="color: #d1d5db; font-size: 14px; margin: 0;">设计思维</p>
-            </section>
-            
-            <!-- 第二条分隔线 -->
-            <section style="display: inline-block; width: 1px; height: 40px; background-color: rgba(227, 25, 55, 0.5); margin: 0 1%; vertical-align: middle;"></section>
-            
-            <!-- 创业区块 -->
-            <section style="display: inline-block; text-align: center; width: 32%; vertical-align: top;">
-                <p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">创业</p>
-                <p style="color: #d1d5db; font-size: 14px; margin: 0;">商业洞察</p>
-            </section>
-        </section>
-        
-        <!-- CTA -->
-        <section style="text-align: center; margin-bottom: 24px;">
-            <span style="display: inline-block; background-color: #E31937; color: #ffffff; padding: 12px 32px; border-radius: 24px; font-size: 16px; font-weight: bold; margin-right: 8px;">感谢您的时间！</span>
-            <!-- <span style="display: inline-block; background-color: transparent; border: 1px solid #E31937; color: #E31937; padding: 12px 32px; border-radius: 24px; font-size: 16px; font-weight: bold;">加入社群</span> -->
-        </section>
-        
-        <!-- 分享理念 -->
-        <section style="text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 16px;">
-            <p style="font-size: 14px; color: #a0a0a0; margin: 0; line-height: 1.6;">如果文章对您有价值，欢迎分享给同行</p>
-        </section>
-    </section>
+<section
+	style="max-width: 1280px; margin: 16px 0px; background-color: #000000; padding: 16px; box-sizing: border-box; font-family: sans-serif; color: #d1d5db; line-height: 1.6;">
+	<section style="border: 1px solid #E31937; border-radius: 8px; background-color: #000000; padding: 24px;">
+		<!-- 头部区域 - 公众号标识 -->
+		<section style="text-align: center; margin-bottom: 24px;">
+			<section
+				style="font-size: 28px; font-weight: bold; color: #E31937; margin: 0 0 8px 0; font-family: sans-serif;">
+				手工川
+			</section>
+			<p style="font-size: 14px; color: #a0a0a0; margin: 0; letter-spacing: 0.5px;">Stay Fool, Stay Hungry.</p>
+		</section>
+
+		<!-- 核心价值 -->
+		<section style="text-align: center; margin-bottom: 24px;">
+			<p style="font-size: 20px; color: #ffffff; margin: 0 0 16px 0; line-height: 1.6;">精选<strong
+				style="color: #E31937;">真正有价值的内容</strong></p>
+			<p style="font-size: 16px; color: #d1d5db; margin: 0;">为对的人，带来对的启发</p>
+			<p style="font-size: 16px; color: #d1d5db; margin: 0;">在这里遇见高质量的思考</p>
+		</section>
+
+		<!-- 社群与活动 -->
+		<section style="margin-bottom: 24px;">
+			<!-- 在线社群 -->
+			<section
+				style="background-color: rgba(227, 25, 55, 0.1); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+				<p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 16px;">🌐 在线社群</p>
+				<p style="color: #d1d5db; margin: 0 0 8px 0; font-size: 14px; line-height: 1.6;">免费微信交流社区，汇聚
+					AI 领域创始人、投资人、产品经理、工程师、设计师、运营增长等专业人士</p>
+				<p style="color: #E31937; font-size: 14px; margin: 0; line-height: 1.6; text-align: center;">
+					后台回复“申请加入手工川读者群”</p>
+			</section>
+
+			<!-- 线下活动 -->
+			<section style="background-color: rgba(227, 25, 55, 0.1); border-radius: 8px; padding: 16px;">
+				<p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 16px;">🎓 线下学习</p>
+				<p style="color: #d1d5db; margin: 0 0 8px 0; font-size: 14px; line-height: 1.6;">每周日下午，北京海淀 AI
+					通识/编程/实战训练营，与创业者、律师、自媒体博主等各行各业的朋友一起学习</p>
+				<p style="color: #E31937; font-size: 14px; margin: 0; line-height: 1.6; text-align: center;">
+					后台回复“申请北京线下组团学习AI”</p>
+			</section>
+		</section>
+
+		<!-- 三大主题 - 精致排版样式 -->
+		<section style="text-align: center; margin-bottom: 24px; padding: 16px 0; display: flex; align-items: center;">
+			<!-- 使用内联元素和分隔线替代表格 -->
+			<section style="display: inline-block; text-align: center; width: 32%; vertical-align: top;">
+				<p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">工程</p>
+				<p style="color: #d1d5db; font-size: 14px; margin: 0;">技术实践</p>
+			</section>
+
+			<!-- 第一条分隔线 -->
+			<section
+				style="display: inline-block; width: 1px; height: 40px; background-color: rgba(227, 25, 55, 0.5); margin: 0 1%; vertical-align: middle;"></section>
+
+			<!-- 产品区块 -->
+			<section style="display: inline-block; text-align: center; width: 32%; vertical-align: top;">
+				<p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">产品</p>
+				<p style="color: #d1d5db; font-size: 14px; margin: 0;">设计思维</p>
+			</section>
+
+			<!-- 第二条分隔线 -->
+			<section
+				style="display: inline-block; width: 1px; height: 40px; background-color: rgba(227, 25, 55, 0.5); margin: 0 1%; vertical-align: middle;"></section>
+
+			<!-- 创业区块 -->
+			<section style="display: inline-block; text-align: center; width: 32%; vertical-align: top;">
+				<p style="color: #E31937; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">创业</p>
+				<p style="color: #d1d5db; font-size: 14px; margin: 0;">商业洞察</p>
+			</section>
+		</section>
+
+		<!-- CTA -->
+		<section style="text-align: center; margin-bottom: 24px;">
+			<span
+				style="display: inline-block; background-color: #E31937; color: #ffffff; padding: 12px 32px; border-radius: 24px; font-size: 16px; font-weight: bold; margin-right: 8px;">感谢您的时间！</span>
+			<!-- <span style="display: inline-block; background-color: transparent; border: 1px solid #E31937; color: #E31937; padding: 12px 32px; border-radius: 24px; font-size: 16px; font-weight: bold;">加入社群</span> -->
+		</section>
+
+		<!-- 分享理念 -->
+		<section style="text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 16px;">
+			<p style="font-size: 14px; color: #a0a0a0; margin: 0; line-height: 1.6;">
+				如果文章对您有价值，欢迎分享给同行</p>
+		</section>
+	</section>
 </section>
 
 
 <section class="mp_profile_iframe_wrp custom_select_card_wrp" nodeleaf="">
-    <mp-common-profile class="mpprofile js_uneditable custom_select_card mp_profile_iframe"
-        data-pluginname="mpprofile" data-nickname="手工川 - AI版"
-        data-headimg="http://mmbiz.qpic.cn/sz_mmbiz_png/2niaYkVLHpnHrib4AVjPtsDtX5NBicQhzw8NI8V1bDIhJboJmQ64yiaPb9ianoORa4hhLQTWQJHBb0Os8ia7WyDSLn0w/0?wx_fmt=png"
-        data-signature="努力记录每一个从0到1的开发瞬间，愿我们在AI浪潮中都能找到属于自己的可能性。" data-id="Mzg2OTg5NDg3Mg==" data-service_type="1"
-        data-verify_status="1">
-    </mp-common-profile>
-    <!-- <br class="ProseMirror-trailingBreak"> -->
-    </section>
+	<mp-common-profile class="mpprofile js_uneditable custom_select_card mp_profile_iframe"
+					   data-headimg="http://mmbiz.qpic.cn/sz_mmbiz_png/2niaYkVLHpnHrib4AVjPtsDtX5NBicQhzw8NI8V1bDIhJboJmQ64yiaPb9ianoORa4hhLQTWQJHBb0Os8ia7WyDSLn0w/0?wx_fmt=png" data-id="Mzg2OTg5NDg3Mg=="
+					   data-nickname="手工川 - AI版"
+					   data-pluginname="mpprofile"
+					   data-service_type="1" data-signature="努力记录每一个从0到1的开发瞬间，愿我们在AI浪潮中都能找到属于自己的可能性。"
+					   data-verify_status="1">
+	</mp-common-profile>
+	<!-- <br class="ProseMirror-trailingBreak"> -->
+</section>

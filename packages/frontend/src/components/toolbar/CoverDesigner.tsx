@@ -3,15 +3,10 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../
 import {CoverPreview} from "@/components/toolbar/CoverPreview";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {CoverEditor} from "@/components/toolbar/CoverEditor";
-import {
-	CoverAspectRatio,
-	CoverImageSource,
-	ExtractedImage,
-	GenerationStatus
-} from "@/components/toolbar/cover/types";
+import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from "@/components/toolbar/cover/types";
 import {logger} from "../../../../shared/src/logger";
-import { Image, Download, RotateCcw, Settings, Layers, Save } from "lucide-react";
-import { persistentStorageService } from '../../services/persistentStorage';
+import {Download, Image, Layers, RotateCcw, Settings} from "lucide-react";
+import {persistentStorageService} from '../../services/persistentStorage';
 
 interface CoverDesignerProps {
 	articleHTML: string;
@@ -194,15 +189,15 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	const findMatchedFile = useCallback(async (originalFileName: string, savedAt: string) => {
 		const files = await persistentStorageService.getFiles();
 		const imageFiles = files.filter(f => f.type.startsWith('image/'));
-		
+
 		// 1. 首先按原始文件名精确匹配
 		let matchedFile = imageFiles.find(f => f.name === originalFileName);
-		
+
 		// 2. 如果没找到，按文件名包含匹配
 		if (!matchedFile) {
 			matchedFile = imageFiles.find(f => f.name.includes(originalFileName));
 		}
-		
+
 		// 3. 如果还没找到，按保存时间附近匹配（前后5分钟内）
 		if (!matchedFile && savedAt) {
 			const savedTime = new Date(savedAt).getTime();
@@ -211,14 +206,14 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				return Math.abs(savedTime - fileTime) < 5 * 60 * 1000; // 5分钟内
 			});
 		}
-		
+
 		// 4. 最后选择最近使用的图片文件
 		if (!matchedFile && imageFiles.length > 0) {
-			matchedFile = imageFiles.sort((a, b) => 
+			matchedFile = imageFiles.sort((a, b) =>
 				new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime()
 			)[0];
 		}
-		
+
 		return matchedFile;
 	}, []);
 
@@ -227,20 +222,20 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		if (!cover.imageUrl.startsWith('blob:')) {
 			return cover;
 		}
-		
+
 		try {
 			if (!data.originalFileName) return cover;
-			
+
 			const matchedFile = await findMatchedFile(data.originalFileName, data.savedAt);
 			if (matchedFile) {
 				const newUrl = await persistentStorageService.getFileUrl(matchedFile);
 				logger.info(`[CoverDesigner] 恢复封面${coverNumber}图片: ${matchedFile.name}`);
-				return { ...cover, imageUrl: newUrl };
+				return {...cover, imageUrl: newUrl};
 			}
 		} catch (error) {
 			logger.error('[CoverDesigner] 恢复档案库图片失败:', error);
 		}
-		
+
 		return cover;
 	}, [findMatchedFile]);
 
@@ -249,16 +244,16 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		try {
 			const storageKey = `cover-designer-preview-${coverNumber}`;
 			const saved = localStorage.getItem(storageKey);
-			
+
 			if (!saved) return;
-			
+
 			const data = JSON.parse(saved);
 			if (!data.covers || !Array.isArray(data.covers)) return;
-			
+
 			const restoredCovers = await Promise.all(
 				data.covers.map((cover: CoverData) => restoreCoverFromData(cover, data, coverNumber))
 			);
-			
+
 			if (coverNumber === 1) {
 				setCover1PreviewCovers(restoredCovers);
 			} else {
@@ -278,7 +273,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			]);
 			logger.info('[CoverDesigner] 加载封面预览持久化数据完成');
 		};
-		
+
 		loadPersistedData();
 	}, [loadCoverData]);
 
@@ -303,7 +298,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		try {
 			const storageKey = `cover-designer-preview-${coverNum}`;
 			let originalFileName = '';
-			
+
 			// 如果是档案库来源，尝试从文件列表中获取原始文件名
 			if (source === 'upload' && imageUrl.startsWith('blob:')) {
 				try {
@@ -311,7 +306,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					const imageFiles = files.filter(f => f.type.startsWith('image/'));
 					// 根据最近使用时间推测文件
 					if (imageFiles.length > 0) {
-						const latestFile = imageFiles.sort((a, b) => 
+						const latestFile = imageFiles.sort((a, b) =>
 							new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime()
 						)[0];
 						originalFileName = latestFile.name;
@@ -320,14 +315,14 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					logger.error('[CoverDesigner] 获取原始文件名失败:', error);
 				}
 			}
-			
+
 			const persistData = {
 				covers: [coverData],
 				source,
 				originalFileName,
 				savedAt: new Date().toISOString()
 			};
-			
+
 			localStorage.setItem(storageKey, JSON.stringify(persistData));
 			logger.debug(`[CoverDesigner] 保存封面${coverNum}预览持久化数据`);
 		} catch (error) {
@@ -384,7 +379,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		} else {
 			setCover2PreviewCovers([]);
 		}
-		
+
 		// 清空持久化数据
 		try {
 			const storageKey = `cover-designer-preview-${coverNumber}`;
@@ -393,7 +388,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		} catch (error) {
 			logger.error(`[CoverDesigner] 清空封面${coverNumber}持久化数据失败:`, error);
 		}
-		
+
 		logger.info(`[CoverDesigner] 清空封面${coverNumber}预览`);
 	}, []);
 
@@ -421,14 +416,14 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
 				<div className="flex items-center gap-3 mb-4">
 					<div className="p-2 bg-orange-100 rounded-lg">
-						<Settings className="h-5 w-5 text-orange-600" />
+						<Settings className="h-5 w-5 text-orange-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">封面配置</h4>
 						<p className="text-sm text-gray-600">选择要编辑的封面和管理输出</p>
 					</div>
 				</div>
-				
+
 				<div className="flex items-center gap-3">
 					<div className="flex-1">
 						<label className="block text-sm font-medium text-gray-700 mb-2">
@@ -442,13 +437,13 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							<SelectContent>
 								<SelectItem value="1">
 									<div className="flex items-center gap-2">
-										<Layers className="h-4 w-4 text-blue-600" />
+										<Layers className="h-4 w-4 text-blue-600"/>
 										<span>封面1 (2.25:1 横版)</span>
 									</div>
 								</SelectItem>
 								<SelectItem value="2">
 									<div className="flex items-center gap-2">
-										<Image className="h-4 w-4 text-purple-600" />
+										<Image className="h-4 w-4 text-purple-600"/>
 										<span>封面2 (1:1 方形)</span>
 									</div>
 								</SelectItem>
@@ -462,14 +457,14 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors text-sm"
 							title={`清空封面${selectedCover}预览`}
 						>
-							<RotateCcw className="h-4 w-4" />
+							<RotateCcw className="h-4 w-4"/>
 						</button>
 						<button
 							onClick={handleDownloadCovers}
 							className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 							disabled={cover1PreviewCovers.length === 0 && cover2PreviewCovers.length === 0}
 						>
-							<Download className="h-4 w-4" />
+							<Download className="h-4 w-4"/>
 							<span className="text-sm font-medium">
 								下载封面 ({(cover1PreviewCovers.length > 0 ? 1 : 0) + (cover2PreviewCovers.length > 0 ? 1 : 0)})
 							</span>
@@ -479,7 +474,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							onClick={clearAllPreviews}
 							className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							<RotateCcw className="h-4 w-4" />
+							<RotateCcw className="h-4 w-4"/>
 							<span className="text-sm font-medium">清空全部</span>
 						</button>
 					</div>
@@ -491,14 +486,14 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
 				<div className="flex items-center gap-3 mb-4">
 					<div className="p-2 bg-blue-100 rounded-lg">
-						<Image className="h-5 w-5 text-blue-600" />
+						<Image className="h-5 w-5 text-blue-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">封面预览</h4>
 						<p className="text-sm text-gray-600">查看生成的封面效果</p>
 					</div>
 				</div>
-				
+
 				<div className="grid grid-cols-[2.25fr_1fr] gap-6 w-full">
 					<CoverPreview
 						coverData={cover1PreviewCovers[0]}

@@ -1,4 +1,4 @@
-import { NMPSettings } from "../settings";
+import {NMPSettings} from "../settings";
 
 
 import {logger} from "../../shared/src/logger";
@@ -8,6 +8,7 @@ import {logger} from "../../shared/src/logger";
  */
 export interface UniversalPluginConfig {
 	enabled?: boolean;
+
 	[key: string]: string | number | boolean | null | undefined | string[] | number[] | Record<string, unknown>;
 }
 
@@ -39,13 +40,13 @@ export interface UniversalPluginMetaConfig {
  * 插件配置管理器 - 提供统一的配置管理功能
  */
 export class PluginConfigManager {
-	private _config: UniversalPluginConfig = { enabled: true };
+	private _config: UniversalPluginConfig = {enabled: true};
 	private pluginName: string;
 
 	constructor(pluginName: string, defaultConfig?: UniversalPluginConfig) {
 		this.pluginName = pluginName;
 		if (defaultConfig) {
-			this._config = { ...this._config, ...defaultConfig };
+			this._config = {...this._config, ...defaultConfig};
 		}
 		this.loadConfigFromSettings();
 	}
@@ -54,14 +55,14 @@ export class PluginConfigManager {
 	 * 获取插件配置
 	 */
 	getConfig(): UniversalPluginConfig {
-		return { ...this._config };
+		return {...this._config};
 	}
 
 	/**
 	 * 更新插件配置
 	 */
 	updateConfig(config: UniversalPluginConfig): UniversalPluginConfig {
-		this._config = { ...this._config, ...config };
+		this._config = {...this._config, ...config};
 		this.saveConfigToSettings();
 		return this.getConfig();
 	}
@@ -91,7 +92,7 @@ export class PluginConfigManager {
 
 			// 如果设置中有该插件的配置，使用它
 			if (settings.pluginsConfig && settings.pluginsConfig[this.pluginName]) {
-				this._config = { ...this._config, ...settings.pluginsConfig[this.pluginName] };
+				this._config = {...this._config, ...settings.pluginsConfig[this.pluginName]};
 				logger.debug(`从设置中加载了 ${this.pluginName} 插件配置:`, this._config);
 			}
 		} catch (error) {

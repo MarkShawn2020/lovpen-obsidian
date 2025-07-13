@@ -1,20 +1,21 @@
-import { App, Component, Notice, TFile } from 'obsidian';
-import { logger } from '../shared/src/logger';
+// 为了兼容性，需要导入Modal
+import {App, Component, Modal, Notice} from 'obsidian';
+import {logger} from '../shared/src/logger';
 import LovpenPlugin from './main';
 import TemplateManager from './template-manager';
 import AssetsManager from './assets';
-import { NMPSettings } from './settings';
+import {NMPSettings} from './settings';
 import {
+	ITemplateKitManager,
 	TemplateKit,
-	TemplateKitCollection,
-	TemplateKitBasicInfo,
 	TemplateKitApplyOptions,
-	TemplateKitOperationResult,
-	TemplateKitPreview,
+	TemplateKitBasicInfo,
+	TemplateKitCollection,
 	TemplateKitExportOptions,
 	TemplateKitImportOptions,
 	TemplateKitManagerConfig,
-	ITemplateKitManager
+	TemplateKitOperationResult,
+	TemplateKitPreview
 } from './template-kit-types';
 
 /**
@@ -465,7 +466,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 		} catch (error) {
 			logger.error('[TemplateKitManager] Error loading kits:', error);
 			// 加载失败时初始化空集合
-			this.kitsCollection = { version: '1.0.0', kits: [] };
+			this.kitsCollection = {version: '1.0.0', kits: []};
 		}
 	}
 
@@ -495,7 +496,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 
 	private async initializeDefaultKits(): Promise<void> {
 		logger.info('[TemplateKitManager] Initializing default kits');
-		
+
 		try {
 			// 尝试从资源文件中加载预定义套装，使用多个可能的路径
 			const assetsManager = AssetsManager.getInstance();
@@ -504,11 +505,11 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 				assetsManager.manifest.dir + '/../assets/template-kits.json',
 				assetsManager.manifest.dir + '/packages/assets/template-kits.json'
 			];
-			
+
 			let loadedKits = false;
 			for (const templateKitsPath of possiblePaths) {
 				logger.debug(`[TemplateKitManager] Trying to load kits from: ${templateKitsPath}`);
-				
+
 				if (await this.app.vault.adapter.exists(templateKitsPath)) {
 					const content = await this.app.vault.adapter.read(templateKitsPath);
 					const defaultKits = JSON.parse(content);
@@ -518,7 +519,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 					break;
 				}
 			}
-			
+
 			if (!loadedKits) {
 				// 如果资源文件不存在，创建空集合
 				this.kitsCollection = {
@@ -535,19 +536,19 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 				kits: []
 			};
 		}
-		
+
 		await this.saveKits();
 	}
 
 	private async applyStyleConfig(kit: TemplateKit, settingsManager: NMPSettings, assetsManager: any): Promise<void> {
 		const styleConfig = kit.styleConfig;
-		
+
 		// 应用主题
 		settingsManager.defaultStyle = styleConfig.theme;
-		
+
 		// 应用代码高亮
 		settingsManager.defaultHighlight = styleConfig.codeHighlight;
-		
+
 		// 应用自定义主题色
 		if (styleConfig.enableCustomThemeColor && styleConfig.customThemeColor) {
 			settingsManager.enableThemeColor = true;
@@ -559,7 +560,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 
 	private async applyTemplateConfig(kit: TemplateKit, settingsManager: NMPSettings, templateManager: any): Promise<void> {
 		const templateConfig = kit.templateConfig;
-		
+
 		// 应用模板设置
 		settingsManager.useTemplate = templateConfig.useTemplate;
 		if (templateConfig.templateFileName) {
@@ -574,7 +575,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 
 	private async applyPluginConfig(kit: TemplateKit, settingsManager: NMPSettings): Promise<void> {
 		const pluginConfig = kit.pluginConfig;
-		
+
 		// 应用插件配置
 		if (pluginConfig.pluginSettings) {
 			settingsManager.pluginsConfig = pluginConfig.pluginSettings;
@@ -606,7 +607,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 			};
 		}
 
-		return { success: true };
+		return {success: true};
 	}
 }
 
@@ -624,24 +625,24 @@ class ApplyKitConfirmModal extends Modal {
 	}
 
 	onOpen() {
-		const { contentEl } = this;
+		const {contentEl} = this;
 		contentEl.empty();
 
-		contentEl.createEl('h2', { text: `Apply Template Kit: ${this.kit.basicInfo.name}` });
-		contentEl.createEl('p', { text: this.kit.basicInfo.description });
+		contentEl.createEl('h2', {text: `Apply Template Kit: ${this.kit.basicInfo.name}`});
+		contentEl.createEl('p', {text: this.kit.basicInfo.description});
 
-		const warningEl = contentEl.createEl('div', { cls: 'lovpen-warning' });
-		warningEl.createEl('p', { text: 'This will override your current settings. Continue?' });
+		const warningEl = contentEl.createEl('div', {cls: 'lovpen-warning'});
+		warningEl.createEl('p', {text: 'This will override your current settings. Continue?'});
 
-		const buttonContainer = contentEl.createEl('div', { cls: 'lovpen-modal-buttons' });
-		
-		const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
+		const buttonContainer = contentEl.createEl('div', {cls: 'lovpen-modal-buttons'});
+
+		const cancelButton = buttonContainer.createEl('button', {text: 'Cancel'});
 		cancelButton.onclick = () => {
 			this.onConfirm(false);
 			this.close();
 		};
 
-		const confirmButton = buttonContainer.createEl('button', { text: 'Apply Kit', cls: 'lovpen-primary-button' });
+		const confirmButton = buttonContainer.createEl('button', {text: 'Apply Kit', cls: 'lovpen-primary-button'});
 		confirmButton.onclick = () => {
 			this.onConfirm(true);
 			this.close();
@@ -649,5 +650,3 @@ class ApplyKitConfirmModal extends Modal {
 	}
 }
 
-// 为了兼容性，需要导入Modal
-import { Modal } from 'obsidian';

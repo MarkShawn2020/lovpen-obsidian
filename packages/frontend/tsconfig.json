@@ -23,13 +23,19 @@
 		"allowSyntheticDefaultImports": true,
 		"baseUrl": "./",
 		"paths": {
-			"@/*": ["./src/*"],
-			"@lovpen/shared": ["../shared/index.ts"],
-			"@lovpen/shared/*": ["../shared/*"]
+			"@/*": [
+				"./src/*"
+			],
+			"@lovpen/shared": [
+				"../shared/index.ts"
+			],
+			"@lovpen/shared/*": [
+				"../shared/*"
+			]
 		}
 	},
 	"include": [
-      "src"
+		"src"
 	],
 	"references": [
 		{

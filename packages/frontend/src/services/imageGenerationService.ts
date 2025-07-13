@@ -1,4 +1,4 @@
-import { logger } from "../../../shared/src/logger";
+import {logger} from "../../../shared/src/logger";
 
 export interface ImageGenerationParams {
 	prompt: string;

@@ -4,7 +4,7 @@ import {FormInput} from '../ui/FormInput';
 import {PersonalInfo} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {persistentStorageService} from '../../services/persistentStorage';
-import {AtSign, Camera, Eye, Globe, Mail, RotateCcw, Save, User, UserCircle} from 'lucide-react';
+import {AtSign, Camera, Globe, RotateCcw, Save, User, UserCircle} from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 
 interface PersonalInfoSettingsProps {
@@ -99,11 +99,11 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 				};
 				setLocalInfo(newInfo);
 				setPreviewUrl(base64);
-				
+
 				// 实时更新 Jotai 状态，确保头像持久化
 				console.log('[PersonalInfoSettings] Auto-updating avatar to Jotai state');
 				updatePersonalInfo(newInfo);
-				
+
 				// 持久化个人信息
 				try {
 					await persistentStorageService.savePersonalInfo(newInfo);
@@ -160,7 +160,8 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 						<label className="block text-sm font-medium text-gray-700">头像</label>
 						<div className="flex items-center gap-4">
 							<div className="relative group">
-								<div className="w-16 h-16 rounded-full border-2 border-gray-200 flex items-center justify-center bg-gray-50 overflow-hidden">
+								<div
+									className="w-16 h-16 rounded-full border-2 border-gray-200 flex items-center justify-center bg-gray-50 overflow-hidden">
 									{(localInfo.avatar || previewUrl) ? (
 										<img
 											src={previewUrl || localInfo.avatar}
@@ -171,7 +172,8 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 										<User className="w-6 h-6 text-gray-400"/>
 									)}
 								</div>
-								<div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+								<div
+									className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
 									<Camera className="w-4 h-4 text-white"/>
 								</div>
 							</div>

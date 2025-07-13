@@ -3,7 +3,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../
 import {ToggleSwitch} from "../ui/ToggleSwitch";
 import {ViteReactSettings} from "../../types";
 import {useResources} from "../../hooks/useResources";
-import { Layout, Palette, Code, Eye, Loader } from "lucide-react";
+import {Code, Eye, Layout, Loader, Palette} from "lucide-react";
 
 interface StyleSettingsProps {
 	settings: ViteReactSettings;
@@ -23,7 +23,7 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 																onThemeColorChange,
 															}) => {
 	// 动态加载资源
-	const { themes, highlights, templates, loading, error } = useResources();
+	const {themes, highlights, templates, loading, error} = useResources();
 
 	// 转换为选择器选项格式
 	const templateOptions = templates.map(template => ({
@@ -46,7 +46,7 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 		return (
 			<div className="w-full p-8 text-center">
 				<div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-					<Loader className="animate-spin w-8 h-8 text-blue-600 mx-auto mb-3" />
+					<Loader className="animate-spin w-8 h-8 text-blue-600 mx-auto mb-3"/>
 					<h3 className="text-lg font-medium text-gray-900 mb-2">加载样式资源</h3>
 					<p className="text-sm text-gray-600">正在加载模板、主题和高亮样式...</p>
 				</div>
@@ -97,16 +97,17 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 				<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
 					<div className="flex items-center gap-3 mb-3">
 						<div className="p-2 bg-blue-100 rounded-lg">
-							<Layout className="h-5 w-5 text-blue-600" />
+							<Layout className="h-5 w-5 text-blue-600"/>
 						</div>
 						<div>
 							<h4 className="font-semibold text-gray-900">页面模板</h4>
 							<p className="text-sm text-gray-600">选择内容布局模板</p>
 						</div>
 					</div>
-					<Select value={settings.useTemplate ? settings.defaultTemplate : "none"} onValueChange={handleTemplateChange}>
+					<Select value={settings.useTemplate ? settings.defaultTemplate : "none"}
+							onValueChange={handleTemplateChange}>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="选择模板" />
+							<SelectValue placeholder="选择模板"/>
 						</SelectTrigger>
 						<SelectContent>
 							{templateOptions.map((option) => (
@@ -122,7 +123,7 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 				<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
 					<div className="flex items-center gap-3 mb-3">
 						<div className="p-2 bg-purple-100 rounded-lg">
-							<Palette className="h-5 w-5 text-purple-600" />
+							<Palette className="h-5 w-5 text-purple-600"/>
 						</div>
 						<div>
 							<h4 className="font-semibold text-gray-900">视觉主题</h4>
@@ -131,7 +132,7 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 					</div>
 					<Select value={settings.defaultStyle} onValueChange={onThemeChange}>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="选择主题" />
+							<SelectValue placeholder="选择主题"/>
 						</SelectTrigger>
 						<SelectContent>
 							{themeOptions.map((option) => (
@@ -148,7 +149,7 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 			<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
 				<div className="flex items-center gap-3 mb-3">
 					<div className="p-2 bg-green-100 rounded-lg">
-						<Code className="h-5 w-5 text-green-600" />
+						<Code className="h-5 w-5 text-green-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">代码高亮</h4>
@@ -157,7 +158,7 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 				</div>
 				<Select value={settings.defaultHighlight} onValueChange={onHighlightChange}>
 					<SelectTrigger className="w-full">
-						<SelectValue placeholder="选择高亮主题" />
+						<SelectValue placeholder="选择高亮主题"/>
 					</SelectTrigger>
 					<SelectContent>
 						{highlightOptions.map((option) => (
@@ -173,14 +174,14 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 			<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
 				<div className="flex items-center gap-3 mb-4">
 					<div className="p-2 bg-orange-100 rounded-lg">
-						<Eye className="h-5 w-5 text-orange-600" />
+						<Eye className="h-5 w-5 text-orange-600"/>
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">自定义主题色</h4>
 						<p className="text-sm text-gray-600">启用个性化颜色配置</p>
 					</div>
 				</div>
-				
+
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
 						<span className="text-sm font-medium text-gray-700">启用主题色</span>
@@ -197,7 +198,8 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 					</div>
 
 					{settings.enableThemeColor && (
-						<div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
+						<div
+							className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
 							<div className="flex items-center gap-4">
 								<div className="flex items-center gap-3">
 									<input

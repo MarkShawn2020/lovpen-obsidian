@@ -5,7 +5,7 @@ import {PluginData} from "../../types";
 import {persistentStorageService} from "../../services/persistentStorage";
 
 import {logger} from "../../../../shared/src/logger";
-import { ChevronDown, Settings, Info, Plug } from "lucide-react";
+import {ChevronDown, Info, Plug, Settings} from "lucide-react";
 
 const STORAGE_KEY_PREFIX = 'lovpen-config';
 
@@ -53,7 +53,7 @@ export const ConfigComponent = <T extends PluginData>({
 	// 本地配置状态管理
 	const [localConfig, setLocalConfig] = useState(getInitialConfig);
 	const hasLocalUpdate = useRef(false);
-	
+
 	// 初始化时从持久化存储加载配置
 	useEffect(() => {
 		const loadPersistedConfig = async () => {
@@ -71,7 +71,7 @@ export const ConfigComponent = <T extends PluginData>({
 				logger.error(`[PluginConfigComponent] Failed to load persisted config for ${item.name}:`, error);
 			}
 		};
-		
+
 		loadPersistedConfig();
 	}, [item.name]);
 
@@ -93,7 +93,7 @@ export const ConfigComponent = <T extends PluginData>({
 		// 持久化enabled状态到本地存储
 		const enabledStorageKey = `${storageKey}-enabled`;
 		saveToStorage(enabledStorageKey, enabled);
-		
+
 		// 持久化到统一的插件配置存储
 		try {
 			await persistentStorageService.savePluginConfig(
@@ -123,7 +123,7 @@ export const ConfigComponent = <T extends PluginData>({
 
 		// 3. 持久化到localStorage作为备份
 		saveToStorage(storageKey, newConfig);
-		
+
 		// 4. 持久化到统一的插件配置存储
 		try {
 			await persistentStorageService.savePluginConfig(
@@ -174,15 +174,16 @@ export const ConfigComponent = <T extends PluginData>({
 								size="small"
 							/>
 						</div>
-						
+
 						<div className="flex items-center gap-2">
 							<div className={`p-1.5 rounded-lg ${item.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
-								<Plug className={`h-4 w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`} />
+								<Plug className={`h-4 w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`}/>
 							</div>
 							<div>
 								<div className="font-medium text-gray-900">{item.name}</div>
 								{item.description && (
-									<div className="text-xs text-gray-500 mt-0.5 max-w-[300px] truncate" title={item.description}>
+									<div className="text-xs text-gray-500 mt-0.5 max-w-[300px] truncate"
+										 title={item.description}>
 										{item.description}
 									</div>
 								)}
@@ -192,8 +193,9 @@ export const ConfigComponent = <T extends PluginData>({
 
 					<div className="flex items-center gap-2 shrink-0">
 						{hasConfigOptions && (
-							<div className={`p-1 rounded-lg transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-								<ChevronDown className="h-4 w-4 text-gray-400" />
+							<div
+								className={`p-1 rounded-lg transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+								<ChevronDown className="h-4 w-4 text-gray-400"/>
 							</div>
 						)}
 					</div>
@@ -203,15 +205,16 @@ export const ConfigComponent = <T extends PluginData>({
 			{hasConfigOptions && isExpanded && (
 				<div className="border-t border-gray-100 bg-gray-50/50 p-4">
 					<div className="flex items-center gap-2 mb-4">
-						<Settings className="h-4 w-4 text-blue-600" />
+						<Settings className="h-4 w-4 text-blue-600"/>
 						<span className="text-sm font-medium text-gray-900">插件配置</span>
 					</div>
-					
+
 					<div className="space-y-4">
 						{configEntries.map(([key, meta]) => (
-							<div key={key} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+							<div key={key}
+								 className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
 								<div className="flex items-center gap-2">
-									<Info className="h-4 w-4 text-gray-400" />
+									<Info className="h-4 w-4 text-gray-400"/>
 									<span className="text-sm font-medium text-gray-700">{meta.title}</span>
 								</div>
 								<div onClick={(e) => e.stopPropagation()}>
@@ -227,7 +230,7 @@ export const ConfigComponent = <T extends PluginData>({
 											onValueChange={(value) => handleConfigChange(key, value)}
 										>
 											<SelectTrigger className="w-40">
-												<SelectValue />
+												<SelectValue/>
 											</SelectTrigger>
 											<SelectContent>
 												{(meta.options || []).map((option) => (

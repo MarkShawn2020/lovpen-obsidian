@@ -85,16 +85,6 @@ export abstract class RemarkPlugin implements IRemarkPlugin {
 	}
 
 	/**
-	 * 获取配置管理器（延迟初始化）
-	 */
-	protected getConfigManager(): PluginConfigManager {
-		if (!this.configManager) {
-			this.configManager = new PluginConfigManager(this.getName(), { enabled: true });
-		}
-		return this.configManager;
-	}
-
-	/**
 	 * 获取插件配置
 	 * @returns 插件的当前配置
 	 */
@@ -145,6 +135,16 @@ export abstract class RemarkPlugin implements IRemarkPlugin {
 	 */
 	setEnabled(enabled: boolean): void {
 		this.getConfigManager().setEnabled(enabled);
+	}
+
+	/**
+	 * 获取配置管理器（延迟初始化）
+	 */
+	protected getConfigManager(): PluginConfigManager {
+		if (!this.configManager) {
+			this.configManager = new PluginConfigManager(this.getName(), {enabled: true});
+		}
+		return this.configManager;
 	}
 
 	/**

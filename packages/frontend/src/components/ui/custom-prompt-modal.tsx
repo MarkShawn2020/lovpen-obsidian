@@ -1,15 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from './button';
-import { ViteReactSettings } from '../../types';
-import { AIStyle, AI_STYLES } from './ai-analysis-split-button';
-import { 
-	Select, 
-	SelectContent, 
-	SelectItem, 
-	SelectTrigger, 
-	SelectValue 
-} from './select';
-import { Copy, Sparkles, Code, FileText, Wand2, X } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {Button} from './button';
+import {ViteReactSettings} from '../../types';
+import {AI_STYLES, AIStyle} from './ai-analysis-split-button';
+import {Code, Copy, FileText, Sparkles, Wand2, X} from 'lucide-react';
 
 interface CustomPromptModalProps {
 	isOpen: boolean;
@@ -21,13 +14,13 @@ interface CustomPromptModalProps {
 }
 
 export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
-	isOpen,
-	onClose,
-	settings,
-	onSettingsChange,
-	onSaveSettings,
-	onAnalyze
-}) => {
+																		isOpen,
+																		onClose,
+																		settings,
+																		onSettingsChange,
+																		onSaveSettings,
+																		onAnalyze
+																	}) => {
 	const [customPrompt, setCustomPrompt] = useState<string>(settings.aiPromptTemplate || '');
 	const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 	const [activeTab, setActiveTab] = useState<'templates' | 'editor' | 'variables'>('templates');
@@ -41,7 +34,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 	if (!isOpen) return null;
 
 	const handleSave = () => {
-		onSettingsChange({ aiPromptTemplate: customPrompt.trim() });
+		onSettingsChange({aiPromptTemplate: customPrompt.trim()});
 		onSaveSettings();
 		onClose();
 	};
@@ -59,8 +52,8 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 			icon: '⚙️',
 			prompt: customPrompt
 		};
-		
-		onSettingsChange({ aiPromptTemplate: customPrompt.trim() });
+
+		onSettingsChange({aiPromptTemplate: customPrompt.trim()});
 		onSaveSettings();
 		onAnalyze(customStyle);
 		onClose();
@@ -79,32 +72,32 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 	};
 
 	const variables = [
-		{ name: 'content', description: '文章正文内容（已移除frontmatter）', example: '{{content}}' },
-		{ name: 'filename', description: '当前文件名（不含扩展名）', example: '{{filename}}' },
-		{ name: 'personalInfo.name', description: '个人信息中的姓名', example: '{{personalInfo.name}}' },
-		{ name: 'personalInfo.bio', description: '个人信息中的简介', example: '{{personalInfo.bio}}' },
-		{ name: 'personalInfo.email', description: '个人信息中的邮箱', example: '{{personalInfo.email}}' },
-		{ name: 'personalInfo.website', description: '个人信息中的网站', example: '{{personalInfo.website}}' },
-		{ name: 'frontmatter', description: '当前文档的frontmatter对象', example: '{{frontmatter}}' },
-		{ name: 'today', description: '当前日期（YYYY-MM-DD格式）', example: '{{today}}' },
+		{name: 'content', description: '文章正文内容（已移除frontmatter）', example: '{{content}}'},
+		{name: 'filename', description: '当前文件名（不含扩展名）', example: '{{filename}}'},
+		{name: 'personalInfo.name', description: '个人信息中的姓名', example: '{{personalInfo.name}}'},
+		{name: 'personalInfo.bio', description: '个人信息中的简介', example: '{{personalInfo.bio}}'},
+		{name: 'personalInfo.email', description: '个人信息中的邮箱', example: '{{personalInfo.email}}'},
+		{name: 'personalInfo.website', description: '个人信息中的网站', example: '{{personalInfo.website}}'},
+		{name: 'frontmatter', description: '当前文档的frontmatter对象', example: '{{frontmatter}}'},
+		{name: 'today', description: '当前日期（YYYY-MM-DD格式）', example: '{{today}}'},
 	];
 
 	const handlebarsHelpers = [
-		{ name: '#if', description: '条件判断', example: '{{#if variable}}...{{/if}}' },
-		{ name: '#each', description: '循环遍历', example: '{{#each array}}...{{/each}}' },
-		{ name: '#unless', description: '反向条件', example: '{{#unless variable}}...{{/unless}}' },
-		{ name: '@key', description: '循环中的键名', example: '{{#each object}}{{@key}}: {{this}}{{/each}}' },
-		{ name: '@index', description: '循环中的索引', example: '{{#each array}}{{@index}}: {{this}}{{/each}}' },
+		{name: '#if', description: '条件判断', example: '{{#if variable}}...{{/if}}'},
+		{name: '#each', description: '循环遍历', example: '{{#each array}}...{{/each}}'},
+		{name: '#unless', description: '反向条件', example: '{{#unless variable}}...{{/unless}}'},
+		{name: '@key', description: '循环中的键名', example: '{{#each object}}{{@key}}: {{this}}{{/each}}'},
+		{name: '@index', description: '循环中的索引', example: '{{#each array}}{{@index}}: {{this}}{{/each}}'},
 	];
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center">
 			{/* 背景遮罩 */}
-			<div 
+			<div
 				className="absolute inset-0 bg-black/60 backdrop-blur-sm"
 				onClick={onClose}
 			/>
-			
+
 			{/* 模态框内容 */}
 			<div className="relative z-10 w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden">
 				<div className="bg-white rounded-2xl shadow-2xl">
@@ -113,7 +106,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-3">
 								<div className="p-2 bg-white/20 rounded-lg">
-									<Wand2 className="h-6 w-6" />
+									<Wand2 className="h-6 w-6"/>
 								</div>
 								<div>
 									<h2 className="text-2xl font-bold">AI 分析模板编辑器</h2>
@@ -124,27 +117,27 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 								onClick={onClose}
 								className="p-2 hover:bg-white/20 rounded-lg transition-colors"
 							>
-								<X className="h-6 w-6" />
+								<X className="h-6 w-6"/>
 							</button>
 						</div>
-						
+
 						{/* 标签页导航 */}
 						<div className="flex gap-1 mt-6">
 							{[
-								{ key: 'templates', label: '模板库', icon: FileText },
-								{ key: 'editor', label: '编辑器', icon: Code },
-								{ key: 'variables', label: '变量参考', icon: Sparkles }
-							].map(({ key, label, icon: Icon }) => (
+								{key: 'templates', label: '模板库', icon: FileText},
+								{key: 'editor', label: '编辑器', icon: Code},
+								{key: 'variables', label: '变量参考', icon: Sparkles}
+							].map(({key, label, icon: Icon}) => (
 								<button
 									key={key}
 									onClick={() => setActiveTab(key as any)}
 									className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-										activeTab === key 
-											? 'bg-white text-blue-600 shadow-lg' 
+										activeTab === key
+											? 'bg-white text-blue-600 shadow-lg'
 											: 'text-blue-100 hover:bg-white/20'
 									}`}
 								>
-									<Icon className="h-4 w-4" />
+									<Icon className="h-4 w-4"/>
 									{label}
 								</button>
 							))}
@@ -160,7 +153,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 									<h3 className="text-lg font-semibold text-gray-900 mb-2">选择预设模板</h3>
 									<p className="text-gray-600">选择一个预设模板作为起点，然后在编辑器中进行自定义</p>
 								</div>
-								
+
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 									{AI_STYLES.map((style) => (
 										<div
@@ -169,7 +162,8 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 											onClick={() => handleUseTemplate(style.prompt)}
 										>
 											<div className="flex items-center gap-3 mb-3">
-												<div className="p-2 bg-gray-100 group-hover:bg-blue-100 rounded-lg transition-colors">
+												<div
+													className="p-2 bg-gray-100 group-hover:bg-blue-100 rounded-lg transition-colors">
 													<span className="text-xl">{style.icon}</span>
 												</div>
 												<div>
@@ -187,7 +181,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 													className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
 													title="复制模板"
 												>
-													<Copy className="h-4 w-4" />
+													<Copy className="h-4 w-4"/>
 												</button>
 											</div>
 										</div>
@@ -219,7 +213,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 											variant="outline"
 											className="text-gray-600"
 										>
-											<Copy className="h-4 w-4 mr-1" />
+											<Copy className="h-4 w-4 mr-1"/>
 											复制
 										</Button>
 									</div>
@@ -240,7 +234,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 								<div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
 									<div className="flex items-start gap-3">
 										<div className="p-1 bg-amber-100 rounded-lg">
-											<Sparkles className="h-5 w-5 text-amber-600" />
+											<Sparkles className="h-5 w-5 text-amber-600"/>
 										</div>
 										<div>
 											<h4 className="font-medium text-amber-900 mb-2">提示词编写建议</h4>
@@ -275,14 +269,15 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 											{variables.map((variable) => (
 												<div key={variable.name} className="bg-gray-50 rounded-lg p-3">
 													<div className="flex items-center justify-between mb-1">
-														<code className="text-sm font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
+														<code
+															className="text-sm font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
 															{variable.example}
 														</code>
 														<button
 															onClick={() => copyToClipboard(variable.example)}
 															className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
 														>
-															<Copy className="h-3 w-3" />
+															<Copy className="h-3 w-3"/>
 														</button>
 													</div>
 													<p className="text-sm text-gray-600">{variable.description}</p>
@@ -301,14 +296,15 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 											{handlebarsHelpers.map((helper) => (
 												<div key={helper.name} className="bg-gray-50 rounded-lg p-3">
 													<div className="flex items-center justify-between mb-1">
-														<code className="text-sm font-mono text-purple-600 bg-purple-50 px-2 py-1 rounded">
+														<code
+															className="text-sm font-mono text-purple-600 bg-purple-50 px-2 py-1 rounded">
 															{helper.example}
 														</code>
 														<button
 															onClick={() => copyToClipboard(helper.example)}
 															className="p-1 text-gray-400 hover:text-purple-600 transition-colors"
 														>
-															<Copy className="h-3 w-3" />
+															<Copy className="h-3 w-3"/>
 														</button>
 													</div>
 													<p className="text-sm text-gray-600">{helper.description}</p>
@@ -318,7 +314,8 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 									</div>
 								</div>
 
-								<div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4">
+								<div
+									className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4">
 									<h4 className="font-medium text-blue-900 mb-2">使用示例</h4>
 									<div className="bg-white rounded-lg p-3 font-mono text-sm">
 										<code className="text-gray-700">
@@ -368,7 +365,7 @@ export const CustomPromptModal: React.FC<CustomPromptModalProps> = ({
 									disabled={!customPrompt.trim()}
 									className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
 								>
-									<Wand2 className="h-4 w-4 mr-2" />
+									<Wand2 className="h-4 w-4 mr-2"/>
 									保存并分析
 								</Button>
 							</div>

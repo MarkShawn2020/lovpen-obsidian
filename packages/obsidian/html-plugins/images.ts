@@ -1,4 +1,4 @@
-import {HtmlPlugin as UnifiedHtmlPlugin, PluginType, PluginMetadata} from "../shared/unified-plugin-system";
+import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 import {UniversalPluginMetaConfig} from "../shared/plugin-config-manager";
 

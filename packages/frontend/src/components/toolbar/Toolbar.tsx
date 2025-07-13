@@ -354,7 +354,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 									<Plug className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
 									<span className="truncate">插件</span>
 									{plugins.length > 0 && (
-										<span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center leading-none text-[10px] sm:static sm:bg-gray-200 sm:text-gray-700 sm:px-1.5 sm:py-0.5 sm:ml-1 sm:w-auto sm:h-auto">
+										<span
+											className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center leading-none text-[10px] sm:static sm:bg-gray-200 sm:text-gray-700 sm:px-1.5 sm:py-0.5 sm:ml-1 sm:w-auto sm:h-auto">
 											{plugins.length > 99 ? '99+' : plugins.length}
 										</span>
 									)}
@@ -458,7 +459,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 																<p className="text-sm text-blue-700">Markdown语法解析插件
 																	({remarkPlugins.length}个)</p>
 															</div>
-															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
+															<div
+																className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
 																<button
 																	onClick={() => handleBatchToggle('remark', true)}
 																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
@@ -520,7 +522,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 																<p className="text-sm text-purple-700">HTML处理和转换插件
 																	({rehypePlugins.length}个)</p>
 															</div>
-															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
+															<div
+																className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
 																<button
 																	onClick={() => handleBatchToggle('rehype', true)}
 																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"

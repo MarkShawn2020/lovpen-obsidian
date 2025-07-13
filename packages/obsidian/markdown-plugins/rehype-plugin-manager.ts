@@ -17,6 +17,7 @@ export class RehypePluginManager extends BasePluginManager<RehypePlugin> {
 	private constructor() {
 		super();
 	}
+
 	/**
 	 * 获取管理器单例
 	 * @returns Extension管理器实例

@@ -3,7 +3,7 @@ import {App, Notice} from 'obsidian';
 
 
 import {logger} from "../shared/src/logger";
-import { TemplateKit, TemplateKitOperationResult } from './template-kit-types';
+import {TemplateKit, TemplateKitOperationResult} from './template-kit-types';
 
 // 定义模板数据类型
 export interface TemplateData {
@@ -68,7 +68,7 @@ export default class TemplateManager {
 						path: file,
 						content: content
 					});
-					
+
 					logger.info('[TemplateManager] 加载模板:', fileName, '路径:', file);
 				}
 			}
@@ -96,25 +96,25 @@ export default class TemplateManager {
 		logger.info(`[TemplateManager] 尝试应用模板: "${templateName}"`);
 		logger.info(`[TemplateManager] 当前可用模板:`, Array.from(this.templates.keys()));
 		logger.info(`[TemplateManager] 模板数量:`, this.templates.size);
-		
+
 		// 容错处理：尝试去掉可能的扩展名
 		const cleanTemplateName = templateName.replace('.html', '');
-		
+
 		// 先尝试原始名称，再尝试清理后的名称
 		let template = this.templates.get(templateName);
 		if (!template && templateName !== cleanTemplateName) {
 			logger.info(`[TemplateManager] 尝试使用清理后的模板名称: "${cleanTemplateName}"`);
 			template = this.templates.get(cleanTemplateName);
 		}
-		
+
 		if (!template) {
 			logger.warn(`[TemplateManager] 未找到模板 "${templateName}"`);
 			logger.warn(`[TemplateManager] 可用的模板列表:`, Array.from(this.templates.keys()));
 			return content;
 		}
-		
+
 		logger.info(`[TemplateManager] 成功找到模板: "${template.name}"`);
-		
+
 
 		// 确保 meta 中有 epigraph，默认为 ["这篇文章写地贼累！"]
 		if (!meta.epigraph) {
@@ -205,20 +205,6 @@ export default class TemplateManager {
 	// === 模板套装支持方法 ===
 
 	/**
-	 * 获取模板套装管理器
-	 */
-	private getTemplateKitManager(): any {
-		// 延迟导入避免循环依赖
-		try {
-			const TemplateKitManager = require('./template-kit-manager').default;
-			return TemplateKitManager.getInstance();
-		} catch (error) {
-			logger.error('[TemplateManager] Failed to get TemplateKitManager:', error);
-			return null;
-		}
-	}
-
-	/**
 	 * 获取所有可用的模板套装
 	 */
 	public async getAvailableKits(): Promise<TemplateKit[]> {
@@ -252,13 +238,13 @@ export default class TemplateManager {
 
 			logger.info(`[TemplateManager] Applying template kit: ${kitId}`);
 			const result = await kitManager.applyKit(kitId, options);
-			
+
 			if (result.success) {
 				// 重新加载模板以确保新模板可用
 				await this.loadTemplates();
 				logger.info(`[TemplateManager] Template kit ${kitId} applied successfully`);
 			}
-			
+
 			return result;
 		} catch (error) {
 			logger.error('[TemplateManager] Error applying template kit:', error);
@@ -350,7 +336,7 @@ export default class TemplateManager {
 	public async isKitTemplate(templateName: string): Promise<boolean> {
 		try {
 			const kits = await this.getAvailableKits();
-			return kits.some(kit => 
+			return kits.some(kit =>
 				kit.templateConfig.templateFileName === `${templateName}.html`
 			);
 		} catch (error) {
@@ -366,7 +352,7 @@ export default class TemplateManager {
 	public async getTemplateKitInfo(templateName: string): Promise<TemplateKit[]> {
 		try {
 			const kits = await this.getAvailableKits();
-			return kits.filter(kit => 
+			return kits.filter(kit =>
 				kit.templateConfig.templateFileName === `${templateName}.html`
 			);
 		} catch (error) {
@@ -378,13 +364,13 @@ export default class TemplateManager {
 	/**
 	 * 应用模板时自动应用套装样式
 	 * @param content 内容
-	 * @param templateName 模板名称 
+	 * @param templateName 模板名称
 	 * @param meta 模板数据
 	 * @param autoApplyKitStyles 是否自动应用套装样式
 	 */
 	public async applyTemplateWithKitSupport(
-		content: string, 
-		templateName: string, 
+		content: string,
+		templateName: string,
 		meta: TemplateData = {},
 		autoApplyKitStyles: boolean = true
 	): Promise<string> {
@@ -398,7 +384,7 @@ export default class TemplateManager {
 				if (kitInfo.length > 0) {
 					const kit = kitInfo[0]; // 使用第一个匹配的套装
 					logger.info(`[TemplateManager] Auto-applying kit styles for: ${kit.basicInfo.name}`);
-					
+
 					// 这里可以添加样式注入逻辑
 					// 将套装的CSS变量和自定义样式注入到结果中
 					if (kit.styleConfig.cssVariables || kit.styleConfig.customCSS) {
@@ -411,6 +397,20 @@ export default class TemplateManager {
 		} catch (error) {
 			logger.error('[TemplateManager] Error applying template with kit support:', error);
 			return this.applyTemplate(content, templateName, meta);
+		}
+	}
+
+	/**
+	 * 获取模板套装管理器
+	 */
+	private getTemplateKitManager(): any {
+		// 延迟导入避免循环依赖
+		try {
+			const TemplateKitManager = require('./template-kit-manager').default;
+			return TemplateKitManager.getInstance();
+		} catch (error) {
+			logger.error('[TemplateManager] Failed to get TemplateKitManager:', error);
+			return null;
 		}
 	}
 
@@ -440,7 +440,7 @@ export default class TemplateManager {
 			// 注入样式到HTML
 			if (styles) {
 				const styleTag = `<style>\n${styles}\n</style>`;
-				
+
 				// 尝试在head标签中插入，如果没有head则在开头插入
 				if (html.includes('<head>')) {
 					html = html.replace('<head>', `<head>\n${styleTag}`);

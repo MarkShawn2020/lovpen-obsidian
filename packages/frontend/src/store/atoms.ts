@@ -1,5 +1,5 @@
-import { atom } from 'jotai';
-import { PersonalInfo, ViteReactSettings } from '../types';
+import {atom} from 'jotai';
+import {PersonalInfo, ViteReactSettings} from '../types';
 
 // 默认的个人信息
 export const defaultPersonalInfo: PersonalInfo = {
@@ -45,9 +45,9 @@ export const updateSettingsAtom = atom(
 	null,
 	(get, set, update: Partial<ViteReactSettings>) => {
 		const currentSettings = get(settingsAtom);
-		const newSettings = { ...currentSettings, ...update };
+		const newSettings = {...currentSettings, ...update};
 		set(settingsAtom, newSettings);
-		
+
 		// 同步更新个人信息
 		if (update.personalInfo) {
 			set(personalInfoAtom, update.personalInfo);
@@ -60,10 +60,10 @@ export const updatePersonalInfoAtom = atom(
 	null,
 	(get, set, update: PersonalInfo) => {
 		set(personalInfoAtom, update);
-		
+
 		// 同步更新设置中的个人信息
 		const currentSettings = get(settingsAtom);
-		set(settingsAtom, { ...currentSettings, personalInfo: update });
+		set(settingsAtom, {...currentSettings, personalInfo: update});
 	}
 );
 
@@ -80,7 +80,7 @@ export const resetSettingsAtom = atom(
 // 用于初始化设置的atom
 export const initializeSettingsAtom = atom(
 	null,
-	(get, set, { settings, personalInfo }: { settings: ViteReactSettings; personalInfo: PersonalInfo }) => {
+	(get, set, {settings, personalInfo}: { settings: ViteReactSettings; personalInfo: PersonalInfo }) => {
 		set(settingsAtom, settings);
 		set(personalInfoAtom, personalInfo);
 		set(settingsInitializedAtom, true);

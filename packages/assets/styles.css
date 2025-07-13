@@ -1,457 +1,460 @@
-
- 
 /* =========================================================== */
 /* UI 样式                                                      */
 /* =========================================================== */
 .note-preview {
-  min-height: 100%;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
+	min-height: 100%;
+	width: 100%;
+	height: 100%;
+	background-color: #fff;
+	display: flex;
+	flex-direction: column;
 }
 
 .render-div {
-  flex: 1;
-  overflow-y: auto;
+	flex: 1;
+	overflow-y: auto;
 }
 
 /* 专业化工具栏样式 */
 .preview-toolbar {
-  position: relative;
-  border-bottom: 1px solid var(--background-modifier-border);
-  background-color: var(--background-primary);
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+	position: relative;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background-color: var(--background-primary);
+	padding: 0;
+	display: flex;
+	flex-direction: column;
 }
 
 .modern-toolbar {
-  min-height: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	min-height: auto;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* 品牌区域样式 */
 .brand-section {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: linear-gradient(to right, #4A6BF5, #6983fa);
-  color: white;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	display: flex;
+	align-items: center;
+	padding: 12px 16px;
+	background: linear-gradient(to right, #4A6BF5, #6983fa);
+	color: white;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .brand-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 12px;
 }
 
 .brand-logo svg {
-  height: 24px;
-  width: 24px;
+	height: 24px;
+	width: 24px;
 }
 
 .brand-logo svg path {
-  stroke: white;
+	stroke: white;
 }
 
 .brand-name {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
 }
 
 /* 工具栏容器 */
 .toolbar-container {
-  padding: 12px 16px;
+	padding: 12px 16px;
 }
 
 .toolbar-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 16px;
 }
 
 .toolbar-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
 }
 
 .toolbar-section-left {
-  flex: 1;
+	flex: 1;
 }
 
 /* 垂直布局工具栏，让每个设置项单独一行 */
 .toolbar-vertical {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
 }
 
 .toolbar-vertical .toolbar-group {
-  width: 100%;
-  justify-content: space-between;
+	width: 100%;
+	justify-content: space-between;
 }
 
 .toolbar-vertical .select-wrapper {
-  width: 70%;
-  max-width: 300px;
+	width: 70%;
+	max-width: 300px;
 }
 
 .toolbar-vertical .toolbar-select {
-  width: 100%;
+	width: 100%;
 }
 
 .toolbar-section-right {
-  justify-content: flex-end;
+	justify-content: flex-end;
 }
 
 /* 工具组和控件 */
 .toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  border-radius: 6px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	position: relative;
+	border-radius: 6px;
 }
 
 .toolbar-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-normal);
-  white-space: nowrap;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-normal);
+	white-space: nowrap;
 }
 
 .toolbar-label svg {
-  opacity: 0.9;
+	opacity: 0.9;
 }
 
 .select-wrapper {
-  position: relative;
+	position: relative;
 }
 
 .select-wrapper::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  border-style: solid;
-  border-width: 6px 4px 0 4px;
-  border-color: var(--text-muted) transparent transparent transparent;
-  pointer-events: none;
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 10px;
+	transform: translateY(-50%);
+	border-style: solid;
+	border-width: 6px 4px 0 4px;
+	border-color: var(--text-muted) transparent transparent transparent;
+	pointer-events: none;
 }
 
 .toolbar-select {
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: var(--background-secondary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
-  padding: 8px 32px 8px 12px;
-  font-size: 14px;
-  color: var(--text-normal);
-  min-width: 140px;
-  height: 36px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+	appearance: none;
+	-webkit-appearance: none;
+	background-color: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 8px 32px 8px 12px;
+	font-size: 14px;
+	color: var(--text-normal);
+	min-width: 140px;
+	height: 36px;
+	cursor: pointer;
+	transition: all 0.2s ease;
 }
 
 .toolbar-select:hover, .toolbar-select:focus {
-  border-color: #4A6BF5;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(74, 107, 245, 0.2);
+	border-color: #4A6BF5;
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(74, 107, 245, 0.2);
 }
 
 .toolbar-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  background-color: var(--background-secondary);
-  color: var(--text-normal);
-  border: none;
-  cursor: pointer;
-  height: 36px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 8px 16px;
+	border-radius: 6px;
+	font-size: 14px;
+	font-weight: 500;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	border: none;
+	cursor: pointer;
+	height: 36px;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .toolbar-button:hover {
-  background-color: var(--background-modifier-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+	background-color: var(--background-modifier-hover);
+	transform: translateY(-1px);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .copy-button {
-  background-color: #4A6BF5;
-  color: white;
+	background-color: #4A6BF5;
+	color: white;
 }
 
 .copy-button:hover {
-  background-color: #3958da;
-  color: white;
+	background-color: #3958da;
+	color: white;
 }
 
 .refresh-button {
-  background-color: var(--background-secondary);
-  color: var(--text-normal);
-  border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	border: 1px solid var(--background-modifier-border);
 }
 
 .refresh-button:hover {
-  background-color: var(--background-secondary-alt);
+	background-color: var(--background-secondary-alt);
 }
 
 .upload-input {
-  margin-left: 10px;
-  visibility: hidden;
-  width: 0px;
+	margin-left: 10px;
+	visibility: hidden;
+	width: 0px;
 }
 
 /* 旧工具栏元素兼容性样式 */
 .toolbar-line {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 8px 0;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 8px 0;
 }
 
 .style-label {
-  margin-right: 8px;
-  font-size: 13px;
-  color: var(--text-muted);
+	margin-right: 8px;
+	font-size: 13px;
+	color: var(--text-muted);
 }
 
 .style-select {
-  margin-right: 8px;
-  width: 120px;
-  background-color: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 13px;
-  color: var(--text-normal);
+	margin-right: 8px;
+	width: 120px;
+	background-color: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 4px 8px;
+	font-size: 13px;
+	color: var(--text-normal);
 }
 
 .msg-view {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--background-primary);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  z-index: 9999;
-  display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: var(--background-primary);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 18px;
+	z-index: 9999;
+	display: none;
 }
 
 .msg-title {
-  margin-bottom: 20px;
+	margin-bottom: 20px;
 }
 
 .note-mpcard-wrapper {
-  margin: 20px 20px;
-  background-color: rgb(250, 250, 250);
-  padding: 10px 20px;
-  border-radius: 10px;
+	margin: 20px 20px;
+	background-color: rgb(250, 250, 250);
+	padding: 10px 20px;
+	border-radius: 10px;
 }
+
 .note-mpcard-content {
-  display: flex;
+	display: flex;
 }
+
 .note-mpcard-headimg {
-  border: none !important;
-  border-radius: 27px !important;
-  box-shadow: none !important;
-  width: 54px !important;
-  height: 54px !important;
-  margin: 0 !important;
+	border: none !important;
+	border-radius: 27px !important;
+	box-shadow: none !important;
+	width: 54px !important;
+	height: 54px !important;
+	margin: 0 !important;
 }
-.note-mpcard-info { 
-  margin-left: 10px;
+
+.note-mpcard-info {
+	margin-left: 10px;
 }
+
 .note-mpcard-nickname {
-  font-size: 17px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.9);
+	font-size: 17px;
+	font-weight: 500;
+	color: rgba(0, 0, 0, 0.9);
 }
 
 .note-mpcard-signature {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.55);
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.55);
 }
+
 .note-mpcard-foot {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px solid #ececec;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.3);
+	margin-top: 20px;
+	padding-top: 10px;
+	border-top: 1px solid #ececec;
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.3);
 }
 
 /* 脚注样式 */
 .footnotes {
-  margin-top: 40px;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
+	margin-top: 40px;
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.65);
 }
 
 .footnotes hr {
-  margin-bottom: 20px;
-  border: none;
-  border-top: 1px solid #ececec;
+	margin-bottom: 20px;
+	border: none;
+	border-top: 1px solid #ececec;
 }
 
 .footnotes ol {
-  padding-left: 25px;
+	padding-left: 25px;
 }
 
 .footnotes li {
-  margin-bottom: 10px;
-  padding-left: 5px;
-  line-height: 1.5;
-  position: relative;
+	margin-bottom: 10px;
+	padding-left: 5px;
+	line-height: 1.5;
+	position: relative;
 }
 
 .footnote-url {
-  display: block;
-  margin-top: 4px;
-  word-break: break-all; /* 确保长 URL 能够在任何位置断行 */
-  color: rgba(0, 0, 0, 0.5);
-  font-family: monospace;
-  font-size: 13px;
-  padding-left: 8px;
+	display: block;
+	margin-top: 4px;
+	word-break: break-all; /* 确保长 URL 能够在任何位置断行 */
+	color: rgba(0, 0, 0, 0.5);
+	font-family: monospace;
+	font-size: 13px;
+	padding-left: 8px;
 }
 
 /* 主题色控制容器 */
 .color-control-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 4px;
 }
 
 /* 开关容器 */
 .enable-switch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 /* 开关文本 */
 .toggle-text {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
 }
 
 /* 开关样式 */
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 36px;
-  height: 18px;
+	position: relative;
+	display: inline-block;
+	width: 36px;
+	height: 18px;
 }
 
 .switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+	opacity: 0;
+	width: 0;
+	height: 0;
 }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--background-secondary);
-  transition: .3s;
-  border: 1px solid var(--background-modifier-border);
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--background-secondary);
+	transition: .3s;
+	border: 1px solid var(--background-modifier-border);
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 12px;
-  width: 12px;
-  left: 3px;
-  bottom: 2px;
-  background-color: var(--text-muted);
-  transition: .3s;
+	position: absolute;
+	content: "";
+	height: 12px;
+	width: 12px;
+	left: 3px;
+	bottom: 2px;
+	background-color: var(--text-muted);
+	transition: .3s;
 }
 
 input:checked + .slider {
-  background-color: #4A6BF5;
-  border-color: #4A6BF5;
+	background-color: #4A6BF5;
+	border-color: #4A6BF5;
 }
 
 input:checked + .slider:before {
-  background-color: white;
-  transform: translateX(16px);
+	background-color: white;
+	transform: translateX(16px);
 }
 
 .slider.round {
-  border-radius: 34px;
+	border-radius: 34px;
 }
 
 .slider.round:before {
-  border-radius: 50%;
+	border-radius: 50%;
 }
 
 /* 颜色选择器样式 */
 .color-picker-wrapper {
-  display: flex;
-  align-items: center;
-  position: relative;
-  min-width: 40px;
-  transition: opacity 0.3s ease;
+	display: flex;
+	align-items: center;
+	position: relative;
+	min-width: 40px;
+	transition: opacity 0.3s ease;
 }
 
 .toolbar-color-picker {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 30px;
-  height: 30px;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 30px;
+	height: 30px;
+	opacity: 0;
+	cursor: pointer;
+	z-index: 2;
 }
 
 .toolbar-color-picker:disabled {
-  cursor: not-allowed;
+	cursor: not-allowed;
 }
 
 .color-preview {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--background-primary);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
-  display: inline-block;
-  cursor: pointer;
-  position: relative;
-  margin-right: 4px;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: 2px solid var(--background-primary);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+	display: inline-block;
+	cursor: pointer;
+	position: relative;
+	margin-right: 4px;
 }

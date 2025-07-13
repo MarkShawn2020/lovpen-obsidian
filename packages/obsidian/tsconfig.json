@@ -3,9 +3,15 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["../frontend/src/*"],
-			"@lovpen/shared": ["../shared/index.ts"],
-			"@lovpen/shared/*": ["../shared/*"]
+			"@/*": [
+				"../frontend/src/*"
+			],
+			"@lovpen/shared": [
+				"../shared/index.ts"
+			],
+			"@lovpen/shared/*": [
+				"../shared/*"
+			]
 		}
 	},
 	"include": [

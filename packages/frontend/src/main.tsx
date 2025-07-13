@@ -39,10 +39,10 @@ const LovpenReactLib: LovpenReactLib = {
 			const root = rootStore.get(container);
 			if (root) {
 				root.render(
-			<JotaiProvider>
-				<LovpenReact {...props} />
-			</JotaiProvider>
-		);
+					<JotaiProvider>
+						<LovpenReact {...props} />
+					</JotaiProvider>
+				);
 				// 使用多个requestAnimationFrame确保React的useEffect完全执行完毕
 				requestAnimationFrame(() => {
 					requestAnimationFrame(() => {

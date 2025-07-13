@@ -8,30 +8,30 @@ import {initializeSettingsAtom} from "../store/atoms";
 import {logger} from "../../../shared/src/logger";
 
 export const LovpenReact: React.FC<LovpenReactProps> = ({
-																	  settings,
-																	  articleHTML,
-																	  cssContent,
-																	  plugins,
-																	  onRefresh,
-																	  onCopy,
-																	  onDistribute,
-																	  onTemplateChange,
-																	  onThemeChange,
-																	  onHighlightChange,
-																	  onThemeColorToggle,
-																	  onThemeColorChange,
-																	  onRenderArticle,
-																	  onSaveSettings,
-																	  onUpdateCSSVariables,
-																	  onPluginToggle,
-																	  onPluginConfigChange,
-																	  onExpandedSectionsChange,
-																	  onArticleInfoChange,
-																	  onPersonalInfoChange,
-																	  onSettingsChange
-																  }) => {
+															settings,
+															articleHTML,
+															cssContent,
+															plugins,
+															onRefresh,
+															onCopy,
+															onDistribute,
+															onTemplateChange,
+															onThemeChange,
+															onHighlightChange,
+															onThemeColorToggle,
+															onThemeColorChange,
+															onRenderArticle,
+															onSaveSettings,
+															onUpdateCSSVariables,
+															onPluginToggle,
+															onPluginConfigChange,
+															onExpandedSectionsChange,
+															onArticleInfoChange,
+															onPersonalInfoChange,
+															onSettingsChange
+														}) => {
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
-	
+
 	// 调试：检查传入的设置数据
 	console.log('[LovpenReact] Component props received:');
 	console.log('[LovpenReact] settings:', settings);
@@ -60,7 +60,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	// 组件挂载检查
 	useEffect(() => {
 		logger.debug("[mount-useEffect] Component mounted");
-		
+
 		return () => {
 			logger.debug("[mount-useEffect] Component will unmount");
 		};
@@ -77,15 +77,15 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 				email: '',
 				website: ''
 			};
-			
+
 			console.log("[jotai-init] Initializing Jotai with settings:", settings);
 			console.log("[jotai-init] Initializing Jotai with personalInfo:", personalInfo);
-			
+
 			initializeSettings({
 				settings,
 				personalInfo
 			});
-			
+
 			logger.debug("[jotai-init] Jotai state initialized with settings:", settings);
 			logger.debug("[jotai-init] Personal info:", personalInfo);
 		}

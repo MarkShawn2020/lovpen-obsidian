@@ -62,7 +62,7 @@ export default class AssetsManager {
 		try {
 			// 首先加载默认主题
 			this.themes = [this.defaultTheme];
-			
+
 			// 添加Anthropic Style主题
 			const anthropicStyleTheme = {
 				name: 'Anthropic Style',
@@ -71,7 +71,7 @@ export default class AssetsManager {
 				author: 'Lovpen Team',
 				css: ''
 			};
-			
+
 			// 尝试加载Anthropic Style主题的CSS
 			const anthropicStylePath = this.themesPath + 'anthropic-style.css';
 			if (await this.app.vault.adapter.exists(anthropicStylePath)) {
@@ -79,13 +79,13 @@ export default class AssetsManager {
 				anthropicStyleTheme.css = anthropicStyleCSS;
 				this.themes.push(anthropicStyleTheme);
 			}
-			
+
 			// 加载其他主题配置
 			if (!await this.app.vault.adapter.exists(this.themeCfg)) {
 				new Notice('主题资源未下载，请前往设置下载！');
 				return;
 			}
-			
+
 			const data = await this.app.vault.adapter.read(this.themeCfg);
 			if (data) {
 				const themes = JSON.parse(data);
@@ -132,7 +132,7 @@ export default class AssetsManager {
 	async loadTemplates() {
 		try {
 			console.log('[AssetsManager] 开始加载模板，目标路径:', this.templatesPath);
-			
+
 			// 确保模板目录存在
 			if (!await this.app.vault.adapter.exists(this.templatesPath)) {
 				console.log('[AssetsManager] 创建模板目录:', this.templatesPath);
@@ -141,7 +141,7 @@ export default class AssetsManager {
 
 			// 从开发目录复制模板文件到运行目录
 			await this.copyTemplatesFromSource();
-			
+
 			// 检查复制结果
 			const files = await this.app.vault.adapter.list(this.templatesPath);
 			console.log('[AssetsManager] 模板目录中的文件:', files.files);
@@ -159,7 +159,7 @@ export default class AssetsManager {
 				this.manifest.dir + '/../assets/templates/',
 				this.manifest.dir + '/packages/assets/templates/'
 			];
-			
+
 			let sourcePath = '';
 			for (const path of possibleSourcePaths) {
 				if (await this.app.vault.adapter.exists(path)) {
@@ -167,7 +167,7 @@ export default class AssetsManager {
 					break;
 				}
 			}
-			
+
 			if (!sourcePath) {
 				console.warn('[AssetsManager] No valid source templates path found. Tried:', possibleSourcePaths);
 				// 创建默认的Anthropic Style模板
@@ -182,16 +182,16 @@ export default class AssetsManager {
 
 			// 获取源目录中的所有文件
 			const files = await this.app.vault.adapter.list(sourcePath);
-			
+
 			for (const file of files.files) {
 				const filename = file.split('/').pop();
 				if (filename && filename.endsWith('.html')) {
 					const sourceFile = file;
 					const targetFile = this.templatesPath + filename;
-					
+
 					// 读取源文件内容
 					const content = await this.app.vault.adapter.read(sourceFile);
-					
+
 					// 写入到目标文件
 					await this.app.vault.adapter.write(targetFile, content);
 					console.log('[AssetsManager] Copied template:', filename);
@@ -204,7 +204,7 @@ export default class AssetsManager {
 				this.manifest.dir + '/../assets/themes/anthropic-style.css',
 				this.manifest.dir + '/packages/assets/themes/anthropic-style.css'
 			];
-			
+
 			let anthropicStyleSource = '';
 			for (const path of possibleThemePaths) {
 				if (await this.app.vault.adapter.exists(path)) {
@@ -212,15 +212,15 @@ export default class AssetsManager {
 					break;
 				}
 			}
-			
+
 			if (anthropicStyleSource) {
 				const anthropicStyleTarget = this.themesPath + 'anthropic-style.css';
-				
+
 				// 确保themes目录存在
 				if (!await this.app.vault.adapter.exists(this.themesPath)) {
 					await this.app.vault.adapter.mkdir(this.themesPath);
 				}
-				
+
 				const cssContent = await this.app.vault.adapter.read(anthropicStyleSource);
 				await this.app.vault.adapter.write(anthropicStyleTarget, cssContent);
 				console.log('[AssetsManager] Copied Anthropic Style theme');
@@ -235,13 +235,13 @@ export default class AssetsManager {
 	async createDefaultClaudeStyleTemplate() {
 		try {
 			const targetFile = this.templatesPath + 'Anthropic Style.html';
-			
+
 			// 检查文件是否已存在
 			if (await this.app.vault.adapter.exists(targetFile)) {
 				console.log('[AssetsManager] Anthropic Style template already exists');
 				return;
 			}
-			
+
 			console.log('[AssetsManager] Creating default Anthropic Style template at:', targetFile);
 			const defaultTemplate = `<div class="rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style" id="js_content">
 	<section class="claude-main-content">
@@ -283,7 +283,7 @@ export default class AssetsManager {
 
 			await this.app.vault.adapter.write(targetFile, defaultTemplate);
 			console.log('[AssetsManager] Successfully created default Anthropic Style template');
-			
+
 			// 验证文件是否创建成功
 			const exists = await this.app.vault.adapter.exists(targetFile);
 			console.log('[AssetsManager] File exists after creation:', exists);

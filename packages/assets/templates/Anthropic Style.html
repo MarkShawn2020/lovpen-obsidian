@@ -55,7 +55,7 @@
 
 		<!-- 文章内容 -->
 		<section class="lovpen" id="article-section">
-		{{{content}}}
+			{{{content}}}
 		</section>
 
 	</section>
@@ -67,7 +67,8 @@
 			<hr>
 			<div style="text-align: center; margin-top: 2em;">
 				{{#if personalInfo.avatar}}
-				<img src="{{personalInfo.avatar}}" alt="{{personalInfo.name}}" style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 1em;">
+				<img alt="{{personalInfo.name}}" src="{{personalInfo.avatar}}"
+					 style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 1em;">
 				{{/if}}
 				<p><strong>{{personalInfo.name}}</strong></p>
 				{{#if personalInfo.bio}}
@@ -85,555 +86,555 @@
 </div>
 
 <style>
-/* Claude Style 内联样式 */
-.claude-main-content {
-	font-family: "PingFang SC", -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
-	font-size: 15px;
-	line-height: 1.75;
-	color: rgb(34, 34, 34);
-	background: rgb(250, 249, 245) !important;
-	border-radius: 12px;
-	padding: 8px;
-	margin: 0 auto;
-	box-sizing: border-box;
-}
-
-/* 确保整个容器都有背景色 */
-.rich_media_content {
-	background: rgb(250, 249, 245) !important;
-	border-radius: 12px;
-	padding: 8px;
-}
-
-.claude-epigraph {
-	background: rgba(200, 100, 66, 0.1);
-	border-left: 4px solid rgb(200, 100, 66);
-	padding: 1em;
-	margin: 1.5em 8px;
-	border-radius: 6px;
-}
-
-.claude-epigraph p {
-	margin: 0.5em 0;
-	color: rgb(200, 100, 66) !important;
-	font-size: 1.1em;
-}
-
-.claude-subtitle {
-	text-align: center;
-	margin: 1em 8px 2em;
-}
-
-.claude-subtitle p {
-	color: rgb(63, 63, 63);
-	font-size: 1.1em;
-	margin: 0;
-}
-
-.claude-main-content p {
-	margin: 1.5em 8px;
-	text-align: justify;
-	line-height: 1.75;
-	font-size: 15px;
-	letter-spacing: 0.1em;
-	color: rgb(34, 34, 34);
-	word-break: break-word; /* 改为break-word，支持连接符 */
-	hyphens: auto; /* 添加连接符支持 */
-	box-sizing: border-box;
-}
-
-.claude-main-content h1 {
-	font-size: 1.6em;
-	font-weight: bold;
-	margin: 4em auto 2em;
-	text-align: center;
-	line-height: 1.75;
-	display: table;
-	padding: 0.3em 1em;
-	background: rgb(200, 100, 66);
-	border-radius: 8px;
-	box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
-	color: white !important;
-}
-
-.claude-main-content h2 {
-	font-size: 1.3em;
-	font-weight: bold;
-	margin: 4em auto 2em;
-	text-align: center;
-	line-height: 1.75;
-	display: table;
-	padding: 0.3em 1em;
-	background: rgb(200, 100, 66);
-	border-radius: 8px;
-	box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
-	color: white !important;
-}
-
-.claude-main-content h3 {
-	border-left: 4px solid rgb(200, 100, 66);
-	border-bottom: 1px dashed rgb(200, 100, 66);
-	font-size: 1.2em;
-	font-weight: bold;
-	margin: 2em 8px 0.75em 0px;
-	text-align: left;
-	line-height: 1.2;
-	padding-left: 12px;
-	color: rgb(63, 63, 63);
-}
-
-.claude-main-content h4 {
-	font-size: 1.1em;
-	font-weight: bold;
-	margin: 2em 8px -1em;
-	text-align: left;
-	line-height: 1.75;
-	color: rgb(200, 100, 66);
-}
-
-.claude-main-content h5 {
-	font-size: 1em;
-	font-weight: bold;
-	color: rgb(200, 100, 66);
-	margin: 1.5em 8px 0.5em;
-}
-
-.claude-main-content h6 {
-	font-size: 0.9em;
-	font-weight: bold;
-	color: rgb(200, 100, 66);
-	margin: 1.5em 0px 0.5em; /* 与h3保持左对齐，调整上边距 */
-	padding-left: 0; /* 确保与h3-h5左对齐 */
-}
-
-.claude-main-content strong, .claude-main-content b {
-	font-weight: bold;
-	color: rgb(200, 100, 66);
-}
-
-.claude-main-content em, .claude-main-content i {
-	font-style: italic;
-	color: rgb(200, 100, 66);
-}
-
-.claude-main-content img {
-	display: block;
-	vertical-align: middle;
-	max-width: 100%;
-	height: auto;
-	text-align: left;
-	line-height: 1.75;
-	margin: 0.1em auto 0.5em;
-	border-radius: 8px;
-	box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 8px;
-}
-
-.claude-main-content figcaption {
-	text-align: center;
-	line-height: 1.75;
-	font-size: 0.8em;
-	color: rgb(136, 136, 136);
-	margin-top: 0.5em;
-}
-
-.claude-main-content ul, .claude-main-content ol {
-	margin: 1.5em 8px;
-	padding-left: 2em;
-	color: rgb(34, 34, 34);
-}
-
-/* 设置列表标记颜色与主题色一致 */
-.claude-main-content ul {
-	list-style-type: disc;
-}
-
-.claude-main-content ul li::marker {
-	color: rgb(200, 100, 66);
-}
-
-.claude-main-content ol {
-	list-style-type: decimal;
-}
-
-.claude-main-content ol li::marker {
-	color: rgb(200, 100, 66);
-	font-weight: bold;
-}
-
-.claude-main-content li {
-	margin: 0.25em 0;
-	line-height: 1.75;
-	color: rgb(34, 34, 34);
-}
-
-/* 修复多层嵌套列表样式 */
-.claude-main-content ul ul,
-.claude-main-content ol ol,
-.claude-main-content ul ol,
-.claude-main-content ol ul {
-	margin: 0.5em 0;
-	padding-left: 1.5em;
-}
-
-/* 二级列表标记 */
-.claude-main-content ul ul {
-	list-style-type: circle;
-}
-
-.claude-main-content ul ul li::marker {
-	color: rgba(200, 100, 66, 0.8);
-}
-
-.claude-main-content ol ol li::marker {
-	color: rgba(200, 100, 66, 0.8);
-}
-
-/* 三级列表标记 */
-.claude-main-content ul ul ul {
-	list-style-type: square;
-}
-
-.claude-main-content ul ul ul li::marker {
-	color: rgba(200, 100, 66, 0.6);
-}
-
-.claude-main-content ol ol ol li::marker {
-	color: rgba(200, 100, 66, 0.6);
-}
-
-.claude-main-content blockquote {
-	margin: 1.5em 8px;
-	padding: 1em;
-	background: rgba(200, 100, 66, 0.1);
-	border-left: 4px solid rgb(200, 100, 66);
-	border-radius: 6px;
-	color: rgb(34, 34, 34);
-	font-style: italic;
-}
-
-/* 修复多层嵌套引用 - 支持更深层级 */
-.claude-main-content blockquote blockquote {
-	margin: 1em 0 !important;
-	border-left: 3px solid rgba(200, 100, 66, 0.7) !important;
-	background: rgba(200, 100, 66, 0.05) !important;
-	padding: 0.8em !important;
-	font-style: italic !important;
-}
-
-.claude-main-content blockquote blockquote blockquote {
-	margin: 0.8em 0 !important;
-	border-left: 2px solid rgba(200, 100, 66, 0.5) !important;
-	background: rgba(200, 100, 66, 0.03) !important;
-	padding: 0.6em !important;
-}
-
-.claude-main-content blockquote blockquote blockquote blockquote {
-	margin: 0.6em 0 !important;
-	border-left: 2px solid rgba(200, 100, 66, 0.4) !important;
-	background: rgba(200, 100, 66, 0.02) !important;
-	padding: 0.5em !important;
-}
-
-/* 通用深层嵌套引用处理 */
-.claude-main-content blockquote blockquote blockquote blockquote blockquote {
-	margin: 0.5em 0 !important;
-	border-left: 1px solid rgba(200, 100, 66, 0.3) !important;
-	background: rgba(200, 100, 66, 0.01) !important;
-	padding: 0.4em !important;
-}
-
-/* 修复嵌套在引用中的列表 */
-.claude-main-content blockquote ul,
-.claude-main-content blockquote ol {
-	margin: 1em 0;
-	padding-left: 1.5em;
-}
-
-.claude-main-content blockquote li {
-	margin: 0.2em 0;
-}
-
-/* 修复引用中的列表标记颜色 */
-.claude-main-content blockquote ul li::marker,
-.claude-main-content blockquote ol li::marker {
-	color: rgba(200, 100, 66, 0.8);
-}
-
-.claude-main-content code {
-	background: rgb(245, 245, 245);
-	padding: 0.2em 0.4em;
-	border-radius: 4px;
-	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-	font-size: 0.9em;
-	color: rgb(200, 100, 66);
-}
-
-.claude-main-content pre {
-	background: rgb(245, 245, 245);
-	padding: 1em;
-	border-radius: 8px;
-	overflow-x: auto;
-	margin: 1.5em 8px;
-}
-
-.claude-main-content pre code {
-	background: none;
-	padding: 0;
-	color: rgb(34, 34, 34);
-}
-
-.claude-main-content table {
-	width: 100%;
-	border-collapse: collapse;
-	margin: 1.5em 8px;
-	border-radius: 8px;
-	overflow: hidden;
-	box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px;
-}
-
-.claude-main-content th, .claude-main-content td {
-	padding: 0.5em 1em;
-	border-bottom: 1px solid rgb(229, 229, 229);
-}
-
-/* 修复表格对齐 */
-.claude-main-content td[align="center"],
-.claude-main-content th[align="center"] {
-	text-align: center;
-}
-
-.claude-main-content td[align="right"],
-.claude-main-content th[align="right"] {
-	text-align: right;
-}
-
-.claude-main-content td[align="left"],
-.claude-main-content th[align="left"] {
-	text-align: left;
-}
-
-.claude-main-content th {
-	background: rgb(200, 100, 66);
-	color: white;
-	font-weight: bold;
-}
-
-.claude-main-content tr:nth-child(even) {
-	background: rgb(255, 255, 255);
-}
-
-.claude-main-content a {
-	color: rgb(200, 100, 66);
-	text-decoration: none;
-	border-bottom: 1px solid transparent;
-}
-
-.claude-main-content a:hover {
-	border-bottom-color: rgb(200, 100, 66);
-}
-
-.claude-main-content hr {
-	border: none;
-	height: 1px;
-	background: rgb(229, 229, 229);
-	margin: 2em 8px;
-}
-
-.claude-author-info, .claude-series-info {
-	margin: 2em 8px;
-	padding: 1em;
-	background: rgba(200, 100, 66, 0.05);
-	border-radius: 6px;
-}
-
-.claude-tags {
-	margin: 1.5em 8px;
-}
-
-.claude-tag {
-	display: inline-block;
-	color: rgb(200, 100, 66);
-	font-weight: bold;
-}
-
-.claude-personal-info {
-	margin: 2em 8px;
-	padding: 1.5em;
-	background: rgba(200, 100, 66, 0.05);
-	border-radius: 8px;
-	border: 1px solid rgba(200, 100, 66, 0.2);
-}
-
-/* 文章元信息样式 - Claude风格 */
-.claude-meta-section {
-	margin: 2em 8px 3em;
-	position: relative;
-}
-
-.claude-meta-content {
-	background: linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(200, 100, 66, 0.03) 100%);
-	border: 1px solid rgba(200, 100, 66, 0.15);
-	border-radius: 12px;
-	padding: 1.5em;
-	position: relative;
-	overflow: hidden;
-}
-
-.claude-meta-content::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 4px;
-	height: 100%;
-	background: linear-gradient(to bottom, rgb(200, 100, 66), rgba(200, 100, 66, 0.6));
-}
-
-.claude-meta-item {
-	display: flex;
-	align-items: center;
-	margin-bottom: 0.8em;
-	font-size: 0.9em;
-}
-
-.claude-meta-item:last-of-type {
-	margin-bottom: 0;
-}
-
-.claude-meta-label {
-	color: rgb(200, 100, 66);
-	font-weight: 600;
-	min-width: 3em;
-	margin-right: 1em;
-	position: relative;
-}
-
-.claude-meta-label::after {
-	content: '·';
-	margin-left: 0.5em;
-	color: rgba(200, 100, 66, 0.5);
-}
-
-.claude-meta-value {
-	color: rgb(63, 63, 63);
-	font-weight: 500;
-	flex: 1;
-}
-
-.claude-meta-tags {
-	margin-top: 1em;
-	padding-top: 1em;
-	border-top: 1px solid rgba(200, 100, 66, 0.1);
-}
-
-.claude-meta-tag {
-	display: inline-block;
-	background: rgba(200, 100, 66, 0.1);
-	color: rgb(200, 100, 66);
-	padding: 0.3em 0.8em;
-	border-radius: 16px;
-	font-size: 0.8em;
-	font-weight: 500;
-	margin: 0 0.5em 0.5em 0;
-	border: 1px solid rgba(200, 100, 66, 0.2);
-}
-
-.claude-footer {
-	margin-top: 2em;
-}
-
-/* LaTeX数学公式支持 - MathJax 3.x优化 */
-.claude-main-content .block-math-svg {
-	display: flex;
-	justify-content: center;
-	margin: 1.5em 0;
-}
-
-.claude-main-content .MathJax,
-.claude-main-content .katex {
-	font-size: 1.1em;
-	color: rgb(34, 34, 34);
-}
-
-/* MathJax 3.x 主要容器样式 */
-.claude-main-content mjx-container {
-	font-size: 1.1em;
-	color: rgb(34, 34, 34);
-}
-
-/* 行内数学公式 */
-.claude-main-content mjx-container:not([display]) {
-	display: inline-block;
-	margin: 0 0.1em;
-	vertical-align: middle;
-}
-
-/* 块级数学公式 */
-.claude-main-content mjx-container[display="block"] {
-	display: block;
-	margin: 1.5em 8px;
-	text-align: center;
-}
-
-/* SVG元素优化 */
-.claude-main-content mjx-container svg {
-	max-width: 100%;
-	height: auto;
-	vertical-align: middle;
-}
-
-/* 确保行内公式与文本正确对齐 */
-.claude-main-content p mjx-container {
-	display: inline-block;
-	margin: 0;
-	vertical-align: baseline;
-}
-
-/* 兼容旧版本结构 */
-.claude-main-content .MathJax_SVG {
-	display: inline-block;
-	margin: 0;
-	padding: 0;
-}
-
-.claude-main-content .MathJax_SVG_Display {
-	display: block;
-	margin: 1.5em 8px;
-	text-align: center;
-}
-
-/* Mermaid图表样式 */
-.claude-main-content .mermaid {
-	text-align: center;
-	margin: 1.5em 8px;
-	background: rgb(255, 255, 255);
-	border-radius: 8px;
-	padding: 1em;
-	border: 1px solid rgb(229, 229, 229);
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
+	/* Claude Style 内联样式 */
 	.claude-main-content {
-		padding: 4px;
+		font-family: "PingFang SC", -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
+		font-size: 15px;
+		line-height: 1.75;
+		color: rgb(34, 34, 34);
+		background: rgb(250, 249, 245) !important;
+		border-radius: 12px;
+		padding: 8px;
+		margin: 0 auto;
+		box-sizing: border-box;
 	}
-	
-	.claude-main-content p,
-	.claude-main-content ul,
-	.claude-main-content ol,
-	.claude-main-content blockquote {
-		margin-left: 4px;
-		margin-right: 4px;
+
+	/* 确保整个容器都有背景色 */
+	.rich_media_content {
+		background: rgb(250, 249, 245) !important;
+		border-radius: 12px;
+		padding: 8px;
 	}
-	
-	.claude-main-content h1,
+
+	.claude-epigraph {
+		background: rgba(200, 100, 66, 0.1);
+		border-left: 4px solid rgb(200, 100, 66);
+		padding: 1em;
+		margin: 1.5em 8px;
+		border-radius: 6px;
+	}
+
+	.claude-epigraph p {
+		margin: 0.5em 0;
+		color: rgb(200, 100, 66) !important;
+		font-size: 1.1em;
+	}
+
+	.claude-subtitle {
+		text-align: center;
+		margin: 1em 8px 2em;
+	}
+
+	.claude-subtitle p {
+		color: rgb(63, 63, 63);
+		font-size: 1.1em;
+		margin: 0;
+	}
+
+	.claude-main-content p {
+		margin: 1.5em 8px;
+		text-align: justify;
+		line-height: 1.75;
+		font-size: 15px;
+		letter-spacing: 0.1em;
+		color: rgb(34, 34, 34);
+		word-break: break-word; /* 改为break-word，支持连接符 */
+		hyphens: auto; /* 添加连接符支持 */
+		box-sizing: border-box;
+	}
+
+	.claude-main-content h1 {
+		font-size: 1.6em;
+		font-weight: bold;
+		margin: 4em auto 2em;
+		text-align: center;
+		line-height: 1.75;
+		display: table;
+		padding: 0.3em 1em;
+		background: rgb(200, 100, 66);
+		border-radius: 8px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
+		color: white !important;
+	}
+
 	.claude-main-content h2 {
-		font-size: 1.2em;
-		padding: 0.2em 0.5em;
+		font-size: 1.3em;
+		font-weight: bold;
+		margin: 4em auto 2em;
+		text-align: center;
+		line-height: 1.75;
+		display: table;
+		padding: 0.3em 1em;
+		background: rgb(200, 100, 66);
+		border-radius: 8px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
+		color: white !important;
 	}
-	
+
 	.claude-main-content h3 {
-		margin-right: 4px;
+		border-left: 4px solid rgb(200, 100, 66);
+		border-bottom: 1px dashed rgb(200, 100, 66);
+		font-size: 1.2em;
+		font-weight: bold;
+		margin: 2em 8px 0.75em 0px;
+		text-align: left;
+		line-height: 1.2;
+		padding-left: 12px;
+		color: rgb(63, 63, 63);
 	}
-}
+
+	.claude-main-content h4 {
+		font-size: 1.1em;
+		font-weight: bold;
+		margin: 2em 8px -1em;
+		text-align: left;
+		line-height: 1.75;
+		color: rgb(200, 100, 66);
+	}
+
+	.claude-main-content h5 {
+		font-size: 1em;
+		font-weight: bold;
+		color: rgb(200, 100, 66);
+		margin: 1.5em 8px 0.5em;
+	}
+
+	.claude-main-content h6 {
+		font-size: 0.9em;
+		font-weight: bold;
+		color: rgb(200, 100, 66);
+		margin: 1.5em 0px 0.5em; /* 与h3保持左对齐，调整上边距 */
+		padding-left: 0; /* 确保与h3-h5左对齐 */
+	}
+
+	.claude-main-content strong, .claude-main-content b {
+		font-weight: bold;
+		color: rgb(200, 100, 66);
+	}
+
+	.claude-main-content em, .claude-main-content i {
+		font-style: italic;
+		color: rgb(200, 100, 66);
+	}
+
+	.claude-main-content img {
+		display: block;
+		vertical-align: middle;
+		max-width: 100%;
+		height: auto;
+		text-align: left;
+		line-height: 1.75;
+		margin: 0.1em auto 0.5em;
+		border-radius: 8px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 8px;
+	}
+
+	.claude-main-content figcaption {
+		text-align: center;
+		line-height: 1.75;
+		font-size: 0.8em;
+		color: rgb(136, 136, 136);
+		margin-top: 0.5em;
+	}
+
+	.claude-main-content ul, .claude-main-content ol {
+		margin: 1.5em 8px;
+		padding-left: 2em;
+		color: rgb(34, 34, 34);
+	}
+
+	/* 设置列表标记颜色与主题色一致 */
+	.claude-main-content ul {
+		list-style-type: disc;
+	}
+
+	.claude-main-content ul li::marker {
+		color: rgb(200, 100, 66);
+	}
+
+	.claude-main-content ol {
+		list-style-type: decimal;
+	}
+
+	.claude-main-content ol li::marker {
+		color: rgb(200, 100, 66);
+		font-weight: bold;
+	}
+
+	.claude-main-content li {
+		margin: 0.25em 0;
+		line-height: 1.75;
+		color: rgb(34, 34, 34);
+	}
+
+	/* 修复多层嵌套列表样式 */
+	.claude-main-content ul ul,
+	.claude-main-content ol ol,
+	.claude-main-content ul ol,
+	.claude-main-content ol ul {
+		margin: 0.5em 0;
+		padding-left: 1.5em;
+	}
+
+	/* 二级列表标记 */
+	.claude-main-content ul ul {
+		list-style-type: circle;
+	}
+
+	.claude-main-content ul ul li::marker {
+		color: rgba(200, 100, 66, 0.8);
+	}
+
+	.claude-main-content ol ol li::marker {
+		color: rgba(200, 100, 66, 0.8);
+	}
+
+	/* 三级列表标记 */
+	.claude-main-content ul ul ul {
+		list-style-type: square;
+	}
+
+	.claude-main-content ul ul ul li::marker {
+		color: rgba(200, 100, 66, 0.6);
+	}
+
+	.claude-main-content ol ol ol li::marker {
+		color: rgba(200, 100, 66, 0.6);
+	}
+
+	.claude-main-content blockquote {
+		margin: 1.5em 8px;
+		padding: 1em;
+		background: rgba(200, 100, 66, 0.1);
+		border-left: 4px solid rgb(200, 100, 66);
+		border-radius: 6px;
+		color: rgb(34, 34, 34);
+		font-style: italic;
+	}
+
+	/* 修复多层嵌套引用 - 支持更深层级 */
+	.claude-main-content blockquote blockquote {
+		margin: 1em 0 !important;
+		border-left: 3px solid rgba(200, 100, 66, 0.7) !important;
+		background: rgba(200, 100, 66, 0.05) !important;
+		padding: 0.8em !important;
+		font-style: italic !important;
+	}
+
+	.claude-main-content blockquote blockquote blockquote {
+		margin: 0.8em 0 !important;
+		border-left: 2px solid rgba(200, 100, 66, 0.5) !important;
+		background: rgba(200, 100, 66, 0.03) !important;
+		padding: 0.6em !important;
+	}
+
+	.claude-main-content blockquote blockquote blockquote blockquote {
+		margin: 0.6em 0 !important;
+		border-left: 2px solid rgba(200, 100, 66, 0.4) !important;
+		background: rgba(200, 100, 66, 0.02) !important;
+		padding: 0.5em !important;
+	}
+
+	/* 通用深层嵌套引用处理 */
+	.claude-main-content blockquote blockquote blockquote blockquote blockquote {
+		margin: 0.5em 0 !important;
+		border-left: 1px solid rgba(200, 100, 66, 0.3) !important;
+		background: rgba(200, 100, 66, 0.01) !important;
+		padding: 0.4em !important;
+	}
+
+	/* 修复嵌套在引用中的列表 */
+	.claude-main-content blockquote ul,
+	.claude-main-content blockquote ol {
+		margin: 1em 0;
+		padding-left: 1.5em;
+	}
+
+	.claude-main-content blockquote li {
+		margin: 0.2em 0;
+	}
+
+	/* 修复引用中的列表标记颜色 */
+	.claude-main-content blockquote ul li::marker,
+	.claude-main-content blockquote ol li::marker {
+		color: rgba(200, 100, 66, 0.8);
+	}
+
+	.claude-main-content code {
+		background: rgb(245, 245, 245);
+		padding: 0.2em 0.4em;
+		border-radius: 4px;
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		font-size: 0.9em;
+		color: rgb(200, 100, 66);
+	}
+
+	.claude-main-content pre {
+		background: rgb(245, 245, 245);
+		padding: 1em;
+		border-radius: 8px;
+		overflow-x: auto;
+		margin: 1.5em 8px;
+	}
+
+	.claude-main-content pre code {
+		background: none;
+		padding: 0;
+		color: rgb(34, 34, 34);
+	}
+
+	.claude-main-content table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 1.5em 8px;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px;
+	}
+
+	.claude-main-content th, .claude-main-content td {
+		padding: 0.5em 1em;
+		border-bottom: 1px solid rgb(229, 229, 229);
+	}
+
+	/* 修复表格对齐 */
+	.claude-main-content td[align="center"],
+	.claude-main-content th[align="center"] {
+		text-align: center;
+	}
+
+	.claude-main-content td[align="right"],
+	.claude-main-content th[align="right"] {
+		text-align: right;
+	}
+
+	.claude-main-content td[align="left"],
+	.claude-main-content th[align="left"] {
+		text-align: left;
+	}
+
+	.claude-main-content th {
+		background: rgb(200, 100, 66);
+		color: white;
+		font-weight: bold;
+	}
+
+	.claude-main-content tr:nth-child(even) {
+		background: rgb(255, 255, 255);
+	}
+
+	.claude-main-content a {
+		color: rgb(200, 100, 66);
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+	}
+
+	.claude-main-content a:hover {
+		border-bottom-color: rgb(200, 100, 66);
+	}
+
+	.claude-main-content hr {
+		border: none;
+		height: 1px;
+		background: rgb(229, 229, 229);
+		margin: 2em 8px;
+	}
+
+	.claude-author-info, .claude-series-info {
+		margin: 2em 8px;
+		padding: 1em;
+		background: rgba(200, 100, 66, 0.05);
+		border-radius: 6px;
+	}
+
+	.claude-tags {
+		margin: 1.5em 8px;
+	}
+
+	.claude-tag {
+		display: inline-block;
+		color: rgb(200, 100, 66);
+		font-weight: bold;
+	}
+
+	.claude-personal-info {
+		margin: 2em 8px;
+		padding: 1.5em;
+		background: rgba(200, 100, 66, 0.05);
+		border-radius: 8px;
+		border: 1px solid rgba(200, 100, 66, 0.2);
+	}
+
+	/* 文章元信息样式 - Claude风格 */
+	.claude-meta-section {
+		margin: 2em 8px 3em;
+		position: relative;
+	}
+
+	.claude-meta-content {
+		background: linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(200, 100, 66, 0.03) 100%);
+		border: 1px solid rgba(200, 100, 66, 0.15);
+		border-radius: 12px;
+		padding: 1.5em;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.claude-meta-content::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 4px;
+		height: 100%;
+		background: linear-gradient(to bottom, rgb(200, 100, 66), rgba(200, 100, 66, 0.6));
+	}
+
+	.claude-meta-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 0.8em;
+		font-size: 0.9em;
+	}
+
+	.claude-meta-item:last-of-type {
+		margin-bottom: 0;
+	}
+
+	.claude-meta-label {
+		color: rgb(200, 100, 66);
+		font-weight: 600;
+		min-width: 3em;
+		margin-right: 1em;
+		position: relative;
+	}
+
+	.claude-meta-label::after {
+		content: '·';
+		margin-left: 0.5em;
+		color: rgba(200, 100, 66, 0.5);
+	}
+
+	.claude-meta-value {
+		color: rgb(63, 63, 63);
+		font-weight: 500;
+		flex: 1;
+	}
+
+	.claude-meta-tags {
+		margin-top: 1em;
+		padding-top: 1em;
+		border-top: 1px solid rgba(200, 100, 66, 0.1);
+	}
+
+	.claude-meta-tag {
+		display: inline-block;
+		background: rgba(200, 100, 66, 0.1);
+		color: rgb(200, 100, 66);
+		padding: 0.3em 0.8em;
+		border-radius: 16px;
+		font-size: 0.8em;
+		font-weight: 500;
+		margin: 0 0.5em 0.5em 0;
+		border: 1px solid rgba(200, 100, 66, 0.2);
+	}
+
+	.claude-footer {
+		margin-top: 2em;
+	}
+
+	/* LaTeX数学公式支持 - MathJax 3.x优化 */
+	.claude-main-content .block-math-svg {
+		display: flex;
+		justify-content: center;
+		margin: 1.5em 0;
+	}
+
+	.claude-main-content .MathJax,
+	.claude-main-content .katex {
+		font-size: 1.1em;
+		color: rgb(34, 34, 34);
+	}
+
+	/* MathJax 3.x 主要容器样式 */
+	.claude-main-content mjx-container {
+		font-size: 1.1em;
+		color: rgb(34, 34, 34);
+	}
+
+	/* 行内数学公式 */
+	.claude-main-content mjx-container:not([display]) {
+		display: inline-block;
+		margin: 0 0.1em;
+		vertical-align: middle;
+	}
+
+	/* 块级数学公式 */
+	.claude-main-content mjx-container[display="block"] {
+		display: block;
+		margin: 1.5em 8px;
+		text-align: center;
+	}
+
+	/* SVG元素优化 */
+	.claude-main-content mjx-container svg {
+		max-width: 100%;
+		height: auto;
+		vertical-align: middle;
+	}
+
+	/* 确保行内公式与文本正确对齐 */
+	.claude-main-content p mjx-container {
+		display: inline-block;
+		margin: 0;
+		vertical-align: baseline;
+	}
+
+	/* 兼容旧版本结构 */
+	.claude-main-content .MathJax_SVG {
+		display: inline-block;
+		margin: 0;
+		padding: 0;
+	}
+
+	.claude-main-content .MathJax_SVG_Display {
+		display: block;
+		margin: 1.5em 8px;
+		text-align: center;
+	}
+
+	/* Mermaid图表样式 */
+	.claude-main-content .mermaid {
+		text-align: center;
+		margin: 1.5em 8px;
+		background: rgb(255, 255, 255);
+		border-radius: 8px;
+		padding: 1em;
+		border: 1px solid rgb(229, 229, 229);
+	}
+
+	/* 响应式设计 */
+	@media (max-width: 768px) {
+		.claude-main-content {
+			padding: 4px;
+		}
+
+		.claude-main-content p,
+		.claude-main-content ul,
+		.claude-main-content ol,
+		.claude-main-content blockquote {
+			margin-left: 4px;
+			margin-right: 4px;
+		}
+
+		.claude-main-content h1,
+		.claude-main-content h2 {
+			font-size: 1.2em;
+			padding: 0.2em 0.5em;
+		}
+
+		.claude-main-content h3 {
+			margin-right: 4px;
+		}
+	}
 </style>

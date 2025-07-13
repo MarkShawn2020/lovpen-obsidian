@@ -147,31 +147,31 @@ export interface TemplateKitImportOptions {
 export interface ITemplateKitManager {
 	/** 获取所有套装 */
 	getAllKits(): Promise<TemplateKit[]>;
-	
+
 	/** 根据ID获取套装 */
 	getKitById(id: string): Promise<TemplateKit | null>;
-	
+
 	/** 应用套装 */
 	applyKit(kitId: string, options?: TemplateKitApplyOptions): Promise<TemplateKitOperationResult>;
-	
+
 	/** 创建套装 */
 	createKit(kit: TemplateKit): Promise<TemplateKitOperationResult>;
-	
+
 	/** 更新套装 */
 	updateKit(kitId: string, kit: Partial<TemplateKit>): Promise<TemplateKitOperationResult>;
-	
+
 	/** 删除套装 */
 	deleteKit(kitId: string): Promise<TemplateKitOperationResult>;
-	
+
 	/** 导出套装 */
 	exportKit(kitId: string, options?: TemplateKitExportOptions): Promise<TemplateKitOperationResult>;
-	
+
 	/** 导入套装 */
 	importKit(kitData: any, options?: TemplateKitImportOptions): Promise<TemplateKitOperationResult>;
-	
+
 	/** 生成套装预览 */
 	generatePreview(kitId: string, content: string): Promise<TemplateKitPreview>;
-	
+
 	/** 从当前设置创建套装 */
 	createKitFromCurrentSettings(basicInfo: TemplateKitBasicInfo): Promise<TemplateKitOperationResult>;
 }

@@ -106,7 +106,7 @@ function applyStyle(root: HTMLElement, css: string) {
 	// 简化版本，直接使用 style 标签应用样式
 	const styleEl = document.createElement("style");
 	styleEl.textContent = css;
-	
+
 	// 将样式应用到文档头部
 	if (!document.head.querySelector(`style[data-utils-css]`)) {
 		styleEl.setAttribute('data-utils-css', 'true');
@@ -195,21 +195,21 @@ function extractCSSVariables(css: string): string {
 	try {
 		// 使用正则表达式提取 CSS 变量
 		let cssVars = "";
-		
+
 		// 提取 :root 规则
 		const rootRuleRegex = /:root\s*\{[^}]+\}/g;
 		const rootMatches = css.match(rootRuleRegex);
 		if (rootMatches) {
 			cssVars += rootMatches.join("\n") + "\n";
 		}
-		
+
 		// 提取包含 :root 的 @media 规则
 		const mediaRuleRegex = /@media[^{]+\{[^{}]*:root\s*\{[^}]+\}[^}]*\}/g;
 		const mediaMatches = css.match(mediaRuleRegex);
 		if (mediaMatches) {
 			cssVars += mediaMatches.join("\n") + "\n";
 		}
-		
+
 		return cssVars;
 	} catch (e) {
 		logger.error("提取CSS变量失败:", e);

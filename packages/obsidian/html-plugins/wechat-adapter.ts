@@ -146,7 +146,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// 提取所有style标签中的CSS内容
 			const styleElements = tempDiv.querySelectorAll('style');
 			let combinedCSS = '';
-			
+
 			styleElements.forEach(styleEl => {
 				const cssContent = styleEl.textContent || '';
 				combinedCSS += cssContent + '\n';
@@ -208,16 +208,16 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	 */
 	private extractCSSVariables(css: string): Record<string, string> {
 		const variables: Record<string, string> = {};
-		
+
 		// 提取:root中的CSS变量
 		const rootRuleRegex = /:root\s*\{([^}]+)\}/g;
 		let match;
-		
+
 		while ((match = rootRuleRegex.exec(css)) !== null) {
 			const declarations = match[1];
 			const varRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
 			let varMatch;
-			
+
 			while ((varMatch = varRegex.exec(declarations)) !== null) {
 				const varName = varMatch[1];
 				const varValue = varMatch[2].trim();
@@ -258,15 +258,18 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		};
 
 		// 合并默认变量和提取的变量
-		return { ...defaultVariables, ...variables };
+		return {...defaultVariables, ...variables};
 	}
 
 	/**
 	 * 解析CSS规则
 	 */
-	private parseCSSRules(css: string, variables: Record<string, string>): Array<{ selector: string; styles: Record<string, string> }> {
+	private parseCSSRules(css: string, variables: Record<string, string>): Array<{
+		selector: string;
+		styles: Record<string, string>
+	}> {
 		const rules: Array<{ selector: string; styles: Record<string, string> }> = [];
-		
+
 		// 替换CSS变量
 		let processedCSS = css;
 		Object.entries(variables).forEach(([varName, varValue]) => {
@@ -281,7 +284,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		while ((match = ruleRegex.exec(processedCSS)) !== null) {
 			const selectorText = match[1].trim();
 			const declarationsText = match[2];
-			
+
 			// 跳过@规则和:root
 			if (selectorText.startsWith('@') || selectorText === ':root') {
 				continue;
@@ -289,7 +292,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 			const styles: Record<string, string> = {};
 			const declarations = declarationsText.split(';');
-			
+
 			declarations.forEach(decl => {
 				const colonIndex = decl.indexOf(':');
 				if (colonIndex > 0) {
@@ -302,7 +305,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			});
 
 			if (Object.keys(styles).length > 0) {
-				rules.push({ selector: selectorText, styles });
+				rules.push({selector: selectorText, styles});
 			}
 		}
 
@@ -313,7 +316,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	 * 应用内联样式到元素
 	 */
 	private applyInlineStyles(
-		element: HTMLElement, 
+		element: HTMLElement,
 		cssRules: Array<{ selector: string; styles: Record<string, string> }>,
 		variables: Record<string, string>
 	): void {
@@ -334,9 +337,9 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		// 合并现有的内联样式
 		const existingStyle = element.getAttribute('style') || '';
 		const existingStyles = this.parseStyleString(existingStyle);
-		
+
 		// 现有样式优先级更高
-		const finalStyles = { ...matchedStyles, ...existingStyles };
+		const finalStyles = {...matchedStyles, ...existingStyles};
 
 		// 应用最终样式
 		const styleString = Object.entries(finalStyles)
@@ -355,24 +358,24 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		try {
 			// 处理常见的选择器类型
 			const trimmedSelector = selector.trim();
-			
+
 			// 标签选择器
 			if (/^[a-zA-Z]+[0-9]*$/.test(trimmedSelector)) {
 				return element.tagName.toLowerCase() === trimmedSelector.toLowerCase();
 			}
-			
+
 			// 类选择器
 			if (trimmedSelector.startsWith('.')) {
 				const className = trimmedSelector.substring(1);
 				return element.classList.contains(className);
 			}
-			
+
 			// ID选择器
 			if (trimmedSelector.startsWith('#')) {
 				const idName = trimmedSelector.substring(1);
 				return element.id === idName;
 			}
-			
+
 			// 复合选择器（简单处理）
 			if (trimmedSelector.includes(' ')) {
 				// 对于复合选择器，暂时只处理简单的后代选择器
@@ -380,7 +383,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				if (parts.length === 2) {
 					const parentSelector = parts[0].trim();
 					const childSelector = parts[1].trim();
-					
+
 					// 检查当前元素是否匹配子选择器
 					if (this.elementMatchesSelector(element, childSelector)) {
 						// 检查是否有匹配的父元素
@@ -395,7 +398,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				}
 				return false;
 			}
-			
+
 			// 尝试使用原生matches方法
 			return element.matches(trimmedSelector);
 		} catch (e) {
@@ -425,7 +428,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['border-radius'] = variables['border-radius-md'];
 				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px';
 				break;
-			
+
 			case 'h2':
 				styles['font-size'] = variables['font-size-h2'];
 				styles['font-weight'] = 'bold';
@@ -438,7 +441,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['border-radius'] = variables['border-radius-md'];
 				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px';
 				break;
-			
+
 			case 'h3':
 				styles['font-size'] = variables['font-size-h3'];
 				styles['font-weight'] = 'bold';
@@ -448,28 +451,28 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} ${variables['spacing-md']} 0`;
 				styles['color'] = variables['text-secondary'];
 				break;
-			
+
 			case 'h4':
 				styles['font-size'] = variables['font-size-h4'];
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
 				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
 				break;
-			
+
 			case 'h5':
 				styles['font-size'] = '1em';
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
 				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
 				break;
-			
+
 			case 'h6':
 				styles['font-size'] = '0.9em';
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
 				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
 				break;
-			
+
 			case 'p':
 				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				styles['text-align'] = 'justify';
@@ -477,19 +480,19 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['font-size'] = variables['font-size-base'];
 				styles['color'] = variables['text-primary'];
 				break;
-			
+
 			case 'strong':
 			case 'b':
 				styles['font-weight'] = 'bold';
 				styles['color'] = variables['primary-color'];
 				break;
-			
+
 			case 'em':
 			case 'i':
 				styles['font-style'] = 'italic';
 				styles['color'] = variables['primary-color'];
 				break;
-			
+
 			case 'img':
 				styles['display'] = 'block';
 				styles['max-width'] = '100%';
@@ -500,7 +503,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['visibility'] = 'visible';
 				styles['opacity'] = '1';
 				break;
-			
+
 			case 'blockquote':
 				// 检查是否已有微信样式
 				const existingStyle = element.getAttribute('style') || '';
@@ -523,7 +526,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 						}
 						parent = parent.parentElement;
 					}
-					
+
 					// 根据嵌套层级设置不同样式
 					if (nestingLevel === 0) {
 						// 一级引用
@@ -556,7 +559,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					}
 				}
 				break;
-			
+
 			case 'code':
 				styles['background'] = variables['background-tertiary'];
 				styles['padding'] = `${variables['spacing-xs']} ${variables['spacing-sm']}`;
@@ -565,7 +568,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['font-size'] = '0.9em';
 				styles['color'] = variables['primary-color'];
 				break;
-			
+
 			case 'pre':
 				styles['background'] = variables['background-tertiary'];
 				styles['padding'] = variables['spacing-md'];
@@ -573,27 +576,27 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['overflow-x'] = 'auto';
 				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				break;
-			
+
 			case 'sup':
 				styles['color'] = 'rgb(51, 112, 255)';
 				styles['font-size'] = 'smaller';
 				styles['vertical-align'] = 'super';
 				break;
-			
+
 			case 'ul':
 				styles['list-style-type'] = 'disc';
 				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				styles['padding-left'] = '2em';
 				styles['color'] = variables['text-primary'];
 				break;
-				
+
 			case 'ol':
 				styles['list-style-type'] = 'decimal';
 				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				styles['padding-left'] = '2em';
 				styles['color'] = variables['text-primary'];
 				break;
-				
+
 			case 'li':
 				styles['margin'] = '0.25em 0';
 				styles['line-height'] = variables['line-height-base'];
@@ -686,7 +689,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				if (!pre.hasAttribute('style')) {
 					pre.setAttribute('style', 'background: #f5f5f5; padding: 1em; border-radius: 4px; overflow-x: auto;');
 				}
-				
+
 				// 处理代码缩进问题
 				this.fixCodeIndentation(code as HTMLElement);
 			}
@@ -698,18 +701,18 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	 */
 	private fixCodeIndentation(codeElement: HTMLElement): void {
 		let html = codeElement.innerHTML;
-		
+
 		// 将制表符转换为4个空格
 		html = html.replace(/\t/g, '    ');
-		
+
 		// 处理行首的空格缩进，转换为&nbsp;确保在微信中正确显示
 		html = html.replace(/^( {2,})/gm, (match) => {
 			return '&nbsp;'.repeat(match.length);
 		});
-		
+
 		// 处理代码中的多个连续空格
 		html = html.replace(/  /g, '&nbsp;&nbsp;');
-		
+
 		codeElement.innerHTML = html;
 	}
 
@@ -724,7 +727,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			if (element.classList.contains('hljs')) {
 				element.classList.remove('hljs');
 			}
-			
+
 			// 清理空的属性
 			if (element.hasAttribute('class') && !element.getAttribute('class')?.trim()) {
 				element.removeAttribute('class');
@@ -738,7 +741,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private parseStyleString(styleStr: string): Record<string, string> {
 		const styles: Record<string, string> = {};
 		if (!styleStr) return styles;
-		
+
 		styleStr.split(';').forEach(rule => {
 			const colonIndex = rule.indexOf(':');
 			if (colonIndex > 0) {
@@ -749,7 +752,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				}
 			}
 		});
-		
+
 		return styles;
 	}
 }

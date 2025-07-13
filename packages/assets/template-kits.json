@@ -1,226 +1,248 @@
 {
-  "version": "1.0.0",
-  "description": "Lovpen模板套装集合，提供一键应用的完整样式解决方案",
-  "kits": [
-    {
-      "basicInfo": {
-        "id": "anthropic-style",
-        "name": "Anthropic Style",
-        "description": "基于微信公众号 Anthropic 风格的优雅模板套装，采用温暖的橙红色主题和圆角设计，适合技术文章和知识分享",
-        "author": "Lovpen Team",
-        "version": "1.0.0",
-        "createdAt": "2025-01-11T10:00:00.000Z",
-        "updatedAt": "2025-01-11T10:00:00.000Z",
-        "tags": ["微信风格", "技术文章", "知识分享", "橙红主题", "圆角设计"],
-        "previewImage": ""
-      },
-      "styleConfig": {
-        "theme": "anthropic-style",
-        "codeHighlight": "github",
-        "cssVariables": {
-          "--primary-color": "rgb(200, 100, 66)",
-          "--primary-color-hover": "rgb(180, 85, 50)",
-          "--primary-color-light": "rgba(200, 100, 66, 0.1)",
-          "--background-primary": "rgb(250, 249, 245)",
-          "--background-secondary": "rgb(255, 255, 255)",
-          "--background-tertiary": "rgb(245, 245, 245)",
-          "--text-primary": "rgb(34, 34, 34)",
-          "--text-secondary": "rgb(63, 63, 63)",
-          "--text-tertiary": "rgb(136, 136, 136)",
-          "--text-on-primary": "rgb(255, 255, 255)",
-          "--border-color": "rgb(229, 229, 229)",
-          "--font-family": "\"PingFang SC\", -apple-system-font, BlinkMacSystemFont, \"Helvetica Neue\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", Arial, sans-serif",
-          "--font-size-base": "15px",
-          "--line-height-base": "1.75",
-          "--letter-spacing-base": "0.1em",
-          "--border-radius-md": "8px",
-          "--border-radius-lg": "12px",
-          "--shadow-md": "rgba(0, 0, 0, 0.1) 0px 4px 8px"
-        },
-        "enableCustomThemeColor": true,
-        "customThemeColor": "#c86442",
-        "customCSS": ""
-      },
-      "templateConfig": {
-        "templateFileName": "Anthropic Style.html",
-        "useTemplate": true
-      },
-      "pluginConfig": {
-        "enabledMarkdownPlugins": [
-          "CalloutRenderer",
-          "LocalFile", 
-          "CodeHighlight",
-          "LinkRenderer",
-          "FootnoteRenderer",
-          "MathRenderer"
-        ],
-        "enabledHtmlPlugins": [
-          "Images",
-          "CodeBlocks",
-          "Headings",
-          "Tables",
-          "WechatLink"
-        ],
-        "pluginSettings": {
-          "CalloutRenderer": {
-            "enabled": true,
-            "useCustomStyles": true
-          },
-          "CodeHighlight": {
-            "enabled": true,
-            "theme": "github",
-            "showLineNumbers": false
-          },
-          "Images": {
-            "enabled": true,
-            "addShadow": true,
-            "roundCorners": true,
-            "borderRadius": "8px"
-          },
-          "Headings": {
-            "enabled": true,
-            "addAnchors": false,
-            "useCustomStyles": true
-          },
-          "Tables": {
-            "enabled": true,
-            "stripedRows": true,
-            "hover": true,
-            "responsive": true
-          },
-          "LinkRenderer": {
-            "enabled": true,
-            "openInNewTab": true,
-            "underlineStyle": "hover"
-          }
-        }
-      }
-    },
-    {
-      "basicInfo": {
-        "id": "minimal-clean",
-        "name": "Minimal Clean",
-        "description": "简约清新的模板套装，采用极简设计理念，适合学术论文和正式文档",
-        "author": "Lovpen Team", 
-        "version": "1.0.0",
-        "createdAt": "2025-01-11T10:00:00.000Z",
-        "updatedAt": "2025-01-11T10:00:00.000Z",
-        "tags": ["极简", "学术", "正式", "清新", "黑白"],
-        "previewImage": ""
-      },
-      "styleConfig": {
-        "theme": "bento",
-        "codeHighlight": "vs",
-        "cssVariables": {
-          "--primary-color": "#333333",
-          "--background-primary": "#ffffff",
-          "--text-primary": "#333333"
-        },
-        "enableCustomThemeColor": false,
-        "customThemeColor": "",
-        "customCSS": ""
-      },
-      "templateConfig": {
-        "templateFileName": "Bento 1.html",
-        "useTemplate": true
-      },
-      "pluginConfig": {
-        "enabledMarkdownPlugins": [
-          "CodeHighlight",
-          "LinkRenderer",
-          "FootnoteRenderer",
-          "MathRenderer"
-        ],
-        "enabledHtmlPlugins": [
-          "Images",
-          "CodeBlocks", 
-          "Headings",
-          "Tables"
-        ],
-        "pluginSettings": {
-          "CodeHighlight": {
-            "enabled": true,
-            "theme": "vs",
-            "showLineNumbers": true
-          },
-          "Images": {
-            "enabled": true,
-            "addShadow": false,
-            "roundCorners": false
-          },
-          "Tables": {
-            "enabled": true,
-            "stripedRows": false,
-            "hover": false
-          }
-        }
-      }
-    },
-    {
-      "basicInfo": {
-        "id": "tech-dark",
-        "name": "Tech Dark",
-        "description": "深色科技风格模板套装，采用暗色主题和蓝色强调色，适合程序员和技术博客",
-        "author": "Lovpen Team",
-        "version": "1.0.0", 
-        "createdAt": "2025-01-11T10:00:00.000Z",
-        "updatedAt": "2025-01-11T10:00:00.000Z",
-        "tags": ["暗色主题", "科技风", "程序员", "蓝色", "代码"],
-        "previewImage": ""
-      },
-      "styleConfig": {
-        "theme": "bento-dark",
-        "codeHighlight": "vs-dark",
-        "cssVariables": {
-          "--primary-color": "#007ACC",
-          "--background-primary": "#1e1e1e",
-          "--text-primary": "#d4d4d4"
-        },
-        "enableCustomThemeColor": true,
-        "customThemeColor": "#007ACC",
-        "customCSS": ""
-      },
-      "templateConfig": {
-        "templateFileName": "手工川 - 2.html",
-        "useTemplate": true
-      },
-      "pluginConfig": {
-        "enabledMarkdownPlugins": [
-          "CalloutRenderer",
-          "CodeHighlight",
-          "LinkRenderer",
-          "FootnoteRenderer",
-          "MathRenderer"
-        ],
-        "enabledHtmlPlugins": [
-          "Images",
-          "CodeBlocks",
-          "Headings", 
-          "Tables"
-        ],
-        "pluginSettings": {
-          "CodeHighlight": {
-            "enabled": true,
-            "theme": "vs-dark",
-            "showLineNumbers": true
-          },
-          "Images": {
-            "enabled": true,
-            "addShadow": true,
-            "roundCorners": true
-          },
-          "CalloutRenderer": {
-            "enabled": true,
-            "useCustomStyles": true
-          }
-        }
-      }
-    }
-  ],
-  "metadata": {
-    "totalKits": 3,
-    "categories": ["微信风格", "极简", "暗色主题"],
-    "lastUpdated": "2025-01-11T10:00:00.000Z",
-    "schemaVersion": "1.0"
-  }
+	"version": "1.0.0",
+	"description": "Lovpen模板套装集合，提供一键应用的完整样式解决方案",
+	"kits": [
+		{
+			"basicInfo": {
+				"id": "anthropic-style",
+				"name": "Anthropic Style",
+				"description": "基于微信公众号 Anthropic 风格的优雅模板套装，采用温暖的橙红色主题和圆角设计，适合技术文章和知识分享",
+				"author": "Lovpen Team",
+				"version": "1.0.0",
+				"createdAt": "2025-01-11T10:00:00.000Z",
+				"updatedAt": "2025-01-11T10:00:00.000Z",
+				"tags": [
+					"微信风格",
+					"技术文章",
+					"知识分享",
+					"橙红主题",
+					"圆角设计"
+				],
+				"previewImage": ""
+			},
+			"styleConfig": {
+				"theme": "anthropic-style",
+				"codeHighlight": "github",
+				"cssVariables": {
+					"--primary-color": "rgb(200, 100, 66)",
+					"--primary-color-hover": "rgb(180, 85, 50)",
+					"--primary-color-light": "rgba(200, 100, 66, 0.1)",
+					"--background-primary": "rgb(250, 249, 245)",
+					"--background-secondary": "rgb(255, 255, 255)",
+					"--background-tertiary": "rgb(245, 245, 245)",
+					"--text-primary": "rgb(34, 34, 34)",
+					"--text-secondary": "rgb(63, 63, 63)",
+					"--text-tertiary": "rgb(136, 136, 136)",
+					"--text-on-primary": "rgb(255, 255, 255)",
+					"--border-color": "rgb(229, 229, 229)",
+					"--font-family": "\"PingFang SC\", -apple-system-font, BlinkMacSystemFont, \"Helvetica Neue\", \"Hiragino Sans GB\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", Arial, sans-serif",
+					"--font-size-base": "15px",
+					"--line-height-base": "1.75",
+					"--letter-spacing-base": "0.1em",
+					"--border-radius-md": "8px",
+					"--border-radius-lg": "12px",
+					"--shadow-md": "rgba(0, 0, 0, 0.1) 0px 4px 8px"
+				},
+				"enableCustomThemeColor": true,
+				"customThemeColor": "#c86442",
+				"customCSS": ""
+			},
+			"templateConfig": {
+				"templateFileName": "Anthropic Style.html",
+				"useTemplate": true
+			},
+			"pluginConfig": {
+				"enabledMarkdownPlugins": [
+					"CalloutRenderer",
+					"LocalFile",
+					"CodeHighlight",
+					"LinkRenderer",
+					"FootnoteRenderer",
+					"MathRenderer"
+				],
+				"enabledHtmlPlugins": [
+					"Images",
+					"CodeBlocks",
+					"Headings",
+					"Tables",
+					"WechatLink"
+				],
+				"pluginSettings": {
+					"CalloutRenderer": {
+						"enabled": true,
+						"useCustomStyles": true
+					},
+					"CodeHighlight": {
+						"enabled": true,
+						"theme": "github",
+						"showLineNumbers": false
+					},
+					"Images": {
+						"enabled": true,
+						"addShadow": true,
+						"roundCorners": true,
+						"borderRadius": "8px"
+					},
+					"Headings": {
+						"enabled": true,
+						"addAnchors": false,
+						"useCustomStyles": true
+					},
+					"Tables": {
+						"enabled": true,
+						"stripedRows": true,
+						"hover": true,
+						"responsive": true
+					},
+					"LinkRenderer": {
+						"enabled": true,
+						"openInNewTab": true,
+						"underlineStyle": "hover"
+					}
+				}
+			}
+		},
+		{
+			"basicInfo": {
+				"id": "minimal-clean",
+				"name": "Minimal Clean",
+				"description": "简约清新的模板套装，采用极简设计理念，适合学术论文和正式文档",
+				"author": "Lovpen Team",
+				"version": "1.0.0",
+				"createdAt": "2025-01-11T10:00:00.000Z",
+				"updatedAt": "2025-01-11T10:00:00.000Z",
+				"tags": [
+					"极简",
+					"学术",
+					"正式",
+					"清新",
+					"黑白"
+				],
+				"previewImage": ""
+			},
+			"styleConfig": {
+				"theme": "bento",
+				"codeHighlight": "vs",
+				"cssVariables": {
+					"--primary-color": "#333333",
+					"--background-primary": "#ffffff",
+					"--text-primary": "#333333"
+				},
+				"enableCustomThemeColor": false,
+				"customThemeColor": "",
+				"customCSS": ""
+			},
+			"templateConfig": {
+				"templateFileName": "Bento 1.html",
+				"useTemplate": true
+			},
+			"pluginConfig": {
+				"enabledMarkdownPlugins": [
+					"CodeHighlight",
+					"LinkRenderer",
+					"FootnoteRenderer",
+					"MathRenderer"
+				],
+				"enabledHtmlPlugins": [
+					"Images",
+					"CodeBlocks",
+					"Headings",
+					"Tables"
+				],
+				"pluginSettings": {
+					"CodeHighlight": {
+						"enabled": true,
+						"theme": "vs",
+						"showLineNumbers": true
+					},
+					"Images": {
+						"enabled": true,
+						"addShadow": false,
+						"roundCorners": false
+					},
+					"Tables": {
+						"enabled": true,
+						"stripedRows": false,
+						"hover": false
+					}
+				}
+			}
+		},
+		{
+			"basicInfo": {
+				"id": "tech-dark",
+				"name": "Tech Dark",
+				"description": "深色科技风格模板套装，采用暗色主题和蓝色强调色，适合程序员和技术博客",
+				"author": "Lovpen Team",
+				"version": "1.0.0",
+				"createdAt": "2025-01-11T10:00:00.000Z",
+				"updatedAt": "2025-01-11T10:00:00.000Z",
+				"tags": [
+					"暗色主题",
+					"科技风",
+					"程序员",
+					"蓝色",
+					"代码"
+				],
+				"previewImage": ""
+			},
+			"styleConfig": {
+				"theme": "bento-dark",
+				"codeHighlight": "vs-dark",
+				"cssVariables": {
+					"--primary-color": "#007ACC",
+					"--background-primary": "#1e1e1e",
+					"--text-primary": "#d4d4d4"
+				},
+				"enableCustomThemeColor": true,
+				"customThemeColor": "#007ACC",
+				"customCSS": ""
+			},
+			"templateConfig": {
+				"templateFileName": "手工川 - 2.html",
+				"useTemplate": true
+			},
+			"pluginConfig": {
+				"enabledMarkdownPlugins": [
+					"CalloutRenderer",
+					"CodeHighlight",
+					"LinkRenderer",
+					"FootnoteRenderer",
+					"MathRenderer"
+				],
+				"enabledHtmlPlugins": [
+					"Images",
+					"CodeBlocks",
+					"Headings",
+					"Tables"
+				],
+				"pluginSettings": {
+					"CodeHighlight": {
+						"enabled": true,
+						"theme": "vs-dark",
+						"showLineNumbers": true
+					},
+					"Images": {
+						"enabled": true,
+						"addShadow": true,
+						"roundCorners": true
+					},
+					"CalloutRenderer": {
+						"enabled": true,
+						"useCustomStyles": true
+					}
+				}
+			}
+		}
+	],
+	"metadata": {
+		"totalKits": 3,
+		"categories": [
+			"微信风格",
+			"极简",
+			"暗色主题"
+		],
+		"lastUpdated": "2025-01-11T10:00:00.000Z",
+		"schemaVersion": "1.0"
+	}
 }
