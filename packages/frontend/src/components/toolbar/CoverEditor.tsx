@@ -301,7 +301,7 @@ export const CoverEditor: React.FC<CoverEditorProps> = ({
 					<PersistentFileManager
 						onFileSelect={async (fileUrl) => await onCreateCover(fileUrl, 'upload')}
 						acceptedTypes={['image/*']}
-						title={`封面${coverNumber}档案库`}
+						title={`档案库`}
 					/>
 				</TabsContent>
 

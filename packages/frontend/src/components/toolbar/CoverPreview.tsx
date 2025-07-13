@@ -89,9 +89,9 @@ export const CoverPreview: React.FC<CoverPreviewProps> = ({
 							{coverData.title}
 						</div>
 					)}
-					<div className="mt-2 text-xs text-gray-600">
-						{coverData.aspectRatio} ({coverData.width}x{coverData.height})
-					</div>
+					{/*<div className="mt-2 text-xs text-gray-600">*/}
+					{/*	{coverData.aspectRatio} ({coverData.width}x{coverData.height})*/}
+					{/*</div>*/}
 				</div>
 			) : (
 				<div

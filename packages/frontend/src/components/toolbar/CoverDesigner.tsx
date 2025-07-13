@@ -424,7 +424,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					</div>
 				</div>
 
-				<div className="flex items-center gap-3">
+				<div className="flex items-center justify-end gap-3">
 					<div className="flex-1">
 						<Select value={selectedCover.toString()}
 								onValueChange={(value) => setSelectedCover(parseInt(value) as 1 | 2)}>
@@ -462,7 +462,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							disabled={cover1PreviewCovers.length === 0 && cover2PreviewCovers.length === 0}
 						>
 							<Download className="h-4 w-4"/>
-							<span className="text-sm font-medium hidden [@container(min-width:500px)]:block">
+							<span className="text-sm font-medium hidden @md:block">
 								下载封面 ({(cover1PreviewCovers.length > 0 ? 1 : 0) + (cover2PreviewCovers.length > 0 ? 1 : 0)})
 							</span>
 						</button>
@@ -472,7 +472,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 							className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<RotateCcw className="h-4 w-4"/>
-							<span className="text-sm font-medium hidden [@container(min-width:500px)]:block">清空全部</span>
+							<span className="text-sm font-medium hidden @md:block">清空全部</span>
 						</button>
 					</div>
 				</div>
@@ -487,7 +487,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					</div>
 					<div>
 						<h4 className="font-semibold text-gray-900">封面预览</h4>
-						<p className="text-sm text-gray-600">查看生成的封面效果</p>
+						<p className="text-sm text-gray-600"> 查看生成的封面效果</p>
 					</div>
 				</div>
 
