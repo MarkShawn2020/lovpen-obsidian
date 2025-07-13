@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Button } from '../ui/button';
 import { ViteReactSettings, PersonalInfo, TemplateKit } from '../../types';
 import { logger } from '../../../../shared/src/logger';
+import { StyleSettings } from './StyleSettings';
 import {
 	Package,
 	Sparkles,
@@ -62,6 +63,12 @@ interface TemplateKitSelectorProps {
 	onKitCreate?: (basicInfo: any) => void;
 	onKitDelete?: (kitId: string) => void;
 	onSettingsChange?: (settings: Partial<ViteReactSettings>) => void;
+	// 样式设置相关的回调
+	onTemplateChange?: (template: string) => void;
+	onThemeChange?: (theme: string) => void;
+	onHighlightChange?: (highlight: string) => void;
+	onThemeColorToggle?: (enabled: boolean) => void;
+	onThemeColorChange?: (color: string) => void;
 }
 
 export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
@@ -70,6 +77,11 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 	onKitCreate,
 	onKitDelete,
 	onSettingsChange,
+	onTemplateChange,
+	onThemeChange,
+	onHighlightChange,
+	onThemeColorToggle,
+	onThemeColorChange,
 }) => {
 	const [kits, setKits] = useState<TemplateKit[]>([]);
 	const [selectedKitId, setSelectedKitId] = useState<string>('');
@@ -261,34 +273,62 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 						</div>
 					</CardHeader>
 					<CardContent className="pt-0">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-							<div className="bg-white/60 border border-purple-200 rounded-lg p-3">
-								<div className="flex items-center gap-2 mb-2">
-									<Palette className="w-3 h-3 text-purple-600" />
-									<span className="font-medium text-gray-800">主题样式</span>
+						<div className="space-y-4">
+							{/* 样式预览 */}
+							<div className="bg-white/80 border border-gray-200 rounded-lg p-4">
+								<h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+									<Eye className="w-4 h-4 text-blue-600" />
+									样式预览
+								</h4>
+								<div className="border border-gray-200 rounded-md p-3 bg-white text-sm">
+									<div className="space-y-2">
+										<h5 className="font-semibold text-gray-900">文章标题示例</h5>
+										<p className="text-gray-700">这是一段示例文本，展示当前套装的样式效果。</p>
+										<pre className="bg-gray-100 p-2 rounded text-xs">
+											<code>{`function example() {
+  console.log("Hello World");
+}`}</code>
+										</pre>
+										<blockquote className="border-l-4 border-blue-500 pl-3 text-gray-600 italic">
+											这是一个引用块的示例
+										</blockquote>
+									</div>
 								</div>
-								<p className="text-gray-600">主题: {previewKit.styleConfig.theme}</p>
-								<p className="text-gray-600">高亮: {previewKit.styleConfig.codeHighlight}</p>
 							</div>
-							<div className="bg-white/60 border border-blue-200 rounded-lg p-3">
-								<div className="flex items-center gap-2 mb-2">
-									<Package className="w-3 h-3 text-blue-600" />
-									<span className="font-medium text-gray-800">模板配置</span>
+							
+							{/* 配置详情 */}
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+								<div className="bg-white/60 border border-purple-200 rounded-lg p-3">
+									<div className="flex items-center gap-2 mb-2">
+										<Palette className="w-3 h-3 text-purple-600" />
+										<span className="font-medium text-gray-800">主题样式</span>
+									</div>
+									<p className="text-gray-600">主题: {previewKit.styleConfig.theme}</p>
+									<p className="text-gray-600">高亮: {previewKit.styleConfig.codeHighlight}</p>
+									{previewKit.styleConfig.enableCustomThemeColor && (
+										<p className="text-gray-600">主题色: {previewKit.styleConfig.customThemeColor || '默认'}</p>
+									)}
 								</div>
-								<p className="text-gray-600">模板: {previewKit.templateConfig.templateFileName}</p>
-								<p className="text-gray-600">启用: {previewKit.templateConfig.useTemplate ? '是' : '否'}</p>
-							</div>
-							<div className="bg-white/60 border border-green-200 rounded-lg p-3">
-								<div className="flex items-center gap-2 mb-2">
-									<Settings className="w-3 h-3 text-green-600" />
-									<span className="font-medium text-gray-800">插件配置</span>
+								<div className="bg-white/60 border border-blue-200 rounded-lg p-3">
+									<div className="flex items-center gap-2 mb-2">
+										<Package className="w-3 h-3 text-blue-600" />
+										<span className="font-medium text-gray-800">模板配置</span>
+									</div>
+									<p className="text-gray-600">模板: {previewKit.templateConfig.templateFileName}</p>
+									<p className="text-gray-600">启用: {previewKit.templateConfig.useTemplate ? '是' : '否'}</p>
 								</div>
-								<p className="text-gray-600">
-									Markdown: {previewKit.pluginConfig.enabledMarkdownPlugins.length}个
-								</p>
-								<p className="text-gray-600">
-									HTML: {previewKit.pluginConfig.enabledHtmlPlugins.length}个
-								</p>
+								<div className="bg-white/60 border border-green-200 rounded-lg p-3">
+									<div className="flex items-center gap-2 mb-2">
+										<Settings className="w-3 h-3 text-green-600" />
+										<span className="font-medium text-gray-800">插件配置</span>
+									</div>
+									<p className="text-gray-600">
+										Markdown: {previewKit.pluginConfig.enabledMarkdownPlugins.length}个
+									</p>
+									<p className="text-gray-600">
+										HTML: {previewKit.pluginConfig.enabledHtmlPlugins.length}个
+									</p>
+								</div>
 							</div>
 						</div>
 					</CardContent>
@@ -309,13 +349,28 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 							}`}
 							onClick={() => handleKitSelect(kit.basicInfo.id)}
 						>
-							<div className="flex items-start justify-between">
+							<div className="flex items-start gap-3">
+								{/* 小预览缩略图 */}
+								<div className="flex-shrink-0 w-16 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded border overflow-hidden">
+									<div className="w-full h-full p-1">
+										<div className="w-full h-2 bg-white rounded-sm mb-1"></div>
+										<div className="w-3/4 h-1 bg-gray-400 rounded-sm mb-1"></div>
+										<div className="w-full h-1 bg-gray-300 rounded-sm mb-1"></div>
+										<div className="w-1/2 h-1 bg-gray-300 rounded-sm"></div>
+									</div>
+								</div>
+								
 								<div className="flex-1">
 									<div className="flex items-center gap-2 mb-1">
 										<h5 className="text-sm font-medium text-gray-900">{kit.basicInfo.name}</h5>
 										{getKitStatusBadge(kit)}
 									</div>
 									<p className="text-xs text-gray-600 mb-2">{kit.basicInfo.description}</p>
+									<div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+										<span>主题: {kit.styleConfig.theme}</span>
+										<span>•</span>
+										<span>高亮: {kit.styleConfig.codeHighlight}</span>
+									</div>
 									<div className="flex flex-wrap gap-1">
 										{kit.basicInfo.tags.slice(0, 3).map((tag, index) => (
 											<Badge key={index} variant="outline" className="text-xs">
@@ -343,6 +398,30 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 							</div>
 						</div>
 					))}
+				</div>
+			</div>
+
+			{/* 高级样式配置 */}
+			<div className="border-t border-gray-200 pt-6">
+				<div className="flex items-center gap-3 mb-4">
+					<div className="p-2 bg-indigo-100 rounded-lg">
+						<Palette className="w-5 h-5 text-indigo-600" />
+					</div>
+					<div>
+						<h3 className="text-lg font-semibold text-gray-900">高级样式配置</h3>
+						<p className="text-sm text-gray-600">微调当前套装的样式设置</p>
+					</div>
+				</div>
+				
+				<div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+					<StyleSettings
+						settings={settings}
+						onTemplateChange={onTemplateChange || (() => {})}
+						onThemeChange={onThemeChange || (() => {})}
+						onHighlightChange={onHighlightChange || (() => {})}
+						onThemeColorToggle={onThemeColorToggle || (() => {})}
+						onThemeColorChange={onThemeColorChange || (() => {})}
+					/>
 				</div>
 			</div>
 		</div>

@@ -80,8 +80,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 	// 使用本地状态管理当前选中的tab
 	const [activeTab, setActiveTab] = useState<string>(() => {
-		// 默认选择基本信息tab
-		return 'info';
+		// 默认选择基础tab
+		return 'basic';
 	});
 
 	// 插件管理中的子tab状态
@@ -342,23 +342,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 						</div>
 						
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
-							<TabsList className="grid w-full grid-cols-5 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-1">
+							<TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-1">
 								<TabsTrigger 
-									value="info"
+									value="basic"
 									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
 								>
 									<FileText className="h-4 w-4" />
-									<span className="hidden sm:inline">基本信息</span>
+									<span className="hidden sm:inline">基础</span>
 								</TabsTrigger>
-								{settings.showStyleUI && (
-									<TabsTrigger 
-										value="style"
-										className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm"
-									>
-										<Palette className="h-4 w-4" />
-										<span className="hidden sm:inline">样式</span>
-									</TabsTrigger>
-								)}
 								<TabsTrigger 
 									value="kits"
 									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm"
@@ -376,16 +367,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{plugins.length}
 									</span>
 								</TabsTrigger>
-								<TabsTrigger 
-									value="cover"
-									className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm"
-								>
-									<Image className="h-4 w-4" />
-									<span className="hidden sm:inline">封面</span>
-								</TabsTrigger>
 							</TabsList>
 							
-							<TabsContent value="info" className="mt-6">
+							<TabsContent value="basic" className="mt-6 space-y-6">
+								{/* 基本信息 */}
 								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
 									<ArticleInfo
 										settings={settings}
@@ -395,22 +380,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										onSettingsChange={onSettingsChange}
 									/>
 								</div>
+								
+								{/* 封面设计 */}
+								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
+									<CoverDesigner
+										articleHTML={articleHTML}
+										onDownloadCovers={handleDownloadCovers}
+										onClose={() => {}}
+									/>
+								</div>
 							</TabsContent>
 							
-							{settings.showStyleUI && (
-								<TabsContent value="style" className="mt-6">
-									<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
-										<StyleSettings
-											settings={settings}
-											onTemplateChange={onTemplateChange}
-											onThemeChange={onThemeChange}
-											onHighlightChange={onHighlightChange}
-											onThemeColorToggle={onThemeColorToggle}
-											onThemeColorChange={onThemeColorChange}
-										/>
-									</div>
-								</TabsContent>
-							)}
 
 							<TabsContent value="kits" className="mt-6">
 								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -420,6 +400,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										onKitCreate={onKitCreate}
 										onKitDelete={onKitDelete}
 										onSettingsChange={onSettingsChange}
+										onTemplateChange={onTemplateChange}
+										onThemeChange={onThemeChange}
+										onHighlightChange={onHighlightChange}
+										onThemeColorToggle={onThemeColorToggle}
+										onThemeColorChange={onThemeColorChange}
 									/>
 								</div>
 							</TabsContent>
@@ -589,15 +574,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								</div>
 							</TabsContent>
 
-							<TabsContent value="cover" className="mt-6">
-								<div className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-sm">
-									<CoverDesigner
-										articleHTML={articleHTML}
-										onDownloadCovers={handleDownloadCovers}
-										onClose={() => {}}
-									/>
-								</div>
-							</TabsContent>
 						</Tabs>
 					</div>
 				</div>
