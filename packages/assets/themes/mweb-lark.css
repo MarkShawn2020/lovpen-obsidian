@@ -19,10 +19,10 @@
  * 各个属性的默认值为 chrome 的默认样式，见 variables/default.scss。
  */
 /**
- * MWeb 包裹 markdown 的容器是 .note-to-mp
+ * MWeb 包裹 markdown 的容器是 #render-container
  * Typora 中是 #write
  */
-.note-to-mp {
+#render-container  {
 	line-height: 1.68;
 	-webkit-text-size-adjust: 100%;
 	margin: 0px 0px;
@@ -39,26 +39,26 @@
 	/* svg */
 }
 
-.note-to-mp * {
+#render-container  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
-.note-to-mp > *:first-child {
+#render-container  > *:first-child {
 	margin-top: 0 !important;
 }
 
-.note-to-mp > *:last-child {
+#render-container  > *:last-child {
 	margin-top: 0 !important;
 }
 
-.note-to-mp p, .note-to-mp details, .note-to-mp dl, .note-to-mp ol, .note-to-mp ul, .note-to-mp pre, .note-to-mp xmp, .note-to-mp plaintext, .note-to-mp listing, .note-to-mp blockquote, .note-to-mp table, .note-to-mp figure, .note-to-mp hr {
+#render-container  p, #render-container  details, #render-container  dl, #render-container  ol, #render-container  ul, #render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing, #render-container  blockquote, #render-container  table, #render-container  figure, #render-container  hr {
 	margin-top: 8px;
 	margin-bottom: 8px;
 }
 
-.note-to-mp h1 {
+#render-container  h1 {
 	font-size: 26px;
 	font-weight: bold;
 	margin-top: 26px;
@@ -67,7 +67,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h2 {
+#render-container  h2 {
 	font-size: 22px;
 	font-weight: bold;
 	margin-top: 22px;
@@ -76,7 +76,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h3 {
+#render-container  h3 {
 	font-size: 20px;
 	font-weight: bold;
 	margin-top: 20px;
@@ -85,7 +85,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h4 {
+#render-container  h4 {
 	font-size: 18px;
 	font-weight: bold;
 	margin-top: 18px;
@@ -94,7 +94,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h5 {
+#render-container  h5 {
 	font-size: 16px;
 	font-weight: bold;
 	margin-top: 16px;
@@ -103,7 +103,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h6 {
+#render-container  h6 {
 	font-size: 16px;
 	font-weight: bold;
 	margin-top: 16px;
@@ -112,81 +112,81 @@
 	margin-right: 0;
 }
 
-.note-to-mp p {
+#render-container  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
-.note-to-mp pre, .note-to-mp xmp, .note-to-mp plaintext, .note-to-mp listing {
+#render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-.note-to-mp blockquote > :first-child {
+#render-container  blockquote > :first-child {
 	margin-top: 0;
 }
 
-.note-to-mp blockquote > :last-child {
+#render-container  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-.note-to-mp hr {
+#render-container  hr {
 	border-style: inset;
 	border-width: 1px;
 }
 
-.note-to-mp img {
+#render-container  img {
 	max-width: 100%;
 	height: auto;
 }
 
-.note-to-mp li {
+#render-container  li {
 	word-wrap: break-all;
 }
 
-.note-to-mp li + li {
+#render-container  li + li {
 	margin-top: 4px;
 }
 
-.note-to-mp ul ul, .note-to-mp ol ul, .note-to-mp ul ol, .note-to-mp ol ol {
+#render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-.note-to-mp .task-list-item {
+#render-container  .task-list-item {
 	list-style-type: none;
 }
 
-.note-to-mp a {
+#render-container  a {
 	color: #3370ff;
 	text-decoration: underline;
 }
 
-.note-to-mp a img {
+#render-container  a img {
 	border: none;
 }
 
-.note-to-mp b, .note-to-mp strong {
+#render-container  b, #render-container  strong {
 	font-weight: bold;
 }
 
-.note-to-mp i, .note-to-mp cite, .note-to-mp em, .note-to-mp var, .note-to-mp address, .note-to-mp dfn {
+#render-container  i, #render-container  cite, #render-container  em, #render-container  var, #render-container  address, #render-container  dfn {
 	font-style: italic;
 }
 
-.note-to-mp code, .note-to-mp kbd, .note-to-mp tt, .note-to-mp samp {
+#render-container  code, #render-container  kbd, #render-container  tt, #render-container  samp {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-.note-to-mp mark {
+#render-container  mark {
 	padding: 0.2em 0;
 	background-color: rgba(255, 246, 122, 0.8);
 }
 
-.note-to-mp del, .note-to-mp s {
+#render-container  del, #render-container  s {
 	color: inherit;
 }
 
-.note-to-mp table {
+#render-container  table {
 	color: black;
 	border-collapse: collapse;
 	background-color: white;
@@ -194,41 +194,41 @@
 	font-size: 1em;
 }
 
-.note-to-mp th, .note-to-mp td {
+#render-container  th, #render-container  td {
 	border-color: #dee0e3;
 	border-width: 1px;
 	border-style: solid;
 }
 
-.note-to-mp th {
+#render-container  th {
 	padding: 8px 8px;
 	font-size: 1em;
 	font-weight: 600;
 }
 
-.note-to-mp td {
+#render-container  td {
 	padding: 8px 8px;
 	font-size: 1em;
 	font-weight: normal;
 }
 
-.note-to-mp div[id^=mweb-chart-ele] svg {
+#render-container  div[id^=mweb-chart-ele] svg {
 	background-color: white;
 }
 
-.note-to-mp * {
+#render-container  * {
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
 
-.note-to-mp h1, .note-to-mp h2, .note-to-mp h3, .note-to-mp h4, .note-to-mp h5, .note-to-mp h6 {
+#render-container  h1, #render-container  h2, #render-container  h3, #render-container  h4, #render-container  h5, #render-container  h6 {
 	line-height: 1.4;
 	font-weight: 600;
 	margin-top: 1em;
 	margin-bottom: 0.37em;
 }
 
-.note-to-mp blockquote {
+#render-container  blockquote {
 	display: block;
 	margin-left: 0;
 	padding-left: 14px;
@@ -236,7 +236,7 @@
 	color: rgba(31, 35, 41, 0.7);
 }
 
-.note-to-mp a {
+#render-container  a {
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	white-space: pre-wrap;
@@ -246,11 +246,11 @@
 	text-decoration: none;
 }
 
-.note-to-mp a:hover {
+#render-container  a:hover {
 	text-decoration: underline;
 }
 
-.note-to-mp hr {
+#render-container  hr {
 	margin: 13px 0 12px;
 	border: 0px;
 	height: 1px;
@@ -259,42 +259,42 @@
 	background-repeat: no-repeat;
 }
 
-.note-to-mp ul > li:not([class*=task-list-item]) {
+#render-container  ul > li:not([class*=task-list-item]) {
 	word-wrap: break-all;
 	padding-left: 12px;
 }
 
-.note-to-mp ul > li:not([class*=task-list-item])::marker {
+#render-container  ul > li:not([class*=task-list-item])::marker {
 	color: #3370ff;
 }
 
-.note-to-mp ol > li:not([class*=task-list-item]) {
+#render-container  ol > li:not([class*=task-list-item]) {
 	word-wrap: break-all;
 	padding-left: 12px;
 }
 
-.note-to-mp ol > li:not([class*=task-list-item])::marker {
+#render-container  ol > li:not([class*=task-list-item])::marker {
 	color: #3370ff;
 }
 
-.note-to-mp li + li, .note-to-mp ul ul, .note-to-mp ol ul, .note-to-mp ul ol, .note-to-mp ol ol, .note-to-mp li ul, .note-to-mp li ol {
+#render-container  li + li, #render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol, #render-container  li ul, #render-container  li ol {
 	margin-top: 4px;
 }
 
-.note-to-mp .task-list-item {
+#render-container  .task-list-item {
 	padding-left: 28px;
 	margin-left: -6px;
 	list-style: none;
 	word-wrap: break-all;
 }
 
-.note-to-mp .task-list-item input {
+#render-container  .task-list-item input {
 	margin: 0 !important;
 	appearance: none;
 	-webkit-appearance: none;
 }
 
-.note-to-mp .task-list-item input:before {
+#render-container  .task-list-item input:before {
 	content: " ";
 	display: inline-block;
 	position: relative;
@@ -311,17 +311,17 @@
 	margin-right: 6px;
 }
 
-.note-to-mp .task-list-item input:checked:before {
+#render-container  .task-list-item input:checked:before {
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEwLjU4OSAzLjkwM2wuODA4LjgwOGEuMzUuMzUgMCAwIDEgMCAuNDk1TDYuMTggMTAuNDI1YS4zNS4zNSAwIDAgMS0uNDk1IDBMMi43MDMgNy40NDRhLjM1LjM1IDAgMCAxIDAtLjQ5NWwuODA4LS44MDhhLjM1LjM1IDAgMCAxIC40OTUgMGwxLjkyNSAxLjkyNCA0LjE2My00LjE2M2EuMzUuMzUgMCAwIDEgLjQ5NSAweiIgZmlsbD0iIzMzNzBGRiIvPjwvc3ZnPg==);
 	background-size: contain;
 }
 
-.note-to-mp .footnotes hr {
+#render-container  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-.note-to-mp code {
+#render-container  code {
 	border-radius: 4px;
 	margin-left: 2px;
 	margin-right: 2px;
@@ -332,20 +332,20 @@
 	padding: 0 2px;
 }
 
-.note-to-mp .code-section {
+#render-container  .code-section {
 	display: flex;
 	border: 1px solid #dee0e3;
 	background-color: #f5f6f7;
 }
 
-.note-to-mp .code-section pre {
+#render-container  .code-section pre {
 	margin: 0;
 	display: block;
 	padding: 1em;
 	overflow-x: auto;
 }
 
-.note-to-mp .code-section pre code {
+#render-container  .code-section pre code {
 	border: none;
 	background-color: #f5f6f7;
 	font-size: 1em;
@@ -355,7 +355,7 @@
 	text-wrap: nowrap;
 }
 
-.note-to-mp .code-section ul {
+#render-container  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -364,7 +364,7 @@
 	width: fit-content;
 }
 
-.note-to-mp .code-section ul > li {
+#render-container  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -379,6 +379,6 @@
 	color: #ff502c;
 }
 
-.note-to-mp .code-section ul > li::marker {
+#render-container  .code-section ul > li::marker {
 	content: none;
 }

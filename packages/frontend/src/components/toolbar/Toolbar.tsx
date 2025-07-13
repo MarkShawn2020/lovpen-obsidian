@@ -82,16 +82,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		try {
 			const saved = localStorage.getItem('lovpen-toolbar-plugin-tab');
 			if (saved) return saved;
-		} catch {
-		}
-
-		// 默认选择第一个有插件的类型
-		const remarkPlugins = plugins.filter(plugin => plugin.type === 'remark');
-		const rehypePlugins = plugins.filter(plugin => plugin.type === 'rehype');
-
-		if (rehypePlugins.length > 0) return 'rehype';
-		if (remarkPlugins.length > 0) return 'remark';
-		return 'rehype';
+		} catch {}
+		return plugins.some(p => p.type === 'rehype') ? 'rehype' : 'remark';
 	});
 
 	// 插件展开状态管理
@@ -129,19 +121,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		onSaveSettings();
 	};
 
-	// 分离不同类型的插件
-	const remarkPlugins = plugins.filter(plugin => plugin.type === 'remark');
-	const rehypePlugins = plugins.filter(plugin => plugin.type === 'rehype');
+	const remarkPlugins = plugins.filter(p => p.type === 'remark');
+	const rehypePlugins = plugins.filter(p => p.type === 'rehype');
 
-	// 批量操作函数
 	const handleBatchToggle = (pluginType: 'remark' | 'rehype', enabled: boolean) => {
-		const targetPlugins = pluginType === 'remark' ? remarkPlugins : rehypePlugins;
-		targetPlugins.forEach(plugin => {
-			if (onPluginToggle) {
-				onPluginToggle(plugin.name, enabled);
-			}
-		});
-		// 触发重新渲染
+		(pluginType === 'remark' ? remarkPlugins : rehypePlugins)
+			.forEach(plugin => onPluginToggle?.(plugin.name, enabled));
 		onRenderArticle();
 	};
 
@@ -447,29 +432,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 											<TabsList className="bg-gray-100 rounded-lg p-0.5 sm:p-1">
 												{remarkPlugins.length > 0 && (
-													<TabsTrigger
-														value="remark"
-														className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-2 sm:px-3 py-1.5 sm:py-2"
-													>
+													<TabsTrigger value="remark"
+														className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-2 sm:px-3 py-1.5 sm:py-2">
 														<Plug className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
 														<span className="hidden sm:inline">Remark</span>
 														<span className="sm:hidden">R</span>
-														<span
-															className="bg-blue-100 text-blue-700 text-xs px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs">
+														<span className="bg-blue-100 text-blue-700 text-xs px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs">
 															{remarkPlugins.length}
 														</span>
 													</TabsTrigger>
 												)}
 												{rehypePlugins.length > 0 && (
-													<TabsTrigger
-														value="rehype"
-														className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-2 sm:px-3 py-1.5 sm:py-2"
-													>
+													<TabsTrigger value="rehype"
+														className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm px-2 sm:px-3 py-1.5 sm:py-2">
 														<Zap className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"/>
 														<span className="hidden sm:inline">Rehype</span>
 														<span className="sm:hidden">H</span>
-														<span
-															className="bg-purple-100 text-purple-700 text-xs px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs">
+														<span className="bg-purple-100 text-purple-700 text-xs px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs">
 															{rehypePlugins.length}
 														</span>
 													</TabsTrigger>
@@ -479,123 +458,69 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 											{remarkPlugins.length > 0 && (
 												<TabsContent value="remark" className="mt-6">
 													<div className="space-y-4">
-														<div
-															className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg gap-3 sm:gap-0">
+														<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg gap-3 sm:gap-0">
 															<div>
-																<h4 className="font-semibold text-blue-900">Remark
-																	插件</h4>
-																<p className="text-sm text-blue-700">Markdown语法解析插件
-																	({remarkPlugins.length}个)</p>
+																<h4 className="font-semibold text-blue-900">Remark插件</h4>
+																<p className="text-sm text-blue-700">Markdown语法解析插件({remarkPlugins.length}个)</p>
 															</div>
-															<div
-																className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
-																<button
-																	onClick={() => handleBatchToggle('remark', true)}
-																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-																>
+															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
+																<button onClick={() => handleBatchToggle('remark', true)}
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 hover:bg-green-200 rounded-lg transition-colors">
 																	<CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部启用
 																</button>
-																<button
-																	onClick={() => handleBatchToggle('remark', false)}
-																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-																>
+																<button onClick={() => handleBatchToggle('remark', false)}
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors">
 																	<XCircle className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部关闭
 																</button>
 															</div>
 														</div>
 														<div className="space-y-1">
-															{remarkPlugins.map((plugin) => (
-																<ConfigComponent
-																	key={plugin.name}
-																	item={plugin}
-																	type="plugin"
-																	expandedSections={pluginExpandedSections}
-																	onToggle={handlePluginToggle}
-																	onEnabledChange={(pluginName, enabled) => onPluginToggle?.(pluginName, enabled)}
-																	onConfigChange={async (pluginName, key, value) => {
-																		console.log(`[Toolbar] Remark插件配置变更: ${pluginName}.${key} = ${value}`);
-
-																		if (onPluginConfigChange) {
-																			try {
-																				const result = onPluginConfigChange(pluginName, key, value) as any;
-																				if (result && typeof result?.then === 'function') {
-																					await result;
-																				}
-																				console.log(`[Toolbar] Remark插件配置更新完成: ${pluginName}.${key}`);
-																			} catch (error) {
-																				console.error(`[Toolbar] Remark插件配置更新失败:`, error);
-																			}
-																		}
-
-																		console.log(`[Toolbar] 触发重新渲染: ${pluginName}.${key}`);
+															{remarkPlugins.map(plugin => 
+																<ConfigComponent key={plugin.name} item={plugin} type="plugin"
+																	expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
+																	onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
+																	onConfigChange={async (name, key, value) => {
+																		onPluginConfigChange && await onPluginConfigChange(name, key, value);
 																		onRenderArticle();
-																	}}
-																/>
-															))}
+																	}}/>
+															)}
 														</div>
 													</div>
 												</TabsContent>
 											)}
-
 											{rehypePlugins.length > 0 && (
 												<TabsContent value="rehype" className="mt-6">
 													<div className="space-y-4">
-														<div
-															className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 bg-purple-50 border border-purple-200 rounded-lg gap-3 sm:gap-0">
+														<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 bg-purple-50 border border-purple-200 rounded-lg gap-3 sm:gap-0">
 															<div>
-																<h4 className="font-semibold text-purple-900">Rehype
-																	插件</h4>
-																<p className="text-sm text-purple-700">HTML处理和转换插件
-																	({rehypePlugins.length}个)</p>
+																<h4 className="font-semibold text-purple-900">Rehype插件</h4>
+																<p className="text-sm text-purple-700">HTML处理和转换插件({rehypePlugins.length}个)</p>
 															</div>
-															<div
-																className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
-																<button
-																	onClick={() => handleBatchToggle('rehype', true)}
-																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-																>
+															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
+																<button onClick={() => handleBatchToggle('rehype', true)}
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-100 text-green-700 hover:bg-green-200 rounded-lg transition-colors">
 																	<CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部启用
 																</button>
-																<button
-																	onClick={() => handleBatchToggle('rehype', false)}
-																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-																>
+																<button onClick={() => handleBatchToggle('rehype', false)}
+																	className="flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors">
 																	<XCircle className="h-3 w-3 sm:h-4 sm:w-4"/>
 																	全部关闭
 																</button>
 															</div>
 														</div>
 														<div className="space-y-1">
-															{rehypePlugins.map((plugin) => (
-																<ConfigComponent
-																	key={plugin.name}
-																	item={plugin}
-																	type="plugin"
-																	expandedSections={pluginExpandedSections}
-																	onToggle={handlePluginToggle}
-																	onEnabledChange={(pluginName, enabled) => onPluginToggle?.(pluginName, enabled)}
-																	onConfigChange={async (pluginName, key, value) => {
-																		console.log(`[Toolbar] Rehype插件配置变更: ${pluginName}.${key} = ${value}`);
-
-																		if (onPluginConfigChange) {
-																			try {
-																				const result = onPluginConfigChange(pluginName, key, value) as any;
-																				if (result && typeof result?.then === 'function') {
-																					await result;
-																				}
-																				console.log(`[Toolbar] Rehype插件配置更新完成: ${pluginName}.${key}`);
-																			} catch (error) {
-																				console.error(`[Toolbar] Rehype插件配置更新失败:`, error);
-																			}
-																		}
-
+															{rehypePlugins.map(plugin => 
+																<ConfigComponent key={plugin.name} item={plugin} type="plugin"
+																	expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
+																	onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
+																	onConfigChange={async (name, key, value) => {
+																		onPluginConfigChange && await onPluginConfigChange(name, key, value);
 																		onRenderArticle();
-																	}}
-																/>
-															))}
+																	}}/>
+															)}
 														</div>
 													</div>
 												</TabsContent>

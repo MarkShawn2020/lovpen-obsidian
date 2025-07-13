@@ -13,10 +13,10 @@
  * 各个属性的默认值为 chrome 的默认样式，见 variables/default.scss。
  */
 /**
- * MWeb 包裹 markdown 的容器是 .note-to-mp
+ * MWeb 包裹 markdown 的容器是 #render-container
  * Typora 中是 #write
  */
-.note-to-mp {
+#render-container  {
 	line-height: 1.6em;
 	-webkit-text-size-adjust: 100%;
 	margin: 0px 0px;
@@ -33,26 +33,26 @@
 	/* svg */
 }
 
-.note-to-mp * {
+#render-container  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
-.note-to-mp > *:first-child {
+#render-container  > *:first-child {
 	margin-top: 0 !important;
 }
 
-.note-to-mp > *:last-child {
+#render-container  > *:last-child {
 	margin-top: 0 !important;
 }
 
-.note-to-mp p, .note-to-mp details, .note-to-mp dl, .note-to-mp ol, .note-to-mp ul, .note-to-mp pre, .note-to-mp xmp, .note-to-mp plaintext, .note-to-mp listing, .note-to-mp blockquote, .note-to-mp table, .note-to-mp figure, .note-to-mp hr {
+#render-container  p, #render-container  details, #render-container  dl, #render-container  ol, #render-container  ul, #render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing, #render-container  blockquote, #render-container  table, #render-container  figure, #render-container  hr {
 	margin-top: 0.75em;
 	margin-bottom: 0.75em;
 }
 
-.note-to-mp h1 {
+#render-container  h1 {
 	font-size: 2em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -61,7 +61,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h2 {
+#render-container  h2 {
 	font-size: 1.5em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -70,7 +70,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h3 {
+#render-container  h3 {
 	font-size: 1.17em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -79,7 +79,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h4 {
+#render-container  h4 {
 	font-size: 1em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -88,7 +88,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h5 {
+#render-container  h5 {
 	font-size: 0.83em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -97,7 +97,7 @@
 	margin-right: 0;
 }
 
-.note-to-mp h6 {
+#render-container  h6 {
 	font-size: 0.67em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -106,81 +106,81 @@
 	margin-right: 0;
 }
 
-.note-to-mp p {
+#render-container  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
-.note-to-mp pre, .note-to-mp xmp, .note-to-mp plaintext, .note-to-mp listing {
+#render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-.note-to-mp blockquote > :first-child {
+#render-container  blockquote > :first-child {
 	margin-top: 0;
 }
 
-.note-to-mp blockquote > :last-child {
+#render-container  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-.note-to-mp hr {
+#render-container  hr {
 	border-style: inset;
 	border-width: 1px;
 }
 
-.note-to-mp img {
+#render-container  img {
 	max-width: 100%;
 	height: auto;
 }
 
-.note-to-mp li {
+#render-container  li {
 	word-wrap: break-all;
 }
 
-.note-to-mp li + li {
+#render-container  li + li {
 	margin-top: 0.25em;
 }
 
-.note-to-mp ul ul, .note-to-mp ol ul, .note-to-mp ul ol, .note-to-mp ol ol {
+#render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-.note-to-mp .task-list-item {
+#render-container  .task-list-item {
 	list-style-type: none;
 }
 
-.note-to-mp a {
+#render-container  a {
 	color: -webkit-link;
 	text-decoration: underline;
 }
 
-.note-to-mp a img {
+#render-container  a img {
 	border: none;
 }
 
-.note-to-mp b, .note-to-mp strong {
+#render-container  b, #render-container  strong {
 	font-weight: bold;
 }
 
-.note-to-mp i, .note-to-mp cite, .note-to-mp em, .note-to-mp var, .note-to-mp address, .note-to-mp dfn {
+#render-container  i, #render-container  cite, #render-container  em, #render-container  var, #render-container  address, #render-container  dfn {
 	font-style: italic;
 }
 
-.note-to-mp code, .note-to-mp kbd, .note-to-mp tt, .note-to-mp samp {
+#render-container  code, #render-container  kbd, #render-container  tt, #render-container  samp {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-.note-to-mp mark {
+#render-container  mark {
 	padding: 0.2em 0;
 	background-color: yellow;
 }
 
-.note-to-mp del, .note-to-mp s {
+#render-container  del, #render-container  s {
 	color: inherit;
 }
 
-.note-to-mp table {
+#render-container  table {
 	color: black;
 	border-collapse: collapse;
 	background-color: white;
@@ -188,29 +188,29 @@
 	font-size: 1em;
 }
 
-.note-to-mp th, .note-to-mp td {
+#render-container  th, #render-container  td {
 	border-color: gray;
 	border-width: 1px;
 	border-style: solid;
 }
 
-.note-to-mp th {
+#render-container  th {
 	padding: 4px 8px;
 	font-size: 1em;
 	font-weight: bold;
 }
 
-.note-to-mp td {
+#render-container  td {
 	padding: 4px 8px;
 	font-size: 1em;
 	font-weight: normal;
 }
 
-.note-to-mp div[id^=mweb-chart-ele] svg {
+#render-container  div[id^=mweb-chart-ele] svg {
 	background-color: white;
 }
 
-.note-to-mp {
+#render-container  {
 	padding: 1em;
 	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
 	color: #595959;
@@ -227,7 +227,7 @@
 	/* 布局 end */
 }
 
-.note-to-mp blockquote {
+#render-container  blockquote {
 	margin-left: 0;
 	background-color: #ebf4ff;
 	border-color: #7f9cf5;
@@ -236,40 +236,40 @@
 	color: #667eea;
 }
 
-.note-to-mp strong {
+#render-container  strong {
 	color: #5a67d8;
 }
 
-.note-to-mp a {
+#render-container  a {
 	border-color: #667eea;
 }
 
-.note-to-mp blockquote,
-.note-to-mp details,
-.note-to-mp dl,
-.note-to-mp ol,
-.note-to-mp p,
-.note-to-mp pre,
-.note-to-mp table,
-.note-to-mp ul {
+#render-container  blockquote,
+#render-container  details,
+#render-container  dl,
+#render-container  ol,
+#render-container  p,
+#render-container  pre,
+#render-container  table,
+#render-container  ul {
 	margin-bottom: 1rem;
 }
 
-.note-to-mp ol {
+#render-container  ol {
 	list-style: decimal;
 }
 
-.note-to-mp ul {
+#render-container  ul {
 	list-style: disc;
 }
 
-.note-to-mp ol,
-.note-to-mp ul {
+#render-container  ol,
+#render-container  ul {
 	padding-left: 2em;
 }
 
-.note-to-mp h1,
-.note-to-mp h2 {
+#render-container  h1,
+#render-container  h2 {
 	border-color: #5a67d8;
 	border-style: solid;
 	border-top-width: 0px;
@@ -280,23 +280,23 @@
 	padding-left: 0.75rem;
 }
 
-.note-to-mp h1,
-.note-to-mp h2 {
+#render-container  h1,
+#render-container  h2 {
 	border-bottom: 1px solid #eaecef !important;
 	border-left-width: 6px;
 }
 
-.note-to-mp h1,
-.note-to-mp h2,
-.note-to-mp h3,
-.note-to-mp h4,
-.note-to-mp h5,
-.note-to-mp h6 {
+#render-container  h1,
+#render-container  h2,
+#render-container  h3,
+#render-container  h4,
+#render-container  h5,
+#render-container  h6 {
 	margin-bottom: 16px;
 	line-height: 1.25;
 }
 
-.note-to-mp blockquote {
+#render-container  blockquote {
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
 	padding-left: 1rem;
@@ -304,36 +304,36 @@
 	border-left: 0.25em solid;
 }
 
-.note-to-mp blockquote > :last-child {
+#render-container  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-.note-to-mp blockquote > :first-child {
+#render-container  blockquote > :first-child {
 	margin-top: 0;
 }
 
-.note-to-mp strong {
+#render-container  strong {
 	font-weight: bold;
 }
 
-.note-to-mp strong::before {
+#render-container  strong::before {
 	content: "「";
 }
 
-.note-to-mp strong::after {
+#render-container  strong::after {
 	content: "」";
 }
 
-.note-to-mp a {
+#render-container  a {
 	text-decoration: none;
 	border-bottom: 1px solid;
 }
 
-.note-to-mp .footnote-ref {
+#render-container  .footnote-ref {
 	border-width: 0px;
 }
 
-.note-to-mp picture img {
+#render-container  picture img {
 	border-radius: 6px;
 	display: block;
 	margin: 10px auto;
@@ -342,7 +342,7 @@
 	box-shadow: 2px 4px 7px #999;
 }
 
-.note-to-mp img {
+#render-container  img {
 	max-width: 100%;
 	display: block;
 	margin: 10px auto;
@@ -351,7 +351,7 @@
 	box-shadow: 2px 4px 7px #999;
 }
 
-.note-to-mp picture {
+#render-container  picture {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -360,42 +360,42 @@
 	margin-bottom: 6px;
 }
 
-.note-to-mp .svg-markmap-box {
+#render-container  .svg-markmap-box {
 	min-height: 20rem;
 	width: 100%;
 }
 
-.note-to-mp .footnotes {
+#render-container  .footnotes {
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
 }
 
-.note-to-mp .footnotes hr {
+#render-container  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-.note-to-mp code,
-.note-to-mp a {
+#render-container  code,
+#render-container  a {
 	color: #5a67d8;
 }
 
-.note-to-mp a {
+#render-container  a {
 	border-color: #667eea;
 }
 
-.note-to-mp code {
+#render-container  code {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 	background-color: #ebf4ff;
 }
 
-.note-to-mp .code-section {
+#render-container  .code-section {
 	display: flex;
 	border: solid 1px #5a67d8;
 	background-color: #ebf4ff;
 }
 
-.note-to-mp .code-section pre {
+#render-container  .code-section pre {
 	display: block;
 	overflow-x: auto;
 	padding: 0.9em;
@@ -404,7 +404,7 @@
 	margin: 0;
 }
 
-.note-to-mp .code-section code {
+#render-container  .code-section code {
 	font-size: 1em;
 	line-height: 1.6em;
 	text-wrap: nowrap;
@@ -414,7 +414,7 @@
 	background-color: #ebf4ff;
 }
 
-.note-to-mp .code-section ul {
+#render-container  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -423,7 +423,7 @@
 	width: fit-content;
 }
 
-.note-to-mp .code-section ul > li {
+#render-container  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -439,6 +439,6 @@
 	text-wrap: nowrap;
 }
 
-.note-to-mp .code-section ul > li::marker {
+#render-container  .code-section ul > li::marker {
 	content: none;
 }

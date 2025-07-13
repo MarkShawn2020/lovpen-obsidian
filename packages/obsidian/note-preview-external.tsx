@@ -664,6 +664,11 @@ ${customCSS}`;
 				);
 				if (plugin && plugin.setEnabled) {
 					plugin.setEnabled(enabled);
+					
+					// 清理缓存管理器状态，确保UI正确更新
+					LocalImageManager.getInstance().cleanup();
+					CardDataManager.getInstance().cleanup();
+					
 					this.saveSettingsToPlugin();
 					this.renderMarkdown();
 					logger.debug(`已${enabled ? '启用' : '禁用'}插件: ${pluginName}`);

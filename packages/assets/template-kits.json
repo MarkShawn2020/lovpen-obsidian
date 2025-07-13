@@ -144,7 +144,7 @@
 				},
 				"enableCustomThemeColor": true,
 				"customThemeColor": "#8b7355",
-				"customCSS": "/* 自定义侘寂美学增强样式 */\n.note-to-mp .wabi-sabi-accent {\n\tposition: relative;\n\tpadding: 1em 1.5em;\n\tmargin: 1.5em 0;\n\tbackground: linear-gradient(135deg, var(--background-tertiary) 0%, var(--background-accent) 100%);\n\tborder-radius: 6px;\n\tborder: 1px solid var(--border-secondary);\n}"
+				"customCSS": "/* 自定义侘寂美学增强样式 */\n .wabi-sabi-accent {\n\tposition: relative;\n\tpadding: 1em 1.5em;\n\tmargin: 1.5em 0;\n\tbackground: linear-gradient(135deg, var(--background-tertiary) 0%, var(--background-accent) 100%);\n\tborder-radius: 6px;\n\tborder: 1px solid var(--border-secondary);\n}"
 			},
 			"templateConfig": {
 				"templateFileName": "Wabi-Sabi.html",

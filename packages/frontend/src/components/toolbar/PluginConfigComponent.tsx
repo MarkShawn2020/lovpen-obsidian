@@ -75,7 +75,7 @@ export const ConfigComponent = <T extends PluginData>({
 		loadPersistedConfig();
 	}, [item.name]);
 
-	// 当外部配置变化时同步本地状态（但避免覆盖刚刚的本地更新）
+	// 当外部配置或插件启用状态变化时同步本地状态
 	useEffect(() => {
 		if (!hasLocalUpdate.current) {
 			// 以 item.config 为准，确保前后端一致
@@ -84,12 +84,15 @@ export const ConfigComponent = <T extends PluginData>({
 			// 重置标记，允许下次外部更新
 			hasLocalUpdate.current = false;
 		}
-	}, [item.config]);
+	}, [item.config, item.enabled]);
 
 	const configEntries = Object.entries(item.metaConfig || {});
 	const hasConfigOptions = configEntries.length > 0;
 
 	const handleEnabledChange = async (enabled: boolean) => {
+		// 立即调用外部回调函数，确保后端状态先更新
+		onEnabledChange(item.name, enabled);
+		
 		// 持久化enabled状态到本地存储
 		const enabledStorageKey = `${storageKey}-enabled`;
 		saveToStorage(enabledStorageKey, enabled);
@@ -105,8 +108,6 @@ export const ConfigComponent = <T extends PluginData>({
 		} catch (error) {
 			logger.error(`[PluginConfigComponent] Failed to save plugin enabled state:`, error);
 		}
-
-		onEnabledChange(item.name, enabled);
 	};
 
 
