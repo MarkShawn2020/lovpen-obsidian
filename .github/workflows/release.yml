@@ -49,6 +49,8 @@ jobs:
         run: |
           # 尝试使用 frozen-lockfile，如果失败则重新生成
           pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+          # 确保 workspace 依赖被正确链接
+          pnpm install
 
       - name: Type check
         run: pnpm check

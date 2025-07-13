@@ -187,6 +187,14 @@ export interface PersistentFile {
 	pinnedAt?: string;
 }
 
+export interface PersistentCover {
+	id: string;
+	name: string;
+	coverData: any;
+	createdAt: string;
+	lastUsed: string;
+}
+
 
 // Persistent configuration interfaces
 export interface PersistentTemplateKit {

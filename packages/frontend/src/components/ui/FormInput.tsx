@@ -1,6 +1,6 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
-import {logger} from "@lovpen/shared/src/logger";
+import {logger} from "@lovpen/shared";
 import {Input} from "@/components/ui/input";
 
 interface FormInputProps {

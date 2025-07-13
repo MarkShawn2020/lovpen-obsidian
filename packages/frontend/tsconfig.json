@@ -23,7 +23,9 @@
 		"allowSyntheticDefaultImports": true,
 		"baseUrl": "./",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@lovpen/shared": ["../shared/index.ts"],
+			"@lovpen/shared/*": ["../shared/*"]
 		}
 	},
 	"include": [
