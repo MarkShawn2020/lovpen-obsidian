@@ -1,6 +1,6 @@
 {
 	"name": "@lovpen/frontend",
-	"version": "0.14.35",
+	"version": "0.14.36",
 	"type": "module",
 	"scripts": {
 		"dev": "vite build --watch",
