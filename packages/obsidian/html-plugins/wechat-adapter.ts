@@ -3,19 +3,138 @@ import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
 
 /**
- * 微信样式适配插件 - 为微信公众号内容应用内联样式
- * 由于微信编辑器仅支持内联CSS，需要将关键样式内联到HTML元素上
+ * 微信公众号适配插件 - 整合所有微信平台相关的处理功能
+ * 包括链接转脚注、样式内联化、平台兼容性处理等
  */
-export class Styles extends UnifiedHtmlPlugin {
+export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	getPluginName(): string {
-		return "微信样式适配插件";
+		return "微信公众号适配插件";
 	}
 
 	getPluginDescription(): string {
-		return "将外部CSS转换为内联样式，确保微信公众号兼容性";
+		return "整合所有微信公众号平台适配功能，包括链接处理、样式内联、兼容性优化";
 	}
 
 	process(html: string, settings: NMPSettings): string {
+		try {
+			logger.debug("开始微信公众号适配处理");
+
+			// 依次执行各个适配步骤
+			html = this.processLinks(html, settings);
+			html = this.inlineStyles(html, settings);
+			html = this.optimizeForWechat(html, settings);
+
+			logger.debug("微信公众号适配处理完成");
+			return html;
+		} catch (error) {
+			logger.error("微信公众号适配处理出错:", error);
+			return html;
+		}
+	}
+
+	/**
+	 * 处理链接转换为脚注
+	 */
+	private processLinks(html: string, settings: NMPSettings): string {
+		try {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(html, "text/html");
+
+			// 查找所有链接
+			const links = doc.querySelectorAll("a");
+			const footnotes: string[] = [];
+
+			links.forEach((link) => {
+				const href = link.getAttribute("href");
+				if (!href) return;
+
+				// 检查是否已经是脚注格式的链接
+				const isFootnoteRef = href.startsWith('#fn-');
+				const isFootnoteBackRef = href.startsWith('#fnref-');
+				const parentIsSup = link.parentElement?.tagName === 'SUP';
+				const hasFootnoteClass = link.classList.contains('footnote-ref') ||
+					link.classList.contains('footnote-backref');
+
+				// 如果已经是脚注相关的链接，去除a标签但保留上标效果
+				if (isFootnoteRef || isFootnoteBackRef || hasFootnoteClass || parentIsSup) {
+					if (parentIsSup) {
+						// 如果父元素是sup，保留sup但去除a标签
+						const supElement = link.parentElement;
+						const linkText = link.textContent;
+						link.replaceWith(linkText || '');
+
+						// 确保还是sup样式
+						if (supElement && linkText) {
+							supElement.textContent = linkText;
+						}
+					} else {
+						// 直接将自身转为上标
+						const supElement = document.createElement('sup');
+						supElement.textContent = link.textContent || '';
+						link.replaceWith(supElement);
+					}
+					return;
+				}
+
+				// 判断是否需要转换此链接
+				const shouldConvert = !href.includes("weixin.qq.com");
+
+				if (shouldConvert) {
+					// 创建脚注标记
+					const footnoteRef = document.createElement("sup");
+					footnoteRef.textContent = `[${footnotes.length + 1}]`;
+					footnoteRef.style.color = "#3370ff";
+
+					// 替换链接为脚注引用
+					link.after(footnoteRef);
+
+					// 根据设置决定脚注内容格式
+					let footnoteContent = "";
+					if (settings.linkDescriptionMode === "raw") {
+						footnoteContent = `[${footnotes.length + 1}] ${
+							link.textContent
+						}: ${href}`;
+					} else {
+						footnoteContent = `[${footnotes.length + 1}] ${href}`;
+					}
+
+					footnotes.push(footnoteContent);
+
+					// 移除链接标签，保留内部文本
+					const linkText = link.textContent;
+					link.replaceWith(linkText || "");
+				}
+			});
+
+			// 如果有脚注，添加到文档末尾
+			if (footnotes.length > 0) {
+				const hr = document.createElement("hr");
+				const footnoteSection = document.createElement("section");
+				footnoteSection.style.fontSize = "14px";
+				footnoteSection.style.color = "#888";
+				footnoteSection.style.marginTop = "30px";
+
+				footnotes.forEach((note) => {
+					const p = document.createElement("p");
+					p.innerHTML = note;
+					footnoteSection.appendChild(p);
+				});
+
+				doc.body.appendChild(hr);
+				doc.body.appendChild(footnoteSection);
+			}
+
+			return doc.body.innerHTML;
+		} catch (error) {
+			logger.error("处理链接时出错:", error);
+			return html;
+		}
+	}
+
+	/**
+	 * CSS样式内联化处理
+	 */
+	private inlineStyles(html: string, settings: NMPSettings): string {
 		try {
 			// 使用离线DOM解析，避免影响页面
 			const parser = new DOMParser();
@@ -50,11 +169,36 @@ export class Styles extends UnifiedHtmlPlugin {
 			// 移除所有style标签，因为微信不支持
 			styleElements.forEach(styleEl => styleEl.remove());
 
-			const result = tempDiv.innerHTML;
-			logger.debug(`微信样式适配完成: ${result.substring(0, 100)}...`);
-			return result;
+			return tempDiv.innerHTML;
 		} catch (error) {
-			logger.error("微信样式适配出错:", error);
+			logger.error("样式内联化处理出错:", error);
+			return html;
+		}
+	}
+
+	/**
+	 * 微信平台特定优化
+	 */
+	private optimizeForWechat(html: string, settings: NMPSettings): string {
+		try {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(html, "text/html");
+
+			// 优化图片处理
+			this.optimizeImages(doc);
+
+			// 优化表格处理
+			this.optimizeTables(doc);
+
+			// 优化代码块处理
+			this.optimizeCodeBlocks(doc);
+
+			// 清理不兼容的属性和标签
+			this.cleanupIncompatibleContent(doc);
+
+			return doc.body.innerHTML;
+		} catch (error) {
+			logger.error("微信平台优化处理出错:", error);
 			return html;
 		}
 	}
@@ -173,10 +317,6 @@ export class Styles extends UnifiedHtmlPlugin {
 		cssRules: Array<{ selector: string; styles: Record<string, string> }>,
 		variables: Record<string, string>
 	): void {
-		const tagName = element.tagName.toLowerCase();
-		const className = element.className;
-		const id = element.id;
-		
 		// 收集匹配的样式
 		const matchedStyles: Record<string, string> = {};
 
@@ -348,13 +488,26 @@ export class Styles extends UnifiedHtmlPlugin {
 				break;
 			
 			case 'blockquote':
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-				styles['padding'] = variables['spacing-md'];
-				styles['background'] = variables['primary-color-light'];
-				styles['border-left'] = `4px solid ${variables['primary-color']}`;
-				styles['border-radius'] = variables['border-radius-sm'];
-				styles['color'] = variables['text-primary'];
-				styles['font-style'] = 'italic';
+				// 检查是否已有微信样式
+				const existingStyle = element.getAttribute('style') || '';
+				if (existingStyle.includes('padding-left: 10px !important')) {
+					// 保持现有的微信引用样式
+					styles['padding-left'] = '10px !important';
+					styles['border-left'] = '3px solid #c86442 !important';
+					styles['color'] = 'rgba(0, 0, 0, 0.6) !important';
+					styles['font-size'] = '15px !important';
+					styles['padding-top'] = '4px !important';
+					styles['margin'] = '1em 0 !important';
+					styles['text-indent'] = '0 !important';
+				} else {
+					styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
+					styles['padding'] = variables['spacing-md'];
+					styles['background'] = variables['primary-color-light'];
+					styles['border-left'] = `4px solid ${variables['primary-color']}`;
+					styles['border-radius'] = variables['border-radius-sm'];
+					styles['color'] = variables['text-primary'];
+					styles['font-style'] = 'italic';
+				}
 				break;
 			
 			case 'code':
@@ -374,40 +527,10 @@ export class Styles extends UnifiedHtmlPlugin {
 				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				break;
 			
-			case 'table':
-				styles['width'] = '100%';
-				styles['border-collapse'] = 'collapse';
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-				styles['border-radius'] = variables['border-radius-md'];
-				styles['overflow'] = 'hidden';
-				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 2px 4px';
-				break;
-			
-			case 'th':
-				styles['background'] = variables['primary-color'];
-				styles['color'] = variables['text-on-primary'];
-				styles['font-weight'] = 'bold';
-				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']}`;
-				styles['text-align'] = 'left';
-				styles['border-bottom'] = `1px solid ${variables['border-color']}`;
-				break;
-			
-			case 'td':
-				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']}`;
-				styles['text-align'] = 'left';
-				styles['border-bottom'] = `1px solid ${variables['border-color']}`;
-				break;
-			
-			case 'ul':
-			case 'ol':
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-				styles['padding-left'] = variables['spacing-xl'];
-				styles['color'] = variables['text-primary'];
-				break;
-			
-			case 'li':
-				styles['margin'] = `${variables['spacing-sm']} 0`;
-				styles['line-height'] = variables['line-height-base'];
+			case 'sup':
+				styles['color'] = 'rgb(51, 112, 255)';
+				styles['font-size'] = 'smaller';
+				styles['vertical-align'] = 'super';
 				break;
 		}
 
@@ -427,7 +550,6 @@ export class Styles extends UnifiedHtmlPlugin {
 
 		// 处理图片说明文字样式
 		if (element.hasAttribute('style') && element.getAttribute('style')?.includes('text-align: center !important')) {
-			// 这是图片说明文字，应用特殊样式
 			styles['text-align'] = 'center !important';
 			styles['color'] = '#666666 !important';
 			styles['font-size'] = '14px !important';
@@ -443,45 +565,68 @@ export class Styles extends UnifiedHtmlPlugin {
 			styles['background-color'] = 'rgba(255, 208, 0, 0.4)';
 		}
 
-		// 处理引用样式的特殊情况
-		if (tagName === 'blockquote' && element.hasAttribute('style')) {
-			const existingStyle = element.getAttribute('style') || '';
-			if (existingStyle.includes('padding-left: 10px !important')) {
-				// 保持现有的微信引用样式
-				styles['padding-left'] = '10px !important';
-				styles['border-left'] = '3px solid #c86442 !important';
-				styles['color'] = 'rgba(0, 0, 0, 0.6) !important';
-				styles['font-size'] = '15px !important';
-				styles['padding-top'] = '4px !important';
-				styles['margin'] = '1em 0 !important';
-				styles['text-indent'] = '0 !important';
-			}
-		}
-
-		// 处理列表样式
-		if (tagName === 'li' && element.hasAttribute('style')) {
-			const existingStyle = element.getAttribute('style') || '';
-			if (existingStyle.includes('color: rgb(200, 100, 66)')) {
-				styles['color'] = 'rgb(200, 100, 66)';
-			}
-		}
-
-		// 处理上标样式
-		if (tagName === 'sup') {
-			styles['color'] = 'rgb(51, 112, 255)';
-			styles['font-size'] = 'smaller';
-			styles['vertical-align'] = 'super';
-		}
-
-		// 处理代码块样式
-		if (tagName === 'section' && element.classList.contains('code-snippet__js')) {
-			styles['background'] = variables['background-tertiary'];
-			styles['border-radius'] = variables['border-radius-md'];
-			styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-			styles['overflow'] = 'hidden';
-		}
-
 		return styles;
+	}
+
+	/**
+	 * 优化图片处理
+	 */
+	private optimizeImages(doc: Document): void {
+		const images = doc.querySelectorAll('img');
+		images.forEach(img => {
+			// 确保图片有必要的样式
+			if (!img.hasAttribute('style')) {
+				img.setAttribute('style', 'max-width: 100%; height: auto; display: block; margin: 0.5em auto;');
+			}
+		});
+	}
+
+	/**
+	 * 优化表格处理
+	 */
+	private optimizeTables(doc: Document): void {
+		const tables = doc.querySelectorAll('table');
+		tables.forEach(table => {
+			// 确保表格有基本样式
+			if (!table.hasAttribute('style')) {
+				table.setAttribute('style', 'width: 100%; border-collapse: collapse; margin: 1em 0;');
+			}
+		});
+	}
+
+	/**
+	 * 优化代码块处理
+	 */
+	private optimizeCodeBlocks(doc: Document): void {
+		const codeBlocks = doc.querySelectorAll('pre code');
+		codeBlocks.forEach(code => {
+			const pre = code.parentElement;
+			if (pre) {
+				// 确保代码块有基本样式
+				if (!pre.hasAttribute('style')) {
+					pre.setAttribute('style', 'background: #f5f5f5; padding: 1em; border-radius: 4px; overflow-x: auto;');
+				}
+			}
+		});
+	}
+
+	/**
+	 * 清理不兼容的内容
+	 */
+	private cleanupIncompatibleContent(doc: Document): void {
+		// 移除可能导致问题的属性
+		const allElements = doc.querySelectorAll('*');
+		allElements.forEach(element => {
+			// 移除可能不兼容的class
+			if (element.classList.contains('hljs')) {
+				element.classList.remove('hljs');
+			}
+			
+			// 清理空的属性
+			if (element.hasAttribute('class') && !element.getAttribute('class')?.trim()) {
+				element.removeAttribute('class');
+			}
+		});
 	}
 
 	/**

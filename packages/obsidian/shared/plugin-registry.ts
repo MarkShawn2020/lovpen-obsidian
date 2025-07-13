@@ -16,9 +16,8 @@ import { Blockquotes } from "../html-plugins/blockquotes";
 import { CodeBlocks } from "../html-plugins/code-blocks";
 import { Headings } from "../html-plugins/headings";
 import { Lists } from "../html-plugins/lists";
-import { Styles } from "../html-plugins/styles";
 import { Tables } from "../html-plugins/tables";
-import { WechatLink } from "../html-plugins/wechat-link";
+import { WechatAdapterPlugin } from "../html-plugins/wechat-adapter";
 
 
 
@@ -59,8 +58,7 @@ export class PluginRegistry {
             new Headings(),
             new Lists(),
             new Tables(),
-            new WechatLink(),
-            new Styles(),  // 样式插件应该最后执行，确保处理所有其他插件的输出
+            new WechatAdapterPlugin(),  // 微信适配插件应该最后执行，整合所有微信相关处理
         ];
         
         this.pluginManager.registerPlugins(htmlPlugins as any);
