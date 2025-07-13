@@ -345,7 +345,7 @@ export default class AssetsManager {
 	}
 
 	getThemeURL() {
-		return `https://github.com/sunbooshi/lovpen/releases/download/1.1.3/assets.zip`;
+		return `https://github.com/markshawn2020/lovpen/releases/download/1.1.3/assets.zip`;
 	}
 
 	async downloadThemes() {

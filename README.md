@@ -1,4 +1,4 @@
-# OmniContent
+# LovPen
 
 这是一个强大的 Obsidian 全媒体内容分发平台，集成了多平台内容分发和格式化发布功能。它不仅可以将你的 Obsidian 笔记完美格式化到微信公众号，还支持将内容一键分发到知乎、小红书和 Twitter 等平台。
 
@@ -20,14 +20,14 @@
 对于新手用户，推荐使用[BRAT插件](https://github.com/TfTHacker/obsidian42-brat)安装。
 
 在BRAT的设置中
-打开Obsidian的**设置**界面，在底部的**第三方插件**——在**BRAT**中点击**Add Beta plugin**，然后输入本插件地址`https://github.com/sunbooshi/omni-content`，点击**Add Plugin**就可以安装 OmniContent 插件了。
+打开Obsidian的**设置**界面，在底部的**第三方插件**——在**BRAT**中点击**Add Beta plugin**，然后输入本插件地址`https://github.com/markshawn2020/lovpen`，点击**Add Plugin**就可以安装 LovPen 插件了。
 
 
 ## 2、手动安装
 
-到[Release](https://github.com/sunbooshi/omni-content/releases)页面下载最新版本，将`main.js`、 `manifest.json`、`styles.css`保存到Obsidian仓库的`.obsidian/plugins/obsidian-omni-content`目录下。
+到[Release](https://github.com/markshawn2020/lovpen/releases)页面下载最新版本，将`main.js`、 `manifest.json`、`styles.css`保存到Obsidian仓库的`.obsidian/plugins/obsidian-lovpen`目录下。
 
-打开Obsidian的**设置**界面，点击**第三方插件**，在**已安装插件**中刷新一下，然后启用本插件 **OmniContent**。
+打开Obsidian的**设置**界面，点击**第三方插件**，在**已安装插件**中刷新一下，然后启用本插件 **LovPen**。
 
 ## 3、主题、代码高亮下载
 
@@ -35,12 +35,12 @@
 为了尽可能保证插件符合官方规范，从`1.0.4`版本开始，主题和代码高亮需要在插件的设置——**获取更多主题**手动下载。
 
 ### 3.2 手动下载
-也可以直接在[Release](https://github.com/sunbooshi/omnicontent/releases)页面下载`assets.zip`文件，解压后放到`.obsidian/plugins/obsidian-omnicontent/assets`目录下。
+也可以直接在[Release](https://github.com/markshawn2020/lovpen/releases)页面下载`assets.zip`文件，解压后放到`.obsidian/plugins/obsidian-lovpen/assets`目录下。
 
 完整的目录结构如下：
 
 ```
-.obsidian/plugins/obsidian-omnicontent/
+.obsidian/plugins/obsidian-lovpen/
 ├── assets
 │   ├── themes.json
 │   ├── highlights.json
@@ -79,7 +79,7 @@
 
 ## 插件配置
 
-插件提供了多种配置选项，可以在 Obsidian 的**设置**中的**第三方插件** > **OmniContent** 进行设置。
+插件提供了多种配置选项，可以在 Obsidian 的**设置**中的**第三方插件** > **LovPen** 进行设置。
 
 ### 行号显示
 
@@ -174,7 +174,7 @@
 在使用分发功能之前，需要先在插件设置中配置各平台的认证信息：
 
 1. 打开 Obsidian 设置
-2. 进入「第三方插件」>「OmniContent」设置
+2. 进入「第三方插件」>「LovPen」设置
 3. 滚动到「内容分发设置」部分
 4. 配置需要的平台：
    - **微信公众号**：利用上方已配置的公众号信息，无需额外设置
