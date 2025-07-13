@@ -85,17 +85,8 @@ export const PersistentFileManager: React.FC<PersistentFileManagerProps> = ({
 
 	const handleFileSelect = async (file: PersistentFile) => {
 		try {
-			console.log('[PersistentFileManager] 选择文件:', {
-				fileName: file.name,
-				fileType: file.type,
-				fileSize: file.size
-			});
 			await persistentStorageService.updateFileUsage(file.id);
 			const fileUrl = await persistentStorageService.getFileUrl(file);
-			console.log('[PersistentFileManager] 生成文件URL:', {
-				fileUrl: fileUrl?.substring(0, 100),
-				fileUrlLength: fileUrl?.length
-			});
 			onFileSelect(fileUrl);
 			if (!showAsGrid) {
 				await loadFiles(); // 只在非网格模式下重新加载，网格模式下选中状态由父组件管理

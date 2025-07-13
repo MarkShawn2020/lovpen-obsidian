@@ -37,13 +37,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 			{images.map((imageUrl, index) => (
 				<div
 					key={index}
-					onClick={() => {
-						console.log('[ImageGrid] 点击图片:', {
-							index,
-							imageUrl: imageUrl?.substring(0, 100)
-						});
-						onImageSelect(imageUrl);
-					}}
+					onClick={() => onImageSelect(imageUrl)}
 					className={`
 						relative aspect-square border-2 rounded-lg overflow-hidden cursor-pointer transition-all duration-200
 						${selectedImage === imageUrl 

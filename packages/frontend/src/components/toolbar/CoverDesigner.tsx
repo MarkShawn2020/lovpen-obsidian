@@ -219,18 +219,27 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 	// 通用的封面恢复函数
 	const restoreCoverFromData = useCallback(async (cover: CoverData, data: any, coverNumber: number): Promise<CoverData> => {
-		if (!cover.imageUrl.startsWith('blob:')) {
-			return cover;
-		}
-
 		try {
-			if (!data.originalFileName) return cover;
+			// 检查是否需要恢复图片URL
+			const needsRestore = cover.imageUrl.startsWith('blob:') || 
+								(data.source === 'upload' && data.originalFileName);
+
+			if (!needsRestore) {
+				return cover;
+			}
+
+			if (!data.originalFileName) {
+				logger.warn(`[CoverDesigner] 封面${coverNumber}缺少原始文件名，无法恢复`);
+				return cover;
+			}
 
 			const matchedFile = await findMatchedFile(data.originalFileName, data.savedAt);
 			if (matchedFile) {
 				const newUrl = await persistentStorageService.getFileUrl(matchedFile);
 				logger.info(`[CoverDesigner] 恢复封面${coverNumber}图片: ${matchedFile.name}`);
 				return {...cover, imageUrl: newUrl};
+			} else {
+				logger.warn(`[CoverDesigner] 未找到匹配的档案库文件: ${data.originalFileName}`);
 			}
 		} catch (error) {
 			logger.error('[CoverDesigner] 恢复档案库图片失败:', error);
@@ -269,13 +278,10 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// 初始化时加载持久化数据
 	useEffect(() => {
 		const loadPersistedData = async () => {
-			console.log('[CoverDesigner] 开始加载持久化数据');
-			
 			// 临时：清空可能损坏的缓存数据用于调试
 			if (window.location.search.includes('clear-cover-cache')) {
 				localStorage.removeItem('cover-designer-preview-1');
 				localStorage.removeItem('cover-designer-preview-2');
-				console.log('[CoverDesigner] 清空封面缓存数据');
 				return;
 			}
 			
@@ -283,7 +289,6 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				loadCoverData(1),
 				loadCoverData(2)
 			]);
-			logger.info('[CoverDesigner] 加载封面预览持久化数据完成');
 		};
 
 		loadPersistedData();
@@ -311,20 +316,40 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			const storageKey = `cover-designer-preview-${coverNum}`;
 			let originalFileName = '';
 
-			// 如果是档案库来源，尝试从文件列表中获取原始文件名
-			if (source === 'upload' && imageUrl.startsWith('blob:')) {
+			// 如果是档案库来源，尝试匹配文件信息
+			if (source === 'upload' || (source === 'library' && imageUrl.startsWith('blob:'))) {
 				try {
 					const files = await persistentStorageService.getFiles();
 					const imageFiles = files.filter(f => f.type.startsWith('image/'));
-					// 根据最近使用时间推测文件
-					if (imageFiles.length > 0) {
-						const latestFile = imageFiles.sort((a, b) =>
+					
+					// 尝试通过URL匹配找到对应的文件
+					let matchedFile = null;
+					for (const file of imageFiles) {
+						try {
+							const fileUrl = await persistentStorageService.getFileUrl(file);
+							if (fileUrl === imageUrl) {
+								matchedFile = file;
+								break;
+							}
+						} catch (error) {
+							// 忽略单个文件的错误
+							continue;
+						}
+					}
+					
+					// 如果没找到匹配的，使用最近使用的文件作为备选
+					if (!matchedFile && imageFiles.length > 0) {
+						matchedFile = imageFiles.sort((a, b) =>
 							new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime()
 						)[0];
-						originalFileName = latestFile.name;
+					}
+					
+					if (matchedFile) {
+						originalFileName = matchedFile.name;
+						logger.info(`[CoverDesigner] 匹配到档案库文件: ${originalFileName}`);
 					}
 				} catch (error) {
-					logger.error('[CoverDesigner] 获取原始文件名失败:', error);
+					logger.error('[CoverDesigner] 匹配档案库文件失败:', error);
 				}
 			}
 
@@ -344,34 +369,17 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 	// 通用的设置封面预览函数
 	const setCoverPreview = useCallback((coverNum: 1 | 2, coverData: CoverData) => {
-		console.log(`[CoverDesigner] 设置封面${coverNum}预览数据:`, {
-			id: coverData.id,
-			imageUrl: coverData.imageUrl?.substring(0, 100),
-			aspectRatio: coverData.aspectRatio,
-			width: coverData.width,
-			height: coverData.height
-		});
-		
 		if (coverNum === 1) {
 			setCover1Data(coverData);
-			console.log('[CoverDesigner] 更新cover1Data状态');
 		} else {
 			setCover2Data(coverData);
-			console.log('[CoverDesigner] 更新cover2Data状态');
 		}
 	}, []);
 
 	const createCover = useCallback(async (imageUrl: string, source: CoverImageSource, coverNum: 1 | 2) => {
-		console.log(`[CoverDesigner] 开始创建封面${coverNum}`, {
-			imageUrl: imageUrl?.substring(0, 100), 
-			source,
-			imageUrlLength: imageUrl?.length,
-			imageUrlType: typeof imageUrl
-		});
-
 		// 验证图片URL
 		if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
-			console.error('[CoverDesigner] 无效的图片URL:', imageUrl);
+			logger.error('[CoverDesigner] 无效的图片URL:', imageUrl);
 			return;
 		}
 
@@ -412,12 +420,6 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// 处理图片选择
 	const handleImageSelect = async (imageUrl: string, source: CoverImageSource) => {
 		if (!selectedCoverNumber) return;
-
-		console.log('[CoverDesigner] 处理图片选择:', {
-			imageUrl: imageUrl?.substring(0, 100),
-			source,
-			selectedCoverNumber
-		});
 
 		try {
 			await createCover(imageUrl, source, selectedCoverNumber);

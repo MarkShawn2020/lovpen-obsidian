@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
 export class PersistentStorageService {
 	private static instance: PersistentStorageService;
 	private obsidianVault: any;
+	private urlCache: Map<string, string> = new Map(); // 文件路径 -> blob URL 的缓存
 
 	private constructor() {
 		this.obsidianVault = (window as any).app?.vault;
@@ -140,6 +141,15 @@ export class PersistentStorageService {
 				await this.obsidianVault.adapter.remove(fileToDelete.path);
 			}
 
+			// 清理 URL 缓存
+			if (fileToDelete && this.urlCache.has(fileToDelete.path)) {
+				const url = this.urlCache.get(fileToDelete.path);
+				if (url) {
+					URL.revokeObjectURL(url);
+				}
+				this.urlCache.delete(fileToDelete.path);
+			}
+
 			const updatedFiles = files.filter(f => f.id !== id);
 			localStorage.setItem(STORAGE_KEYS.FILES, JSON.stringify(updatedFiles));
 		} catch (error) {
@@ -160,6 +170,22 @@ export class PersistentStorageService {
 
 			if (!file.path) {
 				throw new Error('文件路径不存在');
+			}
+
+			// 检查缓存中是否已有有效的 URL
+			const cachedUrl = this.urlCache.get(file.path);
+			if (cachedUrl) {
+				// 验证 blob URL 是否仍然有效
+				try {
+					const response = await fetch(cachedUrl, { method: 'HEAD' });
+					if (response.ok) {
+						console.log(`[PersistentStorage] 使用缓存的URL`);
+						return cachedUrl;
+					}
+				} catch (error) {
+					console.log(`[PersistentStorage] 缓存URL已失效，清除缓存`);
+					this.urlCache.delete(file.path);
+				}
 			}
 
 			if (!this.obsidianVault?.adapter?.read) {
@@ -236,11 +262,45 @@ export class PersistentStorageService {
 
 			const url = URL.createObjectURL(blob);
 			console.log(`[PersistentStorage] 成功创建文件URL`);
+			
+			// 将新的 URL 加入缓存
+			this.urlCache.set(file.path, url);
+			
 			return url;
 
 		} catch (error) {
 			console.error(`[PersistentStorage] 获取文件URL失败:`, error);
 			throw error;
+		}
+	}
+
+	// 清理所有缓存的 URL
+	clearUrlCache(): void {
+		for (const url of this.urlCache.values()) {
+			URL.revokeObjectURL(url);
+		}
+		this.urlCache.clear();
+		console.log('[PersistentStorage] 已清理所有缓存URL');
+	}
+
+	// 预加载常用文件的 URL 缓存
+	async preloadFileUrls(): Promise<void> {
+		try {
+			const files = await this.getFiles();
+			console.log(`[PersistentStorage] 预加载 ${files.length} 个文件的URL`);
+			
+			// 并发加载所有文件URL
+			await Promise.allSettled(
+				files.map(async (file) => {
+					try {
+						await this.getFileUrl(file);
+					} catch (error) {
+						console.warn(`预加载文件 ${file.name} 失败:`, error);
+					}
+				})
+			);
+		} catch (error) {
+			console.error('[PersistentStorage] 预加载文件URL失败:', error);
 		}
 	}
 

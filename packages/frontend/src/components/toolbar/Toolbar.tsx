@@ -164,55 +164,48 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		onSaveSettings();
 	};
 
-	// 处理封面下载
-	const handleDownloadCovers = async (covers: CoverData[]) => {
-		logger.info("[Toolbar] 下载封面", {count: covers.length});
+	// 获取图片数据的通用函数
+	const getImageArrayBuffer = async (imageUrl: string): Promise<ArrayBuffer> => {
+		if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+			// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
+			if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
+				throw new Error('此功能仅在Obsidian环境中可用');
+			}
+			const requestUrl = window.lovpenReactAPI.requestUrl;
+			const response = await requestUrl({ url: imageUrl, method: 'GET' });
+			return response.arrayBuffer;
+		} else if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+			// Blob URL 或 Data URL - 使用fetch API
+			const response = await fetch(imageUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch image: ${response.status}`);
+			}
+			return await response.arrayBuffer();
+		} else {
+			throw new Error(`不支持的URL协议: ${imageUrl}`);
+		}
+	};
 
+	// 回退到vault保存的函数
+	const downloadToVault = async (covers: CoverData[]) => {
 		const cover1 = covers.find(c => c.aspectRatio === '2.25:1');
 		const cover2 = covers.find(c => c.aspectRatio === '1:1');
 
 		// 下载单独的封面
 		for (const [index, cover] of covers.entries()) {
 			try {
-				let arrayBuffer: ArrayBuffer;
-
-				// 检查URL类型并相应处理
-				if (cover.imageUrl.startsWith('http://') || cover.imageUrl.startsWith('https://')) {
-					// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
-					const app = (window as any).app;
-					if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
-						throw new Error('此功能仅在Obsidian环境中可用');
-					}
-					const requestUrl = window.lovpenReactAPI.requestUrl;
-
-					const response = await requestUrl({
-						url: cover.imageUrl,
-						method: 'GET'
-					});
-
-					arrayBuffer = response.arrayBuffer;
-				} else if (cover.imageUrl.startsWith('blob:') || cover.imageUrl.startsWith('data:')) {
-					// Blob URL 或 Data URL - 使用fetch API
-					const response = await fetch(cover.imageUrl);
-					if (!response.ok) {
-						throw new Error(`Failed to fetch blob: ${response.status}`);
-					}
-					arrayBuffer = await response.arrayBuffer();
-				} else {
-					console.error(`封面 ${index + 1} URL协议不支持: ${cover.imageUrl}`);
-					continue;
-				}
-
+				const arrayBuffer = await getImageArrayBuffer(cover.imageUrl);
 				const uint8Array = new Uint8Array(arrayBuffer);
-				const fileName = `cover-${index + 1}-${cover.aspectRatio}.jpg`;
+				const aspectStr = cover.aspectRatio.replace(':', '-').replace('.', '_');
+				const fileName = `lovpen-cover-${index + 1}-${aspectStr}.jpg`;
 
 				// 使用Obsidian的文件系统API保存文件
 				const app = (window as any).app;
 				if (app?.vault?.adapter?.write) {
 					await app.vault.adapter.write(fileName, uint8Array);
-					console.log(`封面 ${index + 1} 已保存到: ${fileName} (${uint8Array.length} bytes)`);
+					console.log(`封面 ${index + 1} 已保存到vault: ${fileName} (${uint8Array.length} bytes)`);
 				} else {
-					console.error("无法访问Obsidian文件系统API");
+					throw new Error("无法访问Obsidian文件系统API");
 				}
 			} catch (error) {
 				console.error(`下载封面 ${index + 1} 失败:`, error);
@@ -228,102 +221,167 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 			}
 		}
 
-		if (covers.length > 0) {
-			alert(`已下载 ${covers.length} 个封面到vault根目录${cover1 && cover2 ? '，并创建了拼接图' : ''}`);
-		}
+		alert(`已下载 ${covers.length} 个封面到 Obsidian vault 根目录${cover1 && cover2 ? '，并创建了拼接图' : ''}`);
 	};
 
-	// 创建拼接封面
+	// 使用浏览器传统下载方式 - 延时下载避免多次弹窗
+	const downloadWithBrowserDownload = async (covers: CoverData[]) => {
+		const cover1 = covers.find(c => c.aspectRatio === '2.25:1');
+		const cover2 = covers.find(c => c.aspectRatio === '1:1');
+
+		// 准备所有下载数据
+		const downloads: Array<{ blob: Blob; fileName: string }> = [];
+
+		// 准备单独的封面
+		for (const [index, cover] of covers.entries()) {
+			try {
+				const arrayBuffer = await getImageArrayBuffer(cover.imageUrl);
+				const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+				const aspectStr = cover.aspectRatio.replace(':', '-').replace('.', '_');
+				const timestamp = Date.now();
+				const fileName = `lovpen-cover-${index + 1}-${aspectStr}-${timestamp}.jpg`;
+				downloads.push({ blob, fileName });
+			} catch (error) {
+				console.error(`准备封面 ${index + 1} 失败:`, error);
+			}
+		}
+
+		// 如果有两个封面，准备拼接图
+		if (cover1 && cover2) {
+			try {
+				const combinedBlob = await createCombinedCoverBlob(cover1, cover2);
+				const timestamp = Date.now();
+				const fileName = `lovpen-cover-combined-3_25_1-${timestamp}.jpg`;
+				downloads.push({ blob: combinedBlob, fileName });
+			} catch (error) {
+				console.error("准备拼接封面失败:", error);
+			}
+		}
+
+		// 依次下载，每次下载间隔1秒避免浏览器弹窗冲突和文件覆盖
+		for (const [index, download] of downloads.entries()) {
+			try {
+				const url = URL.createObjectURL(download.blob);
+				
+				// 创建下载链接
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = download.fileName;
+				a.style.display = 'none';
+				
+				// 添加唯一ID避免冲突
+				a.id = `download-link-${Date.now()}-${Math.random()}`;
+				
+				document.body.appendChild(a);
+				
+				// 模拟用户交互来触发下载
+				a.dispatchEvent(new MouseEvent('click', {
+					bubbles: true,
+					cancelable: true,
+					view: window
+				}));
+				
+				// 延时移除元素和清理URL
+				setTimeout(() => {
+					document.body.removeChild(a);
+					URL.revokeObjectURL(url);
+				}, 2000);
+				
+				console.log(`开始下载: ${download.fileName} (${index + 1}/${downloads.length})`);
+				
+				// 除最后一个文件外，都等待1秒
+				if (index < downloads.length - 1) {
+					await new Promise(resolve => setTimeout(resolve, 1000));
+				}
+			} catch (error) {
+				console.error(`下载 ${download.fileName} 失败:`, error);
+			}
+		}
+
+		alert(`已开始下载 ${downloads.length} 个文件，请检查浏览器下载文件夹`);
+	};
+
+	// 处理封面下载
+	const handleDownloadCovers = async (covers: CoverData[]) => {
+		logger.info("[Toolbar] 下载封面", {count: covers.length});
+		// 直接使用简单的下载方式，避免复杂的弹窗和权限问题
+		await downloadWithBrowserDownload(covers);
+	};
+
+
+	// 创建拼接封面Blob的通用函数
+	const createCombinedCoverBlob = async (cover1: CoverData, cover2: CoverData): Promise<Blob> => {
+		// 下载两张图片的数据
+		const [arrayBuffer1, arrayBuffer2] = await Promise.all([
+			getImageArrayBuffer(cover1.imageUrl),
+			getImageArrayBuffer(cover2.imageUrl)
+		]);
+
+		// 创建blob URL
+		const blob1 = new Blob([arrayBuffer1], {type: 'image/jpeg'});
+		const blob2 = new Blob([arrayBuffer2], {type: 'image/jpeg'});
+		const url1 = URL.createObjectURL(blob1);
+		const url2 = URL.createObjectURL(blob2);
+
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+
+		// 设置画布尺寸 (3.25:1 比例，高度600px，提高分辨率)
+		const height = 600;
+		const width = height * 3.25;
+		canvas.width = width;
+		canvas.height = height;
+
+		// 加载图片
+		const img1 = document.createElement('img');
+		const img2 = document.createElement('img');
+
+		const loadImage = (img: HTMLImageElement, url: string): Promise<void> => {
+			return new Promise((resolve, reject) => {
+				img.onload = () => resolve();
+				img.onerror = reject;
+				img.src = url;
+			});
+		};
+
+		await Promise.all([
+			loadImage(img1, url1),
+			loadImage(img2, url2)
+		]);
+
+		// 绘制第一张图 (2.25:1 比例)
+		const img1Width = height * 2.25;
+		ctx?.drawImage(img1, 0, 0, img1Width, height);
+
+		// 绘制第二张图 (1:1 比例)
+		const img2Width = height;
+		ctx?.drawImage(img2, img1Width, 0, img2Width, height);
+
+		// 清理blob URL
+		URL.revokeObjectURL(url1);
+		URL.revokeObjectURL(url2);
+
+		// 转换为blob
+		return new Promise((resolve) => {
+			canvas.toBlob((blob) => {
+				resolve(blob!);
+			}, 'image/jpeg', 0.95);
+		});
+	};
+
+	// 创建拼接封面（vault版本）
 	const createCombinedCover = async (cover1: CoverData, cover2: CoverData) => {
 		try {
-			// 获取图片数据的通用函数
-			const getImageData = async (imageUrl: string) => {
-				if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-					// HTTP/HTTPS URL - 使用Obsidian的requestUrl API
-					const app = (window as any).app;
-					if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
-						throw new Error('此功能仅在Obsidian环境中可用');
-					}
-					const requestUrl = window.lovpenReactAPI.requestUrl;
-					const response = await requestUrl({url: imageUrl, method: 'GET'});
-					return response.arrayBuffer;
-				} else if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
-					// Blob URL 或 Data URL - 使用fetch API
-					const response = await fetch(imageUrl);
-					if (!response.ok) {
-						throw new Error(`Failed to fetch image: ${response.status}`);
-					}
-					return await response.arrayBuffer();
-				} else {
-					throw new Error(`不支持的URL协议: ${imageUrl}`);
-				}
-			};
+			const combinedBlob = await createCombinedCoverBlob(cover1, cover2);
+			const arrayBuffer = await combinedBlob.arrayBuffer();
+			const uint8Array = new Uint8Array(arrayBuffer);
+			const fileName = 'lovpen-cover-combined-3_25_1.jpg';
 
-			// 下载两张图片的数据
-			const [arrayBuffer1, arrayBuffer2] = await Promise.all([
-				getImageData(cover1.imageUrl),
-				getImageData(cover2.imageUrl)
-			]);
-
-			// 创建blob URL
-			const blob1 = new Blob([arrayBuffer1], {type: 'image/jpeg'});
-			const blob2 = new Blob([arrayBuffer2], {type: 'image/jpeg'});
-			const url1 = URL.createObjectURL(blob1);
-			const url2 = URL.createObjectURL(blob2);
-
-			const canvas = document.createElement('canvas');
-			const ctx = canvas.getContext('2d');
-
-			// 设置画布尺寸 (3.25:1 比例，高度600px，提高分辨率)
-			const height = 600;
-			const width = height * 3.25;
-			canvas.width = width;
-			canvas.height = height;
-
-			// 加载图片
-			const img1 = document.createElement('img');
-			const img2 = document.createElement('img');
-
-			const loadImage = (img: HTMLImageElement, url: string): Promise<void> => {
-				return new Promise((resolve, reject) => {
-					img.onload = () => resolve();
-					img.onerror = reject;
-					img.src = url;
-				});
-			};
-
-			await Promise.all([
-				loadImage(img1, url1),
-				loadImage(img2, url2)
-			]);
-
-			// 绘制第一张图 (2.25:1 比例)
-			const img1Width = height * 2.25;
-			ctx?.drawImage(img1, 0, 0, img1Width, height);
-
-			// 绘制第二张图 (1:1 比例)
-			const img2Width = height;
-			ctx?.drawImage(img2, img1Width, 0, img2Width, height);
-
-			// 清理blob URL
-			URL.revokeObjectURL(url1);
-			URL.revokeObjectURL(url2);
-
-			// 转换为blob并保存（提高JPEG质量到95%）
-			canvas.toBlob(async (blob) => {
-				if (blob) {
-					const arrayBuffer = await blob.arrayBuffer();
-					const uint8Array = new Uint8Array(arrayBuffer);
-					const fileName = `cover-combined-3.25-1.jpg`;
-
-					const app = (window as any).app;
-					if (app?.vault?.adapter?.write) {
-						await app.vault.adapter.write(fileName, uint8Array);
-						console.log(`拼接封面已保存到: ${fileName} (${uint8Array.length} bytes)`);
-					}
-				}
-			}, 'image/jpeg', 0.95);
-
+			const app = (window as any).app;
+			if (app?.vault?.adapter?.write) {
+				await app.vault.adapter.write(fileName, uint8Array);
+				console.log(`拼接封面已保存到vault: ${fileName} (${uint8Array.length} bytes)`);
+			}
 		} catch (error) {
 			console.error("创建拼接封面失败:", error);
 		}
