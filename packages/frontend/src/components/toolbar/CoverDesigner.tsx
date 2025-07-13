@@ -269,6 +269,16 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// 初始化时加载持久化数据
 	useEffect(() => {
 		const loadPersistedData = async () => {
+			console.log('[CoverDesigner] 开始加载持久化数据');
+			
+			// 临时：清空可能损坏的缓存数据用于调试
+			if (window.location.search.includes('clear-cover-cache')) {
+				localStorage.removeItem('cover-designer-preview-1');
+				localStorage.removeItem('cover-designer-preview-2');
+				console.log('[CoverDesigner] 清空封面缓存数据');
+				return;
+			}
+			
 			await Promise.all([
 				loadCoverData(1),
 				loadCoverData(2)
@@ -334,22 +344,43 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 	// 通用的设置封面预览函数
 	const setCoverPreview = useCallback((coverNum: 1 | 2, coverData: CoverData) => {
+		console.log(`[CoverDesigner] 设置封面${coverNum}预览数据:`, {
+			id: coverData.id,
+			imageUrl: coverData.imageUrl?.substring(0, 100),
+			aspectRatio: coverData.aspectRatio,
+			width: coverData.width,
+			height: coverData.height
+		});
+		
 		if (coverNum === 1) {
 			setCover1Data(coverData);
+			console.log('[CoverDesigner] 更新cover1Data状态');
 		} else {
 			setCover2Data(coverData);
+			console.log('[CoverDesigner] 更新cover2Data状态');
 		}
 	}, []);
 
 	const createCover = useCallback(async (imageUrl: string, source: CoverImageSource, coverNum: 1 | 2) => {
-		logger.info(`[CoverDesigner] 开始创建封面${coverNum}`, {imageUrl: imageUrl.substring(0, 100), source});
+		console.log(`[CoverDesigner] 开始创建封面${coverNum}`, {
+			imageUrl: imageUrl?.substring(0, 100), 
+			source,
+			imageUrlLength: imageUrl?.length,
+			imageUrlType: typeof imageUrl
+		});
+
+		// 验证图片URL
+		if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+			console.error('[CoverDesigner] 无效的图片URL:', imageUrl);
+			return;
+		}
 
 		const dimensions = getDimensions(coverNum);
 
 		// 直接创建封面数据，使用原始图片URL进行预览
 		const coverData: CoverData = {
 			id: `cover${coverNum}-${Date.now()}-${Math.random()}`,
-			imageUrl: imageUrl, // 直接使用原始图片URL
+			imageUrl: imageUrl.trim(), // 使用trim后的URL
 			aspectRatio: dimensions.aspectRatio,
 			width: dimensions.width,
 			height: dimensions.height,
@@ -381,6 +412,12 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// 处理图片选择
 	const handleImageSelect = async (imageUrl: string, source: CoverImageSource) => {
 		if (!selectedCoverNumber) return;
+
+		console.log('[CoverDesigner] 处理图片选择:', {
+			imageUrl: imageUrl?.substring(0, 100),
+			source,
+			selectedCoverNumber
+		});
 
 		try {
 			await createCover(imageUrl, source, selectedCoverNumber);
@@ -474,12 +511,12 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				</div>
 			</div>
 
-			{/* 封面卡片区域 */}
-			<div className="grid grid-cols-[2.25fr_1fr] gap-3 sm:gap-6 w-full">
+			{/* 封面卡片区域 - 并排布局模拟最终3.25:1拼接效果 */}
+			<div className="grid grid-cols-[2.25fr_1fr] gap-2 sm:gap-3 w-full">
 				<CoverCard
 					coverData={cover1Data}
 					aspectRatio={2.25}
-					label="封面1 (2.25:1 横版)"
+					label="封面1 (2.25:1)"
 					placeholder="点击添加封面1"
 					isGenerating={generationStatus.isGenerating && selectedCoverNumber === 1}
 					generationProgress={generationStatus.progress}
@@ -489,7 +526,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				<CoverCard
 					coverData={cover2Data}
 					aspectRatio={1}
-					label="封面2 (1:1 方形)"
+					label="封面2 (1:1)"
 					placeholder="点击添加封面2"
 					isGenerating={generationStatus.isGenerating && selectedCoverNumber === 2}
 					generationProgress={generationStatus.progress}

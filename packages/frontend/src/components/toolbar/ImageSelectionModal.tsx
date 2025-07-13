@@ -59,10 +59,17 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	}, [isOpen]);
 
 	const handleImageSelect = (imageUrl: string) => {
+		console.log('[ImageSelectionModal] 选择图片:', {
+			imageUrl: imageUrl?.substring(0, 100)
+		});
 		setSelectedImageUrl(imageUrl);
 	};
 
 	const handleConfirm = () => {
+		console.log('[ImageSelectionModal] 确认选择图片:', {
+			selectedImageUrl: selectedImageUrl?.substring(0, 100),
+			activeTab
+		});
 		if (selectedImageUrl) {
 			onImageSelect(selectedImageUrl, activeTab);
 			onClose();
@@ -126,6 +133,19 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	}, [aiPrompt, aiStyle, aspectRatio, getDimensions, coverNumber]);
 
 	const toolbarContainer = document.getElementById('lovpen-toolbar-container');
+	
+	// 调试：显示传入的图片数据
+	React.useEffect(() => {
+		console.log('[ImageSelectionModal] 接收到的图片数据:', {
+			selectedImagesCount: selectedImages.length,
+			selectedImagesSample: selectedImages.slice(0, 3).map(img => ({
+				src: img.src?.substring(0, 100),
+				alt: img.alt,
+				width: img.width,
+				height: img.height
+			}))
+		});
+	}, [selectedImages]);
 	
 	if (!toolbarContainer) {
 		console.warn('[ImageSelectionModal] 找不到工具栏容器');

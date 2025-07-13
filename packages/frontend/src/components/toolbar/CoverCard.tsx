@@ -23,7 +23,8 @@ export const CoverCard: React.FC<CoverCardProps> = ({
 	onClick,
 	onClear
 }) => {
-	const isEmpty = !coverData;
+	const isEmpty = !coverData || !coverData.imageUrl;
+	
 	
 	// 计算容器样式
 	const containerStyle = {
@@ -33,8 +34,8 @@ export const CoverCard: React.FC<CoverCardProps> = ({
 	return (
 		<div className="relative group">
 			{/* 标签 */}
-			<div className="flex items-center justify-between mb-2">
-				<span className="text-xs sm:text-sm font-medium text-gray-700">{label}</span>
+			<div className="flex items-start justify-between mb-2 min-h-[20px]">
+				<span className="text-xs sm:text-sm font-medium text-gray-700 leading-tight">{label}</span>
 				{!isEmpty && onClear && (
 					<button
 						onClick={(e) => {
@@ -92,8 +93,8 @@ export const CoverCard: React.FC<CoverCardProps> = ({
 						/>
 						
 						{/* 悬停遮罩 */}
-						<div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-							<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-2 text-white">
+						<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+							<div className="bg-black bg-opacity-50 rounded-full px-3 py-2 flex items-center gap-2 text-white">
 								<Edit2 className="h-4 w-4"/>
 								<span className="text-sm font-medium hidden sm:inline">点击更换</span>
 							</div>
