@@ -1,6 +1,6 @@
 {
 	"name": "@lovpen/obsidian",
-	"version": "0.14.40",
+	"version": "0.14.41",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
