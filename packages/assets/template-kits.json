@@ -167,81 +167,15 @@
 					}
 				}
 			}
-		},
-		{
-			"basicInfo": {
-				"id": "tech-dark",
-				"name": "Tech Dark",
-				"description": "深色科技风格模板套装，采用暗色主题和蓝色强调色，适合程序员和技术博客",
-				"author": "Lovpen Team",
-				"version": "1.0.0",
-				"createdAt": "2025-01-11T10:00:00.000Z",
-				"updatedAt": "2025-01-11T10:00:00.000Z",
-				"tags": [
-					"暗色主题",
-					"科技风",
-					"程序员",
-					"蓝色",
-					"代码"
-				],
-				"previewImage": ""
-			},
-			"styleConfig": {
-				"theme": "bento-dark",
-				"codeHighlight": "vs-dark",
-				"cssVariables": {
-					"--primary-color": "#007ACC",
-					"--background-primary": "#1e1e1e",
-					"--text-primary": "#d4d4d4"
-				},
-				"enableCustomThemeColor": true,
-				"customThemeColor": "#007ACC",
-				"customCSS": ""
-			},
-			"templateConfig": {
-				"templateFileName": "手工川 - 2.html",
-				"useTemplate": true
-			},
-			"pluginConfig": {
-				"enabledMarkdownPlugins": [
-					"CalloutRenderer",
-					"CodeHighlight",
-					"LinkRenderer",
-					"FootnoteRenderer",
-					"MathRenderer"
-				],
-				"enabledHtmlPlugins": [
-					"Images",
-					"CodeBlocks",
-					"Headings",
-					"Tables"
-				],
-				"pluginSettings": {
-					"CodeHighlight": {
-						"enabled": true,
-						"theme": "vs-dark",
-						"showLineNumbers": true
-					},
-					"Images": {
-						"enabled": true,
-						"addShadow": true,
-						"roundCorners": true
-					},
-					"CalloutRenderer": {
-						"enabled": true,
-						"useCustomStyles": true
-					}
-				}
-			}
 		}
 	],
 	"metadata": {
 		"totalKits": 3,
 		"categories": [
-			"微信风格",
-			"极简",
-			"暗色主题"
+			"极简主义",
+			"Anthropic 风格"
 		],
+
 		"lastUpdated": "2025-01-11T10:00:00.000Z",
 		"schemaVersion": "1.0"
 	}

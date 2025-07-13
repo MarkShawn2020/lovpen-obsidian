@@ -11,16 +11,23 @@ import {UnifiedPluginManager} from "./shared/unified-plugin-system";
 import {NMPSettings} from "./settings";
 import TemplateManager from "./template-manager";
 import TemplateKitManager from "./template-kit-manager";
+import {ReactAPIService} from "./services/ReactAPIService";
 import {uevent} from "./utils";
 import {persistentStorageService} from "@/services/persistentStorage";
 import {logger} from "@lovpen/shared";
-
-// External React App Interface
-interface ExternalReactLib {
-	mount: (container: HTMLElement, props: any) => void;
-	unmount: (container: HTMLElement) => void;
-	update: (container: HTMLElement, props: any) => void;
-}
+import {
+	ExternalReactLib,
+	ReactComponentPropsWithCallbacks,
+	ReactSettings,
+	PersonalInfo,
+	ArticleInfo,
+	PluginData,
+	GlobalReactAPI,
+	isValidPersonalInfo,
+	isValidArticleInfo,
+	isValidTemplateKitBasicInfo
+} from "./types/react-api-types";
+import {TemplateKitBasicInfo} from "./template-kit-types";
 
 export class NotePreviewExternal extends ItemView implements MDRendererCallback {
 	container: Element;
@@ -32,8 +39,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	listeners: EventRef[];
 	externalReactLib: ExternalReactLib | null = null;
 	reactContainer: HTMLElement | null = null;
-	toolbarArticleInfo: any = null; // 存储工具栏的基本信息
+	toolbarArticleInfo: ArticleInfo | null = null; // 存储工具栏的基本信息
 	isUpdatingFromToolbar: boolean = false; // 标志位，避免无限循环
+	private reactAPIService: ReactAPIService;
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -41,6 +49,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		this.settings = this.getPluginSettings();
 		this.assetsManager = AssetsManager.getInstance();
 		this.markedParser = new MarkedParser(this.app, this);
+		this.reactAPIService = ReactAPIService.getInstance();
 
 		// 插件系统已通过MarkedParser初始化，无需单独初始化
 	}
@@ -262,7 +271,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 						// articleTitle、author、publishDate已经在上面特殊处理了，跳过
 						if (key === 'articleTitle' || key === 'author' || key === 'publishDate') return;
 
-						const value = this.toolbarArticleInfo[key];
+						const value = this.toolbarArticleInfo![key];
 						if (value !== undefined && value !== null && value !== '') {
 							// 对于数组类型的tags，需要特殊处理
 							if (key === 'tags' && Array.isArray(value) && value.length > 0) {
@@ -555,7 +564,10 @@ ${customCSS}`;
 		}
 	}
 
-	private async updateExternalReactComponent() {
+	/**
+	 * 更新外部React组件
+	 */
+	private async updateExternalReactComponent(): Promise<void> {
 		if (!this.externalReactLib || !this.reactContainer) {
 			logger.warn("外部React应用未加载或容器不存在", {
 				externalReactLib: !!this.externalReactLib,
@@ -585,226 +597,8 @@ ${customCSS}`;
 				reactContainerChildren: this.reactContainer ? this.reactContainer.children.length : 0
 			});
 
-			// 转换设置对象以适配外部React应用的接口
-			const externalSettings = {
-				defaultStyle: this.settings.defaultStyle,
-				defaultHighlight: this.settings.defaultHighlight,
-				defaultTemplate: this.settings.defaultTemplate,
-				useTemplate: this.settings.useTemplate,
-				lastSelectedTemplate: this.settings.lastSelectedTemplate,
-				enableThemeColor: this.settings.enableThemeColor,
-				themeColor: this.settings.themeColor,
-				useCustomCss: this.settings.useCustomCss,
-				authKey: this.settings.authKey,
-				wxInfo: this.settings.wxInfo,
-				expandedAccordionSections: this.settings.expandedAccordionSections || [],
-				showStyleUI: this.settings.showStyleUI !== false, // 默认显示
-				personalInfo: this.settings.personalInfo || {
-					name: '',
-					avatar: '',
-					bio: '',
-					email: '',
-					website: ''
-				},
-				aiPromptTemplate: this.settings.aiPromptTemplate || '',
-			};
-
-			// 获取统一插件数据
-			const plugins = this.getUnifiedPlugins();
-
-			const props = {
-				settings: externalSettings,
-				articleHTML: this.articleHTML || "",
-				cssContent: this.getCSS(),
-				plugins: plugins,
-				onRefresh: async () => {
-					await this.renderMarkdown();
-					uevent("refresh");
-				},
-				onCopy: async () => {
-					await this.copyArticle();
-					uevent("copy");
-				},
-				onDistribute: async () => {
-					this.openDistributionModal();
-					uevent("distribute");
-				},
-				onTemplateChange: async (template: string) => {
-					if (template === "") {
-						this.settings.useTemplate = false;
-						this.settings.lastSelectedTemplate = "";
-					} else {
-						this.settings.useTemplate = true;
-						this.settings.defaultTemplate = template;
-						this.settings.lastSelectedTemplate = template;
-					}
-					this.saveSettingsToPlugin();
-					await this.renderMarkdown();
-				},
-				onThemeChange: async (theme: string) => {
-					logger.debug(`[onThemeChange] 切换主题: ${theme}`);
-					this.settings.defaultStyle = theme;
-					this.saveSettingsToPlugin();
-					logger.debug(`[onThemeChange] 设置已更新，开始渲染`);
-					await this.renderMarkdown();
-					logger.debug(`[onThemeChange] 渲染完成`);
-
-					// 直接异步调用update
-					await this.update();
-				},
-				onHighlightChange: async (highlight: string) => {
-					this.settings.defaultHighlight = highlight;
-					this.saveSettingsToPlugin();
-					await this.updateExternalReactComponent();
-				},
-				onThemeColorToggle: async (enabled: boolean) => {
-					this.settings.enableThemeColor = enabled;
-					this.saveSettingsToPlugin();
-					await this.renderMarkdown();
-				},
-				onThemeColorChange: async (color: string) => {
-					this.settings.themeColor = color;
-					this.saveSettingsToPlugin();
-					await this.renderMarkdown();
-				},
-				onRenderArticle: async () => {
-					await this.renderArticleOnly();
-				},
-				onSaveSettings: () => {
-					this.saveSettingsToPlugin();
-				},
-				onUpdateCSSVariables: () => {
-					this.updateCSSVariables();
-				},
-				onPluginToggle: (pluginName: string, enabled: boolean) => {
-					this.handleUnifiedPluginToggle(pluginName, enabled);
-				},
-				onPluginConfigChange: (pluginName: string, key: string, value: string | boolean) => {
-					this.handleUnifiedPluginConfigChange(pluginName, key, value);
-				},
-				onExpandedSectionsChange: (sections: string[]) => {
-					this.settings.expandedAccordionSections = sections;
-					this.saveSettingsToPlugin();
-				},
-				onArticleInfoChange: (info: any) => {
-					// 避免无限循环
-					if (this.isUpdatingFromToolbar) {
-						return;
-					}
-
-					// 将文章信息保存到toolbarArticleInfo中，用于渲染时合并
-					logger.debug('[onArticleInfoChange] 文章信息已更新:', info);
-					this.toolbarArticleInfo = info;
-					logger.debug('[onArticleInfoChange] toolbarArticleInfo已设置:', this.toolbarArticleInfo);
-
-					// 设置标志位并异步更新
-					this.isUpdatingFromToolbar = true;
-					this.updateArticleContentOnly().then(() => {
-						this.isUpdatingFromToolbar = false;
-					});
-				},
-				onPersonalInfoChange: (info: any) => {
-					logger.debug('[onPersonalInfoChange] 个人信息已更新:', info);
-					logger.debug('[onPersonalInfoChange] 更新前的设置:', this.settings.personalInfo);
-					this.settings.personalInfo = info;
-					logger.debug('[onPersonalInfoChange] 更新后的设置:', this.settings.personalInfo);
-					logger.debug('[onPersonalInfoChange] 全部设置:', this.settings.getAllSettings());
-					this.saveSettingsToPlugin();
-				},
-				onSettingsChange: (settingsUpdate: any) => {
-					logger.debug('[onSettingsChange] 设置已更新:', settingsUpdate);
-					logger.debug('[onSettingsChange] 更新前的authKey:', this.settings.authKey);
-					logger.debug('[onSettingsChange] 更新前的全部设置:', this.settings.getAllSettings());
-
-					// 合并设置更新
-					Object.keys(settingsUpdate).forEach(key => {
-						if (settingsUpdate[key] !== undefined) {
-							(this.settings as any)[key] = settingsUpdate[key];
-							logger.debug(`[onSettingsChange] 已更新 ${key}:`, settingsUpdate[key]);
-						}
-					});
-
-					logger.debug('[onSettingsChange] 更新后的authKey:', this.settings.authKey);
-					logger.debug('[onSettingsChange] 更新后的全部设置:', this.settings.getAllSettings());
-					this.saveSettingsToPlugin();
-				},
-				onKitApply: async (kitId: string) => {
-					logger.debug(`[onKitApply] 应用模板套装: ${kitId}`);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const result = await templateManager.applyTemplateKit(kitId, {
-							overrideExisting: true,
-							applyStyles: true,
-							applyTemplate: true,
-							applyPlugins: true,
-							showConfirmDialog: false
-						});
-
-						if (result.success) {
-							logger.info(`[onKitApply] 套装 ${kitId} 应用成功`);
-							// 重新渲染文章
-							await this.renderMarkdown();
-							// 更新React组件
-							await this.updateExternalReactComponent();
-							new Notice(`模板套装应用成功！`);
-						} else {
-							logger.error(`[onKitApply] 套装应用失败:`, result.error);
-							new Notice(`应用套装失败: ${result.error}`);
-						}
-					} catch (error) {
-						logger.error(`[onKitApply] 应用套装时出错:`, error);
-						new Notice(`应用套装时出错: ${error.message}`);
-					}
-				},
-				onKitCreate: async (basicInfo: any) => {
-					logger.debug(`[onKitCreate] 创建模板套装:`, basicInfo);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const result = await templateManager.createKitFromCurrentSettings(basicInfo);
-
-						if (result.success) {
-							logger.info(`[onKitCreate] 套装 ${basicInfo.name} 创建成功`);
-							new Notice(`模板套装 "${basicInfo.name}" 创建成功！`);
-						} else {
-							logger.error(`[onKitCreate] 套装创建失败:`, result.error);
-							new Notice(`创建套装失败: ${result.error}`);
-						}
-					} catch (error) {
-						logger.error(`[onKitCreate] 创建套装时出错:`, error);
-						new Notice(`创建套装时出错: ${error.message}`);
-					}
-				},
-				onKitDelete: async (kitId: string) => {
-					logger.debug(`[onKitDelete] 删除模板套装: ${kitId}`);
-					try {
-						const kitManager = TemplateKitManager.getInstance();
-						const result = await kitManager.deleteKit(kitId);
-
-						if (result.success) {
-							logger.info(`[onKitDelete] 套装 ${kitId} 删除成功`);
-							new Notice(`模板套装删除成功！`);
-						} else {
-							logger.error(`[onKitDelete] 套装删除失败:`, result.error);
-							new Notice(`删除套装失败: ${result.error}`);
-						}
-					} catch (error) {
-						logger.error(`[onKitDelete] 删除套装时出错:`, error);
-						new Notice(`删除套装时出错: ${error.message}`);
-					}
-				},
-				loadTemplateKits: async () => {
-					logger.debug(`[loadTemplateKits] 加载模板套装列表`);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const kits = await templateManager.getAvailableKits();
-						logger.info(`[loadTemplateKits] 加载到 ${kits.length} 个套装`);
-						return kits;
-					} catch (error) {
-						logger.error(`[loadTemplateKits] 加载套装时出错:`, error);
-						throw error;
-					}
-				}
-			};
+			// 使用新的构建方法获取props
+			const props = this.buildReactComponentProps();
 
 			// 使用外部React应用进行渲染，等待渲染完成
 			await this.externalReactLib.update(this.reactContainer, props);
@@ -827,321 +621,38 @@ ${customCSS}`;
 		}
 	}
 
-	private setupGlobalAPI() {
+	/**
+	 * 设置全局API，供React组件调用
+	 */
+	private setupGlobalAPI(): void {
 		try {
 			// 设置全局API对象
-			(window as any).lovpenReactAPI = {
-				loadTemplateKits: async () => {
-					logger.debug(`[loadTemplateKits] 加载模板套装列表`);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const kits = await templateManager.getAvailableKits();
-						logger.info(`[loadTemplateKits] 加载到 ${kits.length} 个套装`);
-						return kits;
-					} catch (error) {
-						logger.error(`[loadTemplateKits] 加载套装时出错:`, error);
-						throw error;
-					}
-				},
-				loadTemplates: async () => {
-					logger.debug(`[loadTemplates] 加载模板列表`);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const templateNames = templateManager.getTemplateNames();
-						logger.info(`[loadTemplates] 加载到 ${templateNames.length} 个模板:`, templateNames);
-						return templateNames;
-					} catch (error) {
-						logger.error(`[loadTemplates] 加载模板时出错:`, error);
-						throw error;
-					}
-				},
-				onKitApply: async (kitId: string) => {
-					logger.debug(`[onKitApply] 应用模板套装: ${kitId}`);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const result = await templateManager.applyTemplateKit(kitId, {
-							overrideExisting: true,
-							applyStyles: true,
-							applyTemplate: true,
-							applyPlugins: true,
-							showConfirmDialog: false
-						});
-
-						if (result.success) {
-							logger.info(`[onKitApply] 套装 ${kitId} 应用成功`);
-							// 重新渲染文章
-							await this.renderMarkdown();
-							// 更新React组件
-							await this.updateExternalReactComponent();
-							new Notice(`模板套装应用成功！`);
-						} else {
-							logger.error(`[onKitApply] 套装应用失败:`, result.error);
-							new Notice(`应用套装失败: ${result.error}`);
-						}
-					} catch (error) {
-						logger.error(`[onKitApply] 应用套装时出错:`, error);
-						new Notice(`应用套装时出错: ${error.message}`);
-					}
-				},
-				onKitCreate: async (basicInfo: any) => {
-					logger.debug(`[onKitCreate] 创建模板套装:`, basicInfo);
-					try {
-						const templateManager = TemplateManager.getInstance();
-						const result = await templateManager.createKitFromCurrentSettings(basicInfo);
-
-						if (result.success) {
-							logger.info(`[onKitCreate] 套装 ${basicInfo.name} 创建成功`);
-							new Notice(`模板套装 "${basicInfo.name}" 创建成功！`);
-						} else {
-							logger.error(`[onKitCreate] 套装创建失败:`, result.error);
-							new Notice(`创建套装失败: ${result.error}`);
-						}
-					} catch (error) {
-						logger.error(`[onKitCreate] 创建套装时出错:`, error);
-						new Notice(`创建套装时出错: ${error.message}`);
-					}
-				},
-				onKitDelete: async (kitId: string) => {
-					logger.debug(`[onKitDelete] 删除模板套装: ${kitId}`);
-					try {
-						const kitManager = TemplateKitManager.getInstance();
-						const result = await kitManager.deleteKit(kitId);
-
-						if (result.success) {
-							logger.info(`[onKitDelete] 套装 ${kitId} 删除成功`);
-							new Notice(`模板套装删除成功！`);
-						} else {
-							logger.error(`[onKitDelete] 套装删除失败:`, result.error);
-							new Notice(`删除套装失败: ${result.error}`);
-						}
-					} catch (error) {
-						logger.error(`[onKitDelete] 删除套装时出错:`, error);
-						new Notice(`删除套装时出错: ${error.message}`);
-					}
-				},
-				onSettingsChange: (settingsUpdate: any) => {
-					logger.debug('[onSettingsChange] 设置已更新:', settingsUpdate);
-
-					// 合并设置更新
-					Object.keys(settingsUpdate).forEach(key => {
-						if (settingsUpdate[key] !== undefined) {
-							(this.settings as any)[key] = settingsUpdate[key];
-							logger.debug(`[onSettingsChange] 已更新 ${key}:`, settingsUpdate[key]);
-						}
-					});
-
-					this.saveSettingsToPlugin();
-				},
-				onPersonalInfoChange: (info: any) => {
-					logger.debug('[onPersonalInfoChange] 个人信息已更新:', info);
-					this.settings.personalInfo = info;
-					this.saveSettingsToPlugin();
-				},
-				onArticleInfoChange: (info: any) => {
-					if (this.isUpdatingFromToolbar) {
-						return;
-					}
-
-					logger.debug('[onArticleInfoChange] 文章信息已更新:', info);
-					this.toolbarArticleInfo = info;
-
-					this.isUpdatingFromToolbar = true;
-					this.updateArticleContentOnly().then(() => {
-						this.isUpdatingFromToolbar = false;
-					});
-				},
-				onSaveSettings: () => {
-					this.saveSettingsToPlugin();
-				},
-
-				// 添加持久化存储APIs
-				persistentStorage: {
-					// Template Kit Management
-					saveTemplateKit: async (kitData: any, customName?: string) => {
-						try {
-							return await persistentStorageService.saveTemplateKit(kitData, customName);
-						} catch (error) {
-							logger.error('[persistentStorage.saveTemplateKit] Error:', error);
-							throw error;
-						}
-					},
-					getTemplateKits: async () => {
-						try {
-							return await persistentStorageService.getTemplateKits();
-						} catch (error) {
-							logger.error('[persistentStorage.getTemplateKits] Error:', error);
-							throw error;
-						}
-					},
-					deleteTemplateKit: async (id: string) => {
-						try {
-							return await persistentStorageService.deleteTemplateKit(id);
-						} catch (error) {
-							logger.error('[persistentStorage.deleteTemplateKit] Error:', error);
-							throw error;
-						}
-					},
-
-					// Plugin Configuration Management
-					savePluginConfig: async (pluginName: string, config: any, metaConfig: any) => {
-						try {
-							return await persistentStorageService.savePluginConfig(pluginName, config, metaConfig);
-						} catch (error) {
-							logger.error('[persistentStorage.savePluginConfig] Error:', error);
-							throw error;
-						}
-					},
-					getPluginConfigs: async () => {
-						try {
-							return await persistentStorageService.getPluginConfigs();
-						} catch (error) {
-							logger.error('[persistentStorage.getPluginConfigs] Error:', error);
-							throw error;
-						}
-					},
-					getPluginConfig: async (pluginName: string) => {
-						try {
-							return await persistentStorageService.getPluginConfig(pluginName);
-						} catch (error) {
-							logger.error('[persistentStorage.getPluginConfig] Error:', error);
-							throw error;
-						}
-					},
-
-					// Personal Info Management
-					savePersonalInfo: async (info: any) => {
-						try {
-							return await persistentStorageService.savePersonalInfo(info);
-						} catch (error) {
-							logger.error('[persistentStorage.savePersonalInfo] Error:', error);
-							throw error;
-						}
-					},
-					getPersonalInfo: async () => {
-						try {
-							return await persistentStorageService.getPersonalInfo();
-						} catch (error) {
-							logger.error('[persistentStorage.getPersonalInfo] Error:', error);
-							throw error;
-						}
-					},
-
-					// Article Info Management
-					saveArticleInfo: async (info: any) => {
-						try {
-							return await persistentStorageService.saveArticleInfo(info);
-						} catch (error) {
-							logger.error('[persistentStorage.saveArticleInfo] Error:', error);
-							throw error;
-						}
-					},
-					getArticleInfo: async () => {
-						try {
-							return await persistentStorageService.getArticleInfo();
-						} catch (error) {
-							logger.error('[persistentStorage.getArticleInfo] Error:', error);
-							throw error;
-						}
-					},
-
-					// Style Settings Management
-					saveStyleSettings: async (settings: any) => {
-						try {
-							return await persistentStorageService.saveStyleSettings(settings);
-						} catch (error) {
-							logger.error('[persistentStorage.saveStyleSettings] Error:', error);
-							throw error;
-						}
-					},
-					getStyleSettings: async () => {
-						try {
-							return await persistentStorageService.getStyleSettings();
-						} catch (error) {
-							logger.error('[persistentStorage.getStyleSettings] Error:', error);
-							throw error;
-						}
-					},
-
-					// File and Cover Management
-					saveFile: async (file: File, customName?: string) => {
-						try {
-							return await persistentStorageService.saveFile(file, customName);
-						} catch (error) {
-							logger.error('[persistentStorage.saveFile] Error:', error);
-							throw error;
-						}
-					},
-					getFiles: async () => {
-						try {
-							return await persistentStorageService.getFiles();
-						} catch (error) {
-							logger.error('[persistentStorage.getFiles] Error:', error);
-							throw error;
-						}
-					},
-					deleteFile: async (id: string) => {
-						try {
-							return await persistentStorageService.deleteFile(id);
-						} catch (error) {
-							logger.error('[persistentStorage.deleteFile] Error:', error);
-							throw error;
-						}
-					},
-					saveCover: async (coverData: any) => {
-						try {
-							return await persistentStorageService.saveCover(coverData);
-						} catch (error) {
-							logger.error('[persistentStorage.saveCover] Error:', error);
-							throw error;
-						}
-					},
-					getCovers: async () => {
-						try {
-							return await persistentStorageService.getCovers();
-						} catch (error) {
-							logger.error('[persistentStorage.getCovers] Error:', error);
-							throw error;
-						}
-					},
-					deleteCover: async (id: string) => {
-						try {
-							return await persistentStorageService.deleteCover(id);
-						} catch (error) {
-							logger.error('[persistentStorage.deleteCover] Error:', error);
-							throw error;
-						}
-					},
-
-					// Utility functions
-					clearAllPersistentData: async () => {
-						try {
-							return await persistentStorageService.clearAllPersistentData();
-						} catch (error) {
-							logger.error('[persistentStorage.clearAllPersistentData] Error:', error);
-							throw error;
-						}
-					},
-					exportAllData: async () => {
-						try {
-							return await persistentStorageService.exportAllData();
-						} catch (error) {
-							logger.error('[persistentStorage.exportAllData] Error:', error);
-							throw error;
-						}
-					}
-				},
-				
-				// 暴露Obsidian API函数
+			const globalAPI: GlobalReactAPI = {
+				loadTemplateKits: this.reactAPIService.loadTemplateKits.bind(this.reactAPIService),
+				loadTemplates: this.reactAPIService.loadTemplates.bind(this.reactAPIService),
+				onKitApply: this.handleKitApply.bind(this),
+				onKitCreate: this.handleKitCreate.bind(this),
+				onKitDelete: this.handleKitDelete.bind(this),
+				onSettingsChange: this.handleSettingsChange.bind(this),
+				onPersonalInfoChange: this.handlePersonalInfoChange.bind(this),
+				onArticleInfoChange: this.handleArticleInfoChange.bind(this),
+				onSaveSettings: this.saveSettingsToPlugin.bind(this),
+				persistentStorage: this.buildPersistentStorageAPI(),
 				requestUrl: requestUrl
 			};
 
-		logger.info('[setupGlobalAPI] 全局API已设置完成，包含持久化存储APIs');
+			(window as any).lovpenReactAPI = globalAPI;
+
+			logger.info('[setupGlobalAPI] 全局API已设置完成，包含持久化存储APIs');
 		} catch (error) {
 			logger.error('[setupGlobalAPI] 设置全局API时出错:', error);
 		}
 	}
 
-	private getUnifiedPlugins() {
+	/**
+	 * 获取统一插件数据
+	 */
+	private getUnifiedPlugins(): PluginData[] {
 		try {
 			const pluginManager = UnifiedPluginManager.getInstance();
 			if (!pluginManager) {
@@ -1151,7 +662,7 @@ ${customCSS}`;
 
 			const plugins = pluginManager.getPlugins();
 			logger.debug(`获取到 ${plugins.length} 个插件`);
-			return plugins.map((plugin: any) => {
+			return plugins.map((plugin: any): PluginData => {
 				let description = '';
 				if (plugin.getMetadata && plugin.getMetadata().description) {
 					description = plugin.getMetadata().description;
@@ -1161,9 +672,12 @@ ${customCSS}`;
 
 				// 将新的类型映射回React组件期望的类型（按照标准remark/rehype概念）
 				const pluginType = plugin.getType ? plugin.getType() : 'unknown';
-				const mappedType = pluginType === 'html' ? 'rehype' : pluginType === 'markdown' ? 'remark' : pluginType;
+				const mappedType: 'remark' | 'rehype' | 'unknown' = 
+					pluginType === 'html' ? 'rehype' : 
+					pluginType === 'markdown' ? 'remark' : 
+					'unknown';
 
-				const pluginData = {
+				const pluginData: PluginData = {
 					name: plugin.getName ? plugin.getName() : 'Unknown Plugin',
 					type: mappedType,
 					description: description,
@@ -1217,6 +731,427 @@ ${customCSS}`;
 		} catch (error) {
 			logger.error("更新插件配置失败:", error);
 		}
+	}
+
+	/**
+	 * 构建React组件的props
+	 */
+	private buildReactComponentProps(): ReactComponentPropsWithCallbacks {
+		// 转换设置对象以适配外部React应用的接口
+		const externalSettings: ReactSettings = {
+			defaultStyle: this.settings.defaultStyle,
+			defaultHighlight: this.settings.defaultHighlight,
+			defaultTemplate: this.settings.defaultTemplate,
+			useTemplate: this.settings.useTemplate,
+			lastSelectedTemplate: this.settings.lastSelectedTemplate,
+			enableThemeColor: this.settings.enableThemeColor,
+			themeColor: this.settings.themeColor,
+			useCustomCss: this.settings.useCustomCss,
+			authKey: this.settings.authKey,
+			wxInfo: this.settings.wxInfo,
+			expandedAccordionSections: this.settings.expandedAccordionSections || [],
+			showStyleUI: this.settings.showStyleUI !== false, // 默认显示
+			personalInfo: {
+				name: this.settings.personalInfo?.name || '',
+				avatar: this.settings.personalInfo?.avatar || '',
+				bio: this.settings.personalInfo?.bio || '',
+				email: this.settings.personalInfo?.email || '',
+				website: this.settings.personalInfo?.website || ''
+			},
+			aiPromptTemplate: this.settings.aiPromptTemplate || '',
+		};
+
+		// 获取统一插件数据
+		const plugins = this.getUnifiedPlugins();
+
+		return {
+			settings: externalSettings,
+			articleHTML: this.articleHTML || "",
+			cssContent: this.getCSS(),
+			plugins: plugins,
+			onRefresh: async () => {
+				await this.renderMarkdown();
+				uevent("refresh");
+			},
+			onCopy: async () => {
+				await this.copyArticle();
+				uevent("copy");
+			},
+			onDistribute: async () => {
+				this.openDistributionModal();
+				uevent("distribute");
+			},
+			onTemplateChange: this.handleTemplateChange.bind(this),
+			onThemeChange: this.handleThemeChange.bind(this),
+			onHighlightChange: this.handleHighlightChange.bind(this),
+			onThemeColorToggle: this.handleThemeColorToggle.bind(this),
+			onThemeColorChange: this.handleThemeColorChange.bind(this),
+			onRenderArticle: this.renderArticleOnly.bind(this),
+			onSaveSettings: this.saveSettingsToPlugin.bind(this),
+			onUpdateCSSVariables: this.updateCSSVariables.bind(this),
+			onPluginToggle: this.handleUnifiedPluginToggle.bind(this),
+			onPluginConfigChange: this.handleUnifiedPluginConfigChange.bind(this),
+			onExpandedSectionsChange: this.handleExpandedSectionsChange.bind(this),
+			onArticleInfoChange: this.handleArticleInfoChange.bind(this),
+			onPersonalInfoChange: this.handlePersonalInfoChange.bind(this),
+			onSettingsChange: this.handleSettingsChange.bind(this),
+			onKitApply: this.handleKitApply.bind(this),
+			onKitCreate: this.handleKitCreate.bind(this),
+			onKitDelete: this.handleKitDelete.bind(this),
+			loadTemplateKits: this.reactAPIService.loadTemplateKits.bind(this.reactAPIService),
+			persistentStorage: this.buildPersistentStorageAPI(),
+			requestUrl: requestUrl
+		};
+	}
+
+	/**
+	 * 构建持久化存储API
+	 */
+	private buildPersistentStorageAPI() {
+		return {
+			// Template Kit Management
+			saveTemplateKit: async (kitData: any, customName?: string) => {
+				try {
+					return await persistentStorageService.saveTemplateKit(kitData, customName);
+				} catch (error) {
+					logger.error('[persistentStorage.saveTemplateKit] Error:', error);
+					throw error;
+				}
+			},
+			getTemplateKits: async () => {
+				try {
+					return await persistentStorageService.getTemplateKits();
+				} catch (error) {
+					logger.error('[persistentStorage.getTemplateKits] Error:', error);
+					throw error;
+				}
+			},
+			deleteTemplateKit: async (id: string) => {
+				try {
+					return await persistentStorageService.deleteTemplateKit(id);
+				} catch (error) {
+					logger.error('[persistentStorage.deleteTemplateKit] Error:', error);
+					throw error;
+				}
+			},
+
+			// Plugin Configuration Management
+			savePluginConfig: async (pluginName: string, config: any, metaConfig: any) => {
+				try {
+					return await persistentStorageService.savePluginConfig(pluginName, config, metaConfig);
+				} catch (error) {
+					logger.error('[persistentStorage.savePluginConfig] Error:', error);
+					throw error;
+				}
+			},
+			getPluginConfigs: async () => {
+				try {
+					return await persistentStorageService.getPluginConfigs();
+				} catch (error) {
+					logger.error('[persistentStorage.getPluginConfigs] Error:', error);
+					throw error;
+				}
+			},
+			getPluginConfig: async (pluginName: string) => {
+				try {
+					return await persistentStorageService.getPluginConfig(pluginName);
+				} catch (error) {
+					logger.error('[persistentStorage.getPluginConfig] Error:', error);
+					throw error;
+				}
+			},
+
+			// Personal Info Management
+			savePersonalInfo: async (info: any) => {
+				try {
+					return await persistentStorageService.savePersonalInfo(info);
+				} catch (error) {
+					logger.error('[persistentStorage.savePersonalInfo] Error:', error);
+					throw error;
+				}
+			},
+			getPersonalInfo: async () => {
+				try {
+					return await persistentStorageService.getPersonalInfo();
+				} catch (error) {
+					logger.error('[persistentStorage.getPersonalInfo] Error:', error);
+					throw error;
+				}
+			},
+
+			// Article Info Management
+			saveArticleInfo: async (info: any) => {
+				try {
+					return await persistentStorageService.saveArticleInfo(info);
+				} catch (error) {
+					logger.error('[persistentStorage.saveArticleInfo] Error:', error);
+					throw error;
+				}
+			},
+			getArticleInfo: async () => {
+				try {
+					return await persistentStorageService.getArticleInfo();
+				} catch (error) {
+					logger.error('[persistentStorage.getArticleInfo] Error:', error);
+					throw error;
+				}
+			},
+
+			// Style Settings Management
+			saveStyleSettings: async (settings: any) => {
+				try {
+					return await persistentStorageService.saveStyleSettings(settings);
+				} catch (error) {
+					logger.error('[persistentStorage.saveStyleSettings] Error:', error);
+					throw error;
+				}
+			},
+			getStyleSettings: async () => {
+				try {
+					return await persistentStorageService.getStyleSettings();
+				} catch (error) {
+					logger.error('[persistentStorage.getStyleSettings] Error:', error);
+					throw error;
+				}
+			},
+
+			// File and Cover Management
+			saveFile: async (file: File, customName?: string) => {
+				try {
+					return await persistentStorageService.saveFile(file, customName);
+				} catch (error) {
+					logger.error('[persistentStorage.saveFile] Error:', error);
+					throw error;
+				}
+			},
+			getFiles: async () => {
+				try {
+					return await persistentStorageService.getFiles();
+				} catch (error) {
+					logger.error('[persistentStorage.getFiles] Error:', error);
+					throw error;
+				}
+			},
+			deleteFile: async (id: string) => {
+				try {
+					return await persistentStorageService.deleteFile(id);
+				} catch (error) {
+					logger.error('[persistentStorage.deleteFile] Error:', error);
+					throw error;
+				}
+			},
+			saveCover: async (coverData: any) => {
+				try {
+					return await persistentStorageService.saveCover(coverData);
+				} catch (error) {
+					logger.error('[persistentStorage.saveCover] Error:', error);
+					throw error;
+				}
+			},
+			getCovers: async () => {
+				try {
+					return await persistentStorageService.getCovers();
+				} catch (error) {
+					logger.error('[persistentStorage.getCovers] Error:', error);
+					throw error;
+				}
+			},
+			deleteCover: async (id: string) => {
+				try {
+					return await persistentStorageService.deleteCover(id);
+				} catch (error) {
+					logger.error('[persistentStorage.deleteCover] Error:', error);
+					throw error;
+				}
+			},
+
+			// Utility functions
+			clearAllPersistentData: async () => {
+				try {
+					return await persistentStorageService.clearAllPersistentData();
+				} catch (error) {
+					logger.error('[persistentStorage.clearAllPersistentData] Error:', error);
+					throw error;
+				}
+			},
+			exportAllData: async () => {
+				try {
+					return await persistentStorageService.exportAllData();
+				} catch (error) {
+					logger.error('[persistentStorage.exportAllData] Error:', error);
+					throw error;
+				}
+			}
+		};
+	}
+
+	/**
+	 * 处理模板变更
+	 */
+	private async handleTemplateChange(template: string): Promise<void> {
+		if (template === "") {
+			this.settings.useTemplate = false;
+			this.settings.lastSelectedTemplate = "";
+		} else {
+			this.settings.useTemplate = true;
+			this.settings.defaultTemplate = template;
+			this.settings.lastSelectedTemplate = template;
+		}
+		this.saveSettingsToPlugin();
+		await this.renderMarkdown();
+	}
+
+	/**
+	 * 处理主题变更
+	 */
+	private async handleThemeChange(theme: string): Promise<void> {
+		logger.debug(`[handleThemeChange] 切换主题: ${theme}`);
+		this.settings.defaultStyle = theme;
+		this.saveSettingsToPlugin();
+		logger.debug(`[handleThemeChange] 设置已更新，开始渲染`);
+		await this.renderMarkdown();
+		logger.debug(`[handleThemeChange] 渲染完成`);
+
+		// 直接异步调用update
+		await this.update();
+	}
+
+	/**
+	 * 处理高亮变更
+	 */
+	private async handleHighlightChange(highlight: string): Promise<void> {
+		this.settings.defaultHighlight = highlight;
+		this.saveSettingsToPlugin();
+		await this.updateExternalReactComponent();
+	}
+
+	/**
+	 * 处理主题色开关
+	 */
+	private async handleThemeColorToggle(enabled: boolean): Promise<void> {
+		this.settings.enableThemeColor = enabled;
+		this.saveSettingsToPlugin();
+		await this.renderMarkdown();
+	}
+
+	/**
+	 * 处理主题色变更
+	 */
+	private async handleThemeColorChange(color: string): Promise<void> {
+		this.settings.themeColor = color;
+		this.saveSettingsToPlugin();
+		await this.renderMarkdown();
+	}
+
+	/**
+	 * 处理展开节控制变更
+	 */
+	private handleExpandedSectionsChange(sections: string[]): void {
+		this.settings.expandedAccordionSections = sections;
+		this.saveSettingsToPlugin();
+	}
+
+	/**
+	 * 处理文章信息变更
+	 */
+	private handleArticleInfoChange(info: ArticleInfo): void {
+		// 避免无限循环
+		if (this.isUpdatingFromToolbar) {
+			return;
+		}
+
+		// 验证输入
+		if (!isValidArticleInfo(info)) {
+			logger.warn('[handleArticleInfoChange] 无效的文章信息:', info);
+			return;
+		}
+
+		// 将文章信息保存到toolbarArticleInfo中，用于渲染时合并
+		logger.debug('[handleArticleInfoChange] 文章信息已更新:', info);
+		this.toolbarArticleInfo = info;
+		logger.debug('[handleArticleInfoChange] toolbarArticleInfo已设置:', this.toolbarArticleInfo);
+
+		// 设置标志位并异步更新
+		this.isUpdatingFromToolbar = true;
+		this.updateArticleContentOnly().then(() => {
+			this.isUpdatingFromToolbar = false;
+		});
+	}
+
+	/**
+	 * 处理个人信息变更
+	 */
+	private handlePersonalInfoChange(info: PersonalInfo): void {
+		// 验证输入
+		if (!isValidPersonalInfo(info)) {
+			logger.warn('[handlePersonalInfoChange] 无效的个人信息:', info);
+			return;
+		}
+
+		logger.debug('[handlePersonalInfoChange] 个人信息已更新:', info);
+		logger.debug('[handlePersonalInfoChange] 更新前的设置:', this.settings.personalInfo);
+		this.settings.personalInfo = info;
+		logger.debug('[handlePersonalInfoChange] 更新后的设置:', this.settings.personalInfo);
+		logger.debug('[handlePersonalInfoChange] 全部设置:', this.settings.getAllSettings());
+		this.saveSettingsToPlugin();
+	}
+
+	/**
+	 * 处理设置变更
+	 */
+	private handleSettingsChange(settingsUpdate: Partial<ReactSettings>): void {
+		logger.debug('[handleSettingsChange] 设置已更新:', settingsUpdate);
+		logger.debug('[handleSettingsChange] 更新前的authKey:', this.settings.authKey);
+		logger.debug('[handleSettingsChange] 更新前的全部设置:', this.settings.getAllSettings());
+
+		// 合并设置更新
+		Object.keys(settingsUpdate).forEach(key => {
+			const value = settingsUpdate[key as keyof ReactSettings];
+			if (value !== undefined) {
+				(this.settings as any)[key] = value;
+				logger.debug(`[handleSettingsChange] 已更新 ${key}:`, value);
+			}
+		});
+
+		logger.debug('[handleSettingsChange] 更新后的authKey:', this.settings.authKey);
+		logger.debug('[handleSettingsChange] 更新后的全部设置:', this.settings.getAllSettings());
+		this.saveSettingsToPlugin();
+	}
+
+	/**
+	 * 处理套装应用
+	 */
+	private async handleKitApply(kitId: string): Promise<void> {
+		logger.debug(`[handleKitApply] 应用模板套装: ${kitId}`);
+		await this.reactAPIService.applyTemplateKit(
+			kitId,
+			() => this.renderMarkdown(),
+			() => this.updateExternalReactComponent()
+		);
+	}
+
+	/**
+	 * 处理套装创建
+	 */
+	private async handleKitCreate(basicInfo: TemplateKitBasicInfo): Promise<void> {
+		logger.debug(`[handleKitCreate] 创建模板套装:`, basicInfo);
+		
+		// 验证输入
+		if (!isValidTemplateKitBasicInfo(basicInfo)) {
+			logger.warn('[handleKitCreate] 无效的套装基本信息:', basicInfo);
+			new Notice('无效的套装信息！');
+			return;
+		}
+
+		await this.reactAPIService.createTemplateKit(basicInfo);
+	}
+
+	/**
+	 * 处理套装删除
+	 */
+	private async handleKitDelete(kitId: string): Promise<void> {
+		logger.debug(`[handleKitDelete] 删除模板套装: ${kitId}`);
+		await this.reactAPIService.deleteTemplateKit(kitId);
 	}
 
 	private saveSettingsToPlugin(): void {
