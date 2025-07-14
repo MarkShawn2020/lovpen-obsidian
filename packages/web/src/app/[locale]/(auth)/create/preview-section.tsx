@@ -95,11 +95,22 @@ function DraggablePreviewPanel({
     onPanelSelect(panel.id, e.ctrlKey || e.metaKey);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onPanelSelect(panel.id, e.ctrlKey || e.metaKey);
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       onClick={handlePanelClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Select preview panel for ${panel.title}`}
       className={`bg-background-main rounded-lg border overflow-hidden flex flex-col min-h-[400px] transition-all duration-200 cursor-pointer ${
         isDragging
           ? 'opacity-50 shadow-xl scale-105 border-primary/40'
@@ -265,11 +276,25 @@ export function PreviewSection({
   };
 
   return (
-    <div className="lg:col-span-6 flex flex-col u-gap-m" onClick={onBackgroundClick}>
+    <div 
+      className="lg:col-span-6 flex flex-col u-gap-m" 
+      onClick={onBackgroundClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onBackgroundClick();
+        }
+      }}
+      role="region"
+      tabIndex={0}
+      aria-label="Preview section background"
+    >
       {/* 全局工具栏 */}
       <div
         className="bg-background-main rounded-lg border border-border-default/20 px-6 py-4"
         onClick={e => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        role="toolbar"
+        aria-label="Preview section toolbar"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center u-gap-s">

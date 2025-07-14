@@ -2,7 +2,7 @@
 
 import type { SearchFilters } from '@/types/knowledge-base';
 import { useUser } from '@clerk/nextjs';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { KnowledgeBaseService } from '@/services/knowledge-base';
 
 export function KnowledgeBasePage() {
@@ -12,13 +12,7 @@ export function KnowledgeBasePage() {
   const [filters] = useState<SearchFilters>({});
   const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    if (user) {
-      loadKnowledgeItems();
-    }
-  }, [user, searchQuery, filters]);
-
-  const loadKnowledgeItems = async () => {
+  const loadKnowledgeItems = useCallback(async () => {
     if (!user) {
       return;
     }
@@ -53,7 +47,13 @@ export function KnowledgeBasePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, searchQuery, filters]);
+
+  useEffect(() => {
+    if (user) {
+      loadKnowledgeItems();
+    }
+  }, [user, loadKnowledgeItems]);
 
   if (loading) {
     return (

@@ -59,7 +59,7 @@ export function PlatformControls({
           <div className="p-6 u-gap-m flex flex-col">
             {/* 内容设置 */}
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="article-length" className="block text-sm font-medium text-text-main u-mb-text">
                 文章长度
               </label>
               <Select
@@ -67,7 +67,7 @@ export function PlatformControls({
                 onValueChange={(value: 'short' | 'medium' | 'long') =>
                   onUpdate(platformId, { articleLength: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="article-length">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -79,7 +79,7 @@ export function PlatformControls({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="writing-style" className="block text-sm font-medium text-text-main u-mb-text">
                 写作风格
               </label>
               <Select
@@ -87,7 +87,7 @@ export function PlatformControls({
                 onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') =>
                   onUpdate(platformId, { writingStyle: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="writing-style">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -129,7 +129,7 @@ export function PlatformControls({
 
             {/* 图片处理 */}
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="image-compression" className="block text-sm font-medium text-text-main u-mb-text">
                 图片处理
               </label>
               <Select
@@ -137,7 +137,7 @@ export function PlatformControls({
                 onValueChange={(value: 'high' | 'medium' | 'low') =>
                   onUpdate(platformId, { imageCompression: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="image-compression">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -150,7 +150,7 @@ export function PlatformControls({
 
             {/* 链接处理 */}
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="link-handling" className="block text-sm font-medium text-text-main u-mb-text">
                 链接处理
               </label>
               <Select
@@ -158,7 +158,7 @@ export function PlatformControls({
                 onValueChange={(value: 'preserve' | 'convert-to-text' | 'footnote') =>
                   onUpdate(platformId, { linkHandling: value })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="link-handling">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -325,7 +325,7 @@ export function PlatformControls({
 
           <div className="p-6 u-gap-m flex flex-col">
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="multi-article-length" className="block text-sm font-medium text-text-main u-mb-text">
                 文章长度
               </label>
               <Select
@@ -335,7 +335,7 @@ export function PlatformControls({
                   });
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="multi-article-length">
                   <SelectValue placeholder="选择文章长度" />
                 </SelectTrigger>
                 <SelectContent>
@@ -347,7 +347,7 @@ export function PlatformControls({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="multi-writing-style" className="block text-sm font-medium text-text-main u-mb-text">
                 写作风格
               </label>
               <Select
@@ -357,7 +357,7 @@ export function PlatformControls({
                   });
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="multi-writing-style">
                   <SelectValue placeholder="选择写作风格" />
                 </SelectTrigger>
                 <SelectContent>
@@ -370,7 +370,7 @@ export function PlatformControls({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="multi-image-compression" className="block text-sm font-medium text-text-main u-mb-text">
                 图片处理
               </label>
               <Select
@@ -380,7 +380,7 @@ export function PlatformControls({
                   });
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="multi-image-compression">
                   <SelectValue placeholder="选择压缩级别" />
                 </SelectTrigger>
                 <SelectContent>
@@ -392,7 +392,7 @@ export function PlatformControls({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-main u-mb-text">
+              <label htmlFor="multi-link-handling" className="block text-sm font-medium text-text-main u-mb-text">
                 链接处理
               </label>
               <Select
@@ -402,7 +402,7 @@ export function PlatformControls({
                   });
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="multi-link-handling">
                   <SelectValue placeholder="选择链接处理" />
                 </SelectTrigger>
                 <SelectContent>

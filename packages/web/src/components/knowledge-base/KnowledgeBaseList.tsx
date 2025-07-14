@@ -23,6 +23,15 @@ export function KnowledgeBaseList({ items, onItemSelect, selectedItemId }: Knowl
         <div
           key={item.id}
           onClick={() => onItemSelect(item)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onItemSelect(item);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Select knowledge item: ${item.title || 'Untitled'}`}
           className={`bg-white rounded-lg border border-gray-200 p-4 cursor-pointer transition-all hover:shadow-md ${
             selectedItemId === item.id ? 'ring-2 ring-blue-500 border-blue-500' : ''
           }`}

@@ -76,7 +76,7 @@ function SimpleChart({ data, title, color = 'primary' }: { data: number[]; title
       <CardContent>
         <div className="flex items-end space-x-2 h-40">
           {data.map((value, index) => (
-            <div key={index} className="flex-1 flex flex-col items-center">
+            <div key={`chart-bar-${index}`} className="flex-1 flex flex-col items-center">
               <div
                 className={`w-full ${colorClasses[color as keyof typeof colorClasses]} rounded-t opacity-80 hover:opacity-100 transition-opacity`}
                 style={{ height: `${(value / max) * 100}%` }}

@@ -135,6 +135,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	async copyArticle() {
+		console.log("🚨🚨🚨 [复制功能] COPY ARTICLE CALLED! 🚨🚨🚨");
 		console.log("📋 [复制功能] 开始复制文章");
 		
 		let content = await this.getArticleContent();
