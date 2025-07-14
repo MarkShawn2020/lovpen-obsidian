@@ -19,6 +19,7 @@ export function KnowledgeBaseDetail({ item, onClose }: KnowledgeBaseDetailProps)
             {item.title || '无标题'}
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
           >
@@ -43,7 +44,7 @@ export function KnowledgeBaseDetail({ item, onClose }: KnowledgeBaseDetailProps)
                 ? (
                     item.tags.map((tag, index) => (
                       <span
-                        key={index}
+                        key={`tag-${tag}-${index}`}
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                       >
                         {tag}

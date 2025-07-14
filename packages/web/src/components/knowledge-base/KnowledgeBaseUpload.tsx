@@ -26,6 +26,7 @@ export function KnowledgeBaseUpload({ onClose, onComplete }: KnowledgeBaseUpload
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">添加内容</h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
           >
@@ -36,10 +37,11 @@ export function KnowledgeBaseUpload({ onClose, onComplete }: KnowledgeBaseUpload
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="text-title" className="block text-sm font-medium text-gray-700 mb-2">
                 标题（可选）
               </label>
               <input
+                id="text-title"
                 type="text"
                 value={textTitle}
                 onChange={e => setTextTitle(e.target.value)}
@@ -49,10 +51,11 @@ export function KnowledgeBaseUpload({ onClose, onComplete }: KnowledgeBaseUpload
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="text-content" className="block text-sm font-medium text-gray-700 mb-2">
                 内容
               </label>
               <textarea
+                id="text-content"
                 value={textContent}
                 onChange={e => setTextContent(e.target.value)}
                 className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -65,12 +68,14 @@ export function KnowledgeBaseUpload({ onClose, onComplete }: KnowledgeBaseUpload
         <div className="p-6 border-t border-gray-200">
           <div className="flex justify-end gap-3">
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               取消
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={!textContent.trim()}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"

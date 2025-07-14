@@ -276,15 +276,15 @@ export function PreviewSection({
   };
 
   return (
-    <div 
-      className="lg:col-span-6 flex flex-col u-gap-m" 
+    <div
+      className="lg:col-span-6 flex flex-col u-gap-m"
       onClick={onBackgroundClick}
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           onBackgroundClick();
         }
       }}
-      role="region"
+      role="button"
       tabIndex={0}
       aria-label="Preview section background"
     >
@@ -292,7 +292,7 @@ export function PreviewSection({
       <div
         className="bg-background-main rounded-lg border border-border-default/20 px-6 py-4"
         onClick={e => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={e => e.stopPropagation()}
         role="toolbar"
         aria-label="Preview section toolbar"
       >

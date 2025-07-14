@@ -69,6 +69,7 @@ export function SmartSidebar({ context, onContextChange, children }: SmartSideba
             {context.selectedPanels.length > 0 && (
               <div className="flex items-center u-gap-xs">
                 <button
+                  type="button"
                   onClick={() => handleModeSwitch('global')}
                   className="text-xs px-2 py-1 rounded text-text-faded hover:text-text-main hover:bg-gray-50 transition-colors"
                   title="返回通用设置"

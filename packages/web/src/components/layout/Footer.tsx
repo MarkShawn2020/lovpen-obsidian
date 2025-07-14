@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { Container } from './Container';
@@ -32,9 +33,11 @@ const Footer = () => {
             {/* Logo and Description */}
             <div className="lg:col-span-4">
               <Link href="/" className="flex items-center no-underline mb-4">
-                <img
+                <Image
                   src="/assets/images/neurora-logo-white.png"
                   alt="Neurora"
+                  width={40}
+                  height={40}
                   className="h-10 w-auto"
                 />
               </Link>

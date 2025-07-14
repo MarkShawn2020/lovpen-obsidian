@@ -150,7 +150,7 @@ const LovPenFlowDiagram = () => (
               {/* 特性列表 */}
               <div className="space-y-1">
                 {step.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="text-xs text-text-main bg-white/60 rounded-full px-3 py-1 inline-block mr-1 mb-1">
+                  <div key={`${step.step}-feature-${feature}-${featureIndex}`} className="text-xs text-text-main bg-white/60 rounded-full px-3 py-1 inline-block mr-1 mb-1">
                     {feature}
                   </div>
                 ))}
