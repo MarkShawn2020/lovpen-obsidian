@@ -6,13 +6,14 @@
     <title>{{title}}</title>
     <style>
         /* Wabi-Sabi 模板 - 日式极简美学的体现 */
-        * {
+        /* 限制样式影响范围，避免影响工具栏 */
+        .wabi-sabi-container * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
+        .wabi-sabi-container {
             font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif CJK JP", serif;
             background: linear-gradient(145deg, #fefcf8 0%, #f7f5f1 100%);
             color: #2a2a2a;
@@ -30,7 +31,7 @@
 
         /* 深色模式支持 */
         @media (prefers-color-scheme: dark) {
-            body {
+            .wabi-sabi-container {
                 background: linear-gradient(145deg, #1a1816 0%, #211e1c 100%);
                 color: #e8e6e3;
                 background-image: 
@@ -40,7 +41,7 @@
         }
 
         /* 主容器：创造不对称的视觉平衡 */
-        .wabi-sabi-container {
+        .wabi-sabi-container .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 0;
@@ -48,150 +49,283 @@
             position: relative;
         }
 
-        /* 顶部装饰条：模拟传统书法中的天头 */
-        .top-accent {
-            height: 4px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(139, 115, 85, 0.3) 15%, 
-                rgba(107, 76, 58, 0.5) 50%, 
-                rgba(139, 115, 85, 0.3) 85%, 
+        /* 顶部装饰条：如晨曦般的优雅装饰 */
+        .wabi-sabi-container .top-accent {
+            height: 8px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(139, 115, 85, 0.6) 15%,
+                rgba(107, 76, 58, 0.8) 45%,
+                rgba(90, 108, 87, 0.7) 75%,
                 transparent 100%);
-            margin-bottom: 3em;
-            border-radius: 2px;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            .top-accent {
-                background: linear-gradient(90deg, 
-                    transparent 0%, 
-                    rgba(166, 139, 106, 0.4) 15%, 
-                    rgba(139, 107, 90, 0.6) 50%, 
-                    rgba(166, 139, 106, 0.4) 85%, 
-                    transparent 100%);
-            }
-        }
-
-        /* 文章头部：标题区域的诗意布局 */
-        .article-header {
-            text-align: center;
-            padding: 2em 2em 3em;
-            margin-bottom: 2em;
+            margin-bottom: 0;
             position: relative;
-            background: rgba(247, 245, 241, 0.6);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(224, 221, 214, 0.5);
-            box-shadow: 0 2px 20px rgba(42, 42, 42, 0.04);
+            overflow: hidden;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-header {
-                background: rgba(33, 30, 28, 0.8);
-                border: 1px solid rgba(58, 55, 52, 0.5);
-                box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
-            }
-        }
-
-        /* 装饰性元素：在标题周围添加传统的装饰线 */
-        .article-header::before,
-        .article-header::after {
+        /* 为顶部装饰条添加微妙的动态效果 */
+        .wabi-sabi-container .top-accent::after {
             content: '';
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 2px;
-            background: linear-gradient(to right, 
-                transparent, 
-                rgba(139, 115, 85, 0.6), 
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
                 transparent);
+            animation: shimmer 8s ease-in-out infinite;
         }
 
-        .article-header::before {
-            top: 0.8em;
+        @keyframes shimmer {
+            0%, 100% { left: -100%; }
+            50% { left: 100%; }
         }
 
-        .article-header::after {
-            bottom: 0.8em;
+        /* 文章头部：简约而不失韵味 */
+        .wabi-sabi-container .article-header {
+            text-align: center;
+            padding: 4em 2em 2em;
+            margin-bottom: 2em;
+            position: relative;
         }
 
-        /* 主标题：体现侘寂美学的不对称平衡 */
-        .article-title {
+        .wabi-sabi-container .article-title {
             font-size: 2.2em;
-            font-weight: 400;
-            color: #333f48;
+            font-weight: 300;
+            color: #2a2a2a;
             margin-bottom: 0.8em;
-            font-family: "Hiragino Kaku Gothic ProN", "Helvetica Neue", Arial, sans-serif;
-            letter-spacing: 0.05em;
-            line-height: 1.4;
-            text-shadow: 0 1px 2px rgba(42, 42, 42, 0.05);
+            letter-spacing: 0.02em;
+            line-height: 1.3;
+            position: relative;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-title {
-                color: #a68b6a;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            }
-        }
-
-        /* 副标题或描述 */
-        .article-subtitle {
+        .wabi-sabi-container .article-subtitle {
             font-size: 1.1em;
-            color: #595959;
+            color: #666;
+            font-weight: 300;
+            margin-bottom: 2em;
             font-style: italic;
-            margin-bottom: 1.5em;
             opacity: 0.8;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-subtitle {
-                color: #c8c6c3;
-            }
-        }
-
-        /* 元信息：作者、日期等 */
-        .article-meta {
+        .wabi-sabi-container .article-meta {
             font-size: 0.9em;
             color: #8a8a8a;
-            letter-spacing: 0.1em;
             display: flex;
             justify-content: center;
-            align-items: center;
             gap: 1.5em;
             flex-wrap: wrap;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-meta {
-                color: #a8a6a3;
-            }
-        }
-
-        .article-meta span {
+        .wabi-sabi-container .article-meta span {
             position: relative;
             padding: 0.3em 0.8em;
-            background: rgba(139, 115, 85, 0.08);
-            border-radius: 16px;
-            border: 1px solid rgba(139, 115, 85, 0.15);
+            background: rgba(139, 115, 85, 0.05);
+            border-radius: 20px;
+            font-weight: 400;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-meta span {
-                background: rgba(166, 139, 106, 0.12);
-                border: 1px solid rgba(166, 139, 106, 0.2);
-            }
+        /* 正文内容：营造静谧的阅读氛围 */
+        .wabi-sabi-container .article-content {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2em;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 正文内容区域 */
-        .article-content {
-            padding: 0 2em 3em;
-            background: transparent;
+        /* 段落和基础文本 */
+        .wabi-sabi-container .article-content p {
+            margin-bottom: 1.8em;
+            text-align: justify;
+            color: #3a3a3a;
+            font-size: 1.05em;
+            text-indent: 2em;
             position: relative;
         }
 
-        /* 为内容添加微妙的侧边装饰 */
-        .article-content::before {
+        /* 标题层次：体现禅意的节奏感 */
+        .wabi-sabi-container .article-content h1 {
+            font-size: 1.8em;
+            font-weight: 300;
+            color: #2a2a2a;
+            margin: 2.5em 0 1.2em 0;
+            text-align: center;
+            position: relative;
+            letter-spacing: 0.05em;
+        }
+
+        .wabi-sabi-container .article-content h2 {
+            font-size: 1.5em;
+            font-weight: 300;
+            color: #333;
+            margin: 2.2em 0 1em 0;
+            position: relative;
+            text-align: left;
+            padding-left: 1em;
+        }
+
+        .wabi-sabi-container .article-content h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 1.2em;
+            background: linear-gradient(to bottom,
+                rgba(139, 115, 85, 0.8),
+                rgba(90, 108, 87, 0.6));
+            border-radius: 2px;
+        }
+
+        .wabi-sabi-container .article-content h3 {
+            font-size: 1.3em;
+            font-weight: 400;
+            color: #444;
+            margin: 1.8em 0 0.8em 0;
+            position: relative;
+        }
+
+        .wabi-sabi-container .article-content h4,
+        .wabi-sabi-container .article-content h5,
+        .wabi-sabi-container .article-content h6 {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #555;
+            margin: 1.5em 0 0.6em 0;
+        }
+
+        /* 列表样式：体现层次的美感 */
+        .wabi-sabi-container .article-content ul,
+        .wabi-sabi-container .article-content ol {
+            margin: 1.5em 0;
+            padding-left: 2.5em;
+        }
+
+        .wabi-sabi-container .article-content li {
+            margin-bottom: 0.8em;
+            line-height: 1.7;
+            color: #3a3a3a;
+        }
+
+        .wabi-sabi-container .article-content ul li::marker {
+            color: rgba(139, 115, 85, 0.7);
+        }
+
+        /* 引用块：营造沉思的意境 */
+        .wabi-sabi-container .article-content blockquote {
+            margin: 2.5em 0;
+            padding: 1.5em 2em;
+            background: rgba(139, 115, 85, 0.03);
+            border-left: 4px solid rgba(139, 115, 85, 0.4);
+            position: relative;
+            font-style: italic;
+            color: #555;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .wabi-sabi-container .article-content blockquote p {
+            text-indent: 0;
+            margin-bottom: 0;
+        }
+
+        /* 代码块：保持技术的纯净 */
+        .wabi-sabi-container .article-content pre {
+            background: rgba(42, 42, 42, 0.95);
+            color: #e8e6e3;
+            padding: 1.5em;
+            border-radius: 8px;
+            margin: 2em 0;
+            overflow-x: auto;
+            font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .wabi-sabi-container .article-content code {
+            background: rgba(139, 115, 85, 0.1);
+            color: #8b7355;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
+            font-size: 0.9em;
+        }
+
+        .wabi-sabi-container .article-content pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* 图片：融入自然的美感 */
+        .wabi-sabi-container .article-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 2.5em auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(139, 115, 85, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .wabi-sabi-container .article-content img:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(139, 115, 85, 0.2);
+        }
+
+        /* 分隔线：如水墨般的简约 */
+        .wabi-sabi-container .article-content hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(to right,
+                transparent,
+                rgba(139, 115, 85, 0.3),
+                transparent);
+            margin: 3em 0;
+            position: relative;
+        }
+
+        .wabi-sabi-container .article-content hr::after {
+            content: '◦';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fefcf8;
+            color: rgba(139, 115, 85, 0.6);
+            padding: 0 0.8em;
+            font-size: 1.2em;
+        }
+
+        /* 表格：保持简洁的数据呈现 */
+        .wabi-sabi-container .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2.5em 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .wabi-sabi-container .article-content th,
+        .wabi-sabi-container .article-content td {
+            padding: 1em;
+            text-align: left;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+        }
+
+        .wabi-sabi-container .article-content th {
+            background: rgba(139, 115, 85, 0.05);
+            font-weight: 500;
+            color: #3a3a3a;
+        }
+
+        /* 左侧装饰线：体现不对称的和谐 */
+        .wabi-sabi-container .article-content::before {
             content: '';
             position: absolute;
             left: 0;
@@ -208,7 +342,7 @@
         }
 
         @media (prefers-color-scheme: dark) {
-            .article-content::before {
+            .wabi-sabi-container .article-content::before {
                 background: linear-gradient(to bottom,
                     transparent 0%,
                     rgba(166, 139, 106, 0.3) 20%,
@@ -219,7 +353,7 @@
         }
 
         /* 文章底部：署名和日期的雅致呈现 */
-        .article-footer {
+        .wabi-sabi-container .article-footer {
             text-align: center;
             padding: 3em 2em 2em;
             margin-top: 3em;
@@ -227,7 +361,7 @@
         }
 
         /* 底部装饰线 */
-        .article-footer::before {
+        .wabi-sabi-container .article-footer::before {
             content: '';
             position: absolute;
             top: 0;
@@ -241,136 +375,106 @@
                 transparent);
         }
 
-        .article-signature {
+        .wabi-sabi-container .article-signature {
             font-size: 0.95em;
             color: #8a8a8a;
             font-style: italic;
             margin-bottom: 1em;
+            letter-spacing: 0.03em;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-signature {
-                color: #a8a6a3;
-            }
-        }
-
-        .article-date {
+        .wabi-sabi-container .article-date {
             font-size: 0.85em;
-            color: #b8b8b8;
-            letter-spacing: 0.1em;
+            color: #aaa;
+            font-weight: 300;
+            letter-spacing: 0.05em;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .article-date {
-                color: #888683;
-            }
-        }
-
-        /* 底部装饰条：呼应顶部设计 */
-        .bottom-accent {
-            height: 4px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(139, 115, 85, 0.3) 15%, 
-                rgba(107, 76, 58, 0.5) 50%, 
-                rgba(139, 115, 85, 0.3) 85%, 
-                transparent 100%);
-            margin-top: 3em;
-            border-radius: 2px;
-            margin-bottom: 2em;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            .bottom-accent {
-                background: linear-gradient(90deg, 
-                    transparent 0%, 
-                    rgba(166, 139, 106, 0.4) 15%, 
-                    rgba(139, 107, 90, 0.6) 50%, 
-                    rgba(166, 139, 106, 0.4) 85%, 
-                    transparent 100%);
-            }
-        }
-
-        /* 响应式设计 */
+        /* 响应式设计：保持在不同设备上的优雅 */
         @media (max-width: 768px) {
-            .wabi-sabi-container {
-                margin: 0 1em;
+            .wabi-sabi-container .article-header {
+                padding: 2em 1em 1em;
             }
-
-            .article-header,
-            .article-content {
-                padding-left: 1.5em;
-                padding-right: 1.5em;
-            }
-
-            .article-title {
+            
+            .wabi-sabi-container .article-title {
                 font-size: 1.8em;
             }
-
-            .article-meta {
+            
+            .wabi-sabi-container .article-content {
+                padding: 1em;
+            }
+            
+            .wabi-sabi-container .article-content p {
+                text-indent: 1.5em;
+            }
+            
+            .wabi-sabi-container .article-meta {
                 flex-direction: column;
                 gap: 0.8em;
             }
-
-            .article-content::before {
-                left: 0.5em;
-            }
         }
 
-        /* 为特殊内容类型提供样式支持 */
-        .wabi-sabi-quote {
-            margin: 2em 0;
-            padding: 1.5em 2em;
-            background: rgba(139, 115, 85, 0.05);
-            border-left: 4px solid rgba(139, 115, 85, 0.3);
-            border-radius: 0 8px 8px 0;
-            font-style: italic;
-            position: relative;
-        }
-
+        /* 深色模式下的细节调整 */
         @media (prefers-color-scheme: dark) {
-            .wabi-sabi-quote {
-                background: rgba(166, 139, 106, 0.08);
+            .wabi-sabi-container .article-title {
+                color: #e8e6e3;
+            }
+            
+            .wabi-sabi-container .article-content h1,
+            .wabi-sabi-container .article-content h2,
+            .wabi-sabi-container .article-content h3 {
+                color: #e8e6e3;
+            }
+            
+            .wabi-sabi-container .article-content p,
+            .wabi-sabi-container .article-content li {
+                color: #d0ccc9;
+            }
+            
+            .wabi-sabi-container .article-content blockquote {
+                background: rgba(166, 139, 106, 0.05);
                 border-left-color: rgba(166, 139, 106, 0.4);
+                color: #b8b4b1;
             }
-        }
-
-        .wabi-sabi-quote::before {
-            content: '"';
-            position: absolute;
-            left: 0.5em;
-            top: 0.3em;
-            font-size: 2em;
-            color: rgba(139, 115, 85, 0.3);
-            font-family: serif;
-        }
-
-        /* 印刷样式优化 */
-        @media print {
-            body {
-                background: white !important;
-                color: black !important;
+            
+            .wabi-sabi-container .article-content code {
+                background: rgba(166, 139, 106, 0.15);
+                color: #a68b6a;
             }
-
-            .article-header {
-                background: white !important;
-                border: 1px solid #ddd !important;
-                box-shadow: none !important;
+            
+            .wabi-sabi-container .article-content hr::after {
+                background: #1a1816;
+                color: rgba(166, 139, 106, 0.6);
             }
-
-            .top-accent,
-            .bottom-accent,
-            .article-content::before {
-                display: none;
+            
+            .wabi-sabi-container .article-content table {
+                background: rgba(26, 24, 22, 0.3);
             }
-
-            .article-title {
-                color: black !important;
+            
+            .wabi-sabi-container .article-content th {
+                background: rgba(166, 139, 106, 0.08);
+                color: #d0ccc9;
             }
-
-            .article-meta,
-            .article-signature,
-            .article-date {
+            
+            .wabi-sabi-container .article-content td {
+                color: #c4c0bd;
+            }
+            
+            .wabi-sabi-container .article-content th,
+            .wabi-sabi-container .article-content td {
+                border-bottom-color: rgba(166, 139, 106, 0.15);
+            }
+            
+            .wabi-sabi-container .article-meta span {
+                background: rgba(166, 139, 106, 0.08);
+                color: #a8a5a2;
+            }
+            
+            .wabi-sabi-container .article-signature {
+                color: #888;
+            }
+            
+            .wabi-sabi-container .article-date {
                 color: #666 !important;
             }
         }
@@ -421,9 +525,6 @@
             <div class="article-date">{{publishDate}}</div>
             {{/if}}
         </footer>
-        
-        <!-- 底部装饰条 -->
-        <div class="bottom-accent"></div>
     </div>
 </body>
 </html>
