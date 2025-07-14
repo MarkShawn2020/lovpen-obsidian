@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import { PreviewSection } from './preview-section';
 
 export default function Create() {
   const [isRecording, setIsRecording] = useState(false);
@@ -11,7 +12,7 @@ export default function Create() {
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewPanels, setPreviewPanels] = useState([
-    { id: 'preview-1', platform: 'wechat', title: '微信公众号预览' }
+    { id: 'preview-1', platform: 'wechat', title: '微信公众号预览' },
   ]);
 
   const platforms = {
@@ -26,7 +27,7 @@ export default function Create() {
     const newPanel = {
       id: newId,
       platform,
-      title: `${platforms[platform].fullName}预览`
+      title: `${platforms[platform].fullName}预览`,
     };
     setPreviewPanels([...previewPanels, newPanel]);
   };
@@ -38,10 +39,10 @@ export default function Create() {
   };
 
   const updatePanelPlatform = (panelId: string, platform: string) => {
-    setPreviewPanels(previewPanels.map(panel => 
-      panel.id === panelId 
+    setPreviewPanels(previewPanels.map(panel =>
+      panel.id === panelId
         ? { ...panel, platform, title: `${platforms[platform].fullName}预览` }
-        : panel
+        : panel,
     ));
   };
 
@@ -267,130 +268,14 @@ AI擅长：
           </div>
 
           {/* 中间内容预览区域 */}
-          <div className="lg:col-span-6 flex flex-col u-gap-m">
-            {/* 预览工具栏 */}
-            <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-              <div className="flex items-center justify-between">
-                <h2 className="font-medium text-text-main">
-                  内容预览
-                </h2>
-                <div className="flex items-center u-gap-s">
-                  {/* 平台选择器 */}
-                  <div className="flex items-center bg-background-main rounded-md border border-border-default/20 p-1">
-                    {Object.entries(platforms).map(([id, platform]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => {
-                          if (selectedPlatforms.includes(id)) {
-                            setCurrentPreviewPlatform(id);
-                          } else {
-                            togglePlatform(id);
-                            setCurrentPreviewPlatform(id);
-                          }
-                        }}
-                        className={`px-3 py-2 text-sm font-medium rounded-sm transition-all relative ${
-                          selectedPlatforms.includes(id)
-                            ? currentPreviewPlatform === id
-                              ? 'text-white bg-primary'
-                              : 'text-text-main bg-background-ivory-medium border border-border-default/20'
-                            : 'text-text-faded hover:text-text-main hover:bg-background-ivory-medium'
-                        }`}
-                      >
-                        {platform.name}
-                        {selectedPlatforms.includes(id) && (
-                          <div className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${platform.color}`}></div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* 平台管理按钮 */}
-                  <Button variant="outline" size="sm">
-                    管理平台
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* 内容预览区 */}
-            <div className="flex-1 p-8 overflow-auto">
-              {selectedPlatforms.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-text-faded">
-                  <div className="text-center">
-                    <div className="text-6xl u-mb-gutter">🎯</div>
-                    <h3 className="u-display-s u-mb-text">选择发布平台</h3>
-                    <p className="u-paragraph-m">点击上方平台按钮开始创作</p>
-                  </div>
-                </div>
-              ) : generatedContent ? (
-                <div className="prose max-w-none">
-                  {/* 平台信息头部 */}
-                  <div className="flex items-center u-gap-s u-mb-gutter">
-                    <div className={`w-3 h-3 rounded-full ${platforms[currentPreviewPlatform]?.color}`}></div>
-                    <h3 className="font-medium text-text-main">
-                      {platforms[currentPreviewPlatform]?.fullName}
-                      {' '}
-                      预览
-                    </h3>
-                    <span className="text-sm text-text-faded">
-                      (
-                      {selectedPlatforms.length}
-                      {' '}
-                      个平台已选择)
-                    </span>
-                  </div>
-
-                  <div className="bg-background-ivory-medium rounded-md border border-border-default/20 p-8">
-                    <pre className="whitespace-pre-wrap font-sans text-text-main leading-relaxed u-paragraph-m">
-                      {generatedContent}
-                    </pre>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-text-faded">
-                  <div className="text-center">
-                    <div className="text-6xl u-mb-gutter">📄</div>
-                    <h3 className="u-display-s u-mb-text">等待内容生成</h3>
-                    <p className="u-paragraph-m">
-                      已选择
-                      {' '}
-                      {selectedPlatforms.length}
-                      {' '}
-                      个平台，输入想法后点击"智能生成文章"
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 底部操作栏 */}
-            {generatedContent && (
-              <div className="border-t border-border-default/20 p-6 bg-background-ivory-medium">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center u-gap-l text-sm text-text-faded">
-                    <span>
-                      字数:
-                      {' '}
-                      {generatedContent.length}
-                    </span>
-                    <span>预计阅读: 2分钟</span>
-                  </div>
-                  <div className="flex items-center u-gap-s">
-                    <Button variant="outline" size="sm">
-                      重新生成
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      编辑
-                    </Button>
-                    <Button variant="primary" size="sm">
-                      美化排版
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <PreviewSection
+            previewPanels={previewPanels}
+            platforms={platforms}
+            generatedContent={generatedContent}
+            addPreviewPanel={addPreviewPanel}
+            removePreviewPanel={removePreviewPanel}
+            updatePanelPlatform={updatePanelPlatform}
+          />
 
           {/* 右侧设置面板 */}
           <div className="lg:col-span-3 flex flex-col u-gap-m">
@@ -421,30 +306,14 @@ AI擅长：
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-text-main u-mb-text">目标平台</label>
-                  <div className="u-gap-s flex flex-col">
-                    {Object.entries(platforms).map(([id, platform]) => (
-                      <label key={id} className="flex items-center u-gap-s cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedPlatforms.includes(id)}
-                          onChange={() => togglePlatform(id)}
-                          className="w-4 h-4 text-primary bg-background-main border-border-default rounded focus:ring-primary focus:ring-2"
-                        />
-                        <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
-                        <span className="text-sm text-text-main">{platform.fullName}</span>
-                      </label>
-                    ))}
+                  <div className="block text-sm font-medium text-text-main u-mb-text">预览面板</div>
+                  <div className="text-sm text-text-faded">
+                    当前共有
+                    {' '}
+                    {previewPanels.length}
+                    {' '}
+                    个预览面板，每个面板可以独立配置平台和样式。
                   </div>
-                  {selectedPlatforms.length > 0 && (
-                    <p className="text-xs text-text-faded mt-2">
-                      已选择
-                      {' '}
-                      {selectedPlatforms.length}
-                      {' '}
-                      个平台
-                    </p>
-                  )}
                 </div>
               </div>
             </div>

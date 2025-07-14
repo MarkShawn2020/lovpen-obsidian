@@ -11,6 +11,24 @@ npm run dev:next         # Next.js dev server only
 npm run dev:spotlight    # Sentry Spotlight for local error monitoring
 ```
 
+### UI Components (shadcn/ui)
+```bash
+# Standard way to add shadcn/ui components
+pnpm dlx shadcn add [component-name]
+
+# Examples:
+pnpm dlx shadcn add button
+pnpm dlx shadcn add select
+pnpm dlx shadcn add dialog
+pnpm dlx shadcn add form
+
+# List available components
+pnpm dlx shadcn add
+
+# Add multiple components at once
+pnpm dlx shadcn add button select dialog
+```
+
 ### Build and Type Checking
 ```bash
 npm run build            # Production build with in-memory database for tests
