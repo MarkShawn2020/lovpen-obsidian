@@ -32,52 +32,54 @@ export function GlobalControls({
 
         <div className="p-6 u-gap-m flex flex-col">
           <div>
-            <label htmlFor="article-length" className="block text-sm font-medium text-text-main u-mb-text">
-              文章长度
+            <label htmlFor="content-template" className="block text-sm font-medium text-text-main u-mb-text">
+              内容模板
             </label>
             <Select 
-              value={settings.articleLength} 
-              onValueChange={(value: 'short' | 'medium' | 'long') => 
-                onUpdate({ articleLength: value })
+              value={settings.contentTemplate} 
+              onValueChange={(value: 'custom' | 'blog' | 'news' | 'tutorial' | 'review') => 
+                onUpdate({ contentTemplate: value })
               }
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="short">短文 (300-500字)</SelectItem>
-                <SelectItem value="medium">中等 (800-1200字)</SelectItem>
-                <SelectItem value="long">长文 (1500-2500字)</SelectItem>
+                <SelectItem value="blog">博客文章</SelectItem>
+                <SelectItem value="news">新闻报道</SelectItem>
+                <SelectItem value="tutorial">教程指南</SelectItem>
+                <SelectItem value="review">评测分析</SelectItem>
+                <SelectItem value="custom">自定义</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <label htmlFor="writing-style" className="block text-sm font-medium text-text-main u-mb-text">
-              写作风格
+            <label htmlFor="target-audience" className="block text-sm font-medium text-text-main u-mb-text">
+              目标受众
             </label>
             <Select 
-              value={settings.writingStyle} 
-              onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') => 
-                onUpdate({ writingStyle: value })
+              value={settings.targetAudience} 
+              onValueChange={(value: 'general' | 'professional' | 'academic' | 'casual') => 
+                onUpdate({ targetAudience: value })
               }
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="professional">专业严谨</SelectItem>
-                <SelectItem value="casual">轻松幽默</SelectItem>
-                <SelectItem value="thoughtful">深度思考</SelectItem>
-                <SelectItem value="warm">温暖感性</SelectItem>
+                <SelectItem value="general">普通读者</SelectItem>
+                <SelectItem value="professional">专业人士</SelectItem>
+                <SelectItem value="academic">学术受众</SelectItem>
+                <SelectItem value="casual">休闲阅读</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <div className="block text-sm font-medium text-text-main u-mb-text">预览面板</div>
+            <div className="block text-sm font-medium text-text-main u-mb-text">统一管理</div>
             <div className="text-sm text-text-faded">
-              当前共有 {previewPanelsCount} 个预览面板，全局设置将应用到所有平台。
+              当前共有 {previewPanelsCount} 个预览面板，点击单个面板可进入平台特定设置。
             </div>
           </div>
         </div>

@@ -55,6 +55,50 @@ export function PlatformControls({
           </div>
 
           <div className="p-6 u-gap-m flex flex-col">
+            {/* 内容设置 */}
+            <div>
+              <label className="block text-sm font-medium text-text-main u-mb-text">
+                文章长度
+              </label>
+              <Select 
+                value={settings.articleLength || 'medium'} 
+                onValueChange={(value: 'short' | 'medium' | 'long') => 
+                  onUpdate(platformId, { articleLength: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="short">短文 (300-500字)</SelectItem>
+                  <SelectItem value="medium">中等 (800-1200字)</SelectItem>
+                  <SelectItem value="long">长文 (1500-2500字)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-main u-mb-text">
+                写作风格
+              </label>
+              <Select 
+                value={settings.writingStyle || 'professional'} 
+                onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') => 
+                  onUpdate(platformId, { writingStyle: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">专业严谨</SelectItem>
+                  <SelectItem value="casual">轻松幽默</SelectItem>
+                  <SelectItem value="thoughtful">深度思考</SelectItem>
+                  <SelectItem value="warm">温暖感性</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* 字数限制显示 */}
             {maxChars && (
               <div>
@@ -119,6 +163,47 @@ export function PlatformControls({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* 平台特性 */}
+            {(settings.useHashtags !== undefined || settings.includeCallToAction !== undefined) && (
+              <div>
+                <div className="block text-sm font-medium text-text-main u-mb-text">平台特性</div>
+                <div className="u-gap-s flex flex-col">
+                  {settings.useHashtags !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-text-main">使用标签</span>
+                      <button 
+                        type="button" 
+                        onClick={() => onUpdate(platformId, { useHashtags: !settings.useHashtags })}
+                        className={`w-10 h-5 rounded-full relative transition-colors ${
+                          settings.useHashtags ? 'bg-primary' : 'bg-border-default'
+                        } hover:opacity-90`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
+                          settings.useHashtags ? 'right-0.5' : 'left-0.5'
+                        }`}></div>
+                      </button>
+                    </div>
+                  )}
+                  {settings.includeCallToAction !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-text-main">包含行动号召</span>
+                      <button 
+                        type="button" 
+                        onClick={() => onUpdate(platformId, { includeCallToAction: !settings.includeCallToAction })}
+                        className={`w-10 h-5 rounded-full relative transition-colors ${
+                          settings.includeCallToAction ? 'bg-primary' : 'bg-border-default'
+                        } hover:opacity-90`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
+                          settings.includeCallToAction ? 'right-0.5' : 'left-0.5'
+                        }`}></div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* 平台约束信息 */}
             {platform.constraints && (
@@ -222,6 +307,51 @@ export function PlatformControls({
           </div>
 
           <div className="p-6 u-gap-m flex flex-col">
+            <div>
+              <label className="block text-sm font-medium text-text-main u-mb-text">
+                统一文章长度
+              </label>
+              <Select 
+                onValueChange={(value: 'short' | 'medium' | 'long') => {
+                  selectedPlatforms.forEach(platformId => {
+                    onUpdate(platformId, { articleLength: value });
+                  });
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="选择文章长度应用到所有平台" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="short">短文 (300-500字)</SelectItem>
+                  <SelectItem value="medium">中等 (800-1200字)</SelectItem>
+                  <SelectItem value="long">长文 (1500-2500字)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-main u-mb-text">
+                统一写作风格
+              </label>
+              <Select 
+                onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') => {
+                  selectedPlatforms.forEach(platformId => {
+                    onUpdate(platformId, { writingStyle: value });
+                  });
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="选择写作风格应用到所有平台" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">专业严谨</SelectItem>
+                  <SelectItem value="casual">轻松幽默</SelectItem>
+                  <SelectItem value="thoughtful">深度思考</SelectItem>
+                  <SelectItem value="warm">温暖感性</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 统一图片处理

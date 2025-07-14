@@ -1,18 +1,29 @@
 export type SidebarMode = 'global' | 'platform' | 'multi-select';
 
 export interface GlobalSettings {
-  articleLength: 'short' | 'medium' | 'long';
-  writingStyle: 'professional' | 'casual' | 'thoughtful' | 'warm';
+  // 文档级别设置
   autoImage: boolean;
   seoOptimization: boolean;
   scheduledPublishing: boolean;
+  contentTemplate: 'custom' | 'blog' | 'news' | 'tutorial' | 'review';
+  targetAudience: 'general' | 'professional' | 'academic' | 'casual';
 }
 
 export interface PlatformSettings {
+  // 平台特定的内容设置
+  articleLength?: 'short' | 'medium' | 'long';
+  writingStyle?: 'professional' | 'casual' | 'thoughtful' | 'warm';
+  
+  // 技术设置
   characterLimit?: number;
   imageCompression?: 'high' | 'medium' | 'low';
   linkHandling?: 'preserve' | 'convert-to-text' | 'footnote';
   customStyles?: Record<string, string>;
+  
+  // 平台优化
+  useHashtags?: boolean;
+  includeCallToAction?: boolean;
+  adaptTone?: boolean;
 }
 
 export interface SidebarContext {

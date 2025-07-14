@@ -4,11 +4,49 @@ import { useState, useCallback } from 'react';
 import { SidebarContext, SidebarMode, GlobalSettings, PlatformSettings } from '@/types/sidebar';
 
 const defaultGlobalSettings: GlobalSettings = {
-  articleLength: 'medium',
-  writingStyle: 'professional',
   autoImage: true,
   seoOptimization: false,
   scheduledPublishing: false,
+  contentTemplate: 'blog',
+  targetAudience: 'general',
+};
+
+// 平台默认设置
+const defaultPlatformSettings: Record<string, PlatformSettings> = {
+  wechat: {
+    articleLength: 'medium',
+    writingStyle: 'professional',
+    imageCompression: 'medium',
+    linkHandling: 'convert-to-text',
+    includeCallToAction: true,
+    adaptTone: true,
+  },
+  zhihu: {
+    articleLength: 'long',
+    writingStyle: 'thoughtful', 
+    imageCompression: 'low',
+    linkHandling: 'preserve',
+    includeCallToAction: false,
+    adaptTone: true,
+  },
+  xiaohongshu: {
+    articleLength: 'short',
+    writingStyle: 'casual',
+    imageCompression: 'high',
+    linkHandling: 'convert-to-text',
+    useHashtags: true,
+    includeCallToAction: true,
+    adaptTone: true,
+  },
+  twitter: {
+    articleLength: 'short',
+    writingStyle: 'casual',
+    imageCompression: 'high', 
+    linkHandling: 'preserve',
+    useHashtags: true,
+    includeCallToAction: false,
+    adaptTone: true,
+  },
 };
 
 export function useSidebarContext() {
@@ -16,7 +54,7 @@ export function useSidebarContext() {
     mode: 'global',
     selectedPanels: [],
     globalSettings: defaultGlobalSettings,
-    platformOverrides: {},
+    platformOverrides: defaultPlatformSettings,
   });
 
   const updateContext = useCallback((updates: Partial<SidebarContext>) => {
