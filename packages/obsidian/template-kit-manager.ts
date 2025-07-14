@@ -139,6 +139,49 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 			// 保存设置
 			await this.plugin.saveSettings();
 
+			// 强制清理并重新应用CSS变量和样式
+			// 等待一个小的延迟确保设置已保存
+			const styleConfig = kit.styleConfig;
+			setTimeout(() => {
+				// 清理所有可能的CSS变量和样式残留
+				const containers = document.querySelectorAll('.lovpen, #render-container, .wabi-sabi-container');
+				containers.forEach(container => {
+					if (container instanceof HTMLElement) {
+						// 清除所有可能的主题色变量
+						container.style.removeProperty("--primary-color");
+						container.style.removeProperty("--theme-color-light");
+						container.style.removeProperty("--colors-primary");
+						
+						// 移除所有可能的内联样式 - 这些通常来自之前的主题
+						const elementsWithInlineStyles = container.querySelectorAll('[style*="!important"], [style*="rgb(200, 100, 66)"], [style*="background"], [style*="color"]');
+						elementsWithInlineStyles.forEach(el => {
+							if (el instanceof HTMLElement) {
+								// 清除与颜色相关的内联样式
+								el.style.removeProperty("background");
+								el.style.removeProperty("background-color");
+								el.style.removeProperty("color");
+								// 如果style属性现在为空，完全移除它
+								if (!el.getAttribute('style')?.trim()) {
+									el.removeAttribute('style');
+								}
+							}
+						});
+						
+						// 如果套装启用了自定义主题色，重新应用
+						if (styleConfig.enableCustomThemeColor && styleConfig.customThemeColor) {
+							container.style.setProperty("--primary-color", styleConfig.customThemeColor);
+						}
+					}
+				});
+				
+				// 强制重新渲染页面，确保样式完全更新
+				document.body.style.display = 'none';
+				document.body.offsetHeight; // 触发重排
+				document.body.style.display = '';
+				
+				logger.info(`[TemplateKitManager] CSS变量和样式清理完成`);
+			}, 150);
+
 			new Notice(`Template kit "${kit.basicInfo.name}" applied successfully!`);
 
 			return {
@@ -486,6 +529,11 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 	private async applyStyleConfig(kit: TemplateKit, settingsManager: NMPSettings, assetsManager: any): Promise<void> {
 		const styleConfig = kit.styleConfig;
 
+		// 先清理之前的样式设置
+		settingsManager.enableThemeColor = false;
+		settingsManager.themeColor = '#7852ee'; // 重置为默认值
+		settingsManager.useCustomCss = false;
+
 		// 应用主题
 		settingsManager.defaultStyle = styleConfig.theme;
 
@@ -496,9 +544,14 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 		if (styleConfig.enableCustomThemeColor && styleConfig.customThemeColor) {
 			settingsManager.enableThemeColor = true;
 			settingsManager.themeColor = styleConfig.customThemeColor;
+		} else {
+			settingsManager.enableThemeColor = false;
 		}
 
-		logger.info('[TemplateKitManager] Applied style configuration');
+		// 清理CSS变量（在套装应用时重置）
+		// 这会在下次渲染时清除之前的CSS变量
+		
+		logger.info(`[TemplateKitManager] Applied style configuration: theme=${styleConfig.theme}, enableThemeColor=${settingsManager.enableThemeColor}`);
 	}
 
 	private async applyTemplateConfig(kit: TemplateKit, settingsManager: NMPSettings, templateManager: any): Promise<void> {
@@ -551,6 +604,13 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 		}
 
 		return {success: true};
+	}
+
+	private getDefaultKitsCollection(): TemplateKitCollection {
+		return {
+			version: '1.0.0',
+			kits: []
+		};
 	}
 }
 

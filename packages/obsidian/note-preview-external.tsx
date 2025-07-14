@@ -330,6 +330,8 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 		logger.debug(`[getCSS] 主题对象:`, theme ? `${theme.name}` : 'undefined');
 		logger.debug(`[getCSS] 主题CSS长度:`, theme?.css?.length || 0);
+		logger.debug(`[getCSS] 是否使用模板:`, this.settings.useTemplate);
+		logger.debug(`[getCSS] 当前模板:`, this.settings.defaultTemplate);
 
 		let themeColorCSS = "";
 
@@ -345,7 +347,23 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		const highlightCss = highlight?.css || "";
 		const themeCss = theme?.css || "";
 
-		const finalCSS = `${themeColorCSS}
+		// 当使用模板时，优先使用模板内置样式，而不是额外的主题CSS
+		// 避免Claude Style等主题CSS覆盖模板样式
+		let finalCSS = "";
+		
+		if (this.settings.useTemplate && this.settings.defaultTemplate) {
+			// 使用模板时，只加载基础样式和高亮，不加载会冲突的主题CSS
+			finalCSS = `${themeColorCSS}
+
+${InlineCSS}
+
+${highlightCss}
+
+${customCSS}`;
+			logger.debug(`[getCSS] 模板模式: 跳过主题CSS以避免冲突`);
+		} else {
+			// 不使用模板时，正常加载所有样式
+			finalCSS = `${themeColorCSS}
 
 ${InlineCSS}
 
@@ -354,6 +372,8 @@ ${highlightCss}
 ${themeCss}
 
 ${customCSS}`;
+			logger.debug(`[getCSS] 常规模式: 加载所有样式`);
+		}
 
 		logger.debug(`[getCSS] 最终CSS长度:`, finalCSS.length);
 		return finalCSS;

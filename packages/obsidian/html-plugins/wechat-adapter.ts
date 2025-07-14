@@ -134,6 +134,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 	/**
 	 * CSS样式内联化处理
+	 * 保留样式表，只处理微信平台的兼容性问题
 	 */
 	private inlineStyles(html: string, settings: NMPSettings): string {
 		try {
@@ -142,33 +143,33 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
 			const tempDiv = doc.body.firstChild as HTMLElement;
 
-			logger.debug("为微信内容进行样式处理（离线模式）");
+			logger.debug("为微信内容进行样式处理（保留样式表模式）");
 
-			// 提取所有style标签中的CSS内容
+			// 清理CSS中可能导致微信显示问题的属性
 			const styleElements = tempDiv.querySelectorAll('style');
-			let combinedCSS = '';
-
 			styleElements.forEach(styleEl => {
-				const cssContent = styleEl.textContent || '';
-				combinedCSS += cssContent + '\n';
+				if (styleEl.textContent) {
+					// 清理可能导致微信问题的CSS属性
+					let cssContent = styleEl.textContent;
+					
+					// 移除可能导致问题的CSS属性
+					cssContent = cssContent.replace(/user-select\s*:\s*[^;]+;?/gi, '');
+					cssContent = cssContent.replace(/-webkit-user-select\s*:\s*[^;]+;?/gi, '');
+					cssContent = cssContent.replace(/pointer-events\s*:\s*[^;]+;?/gi, '');
+					
+					styleEl.textContent = cssContent;
+				}
 			});
 
-			// 解析CSS并提取变量
-			const cssVariables = this.extractCSSVariables(combinedCSS);
-			const cssRules = this.parseCSSRules(combinedCSS, cssVariables);
-
-			// 获取所有非样式元素
+			// 获取所有元素，应用微信兼容性的内联样式
 			const allElements = tempDiv.querySelectorAll("*:not(style)");
-			logger.debug(`处理微信样式元素数量: ${allElements.length}`);
+			logger.debug(`处理微信兼容性元素数量: ${allElements.length}`);
 
-			// 应用样式到每个元素
+			// 只为关键元素添加微信兼容性样式
 			for (let i = 0; i < allElements.length; i++) {
 				const el = allElements[i] as HTMLElement;
-				this.applyInlineStyles(el, cssRules, cssVariables);
+				this.applyWechatCompatibilityStyles(el);
 			}
-
-			// 移除所有style标签，因为微信不支持
-			styleElements.forEach(styleEl => styleEl.remove());
 
 			return tempDiv.innerHTML;
 		} catch (error) {
@@ -276,356 +277,81 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			}
 		}
 
-		// 添加Anthropic Style主题的默认变量
-		const defaultVariables = {
-			'primary-color': 'rgb(200, 100, 66)',
-			'primary-color-hover': 'rgb(180, 85, 50)',
-			'primary-color-light': 'rgba(200, 100, 66, 0.1)',
-			'background-primary': 'rgb(250, 249, 245)',
-			'background-secondary': 'rgb(255, 255, 255)',
-			'background-tertiary': 'rgb(245, 245, 245)',
-			'text-primary': 'rgb(34, 34, 34)',
-			'text-secondary': 'rgb(63, 63, 63)',
-			'text-tertiary': 'rgb(136, 136, 136)',
-			'text-on-primary': 'rgb(255, 255, 255)',
-			'border-color': 'rgb(229, 229, 229)',
-			'font-family': '"PingFang SC", -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif',
-			'font-size-base': '15px',
-			'font-size-h1': '1.6em',
-			'font-size-h2': '1.3em',
-			'font-size-h3': '1.2em',
-			'font-size-h4': '1.1em',
-			'line-height-base': '1.75',
-			'line-height-heading': '1.2',
-			'spacing-xs': '0.25em',
-			'spacing-sm': '0.5em',
-			'spacing-md': '1em',
-			'spacing-lg': '1.5em',
-			'spacing-xl': '2em',
-			'spacing-xxl': '4em',
-			'border-radius-sm': '6px',
-			'border-radius-md': '8px',
-			'border-radius-lg': '12px'
-		};
-
-		// 合并默认变量和提取的变量
-		return {...defaultVariables, ...variables};
+		// 直接返回提取的变量，不强制覆盖为特定主题
+		// 微信适配插件只处理平台兼容性，不应该改变视觉样式
+		return variables;
 	}
 
-	/**
-	 * 解析CSS规则
-	 */
-	private parseCSSRules(css: string, variables: Record<string, string>): Array<{
-		selector: string;
-		styles: Record<string, string>
-	}> {
-		const rules: Array<{ selector: string; styles: Record<string, string> }> = [];
-
-		// 替换CSS变量
-		let processedCSS = css;
-		Object.entries(variables).forEach(([varName, varValue]) => {
-			const varRegex = new RegExp(`var\\(--${varName}\\)`, 'g');
-			processedCSS = processedCSS.replace(varRegex, varValue);
-		});
-
-		// 简单的CSS规则解析（处理基本选择器）
-		const ruleRegex = /([^{]+)\{([^}]+)\}/g;
-		let match;
-
-		while ((match = ruleRegex.exec(processedCSS)) !== null) {
-			const selectorText = match[1].trim();
-			const declarationsText = match[2];
-
-			// 跳过@规则和:root
-			if (selectorText.startsWith('@') || selectorText === ':root') {
-				continue;
-			}
-
-			const styles: Record<string, string> = {};
-			const declarations = declarationsText.split(';');
-
-			declarations.forEach(decl => {
-				const colonIndex = decl.indexOf(':');
-				if (colonIndex > 0) {
-					const prop = decl.substring(0, colonIndex).trim();
-					const value = decl.substring(colonIndex + 1).trim();
-					if (prop && value) {
-						styles[prop] = value;
-					}
-				}
-			});
-
-			if (Object.keys(styles).length > 0) {
-				rules.push({selector: selectorText, styles});
-			}
-		}
-
-		return rules;
-	}
 
 	/**
-	 * 应用内联样式到元素
+	 * 应用微信兼容性样式
+	 * 只处理必要的微信平台兼容性问题，不覆盖主题样式
 	 */
-	private applyInlineStyles(
-		element: HTMLElement,
-		cssRules: Array<{ selector: string; styles: Record<string, string> }>,
-		variables: Record<string, string>
-	): void {
-		// 收集匹配的样式
-		const matchedStyles: Record<string, string> = {};
-
-		// 应用通用样式
-		cssRules.forEach(rule => {
-			if (this.elementMatchesSelector(element, rule.selector)) {
-				Object.assign(matchedStyles, rule.styles);
-			}
-		});
-
-		// 添加元素特定的基础样式
-		const elementStyles = this.getElementSpecificStyles(element, variables);
-		Object.assign(matchedStyles, elementStyles);
-
-		// 合并现有的内联样式
+	private applyWechatCompatibilityStyles(element: HTMLElement): void {
+		const tagName = element.tagName.toLowerCase();
 		const existingStyle = element.getAttribute('style') || '';
-		const existingStyles = this.parseStyleString(existingStyle);
+		const compatibilityStyles: string[] = [];
 
-		// 现有样式优先级更高
-		const finalStyles = {...matchedStyles, ...existingStyles};
-
-		// 应用最终样式
-		const styleString = Object.entries(finalStyles)
-			.map(([prop, value]) => `${prop}: ${value}`)
-			.join('; ');
-
-		if (styleString) {
-			element.setAttribute('style', styleString + ';');
-		}
-	}
-
-	/**
-	 * 检查元素是否匹配选择器
-	 */
-	private elementMatchesSelector(element: HTMLElement, selector: string): boolean {
-		try {
-			// 处理常见的选择器类型
-			const trimmedSelector = selector.trim();
-
-			// 标签选择器
-			if (/^[a-zA-Z]+[0-9]*$/.test(trimmedSelector)) {
-				return element.tagName.toLowerCase() === trimmedSelector.toLowerCase();
-			}
-
-			// 类选择器
-			if (trimmedSelector.startsWith('.')) {
-				const className = trimmedSelector.substring(1);
-				return element.classList.contains(className);
-			}
-
-			// ID选择器
-			if (trimmedSelector.startsWith('#')) {
-				const idName = trimmedSelector.substring(1);
-				return element.id === idName;
-			}
-
-			// 复合选择器（简单处理）
-			if (trimmedSelector.includes(' ')) {
-				// 对于复合选择器，暂时只处理简单的后代选择器
-				const parts = trimmedSelector.split(' ').filter(p => p.trim());
-				if (parts.length === 2) {
-					const parentSelector = parts[0].trim();
-					const childSelector = parts[1].trim();
-
-					// 检查当前元素是否匹配子选择器
-					if (this.elementMatchesSelector(element, childSelector)) {
-						// 检查是否有匹配的父元素
-						let parent = element.parentElement;
-						while (parent) {
-							if (this.elementMatchesSelector(parent, parentSelector)) {
-								return true;
-							}
-							parent = parent.parentElement;
-						}
-					}
+		// 只添加微信平台必需的兼容性样式
+		switch (tagName) {
+			case 'img':
+				// 确保图片在微信中正常显示
+				if (!existingStyle.includes('display:') && !existingStyle.includes('display ')) {
+					compatibilityStyles.push('display: block');
 				}
-				return false;
-			}
+				if (!existingStyle.includes('max-width:') && !existingStyle.includes('max-width ')) {
+					compatibilityStyles.push('max-width: 100%');
+				}
+				if (!existingStyle.includes('height:') && !existingStyle.includes('height ')) {
+					compatibilityStyles.push('height: auto');
+				}
+				break;
 
-			// 尝试使用原生matches方法
-			return element.matches(trimmedSelector);
-		} catch (e) {
-			// 如果选择器无效，返回false
-			return false;
+			case 'table':
+				// 确保表格在微信中正常显示
+				if (!existingStyle.includes('width:') && !existingStyle.includes('width ')) {
+					compatibilityStyles.push('width: 100%');
+				}
+				if (!existingStyle.includes('border-collapse:') && !existingStyle.includes('border-collapse ')) {
+					compatibilityStyles.push('border-collapse: collapse');
+				}
+				break;
+
+			case 'pre':
+				// 确保代码块在微信中正常显示
+				if (!existingStyle.includes('overflow-x:') && !existingStyle.includes('overflow-x ')) {
+					compatibilityStyles.push('overflow-x: auto');
+				}
+				if (!existingStyle.includes('white-space:') && !existingStyle.includes('white-space ')) {
+					compatibilityStyles.push('white-space: pre-wrap');
+				}
+				break;
+		}
+
+		// 应用兼容性样式
+		if (compatibilityStyles.length > 0) {
+			const newStyle = existingStyle + (existingStyle ? '; ' : '') + compatibilityStyles.join('; ');
+			element.setAttribute('style', newStyle);
 		}
 	}
+
 
 	/**
 	 * 获取元素特定的样式
+	 * 微信适配插件只处理平台兼容性，不应该改变视觉样式
 	 */
 	private getElementSpecificStyles(element: HTMLElement, variables: Record<string, string>): Record<string, string> {
 		const tagName = element.tagName.toLowerCase();
 		const styles: Record<string, string> = {};
 
-		// Anthropic Style主题的特定样式
+		// 只处理微信平台必需的兼容性样式，不覆盖主题样式
 		switch (tagName) {
-			case 'h1':
-				styles['font-size'] = variables['font-size-h1'] + ' !important';
-				styles['font-weight'] = 'bold !important';
-				styles['text-align'] = 'center !important';
-				styles['margin'] = `${variables['spacing-xxl']} auto ${variables['spacing-xl']} !important`;
-				styles['display'] = 'table !important';
-				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']} !important`;
-				styles['background'] = variables['primary-color'] + ' !important';
-				styles['color'] = variables['text-on-primary'] + ' !important';
-				styles['border-radius'] = variables['border-radius-md'] + ' !important';
-				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px !important';
-				break;
-
-			case 'h2':
-				styles['font-size'] = variables['font-size-h2'] + ' !important';
-				styles['font-weight'] = 'bold !important';
-				styles['text-align'] = 'center !important';
-				styles['margin'] = `${variables['spacing-xxl']} auto ${variables['spacing-xl']} !important`;
-				styles['display'] = 'table !important';
-				styles['padding'] = `${variables['spacing-sm']} ${variables['spacing-md']} !important`;
-				styles['background'] = variables['primary-color'] + ' !important';
-				styles['color'] = variables['text-on-primary'] + ' !important';
-				styles['border-radius'] = variables['border-radius-md'] + ' !important';
-				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px !important';
-				break;
-
-			case 'h3':
-				styles['font-size'] = variables['font-size-h3'];
-				styles['font-weight'] = 'bold';
-				styles['border-left'] = `4px solid ${variables['primary-color']}`;
-				styles['border-bottom'] = `1px dashed ${variables['primary-color']}`;
-				styles['padding-left'] = '12px';
-				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} ${variables['spacing-md']} 0`;
-				styles['color'] = variables['text-secondary'];
-				break;
-
-			case 'h4':
-				styles['font-size'] = variables['font-size-h4'];
-				styles['font-weight'] = 'bold';
-				styles['color'] = variables['primary-color'];
-				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
-				break;
-
-			case 'h5':
-				styles['font-size'] = '1em';
-				styles['font-weight'] = 'bold';
-				styles['color'] = variables['primary-color'];
-				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
-				break;
-
-			case 'h6':
-				styles['font-size'] = '0.9em';
-				styles['font-weight'] = 'bold';
-				styles['color'] = variables['primary-color'];
-				styles['margin'] = `${variables['spacing-xl']} ${variables['spacing-md']} -${variables['spacing-md']}`;
-				break;
-
-			case 'p':
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} !important`;
-				styles['text-align'] = 'justify !important';
-				styles['line-height'] = variables['line-height-base'] + ' !important';
-				styles['font-size'] = variables['font-size-base'] + ' !important';
-				styles['color'] = variables['text-primary'] + ' !important';
-				break;
-
-			case 'strong':
-			case 'b':
-				styles['font-weight'] = 'bold';
-				styles['color'] = variables['primary-color'];
-				break;
-
-			case 'em':
-			case 'i':
-				styles['font-style'] = 'italic';
-				styles['color'] = variables['primary-color'];
-				break;
-
 			case 'img':
 				styles['display'] = 'block';
 				styles['max-width'] = '100%';
 				styles['height'] = 'auto';
-				styles['margin'] = `${variables['spacing-sm']} auto`;
-				styles['border-radius'] = variables['border-radius-md'];
-				styles['box-shadow'] = 'rgba(0, 0, 0, 0.1) 0px 4px 8px';
 				styles['visibility'] = 'visible';
 				styles['opacity'] = '1';
-				break;
-
-			case 'blockquote':
-				// 检查是否已有微信样式
-				const existingStyle = element.getAttribute('style') || '';
-				if (existingStyle.includes('padding-left: 10px !important')) {
-					// 保持现有的微信引用样式
-					styles['padding-left'] = '10px !important';
-					styles['border-left'] = '3px solid #c86442 !important';
-					styles['color'] = 'rgba(0, 0, 0, 0.6) !important';
-					styles['font-size'] = '15px !important';
-					styles['padding-top'] = '4px !important';
-					styles['margin'] = '1em 0 !important';
-					styles['text-indent'] = '0 !important';
-				} else {
-					// 检查嵌套层级
-					let nestingLevel = 0;
-					let parent = element.parentElement;
-					while (parent) {
-						if (parent.tagName.toLowerCase() === 'blockquote') {
-							nestingLevel++;
-						}
-						parent = parent.parentElement;
-					}
-
-					// 根据嵌套层级设置不同样式
-					if (nestingLevel === 0) {
-						// 一级引用
-						styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
-						styles['padding'] = variables['spacing-md'];
-						styles['background'] = variables['primary-color-light'];
-						styles['border-left'] = `4px solid ${variables['primary-color']}`;
-						styles['border-radius'] = variables['border-radius-sm'];
-						styles['color'] = variables['text-primary'];
-						styles['font-style'] = 'italic';
-					} else if (nestingLevel === 1) {
-						// 二级引用
-						styles['margin'] = '1em 0 !important';
-						styles['padding'] = '0.8em !important';
-						styles['background'] = 'rgba(200, 100, 66, 0.05) !important';
-						styles['border-left'] = '3px solid rgba(200, 100, 66, 0.7) !important';
-						styles['font-style'] = 'italic !important';
-					} else if (nestingLevel === 2) {
-						// 三级引用
-						styles['margin'] = '0.8em 0 !important';
-						styles['padding'] = '0.6em !important';
-						styles['background'] = 'rgba(200, 100, 66, 0.03) !important';
-						styles['border-left'] = '2px solid rgba(200, 100, 66, 0.5) !important';
-					} else {
-						// 四级及以上引用
-						styles['margin'] = '0.5em 0 !important';
-						styles['padding'] = '0.4em !important';
-						styles['background'] = 'rgba(200, 100, 66, 0.01) !important';
-						styles['border-left'] = '1px solid rgba(200, 100, 66, 0.3) !important';
-					}
-				}
-				break;
-
-			case 'code':
-				styles['background'] = variables['background-tertiary'];
-				styles['padding'] = `${variables['spacing-xs']} ${variables['spacing-sm']}`;
-				styles['border-radius'] = variables['border-radius-sm'];
-				styles['font-family'] = 'Monaco, Menlo, Ubuntu Mono, monospace';
-				styles['font-size'] = '0.9em';
-				styles['color'] = variables['primary-color'];
-				break;
-
-			case 'pre':
-				styles['background'] = variables['background-tertiary'];
-				styles['padding'] = variables['spacing-md'];
-				styles['border-radius'] = variables['border-radius-md'];
-				styles['overflow-x'] = 'auto';
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']}`;
 				break;
 
 			case 'sup':
@@ -634,52 +360,15 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				styles['vertical-align'] = 'super';
 				break;
 
-			case 'ul':
-				styles['list-style-type'] = 'disc !important';
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} !important`;
-				styles['padding-left'] = '2em !important';
-				styles['color'] = variables['text-primary'] + ' !important';
+			case 'section':
+				styles['display'] = 'block !important';
+				styles['box-sizing'] = 'border-box !important';
 				break;
 
-			case 'ol':
-				styles['list-style-type'] = 'decimal !important';
-				styles['margin'] = `${variables['spacing-lg']} ${variables['spacing-md']} !important`;
-				styles['padding-left'] = '2em !important';
-				styles['color'] = variables['text-primary'] + ' !important';
+			case 'div':
+				styles['display'] = 'block !important';
+				styles['box-sizing'] = 'border-box !important';
 				break;
-
-			case 'li':
-				styles['margin'] = '0.25em 0 !important';
-				styles['line-height'] = variables['line-height-base'] + ' !important';
-				styles['color'] = variables['text-primary'] + ' !important';
-				// 设置列表标记颜色
-				styles['list-style-color'] = variables['primary-color'] + ' !important';
-				break;
-		}
-
-		// 处理包含rich_media_content类的容器
-		if (element.classList.contains('rich_media_content')) {
-			styles['font-family'] = variables['font-family'] + ' !important';
-			styles['font-size'] = variables['font-size-base'] + ' !important';
-			styles['line-height'] = variables['line-height-base'] + ' !important';
-			styles['color'] = variables['text-primary'] + ' !important';
-			// 微信公众号需要使用更强的背景色声明
-			styles['background-color'] = variables['background-primary'] + ' !important';
-			styles['background'] = variables['background-primary'] + ' !important';
-			styles['border-radius'] = variables['border-radius-lg'] + ' !important';
-			styles['padding'] = variables['spacing-md'] + ' !important';
-			styles['box-sizing'] = 'border-box !important';
-			styles['margin'] = '0 auto !important';
-			styles['max-width'] = '100% !important';
-			// 确保容器样式优先级
-			styles['-webkit-background-color'] = variables['background-primary'] + ' !important';
-		}
-
-		// 处理主要内容容器
-		if (element.classList.contains('claude-main-content')) {
-			styles['background'] = variables['background-primary'] + ' !important';
-			styles['background-color'] = variables['background-primary'] + ' !important';
-			styles['-webkit-background-color'] = variables['background-primary'] + ' !important';
 		}
 
 		// 处理图片说明文字样式
@@ -691,89 +380,11 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			styles['margin-bottom'] = '8px !important';
 			styles['font-style'] = 'italic !important';
 			styles['line-height'] = '1.5 !important';
-			styles['font-family'] = '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif !important';
 		}
 
 		// 处理高亮文本
 		if (element.classList.contains('note-highlight')) {
 			styles['background-color'] = 'rgba(255, 208, 0, 0.4)';
-		}
-
-		// 处理元信息卡片特殊样式
-		if (element.classList.contains('claude-meta-section')) {
-			styles['display'] = 'block !important';
-			styles['margin'] = '1.5em 0 !important';
-			styles['padding'] = '0 !important';
-			styles['box-sizing'] = 'border-box !important';
-		}
-
-		if (element.classList.contains('claude-meta-content')) {
-			styles['background'] = 'linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(200, 100, 66, 0.03) 100%) !important';
-			styles['border'] = '1px solid rgba(200, 100, 66, 0.15) !important';
-			styles['border-radius'] = '12px !important';
-			styles['padding'] = '1.5em !important';
-			styles['position'] = 'relative !important';
-			styles['overflow'] = 'hidden !important';
-			styles['display'] = 'block !important';
-			styles['box-sizing'] = 'border-box !important';
-			styles['margin'] = '0 !important';
-		}
-
-		if (element.classList.contains('claude-meta-item')) {
-			styles['display'] = 'flex !important';
-			styles['align-items'] = 'center !important';
-			styles['margin-bottom'] = '0.8em !important';
-			styles['font-size'] = '0.9em !important';
-			styles['box-sizing'] = 'border-box !important';
-		}
-
-		if (element.classList.contains('claude-meta-label')) {
-			styles['color'] = 'rgb(200, 100, 66) !important';
-			styles['font-weight'] = '600 !important';
-			styles['min-width'] = '3em !important';
-			styles['margin-right'] = '1em !important';
-			styles['position'] = 'relative !important';
-			styles['display'] = 'inline-block !important';
-		}
-
-		if (element.classList.contains('claude-meta-value')) {
-			styles['color'] = 'rgb(63, 63, 63) !important';
-			styles['font-weight'] = '500 !important';
-			styles['flex'] = '1 !important';
-			styles['display'] = 'inline-block !important';
-		}
-
-		if (element.classList.contains('claude-meta-tags')) {
-			styles['margin-top'] = '1em !important';
-			styles['padding-top'] = '1em !important';
-			styles['border-top'] = '1px solid rgba(200, 100, 66, 0.1) !important';
-			styles['display'] = 'block !important';
-		}
-
-		if (element.classList.contains('claude-meta-tag')) {
-			styles['display'] = 'inline-block !important';
-			styles['background'] = 'rgba(200, 100, 66, 0.1) !important';
-			styles['color'] = 'rgb(200, 100, 66) !important';
-			styles['padding'] = '0.3em 0.8em !important';
-			styles['border-radius'] = '16px !important';
-			styles['font-size'] = '0.8em !important';
-			styles['font-weight'] = '500 !important';
-			styles['margin'] = '0 0.5em 0.5em 0 !important';
-			styles['border'] = '1px solid rgba(200, 100, 66, 0.2) !important';
-		}
-
-		// 处理section容器
-		if (tagName === 'section') {
-			styles['display'] = 'block !important';
-			styles['margin'] = '0 !important';
-			styles['padding'] = '0 !important';
-			styles['box-sizing'] = 'border-box !important';
-		}
-
-		// 处理div容器
-		if (tagName === 'div') {
-			styles['display'] = 'block !important';
-			styles['box-sizing'] = 'border-box !important';
 		}
 
 		return styles;
@@ -863,24 +474,4 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		});
 	}
 
-	/**
-	 * 解析样式字符串为对象
-	 */
-	private parseStyleString(styleStr: string): Record<string, string> {
-		const styles: Record<string, string> = {};
-		if (!styleStr) return styles;
-
-		styleStr.split(';').forEach(rule => {
-			const colonIndex = rule.indexOf(':');
-			if (colonIndex > 0) {
-				const prop = rule.substring(0, colonIndex).trim();
-				const value = rule.substring(colonIndex + 1).trim();
-				if (prop && value) {
-					styles[prop] = value;
-				}
-			}
-		});
-
-		return styles;
-	}
 }

@@ -98,8 +98,8 @@ interface DistributionConfig {
 export class NMPSettings implements SettingsData {
 	// 单例实例
 	private static instance: NMPSettings;
-	// interface SettingsData
-	defaultStyle: string = 'obsidian-light';
+	// interface SettingsData  
+	defaultStyle: string = 'wabi-sabi';
 	defaultHighlight: string = '默认';
 	showStyleUI: boolean = true;
 	linkDescriptionMode: LinkDescriptionMode = LinkDescriptionMode.Empty;
@@ -157,7 +157,7 @@ export class NMPSettings implements SettingsData {
 
 	// 重置样式和高亮设置
 	resetStyelAndHighlight(): void {
-		this.defaultStyle = 'obsidian-light';
+		this.defaultStyle = 'wabi-sabi';
 		this.defaultHighlight = '默认';
 	}
 
