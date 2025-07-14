@@ -81,12 +81,6 @@ AI擅长：
             </div>
 
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="hidden sm:flex items-center space-x-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <span>保存草稿</span>
-              </Button>
               <Button
                 variant="primary"
                 size="sm"
