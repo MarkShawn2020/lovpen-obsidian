@@ -3,7 +3,7 @@
 import type { SearchFilters } from '@/types/knowledge-base';
 import { useUser } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
-import { KnowledgeBaseService } from '@/services/knowledge-base';
+import { KnowledgeBaseClientService } from '@/services/knowledge-base-client';
 
 export function KnowledgeBasePage() {
   const { user } = useUser();
@@ -22,8 +22,7 @@ export function KnowledgeBasePage() {
       let result;
 
       if (searchQuery.trim()) {
-        const searchResults = await KnowledgeBaseService.semanticSearch(
-          user.id,
+        const searchResults = await KnowledgeBaseClientService.semanticSearch(
           searchQuery,
           20,
         );
@@ -33,8 +32,7 @@ export function KnowledgeBasePage() {
           hasMore: false,
         };
       } else {
-        result = await KnowledgeBaseService.getKnowledgeItems(
-          user.id,
+        result = await KnowledgeBaseClientService.getKnowledgeItems(
           filters,
           20,
           0,
