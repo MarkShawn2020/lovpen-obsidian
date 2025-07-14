@@ -40,17 +40,12 @@ export function PlatformControls({
 
     return (
       <ConditionalSection when="platform" currentMode={currentMode}>
-        {/* 平台特定设置 */}
+        {/* 平台设置 */}
         <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
           <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center u-gap-s">
-                <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
-                <h3 className="font-medium text-text-main">{platform.fullName}</h3>
-              </div>
-              <div className="text-xs text-text-faded bg-green-100 text-green-700 px-2 py-1 rounded">
-                平台特定
-              </div>
+            <div className="flex items-center u-gap-s">
+              <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
+              <h3 className="font-medium text-text-main">{platform.fullName}设置</h3>
             </div>
           </div>
 
@@ -224,24 +219,24 @@ export function PlatformControls({
           </div>
         </div>
 
-        {/* 平台预览选项 */}
+        {/* 快速操作 */}
         <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
           <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-            <h3 className="font-medium text-text-main">预览选项</h3>
+            <h3 className="font-medium text-text-main">快速操作</h3>
           </div>
 
           <div className="p-6 u-gap-s flex flex-col">
             <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-              🔄 重新生成此平台内容
+              🔄 重新生成内容
             </button>
             <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-              ✂️ 智能裁剪到字数限制
+              ✂️ 智能裁剪字数
             </button>
             <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-              🎨 应用平台模板
+              🎨 应用{platform.name}模板
             </button>
             <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-              📤 导出到 {platform.name}
+              📤 导出到{platform.name}
             </button>
           </div>
         </div>
@@ -253,11 +248,11 @@ export function PlatformControls({
   if (currentMode === 'multi-select' && selectedPlatforms.length > 1) {
     return (
       <ConditionalSection when="multi-select" currentMode={currentMode}>
-        {/* 批量操作 */}
+        {/* 统一调整 */}
         <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
           <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-text-main">批量操作</h3>
+              <h3 className="font-medium text-text-main">统一调整</h3>
               <div className="text-xs text-text-faded bg-orange-100 text-orange-700 px-2 py-1 rounded">
                 {selectedPlatforms.length} 个平台
               </div>
@@ -267,7 +262,7 @@ export function PlatformControls({
           <div className="p-6">
             {/* 选中的平台列表 */}
             <div className="u-mb-text">
-              <div className="text-sm font-medium text-text-main u-mb-text">选中平台：</div>
+              <div className="text-sm font-medium text-text-main u-mb-text">已选中：</div>
               <div className="flex flex-wrap u-gap-xs">
                 {selectedPlatforms.map(platformId => {
                   const platform = platforms[platformId];
@@ -282,34 +277,31 @@ export function PlatformControls({
               </div>
             </div>
 
-            {/* 批量操作按钮 */}
+            {/* 快速操作 */}
             <div className="u-gap-s flex flex-col">
               <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                🔄 批量重新生成内容
+                🔄 重新生成全部
               </button>
               <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                ⚙️ 批量应用设置
+                📤 导出全部
               </button>
               <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                📤 批量导出
-              </button>
-              <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                🗑️ 批量删除
+                🗑️ 移除全部
               </button>
             </div>
           </div>
         </div>
 
-        {/* 共同设置 */}
+        {/* 统一设置 */}
         <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
           <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-            <h3 className="font-medium text-text-main">共同设置</h3>
+            <h3 className="font-medium text-text-main">统一设置</h3>
           </div>
 
           <div className="p-6 u-gap-m flex flex-col">
             <div>
               <label className="block text-sm font-medium text-text-main u-mb-text">
-                统一文章长度
+                文章长度
               </label>
               <Select 
                 onValueChange={(value: 'short' | 'medium' | 'long') => {
@@ -319,7 +311,7 @@ export function PlatformControls({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择文章长度应用到所有平台" />
+                  <SelectValue placeholder="选择文章长度" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="short">短文 (300-500字)</SelectItem>
@@ -331,7 +323,7 @@ export function PlatformControls({
 
             <div>
               <label className="block text-sm font-medium text-text-main u-mb-text">
-                统一写作风格
+                写作风格
               </label>
               <Select 
                 onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') => {
@@ -341,7 +333,7 @@ export function PlatformControls({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择写作风格应用到所有平台" />
+                  <SelectValue placeholder="选择写作风格" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="professional">专业严谨</SelectItem>
@@ -354,7 +346,7 @@ export function PlatformControls({
 
             <div>
               <label className="block text-sm font-medium text-text-main u-mb-text">
-                统一图片处理
+                图片处理
               </label>
               <Select 
                 onValueChange={(value: 'high' | 'medium' | 'low') => {
@@ -364,7 +356,7 @@ export function PlatformControls({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择压缩级别应用到所有平台" />
+                  <SelectValue placeholder="选择压缩级别" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="high">高压缩</SelectItem>
@@ -376,7 +368,7 @@ export function PlatformControls({
 
             <div>
               <label className="block text-sm font-medium text-text-main u-mb-text">
-                统一链接处理
+                链接处理
               </label>
               <Select 
                 onValueChange={(value: 'preserve' | 'convert-to-text' | 'footnote') => {
@@ -386,7 +378,7 @@ export function PlatformControls({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择链接处理方式应用到所有平台" />
+                  <SelectValue placeholder="选择链接处理" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="preserve">保持链接</SelectItem>

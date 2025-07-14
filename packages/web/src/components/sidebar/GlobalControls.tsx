@@ -22,12 +22,7 @@ export function GlobalControls({
       {/* 创作设置 */}
       <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
         <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium text-text-main">创作设置</h3>
-            <div className="text-xs text-text-faded bg-blue-100 text-blue-700 px-2 py-1 rounded">
-              全局
-            </div>
-          </div>
+          <h3 className="font-medium text-text-main">创作设置</h3>
         </div>
 
         <div className="p-6 u-gap-m flex flex-col">
@@ -77,9 +72,9 @@ export function GlobalControls({
           </div>
 
           <div>
-            <div className="block text-sm font-medium text-text-main u-mb-text">统一管理</div>
-            <div className="text-sm text-text-faded">
-              当前共有 {previewPanelsCount} 个预览面板，点击单个面板可进入平台特定设置。
+            <div className="block text-sm font-medium text-text-main u-mb-text">预览面板</div>
+            <div className="text-sm text-text-faded whitespace-nowrap overflow-hidden text-ellipsis">
+              当前 {previewPanelsCount} 个面板，点击可专门设置
             </div>
           </div>
         </div>
@@ -88,12 +83,7 @@ export function GlobalControls({
       {/* 发布设置 */}
       <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
         <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium text-text-main">发布设置</h3>
-            <div className="text-xs text-text-faded bg-blue-100 text-blue-700 px-2 py-1 rounded">
-              全局
-            </div>
-          </div>
+          <h3 className="font-medium text-text-main">发布设置</h3>
         </div>
 
         <div className="p-6 u-gap-m flex flex-col">
@@ -147,12 +137,7 @@ export function GlobalControls({
       {/* AI 助手 */}
       <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
         <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium text-text-main">AI 助手</h3>
-            <div className="text-xs text-text-faded bg-blue-100 text-blue-700 px-2 py-1 rounded">
-              全局
-            </div>
-          </div>
+          <h3 className="font-medium text-text-main">AI 助手</h3>
         </div>
 
         <div className="p-6">

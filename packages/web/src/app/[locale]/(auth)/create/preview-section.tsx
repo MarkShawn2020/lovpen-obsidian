@@ -144,7 +144,7 @@ function DraggablePreviewPanel({
             <h3 className="font-medium text-text-main text-sm">{panel.title}</h3>
             {panel.isSelected && (
               <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                已选择
+                ✓
               </div>
             )}
           </div>
@@ -154,7 +154,7 @@ function DraggablePreviewPanel({
             <button
               type="button"
               className="text-xs text-text-faded hover:text-text-main transition-colors"
-              title="定制此平台"
+              title="设置"
             >
               ⚙️
             </button>
@@ -164,7 +164,7 @@ function DraggablePreviewPanel({
                 type="button"
                 onClick={() => removePreviewPanel(panel.id)}
                 className="text-xs text-text-faded hover:text-red-500 transition-colors"
-                title="删除此预览"
+                title="移除"
               >
                 ✕
               </button>
@@ -277,12 +277,12 @@ export function PreviewSection({
             <div className="flex items-center u-gap-s">
               {previewPanels.length > 1 && (
                 <span className="text-xs text-text-faded bg-background-oat px-2 py-1 rounded">
-                  可拖拽排序
+                  拖拽排序
                 </span>
               )}
               {previewPanels.filter(p => p.isSelected).length > 0 && (
                 <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                  {previewPanels.filter(p => p.isSelected).length} 个已选择
+                  已选 {previewPanels.filter(p => p.isSelected).length} 个
                 </span>
               )}
             </div>
@@ -327,7 +327,7 @@ export function PreviewSection({
                 <div className="text-center">
                   <div className="text-6xl mb-4">📱</div>
                   <p className="text-lg font-medium mb-2">还没有预览面板</p>
-                  <p className="text-sm">点击上方「+ 添加预览面板」开始创作</p>
+                  <p className="text-sm">点击上方「+ 添加预览面板」开始</p>
                 </div>
               </div>
             ) : (

@@ -34,7 +34,7 @@ export function SmartSidebar({ context, onContextChange, children }: SmartSideba
 
   return (
     <div className="lg:col-span-3 flex flex-col u-gap-m">
-      {/* 上下文指示器 */}
+      {/* 动态标题指示器 */}
       <div className="bg-background-main rounded-lg border border-border-default/20 p-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col u-gap-xs">
@@ -42,56 +42,43 @@ export function SmartSidebar({ context, onContextChange, children }: SmartSideba
               {context.mode === 'global' && (
                 <>
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-text-main">全局设置</span>
+                  <span className="text-sm font-medium text-text-main">创作设置</span>
                 </>
               )}
               {context.mode === 'platform' && context.selectedPanels.length === 1 && (
                 <>
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-text-main">平台特定</span>
+                  <span className="text-sm font-medium text-text-main">专门设置</span>
                 </>
               )}
               {context.mode === 'multi-select' && context.selectedPanels.length > 1 && (
                 <>
                   <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-text-main">批量编辑</span>
+                  <span className="text-sm font-medium text-text-main">统一调整</span>
                 </>
               )}
             </div>
-            <div className="text-xs text-text-faded">
-              {context.mode === 'global' && '点击预览面板进入平台模式，Ctrl+点击多选'}
-              {context.mode === 'platform' && '单平台优化模式，点击背景或「全局」返回'}
-              {context.mode === 'multi-select' && '批量操作模式，点击「清除」或背景返回'}
+            <div className="text-xs text-text-faded whitespace-nowrap overflow-hidden text-ellipsis">
+              {context.mode === 'global' && '点击面板进行专门设置'}
+              {context.mode === 'platform' && '专为此平台优化设置'}
+              {context.mode === 'multi-select' && `同时调整 ${context.selectedPanels.length} 个平台`}
             </div>
           </div>
           
           <div className="flex items-center u-gap-xs">
-            <div className="flex items-center u-gap-xs">
-              <button
-                onClick={() => handleModeSwitch('global')}
-                className={`text-xs px-2 py-1 rounded transition-colors ${
-                  context.mode === 'global'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-text-faded hover:text-text-main hover:bg-blue-50'
-                }`}
-                title="切换到全局模式"
-              >
-                🌐 全局
-              </button>
-              {context.selectedPanels.length > 0 && (
+            {context.selectedPanels.length > 0 && (
+              <div className="flex items-center u-gap-xs">
                 <button
                   onClick={() => handleModeSwitch('global')}
-                  className="text-xs px-2 py-1 rounded text-text-faded hover:text-text-main hover:bg-red-50"
-                  title="清除选择"
+                  className="text-xs px-2 py-1 rounded text-text-faded hover:text-text-main hover:bg-gray-50 transition-colors"
+                  title="返回通用设置"
                 >
-                  ✕ 清除
+                  ← 返回
                 </button>
-              )}
-            </div>
-            {context.selectedPanels.length > 0 && (
-              <span className="text-xs text-text-faded">
-                {context.selectedPanels.length} 个面板
-              </span>
+                <span className="text-xs text-text-faded">
+                  {context.selectedPanels.length} 个平台
+                </span>
+              </div>
             )}
           </div>
         </div>
