@@ -8,6 +8,7 @@ import { Env } from './Env';
 // Stores the db connection in the global scope to prevent multiple instances due to hot reloading with Next.js
 const globalForDb = globalThis as unknown as {
   drizzle: NodePgDatabase<typeof schema>;
+  migrated: boolean;
 };
 
 // Need a database for production? Check out https://www.prisma.io/?via=nextjsboilerplate
@@ -29,8 +30,21 @@ if (Env.NODE_ENV !== 'production') {
   globalForDb.drizzle = db;
 }
 
-await migrate(db, {
-  migrationsFolder: path.join(process.cwd(), 'migrations'),
-});
+// Run migrations only once
+const runMigrations = async () => {
+  if (!globalForDb.migrated) {
+    try {
+      await migrate(db, {
+        migrationsFolder: path.join(process.cwd(), 'migrations'),
+      });
+      globalForDb.migrated = true;
+    } catch (error) {
+      console.error('Migration failed:', error);
+    }
+  }
+};
+
+// Initialize migrations
+runMigrations();
 
 export { db };
