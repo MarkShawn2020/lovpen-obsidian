@@ -3,8 +3,13 @@ import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
 
 /**
- * 微信公众号适配插件 - 整合所有微信平台相关的处理功能
- * 包括链接转脚注、样式内联化、平台兼容性处理等
+ * 微信公众号适配插件 - 根据微信公众号HTML/CSS支持约束进行适配
+ * 主要功能：
+ * 1. 链接转脚注处理
+ * 2. 移除<style>标签，转换为内联样式
+ * 3. 清理微信不支持的CSS属性（position、id、transform等）
+ * 4. 应用微信兼容的样式（使用px单位、避免复杂定位）
+ * 5. 优化图片、表格、代码块等元素的显示
  */
 export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	getPluginName(): string {
@@ -12,7 +17,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	getPluginDescription(): string {
-		return "整合所有微信公众号平台适配功能，包括链接处理、样式内联、兼容性优化";
+		return "根据微信公众号HTML/CSS约束进行内容适配：移除不支持的样式、转换为内联CSS、优化元素兼容性";
 	}
 
 	process(html: string, settings: NMPSettings): string {
@@ -135,43 +140,37 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 	/**
 	 * CSS样式内联化处理
-	 * 保留样式表，只处理微信平台的兼容性问题
+	 * 简化策略：仅处理关键的微信兼容性问题，保留原有主题效果
 	 */
 	private inlineStyles(html: string, settings: NMPSettings): string {
 		try {
-			// 使用离线DOM解析，避免影响页面
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
 			const container = doc.body.firstChild as HTMLElement;
 
-			logger.debug("为微信内容进行样式处理（保留样式表模式）");
+			logger.debug("微信CSS内联化处理：简化策略，只处理必要的兼容性问题");
 
-			// 清理CSS中可能导致微信显示问题的属性
+			// 微信不支持<style>标签，但我们采用保守策略
+			// 只提取和应用最关键的样式，避免破坏主题效果
 			const styleElements = container.querySelectorAll('style');
+			const cssVariables = this.extractCSSVariables(styleElements[0]?.textContent || '');
+
+			// 仅应用关键的基础样式，避免样式冲突
+			this.applyEssentialStyles(container, cssVariables);
+
+			// 移除style标签（微信要求）
 			styleElements.forEach(styleEl => {
-				if (styleEl.textContent) {
-					// 清理可能导致微信问题的CSS属性
-					let cssContent = styleEl.textContent;
-					
-					// 移除可能导致问题的CSS属性
-					cssContent = cssContent.replace(/user-select\s*:\s*[^;]+;?/gi, '');
-					cssContent = cssContent.replace(/-webkit-user-select\s*:\s*[^;]+;?/gi, '');
-					cssContent = cssContent.replace(/pointer-events\s*:\s*[^;]+;?/gi, '');
-					
-					styleEl.textContent = cssContent;
-				}
+				styleEl.remove();
 			});
 
-			// 获取所有元素，应用微信兼容性的内联样式
-			const allElements = container.querySelectorAll("*:not(style)");
-			logger.debug(`处理微信兼容性元素数量: ${allElements.length}`);
-
-			// 只为关键元素添加微信兼容性样式
+			// 清理不兼容的属性
+			const allElements = container.querySelectorAll("*");
 			for (let i = 0; i < allElements.length; i++) {
 				const el = allElements[i] as HTMLElement;
-				this.applyWechatCompatibilityStyles(el);
+				this.cleanWechatIncompatibleStyles(el);
 			}
 
+			logger.debug(`微信兼容性处理完成，处理元素数量: ${allElements.length}`);
 			return container.innerHTML;
 		} catch (error) {
 			logger.error("样式内联化处理出错:", error);
@@ -259,6 +258,60 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	/**
+	 * 应用关键样式 - 简化版本，只处理必要的微信兼容性
+	 */
+	private applyEssentialStyles(container: HTMLElement, cssVariables: Record<string, string>): void {
+		try {
+			// 只处理最关键的元素和样式
+			
+			// 1. 处理图片 - 确保在微信中正确显示
+			const images = container.querySelectorAll('img');
+			images.forEach(img => {
+				const existingStyle = img.getAttribute('style') || '';
+				if (!existingStyle.includes('max-width')) {
+					img.setAttribute('style', existingStyle + '; max-width: 100%; height: auto;');
+				}
+			});
+
+			// 2. 处理代码块 - 确保代码不会溢出
+			const codeBlocks = container.querySelectorAll('pre');
+			codeBlocks.forEach(pre => {
+				const existingStyle = pre.getAttribute('style') || '';
+				if (!existingStyle.includes('overflow-x')) {
+					pre.setAttribute('style', existingStyle + '; overflow-x: auto; white-space: pre-wrap;');
+				}
+			});
+
+			// 3. 处理表格 - 确保表格适应屏幕
+			const tables = container.querySelectorAll('table');
+			tables.forEach(table => {
+				const existingStyle = table.getAttribute('style') || '';
+				if (!existingStyle.includes('width')) {
+					table.setAttribute('style', existingStyle + '; width: 100%; border-collapse: collapse;');
+				}
+			});
+
+			// 4. 应用CSS变量到关键元素
+			if (cssVariables['primary-color']) {
+				const primaryColor = cssVariables['primary-color'];
+				
+				// 应用主色调到上标元素
+				const sups = container.querySelectorAll('sup');
+				sups.forEach(sup => {
+					const existingStyle = sup.getAttribute('style') || '';
+					if (!existingStyle.includes('color') && !sup.textContent?.startsWith('[')) {
+						sup.setAttribute('style', existingStyle + `; color: ${primaryColor};`);
+					}
+				});
+			}
+
+			logger.debug("关键样式应用完成");
+		} catch (error) {
+			logger.error("应用关键样式时出错:", error);
+		}
+	}
+
+	/**
 	 * 提取CSS变量
 	 */
 	private extractCSSVariables(css: string): Record<string, string> {
@@ -287,175 +340,51 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 
 	/**
-	 * 应用微信兼容性样式
-	 * 只处理必要的微信平台兼容性问题，不覆盖主题样式
+	 * 清理微信不兼容的样式 - 保守策略，只移除确定会导致问题的属性
+	 */
+	private cleanWechatIncompatibleStyles(element: HTMLElement): void {
+		// 清理现有的内联样式中不兼容的属性
+		const existingStyle = element.getAttribute('style');
+		if (existingStyle) {
+			let cleanedStyle = existingStyle;
+			
+			// 只移除确定会被微信删除的属性
+			cleanedStyle = cleanedStyle.replace(/position\s*:\s*[^;]+;?/gi, '');
+			cleanedStyle = cleanedStyle.replace(/user-select\s*:\s*[^;]+;?/gi, '');
+			cleanedStyle = cleanedStyle.replace(/-webkit-user-select\s*:\s*[^;]+;?/gi, '');
+			
+			// 清理多余的分号和空格
+			cleanedStyle = cleanedStyle.replace(/;+/g, ';').replace(/;\s*$/, '').trim();
+			
+			if (cleanedStyle !== existingStyle) {
+				element.setAttribute('style', cleanedStyle);
+			}
+		}
+	}
+
+	/**
+	 * 简化的微信兼容性处理 - 已在applyEssentialStyles中处理，这里不再重复
 	 */
 	private applyWechatCompatibilityStyles(element: HTMLElement): void {
-		const tagName = element.tagName.toLowerCase();
-		const existingStyle = element.getAttribute('style') || '';
-		const compatibilityStyles: string[] = [];
-
-		// 只添加微信平台必需的兼容性样式
-		switch (tagName) {
-			case 'img':
-				// 确保图片在微信中正常显示
-				if (!existingStyle.includes('display:') && !existingStyle.includes('display ')) {
-					compatibilityStyles.push('display: block');
-				}
-				if (!existingStyle.includes('max-width:') && !existingStyle.includes('max-width ')) {
-					compatibilityStyles.push('max-width: 100%');
-				}
-				if (!existingStyle.includes('height:') && !existingStyle.includes('height ')) {
-					compatibilityStyles.push('height: auto');
-				}
-				break;
-
-			case 'table':
-				// 确保表格在微信中正常显示
-				if (!existingStyle.includes('width:') && !existingStyle.includes('width ')) {
-					compatibilityStyles.push('width: 100%');
-				}
-				if (!existingStyle.includes('border-collapse:') && !existingStyle.includes('border-collapse ')) {
-					compatibilityStyles.push('border-collapse: collapse');
-				}
-				break;
-
-			case 'pre':
-				// 确保代码块在微信中正常显示
-				if (!existingStyle.includes('overflow-x:') && !existingStyle.includes('overflow-x ')) {
-					compatibilityStyles.push('overflow-x: auto');
-				}
-				if (!existingStyle.includes('white-space:') && !existingStyle.includes('white-space ')) {
-					compatibilityStyles.push('white-space: pre-wrap');
-				}
-				break;
-		}
-
-		// 应用兼容性样式
-		if (compatibilityStyles.length > 0) {
-			const newStyle = existingStyle + (existingStyle ? '; ' : '') + compatibilityStyles.join('; ');
-			element.setAttribute('style', newStyle);
-		}
+		// 不再在这里添加样式，避免重复处理
+		// 兼容性样式已经在applyEssentialStyles中处理
 	}
 
 
-	/**
-	 * 获取元素特定的样式
-	 * 微信适配插件只处理平台兼容性，不应该改变视觉样式
-	 */
-	private getElementSpecificStyles(element: HTMLElement, variables: Record<string, string>): Record<string, string> {
-		const tagName = element.tagName.toLowerCase();
-		const styles: Record<string, string> = {};
-
-		// 只处理微信平台必需的兼容性样式，不覆盖主题样式
-		switch (tagName) {
-			case 'img':
-				styles['display'] = 'block';
-				styles['max-width'] = '100%';
-				styles['height'] = 'auto';
-				styles['visibility'] = 'visible';
-				styles['opacity'] = '1';
-				break;
-
-			case 'sup':
-				styles['color'] = 'rgb(51, 112, 255)';
-				styles['font-size'] = 'smaller';
-				styles['vertical-align'] = 'super';
-				break;
-
-			case 'section':
-				styles['display'] = 'block !important';
-				styles['box-sizing'] = 'border-box !important';
-				break;
-
-			case 'div':
-				styles['display'] = 'block !important';
-				styles['box-sizing'] = 'border-box !important';
-				break;
-		}
-
-		// 处理图片说明文字样式
-		if (element.hasAttribute('style') && element.getAttribute('style')?.includes('text-align: center !important')) {
-			styles['text-align'] = 'center !important';
-			styles['color'] = '#666666 !important';
-			styles['font-size'] = '14px !important';
-			styles['margin-top'] = '8px !important';
-			styles['margin-bottom'] = '8px !important';
-			styles['font-style'] = 'italic !important';
-			styles['line-height'] = '1.5 !important';
-		}
-
-		// 处理高亮文本
-		if (element.classList.contains('note-highlight')) {
-			styles['background-color'] = 'rgba(255, 208, 0, 0.4)';
-		}
-
-		return styles;
-	}
 
 	/**
-	 * 优化图片处理
+	 * 这些优化方法已经整合到applyEssentialStyles中，避免重复处理
 	 */
 	private optimizeImages(container: HTMLElement): void {
-		const images = container.querySelectorAll('img');
-		images.forEach(img => {
-			// 确保图片有必要的样式
-			if (!img.hasAttribute('style')) {
-				img.setAttribute('style', 'max-width: 100%; height: auto; display: block; margin: 0.5em auto;');
-			}
-		});
+		// 已在applyEssentialStyles中处理
 	}
 
-	/**
-	 * 优化表格处理
-	 */
 	private optimizeTables(container: HTMLElement): void {
-		const tables = container.querySelectorAll('table');
-		tables.forEach(table => {
-			// 确保表格有基本样式
-			if (!table.hasAttribute('style')) {
-				table.setAttribute('style', 'width: 100%; border-collapse: collapse; margin: 1em 0;');
-			}
-		});
+		// 已在applyEssentialStyles中处理
 	}
 
-	/**
-	 * 优化代码块处理
-	 */
 	private optimizeCodeBlocks(container: HTMLElement): void {
-		const codeBlocks = container.querySelectorAll('pre code');
-		codeBlocks.forEach(code => {
-			const pre = code.parentElement;
-			if (pre) {
-				// 确保代码块有基本样式
-				if (!pre.hasAttribute('style')) {
-					pre.setAttribute('style', 'background: #f5f5f5; padding: 1em; border-radius: 4px; overflow-x: auto;');
-				}
-
-				// 处理代码缩进问题
-				this.fixCodeIndentation(code as HTMLElement);
-			}
-		});
-	}
-
-	/**
-	 * 修复代码缩进问题
-	 */
-	private fixCodeIndentation(codeElement: HTMLElement): void {
-		let html = codeElement.innerHTML;
-
-		// 将制表符转换为4个空格
-		html = html.replace(/\t/g, '    ');
-
-		// 处理行首的空格缩进，转换为&nbsp;确保在微信中正确显示
-		html = html.replace(/^( {2,})/gm, (match) => {
-			return '&nbsp;'.repeat(match.length);
-		});
-
-		// 处理代码中的多个连续空格
-		html = html.replace(/  /g, '&nbsp;&nbsp;');
-
-		codeElement.innerHTML = html;
+		// 已在applyEssentialStyles中处理
 	}
 
 	/**

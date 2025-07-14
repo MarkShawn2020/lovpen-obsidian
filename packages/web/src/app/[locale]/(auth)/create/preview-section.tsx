@@ -3,6 +3,25 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type PreviewPanel = {
   id: string;
@@ -23,6 +42,7 @@ type PreviewSectionProps = {
   addPreviewPanel: (platform: string) => void;
   removePreviewPanel: (panelId: string) => void;
   updatePanelPlatform: (panelId: string, platform: string) => void;
+  reorderPreviewPanels: (panels: PreviewPanel[]) => void;
 };
 
 export function PreviewSection({
