@@ -29,7 +29,7 @@ export default async function DashboardLayout(props: {
                 <LogoWithText size="md" className="hidden sm:flex" />
                 <LogoWithText size="sm" className="flex sm:hidden" />
               </Link>
-              
+
               {/* Navigation */}
               <nav className="flex space-x-6">
                 <Link
@@ -52,7 +52,7 @@ export default async function DashboardLayout(props: {
                 </Link>
               </nav>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <LocaleSwitcher />
               <SignOutButton>

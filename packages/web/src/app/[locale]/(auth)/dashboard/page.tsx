@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
@@ -67,7 +67,7 @@ function SimpleChart({ data, title, color = 'primary' }: { data: number[]; title
     fig: 'bg-swatch-fig',
     sky: 'bg-swatch-sky',
   };
-  
+
   return (
     <Card>
       <CardHeader>
@@ -118,7 +118,7 @@ function ActivityTimeline() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {dashboardData.recentActivity.map((activity) => (
+          {dashboardData.recentActivity.map(activity => (
             <div key={activity.id} className="flex items-center space-x-4">
               <div className={`p-3 rounded-full ${getActivityColor(activity.type)}`}>
                 <span className="text-sm">{getActivityIcon(activity.type)}</span>
@@ -129,7 +129,8 @@ function ActivityTimeline() {
               </div>
               {activity.amount && (
                 <div className="text-sm font-semibold text-text-main">
-                  ${activity.amount.toFixed(2)}
+                  $
+                  {activity.amount.toFixed(2)}
                 </div>
               )}
             </div>
@@ -155,7 +156,7 @@ function QuickActions() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-3">
-          {actions.map((action) => (
+          {actions.map(action => (
             <Button
               key={action.title}
               variant={action.variant}

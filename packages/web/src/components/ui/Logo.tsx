@@ -18,7 +18,7 @@ const Logo = ({ variant = 'full', size = 'md', className }: LogoProps) => {
   const FullLogo = () => (
     <svg
       viewBox="0 0 40 40"
-      className={cn(sizeClasses[size], "transition-all duration-200", className)}
+      className={cn(sizeClasses[size], 'transition-all duration-200', className)}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -62,7 +62,7 @@ const Logo = ({ variant = 'full', size = 'md', className }: LogoProps) => {
           repeatCount="indefinite"
         />
       </path>
-      
+
       <defs>
         <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#d97757" />
@@ -76,7 +76,7 @@ const Logo = ({ variant = 'full', size = 'md', className }: LogoProps) => {
   const IconLogo = () => (
     <svg
       viewBox="0 0 24 24"
-      className={cn(sizeClasses[size], "transition-colors duration-200", className)}
+      className={cn(sizeClasses[size], 'transition-colors duration-200', className)}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -116,12 +116,13 @@ const Logo = ({ variant = 'full', size = 'md', className }: LogoProps) => {
   // 纯文字版本
   const TextLogo = () => (
     <span className={cn(
-      "font-bold tracking-tight",
-      size === 'sm' && "text-lg",
-      size === 'md' && "text-xl", 
-      size === 'lg' && "text-2xl",
-      className
-    )}>
+      'font-bold tracking-tight',
+      size === 'sm' && 'text-lg',
+      size === 'md' && 'text-xl',
+      size === 'lg' && 'text-2xl',
+      className,
+    )}
+    >
       LovPen
     </span>
   );
@@ -140,10 +141,11 @@ const Logo = ({ variant = 'full', size = 'md', className }: LogoProps) => {
 const LogoWithText = ({ size = 'md', className }: Omit<LogoProps, 'variant'>) => {
   return (
     <div className={cn(
-      "flex items-center space-x-2 group transition-all duration-200",
-      "hover:scale-105 hover:opacity-90",
-      className
-    )}>
+      'flex items-center space-x-2 group transition-all duration-200',
+      'hover:scale-105 hover:opacity-90',
+      className,
+    )}
+    >
       <div className="transition-transform duration-200 group-hover:rotate-3">
         <Logo variant="icon" size={size} />
       </div>
@@ -157,4 +159,4 @@ const LogoWithText = ({ size = 'md', className }: Omit<LogoProps, 'variant'>) =>
 Logo.displayName = 'Logo';
 LogoWithText.displayName = 'LogoWithText';
 
-export { Logo, LogoWithText, type LogoProps };
+export { Logo, type LogoProps, LogoWithText };

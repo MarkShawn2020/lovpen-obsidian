@@ -184,37 +184,45 @@
   }
 
   .u-bg-subtle-grid {
-    background-image: 
+    background-image:
       linear-gradient(rgba(135, 134, 127, 0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(135, 134, 127, 0.03) 1px, transparent 1px);
     background-size: 32px 32px;
   }
 
   .u-bg-organic-noise {
-    background-image: 
+    background-image:
       radial-gradient(circle at 25% 25%, rgba(217, 151, 87, 0.05) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, rgba(98, 154, 144, 0.04) 0%, transparent 50%),
       radial-gradient(circle at 50% 80%, rgba(180, 159, 216, 0.03) 0%, transparent 50%);
-    background-size: 80px 80px, 120px 120px, 100px 100px;
-    background-position: 0 0, 40px 40px, 20px 60px;
+    background-size:
+      80px 80px,
+      120px 120px,
+      100px 100px;
+    background-position:
+      0 0,
+      40px 40px,
+      20px 60px;
   }
 
   .u-bg-subtle-waves {
-    background-image: 
+    background-image:
       linear-gradient(45deg, transparent 40%, rgba(135, 134, 127, 0.02) 50%, transparent 60%),
       linear-gradient(-45deg, transparent 40%, rgba(135, 134, 127, 0.02) 50%, transparent 60%);
     background-size: 60px 60px;
   }
 
   .u-bg-premium-texture {
-    background-image: 
+    background-image:
       radial-gradient(circle at 1px 1px, rgba(217, 151, 87, 0.06) 1px, transparent 0),
       linear-gradient(45deg, transparent 49%, rgba(135, 134, 127, 0.01) 50%, transparent 51%);
-    background-size: 20px 20px, 40px 40px;
+    background-size:
+      20px 20px,
+      40px 40px;
   }
 
   .u-bg-layered-subtle {
-    background-image: 
+    background-image:
       radial-gradient(ellipse at top, rgba(217, 151, 87, 0.03) 0%, transparent 70%),
       radial-gradient(ellipse at bottom, rgba(98, 154, 144, 0.02) 0%, transparent 70%),
       linear-gradient(180deg, rgba(240, 238, 230, 0.5) 0%, rgba(249, 249, 247, 0.8) 100%);

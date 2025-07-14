@@ -83,7 +83,7 @@ export default async function Index(props: IIndexProps) {
                 {t('hero_cta_secondary')}
               </Button>
             </div>
-            
+
             {/* LovPen Flow System */}
             <div className="mt-16 relative">
               <div className="max-w-6xl mx-auto">
@@ -91,7 +91,7 @@ export default async function Index(props: IIndexProps) {
                 <div className="relative flex items-center justify-center min-h-[500px]">
                   {/* 输入源 - 左侧 */}
                   <div className="absolute left-0 top-1/2 transform -translate-y-1/2 space-y-4">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{animationDelay: '0s'}}>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{ animationDelay: '0s' }}>
                       <div className="flex items-center space-x-3">
                         <span className="text-2xl">💭</span>
                         <div className="text-sm">
@@ -100,7 +100,7 @@ export default async function Index(props: IIndexProps) {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{animationDelay: '1s'}}>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{ animationDelay: '1s' }}>
                       <div className="flex items-center space-x-3">
                         <span className="text-2xl">📊</span>
                         <div className="text-sm">
@@ -109,7 +109,7 @@ export default async function Index(props: IIndexProps) {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{animationDelay: '2s'}}>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{ animationDelay: '2s' }}>
                       <div className="flex items-center space-x-3">
                         <span className="text-2xl">🎤</span>
                         <div className="text-sm">
@@ -354,7 +354,7 @@ export default async function Index(props: IIndexProps) {
                 查看 GitHub 源码
               </Button>
             </div>
-            
+
             {/* Trust indicators */}
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-text-faded max-w-4xl mx-auto">
               <div className="flex items-center space-x-2 justify-center md:justify-start">
