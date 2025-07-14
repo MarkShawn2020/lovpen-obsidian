@@ -1,0 +1,99 @@
+{
+  "RootLayout": {
+    "home_link": "Home",
+    "about_link": "About",
+    "counter_link": "Counter",
+    "portfolio_link": "Portfolio",
+    "sign_in_link": "Sign in",
+    "sign_up_link": "Sign up"
+  },
+  "Header": {
+    "features": "Features",
+    "docs": "Docs",
+    "pricing": "Pricing",
+    "about": "About",
+    "sign_in": "Sign in",
+    "get_started": "Get Started",
+    "download_plugin": "Download Plugin",
+    "dashboard": "Dashboard",
+    "sign_out": "Sign out"
+  },
+  "BaseTemplate": {
+    "description": "Write with Love, Share Everywhere - LovPen Obsidian Plugin",
+    "made_with": "Made with <author></author>."
+  },
+  "Index": {
+    "meta_title": "LovPen - 智能创作平台",
+    "meta_description": "只需输入想法，LovPen 自动基于你的知识库、文风偏好和目标平台智能成文。支持语音输入、对话修改、一键多平台分发。",
+    "hero_title": "LovPen 帮你把想法变成精彩内容",
+    "hero_subtitle": "只需说出你的想法，LovPen 就能基于你的知识库、学习你喜欢的文风，为不同平台自动创作和排版，一键分发到微信、小红书、即刻、推特",
+    "hero_cta_primary": "免费开始创作",
+    "hero_cta_secondary": "看看 LovPen 怎么写",
+    "ai_process_title": "LovPen 智能创作流程",
+    "ai_process_subtitle": "从想法到发布，LovPen 全程协助",
+    "features_title": "让 LovPen 成为你的专属创作助手",
+    "features_subtitle": "个性化学习，智能化创作，自动化分发",
+    "platforms_title": "一键适配所有主流平台",
+    "platforms_subtitle": "LovPen 自动优化每个平台的格式和风格",
+    "cta_title": "开启 LovPen 驱动的创作新时代",
+    "cta_subtitle": "让 LovPen 学习你的风格，为你创作出独一无二的内容",
+    "cta_button": "立即体验 LovPen 创作"
+  },
+  "Counter": {
+    "meta_title": "Counter",
+    "meta_description": "An example of DB operation",
+    "loading_counter": "Loading counter...",
+    "security_powered_by": "Security, bot detection and rate limiting powered by"
+  },
+  "CounterForm": {
+    "presentation": "The counter is stored in the database and incremented by the value you provide.",
+    "label_increment": "Increment by",
+    "button_increment": "Increment",
+    "error_increment_range": "Value must be between 1 and 3"
+  },
+  "CurrentCount": {
+    "count": "Count: {count}"
+  },
+  "About": {
+    "meta_title": "About",
+    "meta_description": "About page description",
+    "about_paragraph": "Welcome to our About page! We are a team of passionate individuals dedicated to creating amazing software.",
+    "translation_powered_by": "Translation powered by"
+  },
+  "Portfolio": {
+    "meta_title": "Portfolio",
+    "meta_description": "Welcome to my portfolio page!",
+    "presentation": "Welcome to my portfolio page! Here you will find a carefully curated collection of my work and accomplishments. Through this portfolio, I'm to showcase my expertise, creativity, and the value I can bring to your projects.",
+    "portfolio_name": "Portfolio {name}",
+    "error_reporting_powered_by": "Error reporting powered by",
+    "coverage_powered_by": "Code coverage powered by"
+  },
+  "PortfolioSlug": {
+    "meta_title": "Portfolio {slug}",
+    "meta_description": "Portfolio {slug} description",
+    "header": "Portfolio {slug}",
+    "content": "Created a set of promotional materials and branding elements for a corporate event. Crafted a visually unified theme, encompassing a logo, posters, banners, and digital assets. Integrated the client's brand identity while infusing it with a contemporary and innovative approach.",
+    "code_review_powered_by": "Code review powered by"
+  },
+  "SignIn": {
+    "meta_title": "Sign in",
+    "meta_description": "Seamlessly sign in to your account with our user-friendly login process."
+  },
+  "SignUp": {
+    "meta_title": "Sign up",
+    "meta_description": "Effortlessly create an account through our intuitive sign-up process."
+  },
+  "Dashboard": {
+    "meta_title": "Dashboard",
+    "hello_message": "Hello {email}!",
+    "alternative_message": "Want to build your SaaS faster using the same stack? Try <url></url>."
+  },
+  "UserProfile": {
+    "meta_title": "User Profile"
+  },
+  "DashboardLayout": {
+    "dashboard_link": "Dashboard",
+    "user_profile_link": "Manage your account",
+    "sign_out": "Sign out"
+  }
+}

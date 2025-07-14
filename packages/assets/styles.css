@@ -63,28 +63,97 @@
 	white-space: nowrap;
 }
 
-/* 工具栏容器 */
+/* 工具栏容器 - Anthropic Design System */
 .toolbar-container {
-	padding: 12px 16px;
+	/* Design tokens */
+	--colors-background-main: #F9F9F7;
+	--colors-background-ivory-medium: #F0EEE6;
+	--colors-background-oat: #F7F4EC;
+	--colors-text-main: #181818;
+	--colors-text-faded: #87867F;
+	--colors-border-default: #87867F;
+	--colors-primary: #D97757;
+	--colors-swatch-cloud-light: #E8E6DC;
+	--spacing-xs: 0.5rem;
+	--spacing-s: 1rem;
+	--spacing-m: 1.5rem;
+	--spacing-l: 3rem;
+	--borderRadius-md: 0.75rem;
+	--borderRadius-lg: 1.5rem;
+	--font-sans: "Fira Code", ui-sans-serif, system-ui, sans-serif;
+	
+	/* Container layout */
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-l);
+	padding: var(--spacing-m);
+	background-color: var(--colors-background-main);
+	border-left: 1px solid var(--colors-border-default);
+	font-family: var(--font-sans);
+	min-width: 320px;
+	max-width: 480px;
+	height: 100vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	
+	/* Modern scrollbar */
+	scrollbar-width: thin;
+	scrollbar-color: var(--colors-text-faded) transparent;
+}
+
+.toolbar-container::-webkit-scrollbar {
+	width: 6px;
+}
+
+.toolbar-container::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.toolbar-container::-webkit-scrollbar-thumb {
+	background-color: var(--colors-text-faded);
+	border-radius: 3px;
+	opacity: 0.5;
+}
+
+.toolbar-container::-webkit-scrollbar-thumb:hover {
+	opacity: 0.8;
+}
+
+/* Toolbar section headers */
+.toolbar-section-header {
+	font-size: clamp(1.25rem, 1.17rem + 0.32vw, 1.5rem);
+	font-weight: 400;
+	color: var(--colors-text-main);
+	margin-bottom: var(--spacing-s);
+	border-bottom: 1px solid var(--colors-swatch-cloud-light);
+	padding-bottom: var(--spacing-xs);
+}
+
+/* Control groups */
+.toolbar-control-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-s);
+	padding: var(--spacing-m);
+	background: var(--colors-background-ivory-medium);
+	border-radius: var(--borderRadius-md);
+	border: 1px solid var(--colors-swatch-cloud-light);
 }
 
 .toolbar-content {
 	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 16px;
+	flex-direction: column;
+	gap: var(--spacing-m);
 }
 
 .toolbar-section {
 	display: flex;
-	align-items: center;
-	gap: 16px;
-	flex-wrap: wrap;
+	flex-direction: column;
+	gap: var(--spacing-s);
 }
 
 .toolbar-section-left {
-	flex: 1;
+	width: 100%;
 }
 
 /* 垂直布局工具栏，让每个设置项单独一行 */
@@ -92,7 +161,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: 12px;
+	gap: var(--spacing-s);
 }
 
 .toolbar-vertical .toolbar-group {
@@ -101,8 +170,7 @@
 }
 
 .toolbar-vertical .select-wrapper {
-	width: 70%;
-	max-width: 300px;
+	width: 100%;
 }
 
 .toolbar-vertical .toolbar-select {
@@ -110,30 +178,42 @@
 }
 
 .toolbar-section-right {
-	justify-content: flex-end;
+	width: 100%;
+	justify-content: flex-start;
 }
 
 /* 工具组和控件 */
 .toolbar-group {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	position: relative;
-	border-radius: 6px;
+	justify-content: space-between;
+	gap: var(--spacing-s);
+	padding: var(--spacing-s);
+	background: white;
+	border-radius: var(--borderRadius-md);
+	border: 1px solid var(--colors-swatch-cloud-light);
+	transition: all 0.2s ease;
+}
+
+.toolbar-group:hover {
+	border-color: var(--colors-primary);
+	box-shadow: 0 2px 8px rgba(217, 119, 87, 0.1);
 }
 
 .toolbar-label {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: var(--spacing-xs);
 	font-size: 14px;
 	font-weight: 500;
-	color: var(--text-normal);
+	color: var(--colors-text-main);
 	white-space: nowrap;
+	flex-shrink: 0;
 }
 
 .toolbar-label svg {
-	opacity: 0.9;
+	opacity: 0.8;
+	color: var(--colors-primary);
 }
 
 .select-wrapper {
@@ -155,36 +235,38 @@
 .toolbar-select {
 	appearance: none;
 	-webkit-appearance: none;
-	background-color: var(--background-secondary);
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 6px;
+	background-color: white;
+	border: 1px solid var(--colors-swatch-cloud-light);
+	border-radius: var(--borderRadius-md);
 	padding: 8px 32px 8px 12px;
 	font-size: 14px;
-	color: var(--text-normal);
-	min-width: 140px;
+	color: var(--colors-text-main);
+	font-family: var(--font-sans);
+	width: 100%;
 	height: 36px;
 	cursor: pointer;
 	transition: all 0.2s ease;
 }
 
 .toolbar-select:hover, .toolbar-select:focus {
-	border-color: #4A6BF5;
+	border-color: var(--colors-primary);
 	outline: none;
-	box-shadow: 0 0 0 2px rgba(74, 107, 245, 0.2);
+	box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.2);
 }
 
 .toolbar-button {
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	padding: 8px 16px;
-	border-radius: 6px;
+	gap: var(--spacing-xs);
+	padding: 0.75rem 1.5rem;
+	border-radius: var(--borderRadius-md);
 	font-size: 14px;
 	font-weight: 500;
-	background-color: var(--background-secondary);
-	color: var(--text-normal);
-	border: none;
+	font-family: var(--font-sans);
+	background-color: transparent;
+	color: var(--colors-text-main);
+	border: 1px solid var(--colors-border-default);
 	cursor: pointer;
 	height: 36px;
 	transition: all 0.2s ease;
@@ -192,29 +274,41 @@
 }
 
 .toolbar-button:hover {
-	background-color: var(--background-modifier-hover);
-	transform: translateY(-1px);
+	background-color: var(--colors-background-oat);
+	transform: scale(1.02);
 	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-.copy-button {
-	background-color: #4A6BF5;
+.toolbar-button--primary {
+	background-color: var(--colors-primary);
 	color: white;
+	border-color: var(--colors-primary);
+}
+
+.toolbar-button--primary:hover {
+	background-color: #c06649;
+	border-color: #c06649;
+}
+
+.copy-button {
+	background-color: var(--colors-primary);
+	color: white;
+	border-color: var(--colors-primary);
 }
 
 .copy-button:hover {
-	background-color: #3958da;
+	background-color: #c06649;
 	color: white;
 }
 
 .refresh-button {
-	background-color: var(--background-secondary);
-	color: var(--text-normal);
-	border: 1px solid var(--background-modifier-border);
+	background-color: transparent;
+	color: var(--colors-text-main);
+	border: 1px solid var(--colors-border-default);
 }
 
 .refresh-button:hover {
-	background-color: var(--background-secondary-alt);
+	background-color: var(--colors-background-oat);
 }
 
 .upload-input {
@@ -368,12 +462,12 @@
 	white-space: nowrap;
 }
 
-/* 开关样式 */
+/* 开关样式 - Anthropic Design */
 .switch {
 	position: relative;
 	display: inline-block;
-	width: 36px;
-	height: 18px;
+	width: 44px;
+	height: 24px;
 }
 
 .switch input {
@@ -389,58 +483,58 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: var(--background-secondary);
-	transition: .3s;
-	border: 1px solid var(--background-modifier-border);
+	background-color: var(--colors-swatch-cloud-light);
+	transition: all 0.3s ease;
+	border: 1px solid var(--colors-border-default);
+	border-radius: 34px;
 }
 
 .slider:before {
 	position: absolute;
 	content: "";
-	height: 12px;
-	width: 12px;
-	left: 3px;
+	height: 18px;
+	width: 18px;
+	left: 2px;
 	bottom: 2px;
-	background-color: var(--text-muted);
-	transition: .3s;
+	background-color: white;
+	transition: all 0.3s ease;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 input:checked + .slider {
-	background-color: #4A6BF5;
-	border-color: #4A6BF5;
+	background-color: var(--colors-primary);
+	border-color: var(--colors-primary);
 }
 
 input:checked + .slider:before {
 	background-color: white;
-	transform: translateX(16px);
+	transform: translateX(20px);
 }
 
-.slider.round {
-	border-radius: 34px;
+.slider:hover {
+	box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.1);
 }
 
-.slider.round:before {
-	border-radius: 50%;
-}
-
-/* 颜色选择器样式 */
+/* 颜色选择器样式 - Anthropic Design */
 .color-picker-wrapper {
 	display: flex;
 	align-items: center;
 	position: relative;
 	min-width: 40px;
-	transition: opacity 0.3s ease;
+	transition: all 0.3s ease;
 }
 
 .toolbar-color-picker {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 30px;
-	height: 30px;
+	width: 36px;
+	height: 36px;
 	opacity: 0;
 	cursor: pointer;
 	z-index: 2;
+	border-radius: var(--borderRadius-md);
 }
 
 .toolbar-color-picker:disabled {
@@ -448,13 +542,45 @@ input:checked + .slider:before {
 }
 
 .color-preview {
-	width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	border: 2px solid var(--background-primary);
-	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+	width: 32px;
+	height: 32px;
+	border-radius: var(--borderRadius-md);
+	border: 2px solid var(--colors-swatch-cloud-light);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	display: inline-block;
 	cursor: pointer;
 	position: relative;
-	margin-right: 4px;
+	transition: all 0.2s ease;
+}
+
+.color-preview:hover {
+	border-color: var(--colors-primary);
+	transform: scale(1.05);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+	.toolbar-container {
+		width: 100% !important;
+		height: auto;
+		max-height: 60vh;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		border-radius: var(--borderRadius-lg) var(--borderRadius-lg) 0 0;
+		border-left: none;
+		border-top: 1px solid var(--colors-border-default);
+		box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+		z-index: 1000;
+	}
+
+	.toolbar-content {
+		gap: var(--spacing-s);
+	}
+
+	.toolbar-control-group {
+		padding: var(--spacing-s);
+	}
 }
