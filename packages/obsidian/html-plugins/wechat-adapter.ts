@@ -230,7 +230,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 微信平台特定优化
+	 * 微信平台特定优化 - 全新策略：DOM预重构
 	 */
 	private optimizeForWechat(html: string, settings: NMPSettings): string {
 		try {
@@ -238,19 +238,26 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
 			const container = doc.body.firstChild as HTMLElement;
 
+			// 核心策略：预测微信编辑器行为，提前重构内容
+			html = this.predictiveRestructure(container);
+
+			// 重新解析已重构的HTML
+			const restructuredDoc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const restructuredContainer = restructuredDoc.body.firstChild as HTMLElement;
+
 			// 优化图片处理
-			this.optimizeImages(container);
+			this.optimizeImages(restructuredContainer);
 
 			// 优化表格处理
-			this.optimizeTables(container);
+			this.optimizeTables(restructuredContainer);
 
 			// 优化代码块处理
-			this.optimizeCodeBlocks(container);
+			this.optimizeCodeBlocks(restructuredContainer);
 
 			// 清理不兼容的属性和标签
-			this.cleanupIncompatibleContent(container);
+			this.cleanupIncompatibleContent(restructuredContainer);
 
-			return container.innerHTML;
+			return restructuredContainer.innerHTML;
 		} catch (error) {
 			logger.error("微信平台优化处理出错:", error);
 			return html;
@@ -258,57 +265,556 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 应用关键样式 - 简化版本，只处理必要的微信兼容性
+	 * 预测性重构：模拟微信编辑器的行为，提前重构内容
+	 */
+	private predictiveRestructure(container: HTMLElement): string {
+		try {
+			logger.debug("开始预测性DOM重构");
+
+			// 处理元信息区域 - 这是最容易被微信编辑器重构的区域
+			this.restructureMetaSection(container);
+
+			// 处理其他可能被重构的复杂结构
+			this.restructureComplexContainers(container);
+
+			return container.innerHTML;
+		} catch (error) {
+			logger.error("预测性重构出错:", error);
+			return container.innerHTML;
+		}
+	}
+
+	/**
+	 * 重构元信息区域 - 核心难点
+	 */
+	private restructureMetaSection(container: HTMLElement): void {
+		try {
+			const metaSections = container.querySelectorAll('.claude-meta-section');
+			
+			metaSections.forEach(metaSection => {
+				const section = metaSection as HTMLElement;
+				const metaContent = section.querySelector('.claude-meta-content') as HTMLElement;
+				
+				if (!metaContent) return;
+
+				// 提取容器样式：将3层嵌套的样式合并
+				const sectionStyles = this.extractStyles(section);
+				const contentStyles = this.extractStyles(metaContent);
+				const mergedContainerStyles = this.mergeStyles(sectionStyles, contentStyles);
+
+				// 处理元信息项目
+				const metaItems = metaContent.querySelectorAll('.claude-meta-item');
+				const newParagraphs: string[] = [];
+
+				metaItems.forEach(item => {
+					const itemElement = item as HTMLElement;
+					const itemStyles = this.extractStyles(itemElement);
+					
+					// 合并所有层级的样式到最终的p标签
+					const finalParagraphStyles = this.mergeStyles(mergedContainerStyles, itemStyles);
+
+					// 处理内部的label和value
+					const label = itemElement.querySelector('.claude-meta-label') as HTMLElement;
+					const value = itemElement.querySelector('.claude-meta-value') as HTMLElement;
+
+					if (label && value) {
+						const labelStyles = this.extractStyles(label);
+						const valueStyles = this.extractStyles(value);
+
+						// 创建微信偏好的p+span结构
+						const paragraph = `<p style="${finalParagraphStyles}">` +
+							`<span style="${labelStyles}">${label.textContent}</span>` +
+							`<span style="${valueStyles}">${value.textContent}</span>` +
+							`</p>`;
+						
+						newParagraphs.push(paragraph);
+					}
+				});
+
+				// 处理标签区域
+				const metaTags = metaContent.querySelector('.claude-meta-tags') as HTMLElement;
+				if (metaTags) {
+					const tagsStyles = this.extractStyles(metaTags);
+					const finalTagsStyles = this.mergeStyles(mergedContainerStyles, tagsStyles);
+
+					const tags = metaTags.querySelectorAll('.claude-meta-tag');
+					const tagSpans: string[] = [];
+
+					tags.forEach(tag => {
+						const tagElement = tag as HTMLElement;
+						const tagStyles = this.extractStyles(tagElement);
+						tagSpans.push(`<span style="${tagStyles}">${tagElement.textContent}</span>`);
+					});
+
+					if (tagSpans.length > 0) {
+						const tagsParagraph = `<p style="${finalTagsStyles}">${tagSpans.join('')}</p>`;
+						newParagraphs.push(tagsParagraph);
+					}
+				}
+
+				// 替换原有的复杂结构
+				if (newParagraphs.length > 0) {
+					section.outerHTML = newParagraphs.join('');
+				}
+			});
+
+			logger.debug("元信息区域重构完成");
+		} catch (error) {
+			logger.error("重构元信息区域出错:", error);
+		}
+	}
+
+	/**
+	 * 提取元素的内联样式
+	 */
+	private extractStyles(element: HTMLElement): string {
+		return element.getAttribute('style') || '';
+	}
+
+	/**
+	 * 合并多个样式字符串
+	 */
+	private mergeStyles(...styles: string[]): string {
+		const mergedStyles: string[] = [];
+		
+		styles.forEach(style => {
+			if (style && style.trim()) {
+				// 清理样式字符串
+				const cleanStyle = style.trim().replace(/;+$/, '');
+				if (cleanStyle) {
+					mergedStyles.push(cleanStyle);
+				}
+			}
+		});
+
+		return mergedStyles.join('; ');
+	}
+
+	/**
+	 * 重构其他复杂容器
+	 */
+	private restructureComplexContainers(container: HTMLElement): void {
+		try {
+			// 处理其他可能被微信编辑器重构的复杂嵌套结构
+			
+			// 1. 处理深层嵌套的div容器
+			this.flattenNestedDivs(container);
+
+			// 2. 处理复杂的section结构
+			this.simplifyComplexSections(container);
+
+			// 3. 处理可能被转换的其他容器元素
+			this.convertContainerElements(container);
+
+			logger.debug("复杂容器重构完成");
+		} catch (error) {
+			logger.error("重构复杂容器出错:", error);
+		}
+	}
+
+	/**
+	 * 扁平化嵌套的div结构
+	 */
+	private flattenNestedDivs(container: HTMLElement): void {
+		try {
+			// 查找深度嵌套的div结构（超过2层的）
+			const nestedDivs = container.querySelectorAll('div div div');
+			
+			nestedDivs.forEach(deepDiv => {
+				const element = deepDiv as HTMLElement;
+				
+				// 如果这个div只包含文本或简单内容，将其转换为span
+				if (this.isSimpleContent(element)) {
+					const span = container.ownerDocument.createElement('span');
+					
+					// 合并所有父级div的样式
+					const parentStyles = this.collectParentStyles(element);
+					span.setAttribute('style', parentStyles);
+					
+					// 复制内容
+					span.innerHTML = element.innerHTML;
+					
+					// 替换原元素
+					element.replaceWith(span);
+				}
+			});
+		} catch (error) {
+			logger.error("扁平化嵌套div时出错:", error);
+		}
+	}
+
+	/**
+	 * 简化复杂的section结构
+	 */
+	private simplifyComplexSections(container: HTMLElement): void {
+		try {
+			const sections = container.querySelectorAll('section');
+			
+			sections.forEach(section => {
+				const sectionElement = section as HTMLElement;
+				
+				// 如果section内容比较简单，考虑转换为div或p
+				if (this.isSimpleSection(sectionElement)) {
+					const replacement = container.ownerDocument.createElement('div');
+					
+					// 保留样式
+					const styles = this.extractStyles(sectionElement);
+					if (styles) {
+						replacement.setAttribute('style', styles);
+					}
+					
+					// 复制内容和属性
+					replacement.innerHTML = sectionElement.innerHTML;
+					if (sectionElement.className) {
+						replacement.className = sectionElement.className;
+					}
+					
+					// 替换
+					sectionElement.replaceWith(replacement);
+				}
+			});
+		} catch (error) {
+			logger.error("简化section结构时出错:", error);
+		}
+	}
+
+	/**
+	 * 转换容器元素为微信偏好的格式
+	 */
+	private convertContainerElements(container: HTMLElement): void {
+		try {
+			// 将一些容器元素转换为更兼容的格式
+			
+			// 处理article、aside等语义化标签
+			const semanticTags = container.querySelectorAll('article, aside, header, footer, nav');
+			semanticTags.forEach(tag => {
+				const element = tag as HTMLElement;
+				const div = container.ownerDocument.createElement('div');
+				
+				// 保留样式和类名
+				const styles = this.extractStyles(element);
+				if (styles) div.setAttribute('style', styles);
+				if (element.className) div.className = element.className;
+				
+				div.innerHTML = element.innerHTML;
+				element.replaceWith(div);
+			});
+		} catch (error) {
+			logger.error("转换容器元素时出错:", error);
+		}
+	}
+
+	/**
+	 * 判断元素内容是否简单
+	 */
+	private isSimpleContent(element: HTMLElement): boolean {
+		// 检查是否只包含文本和简单的内联元素
+		const childNodes = element.childNodes;
+		for (let i = 0; i < childNodes.length; i++) {
+			const node = childNodes[i];
+			if (node.nodeType === Node.ELEMENT_NODE) {
+				const tag = (node as Element).tagName.toLowerCase();
+				// 如果包含块级元素，则不是简单内容
+				if (['div', 'p', 'section', 'article', 'header', 'footer'].includes(tag)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 判断section是否简单
+	 */
+	private isSimpleSection(element: HTMLElement): boolean {
+		// 检查section是否包含复杂的嵌套结构
+		const nestedContainers = element.querySelectorAll('div div, section section');
+		return nestedContainers.length < 2; // 允许一定程度的嵌套
+	}
+
+	/**
+	 * 收集父级样式
+	 */
+	private collectParentStyles(element: HTMLElement): string {
+		const styles: string[] = [];
+		let current: HTMLElement | null = element;
+		
+		// 向上遍历收集样式，最多3层
+		let depth = 0;
+		while (current && depth < 3) {
+			const style = this.extractStyles(current);
+			if (style) {
+				styles.unshift(style); // 父级样式在前
+			}
+			current = current.parentElement;
+			depth++;
+		}
+		
+		return this.mergeStyles(...styles);
+	}
+
+
+	/**
+	 * 应用关键样式 - 完整版本，将CSS样式转换为内联样式
 	 */
 	private applyEssentialStyles(container: HTMLElement, cssVariables: Record<string, string>): void {
 		try {
-			// 只处理最关键的元素和样式
-			
-			// 1. 处理图片 - 确保在微信中正确显示
-			const images = container.querySelectorAll('img');
-			images.forEach(img => {
-				const existingStyle = img.getAttribute('style') || '';
-				if (!existingStyle.includes('max-width')) {
-					img.setAttribute('style', existingStyle + '; max-width: 100%; height: auto;');
-				}
+			// 获取所有style标签的内容
+			const styleElements = container.querySelectorAll('style');
+			let allCSS = '';
+			styleElements.forEach(styleEl => {
+				allCSS += styleEl.textContent || '';
 			});
 
-			// 2. 处理代码块 - 确保代码不会溢出
-			const codeBlocks = container.querySelectorAll('pre');
-			codeBlocks.forEach(pre => {
-				const existingStyle = pre.getAttribute('style') || '';
-				if (!existingStyle.includes('overflow-x')) {
-					pre.setAttribute('style', existingStyle + '; overflow-x: auto; white-space: pre-wrap;');
-				}
-			});
-
-			// 3. 处理表格 - 确保表格适应屏幕
-			const tables = container.querySelectorAll('table');
-			tables.forEach(table => {
-				const existingStyle = table.getAttribute('style') || '';
-				if (!existingStyle.includes('width')) {
-					table.setAttribute('style', existingStyle + '; width: 100%; border-collapse: collapse;');
-				}
-			});
-
-			// 4. 应用CSS变量到关键元素
-			if (cssVariables['primary-color']) {
-				const primaryColor = cssVariables['primary-color'];
-				
-				// 应用主色调到上标元素
-				const sups = container.querySelectorAll('sup');
-				sups.forEach(sup => {
-					const existingStyle = sup.getAttribute('style') || '';
-					if (!existingStyle.includes('color') && !sup.textContent?.startsWith('[')) {
-						sup.setAttribute('style', existingStyle + `; color: ${primaryColor};`);
-					}
-				});
-			}
+			// 解析CSS并应用到对应元素
+			this.applyCSSRules(container, allCSS, cssVariables);
 
 			logger.debug("关键样式应用完成");
 		} catch (error) {
 			logger.error("应用关键样式时出错:", error);
 		}
+	}
+
+	/**
+	 * 解析CSS规则并应用到对应元素
+	 */
+	private applyCSSRules(container: HTMLElement, css: string, cssVariables: Record<string, string>): void {
+		try {
+			// 替换CSS变量
+			let processedCSS = css;
+			Object.entries(cssVariables).forEach(([key, value]) => {
+				const varRegex = new RegExp(`var\\(--${key}\\)`, 'g');
+				processedCSS = processedCSS.replace(varRegex, value);
+			});
+
+			// 解析CSS并应用到元素
+			this.parseCSSAndApply(container, processedCSS);
+
+			// 额外的微信兼容性处理
+			this.applyWechatCompatibilityFixes(container);
+
+		} catch (error) {
+			logger.error("应用CSS规则时出错:", error);
+		}
+	}
+
+	/**
+	 * 解析CSS并应用到元素 - 使用正则表达式解析
+	 */
+	private parseCSSAndApply(container: HTMLElement, css: string): void {
+		try {
+			// 移除注释
+			css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+			// 匹配CSS规则
+			const ruleRegex = /([^{]+)\{([^}]+)\}/g;
+			let match;
+
+			while ((match = ruleRegex.exec(css)) !== null) {
+				const selector = match[1].trim();
+				const declarations = match[2].trim();
+
+				// 跳过@规则和其他特殊规则
+				if (selector.startsWith('@') || selector.includes('::')) {
+					continue;
+				}
+
+				try {
+					// 查找匹配的元素
+					const elements = container.querySelectorAll(selector);
+					
+					elements.forEach(element => {
+						const htmlElement = element as HTMLElement;
+						this.applyDeclarations(htmlElement, declarations);
+					});
+				} catch (selectorError) {
+					// 如果选择器无效，跳过
+					logger.debug(`跳过无效选择器: ${selector}`);
+				}
+			}
+		} catch (error) {
+			logger.error("解析CSS时出错:", error);
+		}
+	}
+
+	/**
+	 * 应用CSS声明到元素
+	 */
+	private applyDeclarations(element: HTMLElement, declarations: string): void {
+		try {
+			const existingStyle = element.getAttribute('style') || '';
+			const newStyles: string[] = [];
+
+			// 解析CSS声明
+			const declarationRegex = /([^:]+):([^;]+);?/g;
+			let match;
+
+			while ((match = declarationRegex.exec(declarations)) !== null) {
+				const property = match[1].trim();
+				const value = match[2].trim();
+
+				// 跳过微信不支持的属性
+				if (this.isWechatCompatibleProperty(property)) {
+					// 对flex布局进行特殊处理，转换为微信更兼容的布局
+					const processedStyle = this.processFlexLayout(property, value);
+					if (processedStyle) {
+						newStyles.push(processedStyle);
+					}
+				}
+			}
+
+			// 合并样式
+			if (newStyles.length > 0) {
+				const newStylesStr = newStyles.join('; ');
+				const mergedStyle = existingStyle ? `${existingStyle}; ${newStylesStr}` : newStylesStr;
+				element.setAttribute('style', mergedStyle);
+			}
+		} catch (error) {
+			logger.error("应用CSS声明时出错:", error);
+		}
+	}
+
+	/**
+	 * 处理flex布局，转换为微信更兼容的布局
+	 */
+	private processFlexLayout(property: string, value: string): string | null {
+		// flex布局转换映射
+		const flexMapping: Record<string, string> = {
+			'display': value === 'flex' ? 'display: block' : `display: ${value}`,
+			'flex-direction': value === 'row' ? 'display: inline-block' : 'display: block',
+			'justify-content': this.convertJustifyContent(value),
+			'align-items': this.convertAlignItems(value),
+			'flex': this.convertFlex(value)
+		};
+
+		// 如果是flex相关属性，进行转换
+		if (flexMapping[property]) {
+			return flexMapping[property];
+		}
+
+		// 其他属性直接返回
+		return `${property}: ${value}`;
+	}
+
+	/**
+	 * 转换justify-content属性
+	 */
+	private convertJustifyContent(value: string): string {
+		const mapping: Record<string, string> = {
+			'center': 'text-align: center',
+			'flex-start': 'text-align: left',
+			'flex-end': 'text-align: right',
+			'space-between': 'text-align: justify',
+			'space-around': 'text-align: center'
+		};
+		return mapping[value] || 'text-align: left';
+	}
+
+	/**
+	 * 转换align-items属性
+	 */
+	private convertAlignItems(value: string): string {
+		const mapping: Record<string, string> = {
+			'center': 'vertical-align: middle',
+			'flex-start': 'vertical-align: top',
+			'flex-end': 'vertical-align: bottom',
+			'baseline': 'vertical-align: baseline'
+		};
+		return mapping[value] || 'vertical-align: top';
+	}
+
+	/**
+	 * 转换flex属性
+	 */
+	private convertFlex(value: string): string {
+		// flex: 1 转换为 width: 100%
+		if (value === '1' || value === '1 1 0%') {
+			return 'width: 100%';
+		}
+		// 其他flex值的处理
+		return 'display: inline-block';
+	}
+
+
+	/**
+	 * 检查CSS属性是否与微信兼容
+	 */
+	private isWechatCompatibleProperty(property: string): boolean {
+		// 微信不支持的属性列表（更保守的策略）
+		const incompatibleProperties = [
+			'position',
+			'user-select',
+			'-webkit-user-select',
+			'-moz-user-select',
+			'transform',
+			'transform-origin',
+			'animation',
+			'transition',
+			'filter',
+			'backdrop-filter',
+			'mix-blend-mode',
+			'clip-path',
+			'mask',
+			'overflow-x',
+			'overflow-y'
+		];
+		
+		// 微信支持但可能被编辑器过滤的属性，需要特殊处理
+		const riskyProperties = [
+			'flex',
+			'flex-direction',
+			'flex-wrap',
+			'justify-content',
+			'align-items',
+			'align-self',
+			'flex-grow',
+			'flex-shrink',
+			'flex-basis'
+		];
+		
+		// 对于危险属性，我们保留但会在后续步骤中转换
+		return !incompatibleProperties.includes(property);
+	}
+
+	/**
+	 * 应用微信兼容性修复
+	 */
+	private applyWechatCompatibilityFixes(container: HTMLElement): void {
+		// 1. 处理图片 - 确保在微信中正确显示
+		const images = container.querySelectorAll('img');
+		images.forEach(img => {
+			const existingStyle = img.getAttribute('style') || '';
+			if (!existingStyle.includes('max-width')) {
+				img.setAttribute('style', existingStyle + '; max-width: 100%; height: auto;');
+			}
+		});
+
+		// 2. 处理代码块 - 确保代码不会溢出
+		const codeBlocks = container.querySelectorAll('pre');
+		codeBlocks.forEach(pre => {
+			const existingStyle = pre.getAttribute('style') || '';
+			if (!existingStyle.includes('overflow-x')) {
+				pre.setAttribute('style', existingStyle + '; overflow-x: auto; white-space: pre-wrap;');
+			}
+		});
+
+		// 3. 处理表格 - 确保表格适应屏幕
+		const tables = container.querySelectorAll('table');
+		tables.forEach(table => {
+			const existingStyle = table.getAttribute('style') || '';
+			if (!existingStyle.includes('width')) {
+				table.setAttribute('style', existingStyle + '; width: 100%; border-collapse: collapse;');
+			}
+		});
+
+		// 4. 处理列表项 - 确保列表样式正确显示
+		const listItems = container.querySelectorAll('li');
+		listItems.forEach(li => {
+			const existingStyle = li.getAttribute('style') || '';
+			if (!existingStyle.includes('display')) {
+				li.setAttribute('style', existingStyle + '; display: list-item;');
+			}
+		});
 	}
 
 	/**
