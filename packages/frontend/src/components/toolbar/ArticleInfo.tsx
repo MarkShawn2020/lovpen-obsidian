@@ -23,6 +23,8 @@ export interface ArticleInfoData {
 	episodeNum: string;
 	seriesName: string;
 	tags: string[];
+	summary: string;
+	recommendation: string;
 }
 
 // 获取默认作者：个人信息设置 -> 默认值
@@ -40,7 +42,9 @@ const getDefaultArticleInfo = (settings: ViteReactSettings): ArticleInfoData => 
 	articleSubtitle: '',
 	episodeNum: '',
 	seriesName: '',
-	tags: []
+	tags: [],
+	summary: '',
+	recommendation: ''
 });
 
 export const ArticleInfo: React.FC<ArticleInfoProps> = ({
@@ -184,7 +188,9 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 				articleSubtitle: aiSuggestion.articleSubtitle || '',
 				episodeNum: aiSuggestion.episodeNum || '',
 				seriesName: aiSuggestion.seriesName || '',
-				tags: aiSuggestion.tags || []
+				tags: aiSuggestion.tags || [],
+				summary: aiSuggestion.summary || '',
+				recommendation: aiSuggestion.recommendation || ''
 			};
 
 			setArticleInfo(finalSuggestion);
@@ -305,7 +311,9 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 			articleSubtitle: '',
 			episodeNum: '',
 			seriesName: '',
-			tags: []
+			tags: [],
+			summary: '',
+			recommendation: ''
 		});
 	};
 
@@ -412,6 +420,32 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 						onChange={(e) => handleInputChange('seriesName', e.target.value)}
 						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
 						placeholder="如：人文与科技"
+					/>
+				</div>
+
+				{/* 摘要 */}
+				<div className="sm:col-span-2">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+						摘要
+					</label>
+					<textarea
+						value={articleInfo.summary}
+						onChange={(e) => handleInputChange('summary', e.target.value)}
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+						placeholder="输入文章摘要，简要概括文章主要内容"
+					/>
+				</div>
+
+				{/* 推荐语 */}
+				<div className="sm:col-span-2">
+					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+						推荐语
+					</label>
+					<textarea
+						value={articleInfo.recommendation}
+						onChange={(e) => handleInputChange('recommendation', e.target.value)}
+						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+						placeholder="输入推荐语，吸引读者阅读的亮点或价值"
 					/>
 				</div>
 

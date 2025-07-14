@@ -55,6 +55,8 @@ export const AI_STYLES: AIStyle[] = [
 5. tags: 3-5个相关标签数组
 6. author: 基于内容推测的作者名（如果无法推测留空）
 7. publishDate: 建议的发布日期（YYYY-MM-DD格式，通常是今天）
+8. summary: 文章摘要，简要概括主要内容（100-200字）
+9. recommendation: 推荐语，吸引读者阅读的亮点或价值（50-100字）
 
 请确保返回格式为纯JSON，不要包含其他文字：
 {
@@ -64,7 +66,9 @@ export const AI_STYLES: AIStyle[] = [
   "seriesName": "...",
   "tags": ["标签1", "标签2", "标签3"],
   "author": "...",
-  "publishDate": "..."
+  "publishDate": "...",
+  "summary": "文章摘要内容...",
+  "recommendation": "推荐语内容..."
 }`
 	},
 	{
@@ -99,7 +103,9 @@ export const AI_STYLES: AIStyle[] = [
   "seriesName": "技术系列名称",
   "tags": ["主要技术栈", "编程语言", "核心概念", "难度级别"],
   "author": "{{personalInfo.name}}",
-  "publishDate": "{{today}}"
+  "publishDate": "{{today}}",
+  "summary": "技术文章摘要，概括主要技术内容和实现方法",
+  "recommendation": "技术推荐语，突出技术价值和学习收获"
 }`
 	},
 	{
@@ -134,7 +140,9 @@ export const AI_STYLES: AIStyle[] = [
   "seriesName": "如果是营销系列内容",
   "tags": ["目标受众", "核心价值", "内容类型", "行业关键词"],
   "author": "{{personalInfo.name}}",
-  "publishDate": "{{today}}"
+  "publishDate": "{{today}}",
+  "summary": "营销内容摘要，概括核心价值主张和目标受众",
+  "recommendation": "营销推荐语，强调实际价值和行动驱动"
 }`
 	},
 	{
@@ -169,7 +177,9 @@ export const AI_STYLES: AIStyle[] = [
   "seriesName": "如果是研究系列",
   "tags": ["研究领域", "方法论", "理论框架", "学科分类"],
   "author": "{{personalInfo.name}}",
-  "publishDate": "{{today}}"
+  "publishDate": "{{today}}",
+  "summary": "学术研究摘要，概括研究问题、方法和主要发现",
+  "recommendation": "学术推荐语，强调研究价值和理论贡献"
 }`
 	},
 	{
@@ -204,7 +214,9 @@ export const AI_STYLES: AIStyle[] = [
   "seriesName": "如果是生活系列分享",
   "tags": ["生活场景", "实用技巧", "情感标签", "价值观念"],
   "author": "{{personalInfo.name}}",
-  "publishDate": "{{today}}"
+  "publishDate": "{{today}}",
+  "summary": "生活内容摘要，概括实用技巧和生活感悟",
+  "recommendation": "生活推荐语，强调实用价值和情感共鸣"
 }`
 	}
 ];
