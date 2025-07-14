@@ -10,6 +10,40 @@ export default function Create() {
   const [textInput, setTextInput] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [previewPanels, setPreviewPanels] = useState([
+    { id: 'preview-1', platform: 'wechat', title: '微信公众号预览' }
+  ]);
+
+  const platforms = {
+    wechat: { name: '微信', fullName: '微信公众号', color: 'bg-green-500' },
+    zhihu: { name: '知乎', fullName: '知乎专栏', color: 'bg-blue-500' },
+    xiaohongshu: { name: '小红书', fullName: '小红书笔记', color: 'bg-pink-500' },
+    twitter: { name: 'Twitter', fullName: 'Twitter动态', color: 'bg-sky-500' },
+  };
+
+  const addPreviewPanel = (platform: string) => {
+    const newId = `preview-${Date.now()}`;
+    const newPanel = {
+      id: newId,
+      platform,
+      title: `${platforms[platform].fullName}预览`
+    };
+    setPreviewPanels([...previewPanels, newPanel]);
+  };
+
+  const removePreviewPanel = (panelId: string) => {
+    if (previewPanels.length > 1) {
+      setPreviewPanels(previewPanels.filter(panel => panel.id !== panelId));
+    }
+  };
+
+  const updatePanelPlatform = (panelId: string, platform: string) => {
+    setPreviewPanels(previewPanels.map(panel => 
+      panel.id === panelId 
+        ? { ...panel, platform, title: `${platforms[platform].fullName}预览` }
+        : panel
+    ));
+  };
 
   const handleVoiceRecord = () => {
     setIsRecording(!isRecording);
@@ -59,49 +93,41 @@ AI擅长：
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      {/* 专业工具栏 */}
-      <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 py-3 sticky top-0 z-50">
+    <div className="min-h-screen bg-background-main">
+      {/* 简洁工具栏 */}
+      <div className="bg-background-main border-b border-border-default/20 py-4 sticky top-0 z-50">
         <Container>
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+            <div className="flex items-center u-gap-l">
+              <div className="flex items-center u-gap-s">
+                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white font-medium text-sm">
                   L
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">LovPen Studio</h1>
-                  <p className="text-xs text-gray-500">智能创作工作台</p>
+                  <h1 className="u-display-s font-serif">LovPen Studio</h1>
+                  <p className="text-sm text-text-faded">智能创作工作台</p>
                 </div>
-              </div>
-              <div className="hidden lg:flex items-center space-x-1 bg-orange-50 border border-orange-200 rounded-full px-3 py-1">
-                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-orange-700 font-medium">7月19日正式上线</span>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center u-gap-s">
               <Button
                 variant="primary"
-                size="sm"
+                size="md"
                 disabled={!generatedContent}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center space-x-2"
+                className="font-medium"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-                <span>发布</span>
+                发布
               </Button>
-              
+
               {/* 用户头像按钮 */}
               <div className="relative">
-                <button 
+                <button
                   type="button"
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-medium text-sm hover:shadow-lg transition-all duration-200"
+                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium hover:opacity-90 transition-opacity"
                 >
                   M
                 </button>
-                {/* 下拉菜单 (可以后续添加) */}
               </div>
             </div>
           </div>
@@ -110,75 +136,72 @@ AI擅长：
 
       {/* 三栏布局主工作区 */}
       <Container>
-        <div className="grid lg:grid-cols-12 gap-6 mt-6 h-[calc(100vh-120px)]">
+        <div className="u-grid-desktop u-gap-l u-mt-gutter min-h-[calc(100vh-120px)]">
           {/* 左侧输入面板 */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 flex flex-col u-gap-m">
             {/* 输入方式选择 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200/60">
-                <h3 className="font-semibold text-gray-900 flex items-center space-x-2 text-sm">
-                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  <span>创作输入</span>
+            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+                <h3 className="font-medium text-text-main">
+                  创作输入
                 </h3>
               </div>
 
-              <div className="p-4">
+              <div className="p-6">
                 <Tabs defaultValue="voice">
-                  <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
-                    <TabsTrigger value="voice" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  <TabsList className="flex w-full border-b border-border-default/20">
+                    <TabsTrigger value="voice" className="px-4 py-2 font-medium text-sm">
                       语音
                     </TabsTrigger>
-                    <TabsTrigger value="text" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <TabsTrigger value="text" className="px-4 py-2 font-medium text-sm">
                       文字
                     </TabsTrigger>
-                    <TabsTrigger value="file" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <TabsTrigger value="file" className="px-4 py-2 font-medium text-sm">
                       文档
                     </TabsTrigger>
                   </TabsList>
 
                   {/* 语音输入 */}
-                  <TabsContent value="voice" className="mt-4">
+                  <TabsContent value="voice" className="mt-6">
                     <div className="text-center">
-                      <div className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
+                      <div className={`w-16 h-16 mx-auto u-mb-text rounded-full flex items-center justify-center text-xl transition-all ${
                         isRecording
-                          ? 'bg-gradient-to-br from-red-100 to-red-200 border-3 border-red-300 animate-pulse'
-                          : 'bg-gradient-to-br from-blue-100 to-blue-200 border-3 border-blue-300 hover:from-blue-200 hover:to-blue-300 cursor-pointer'
+                          ? 'bg-primary/20 border-2 border-primary animate-pulse'
+                          : 'bg-background-ivory-medium border-2 border-border-default/20 hover:border-primary cursor-pointer'
                       }`}
                       >
                         {isRecording ? '🎙️' : '🎤'}
                       </div>
                       <Button
                         variant={isRecording ? 'secondary' : 'primary'}
-                        size="sm"
+                        size="md"
                         onClick={handleVoiceRecord}
-                        className="w-full mb-3 text-xs"
+                        className="w-full u-mb-text"
                       >
-                        {isRecording ? '⏹️ 停止录音' : '🎙️ 开始语音'}
+                        {isRecording ? '停止录音' : '开始语音'}
                       </Button>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm text-text-faded">
                         {isRecording ? '正在录音中...' : '点击开始语音输入'}
                       </p>
                     </div>
                   </TabsContent>
 
                   {/* 文字输入 */}
-                  <TabsContent value="text" className="mt-4">
-                    <div className="space-y-3">
+                  <TabsContent value="text" className="mt-6">
+                    <div className="u-gap-m flex flex-col">
                       <textarea
                         placeholder="在这里输入你的想法、观点或灵感..."
-                        className="w-full h-32 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                        className="w-full h-32 p-4 border border-border-default/20 rounded-md resize-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text-main"
                         value={textInput}
                         onChange={e => setTextInput(e.target.value)}
                       />
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-sm text-text-faded">
                           {textInput.length}
                           {' '}
                           字符
                         </span>
-                        <Button variant="outline" size="sm" onClick={() => setTextInput('')} className="text-xs">
+                        <Button variant="outline" size="sm" onClick={() => setTextInput('')}>
                           清空
                         </Button>
                       </div>
@@ -186,11 +209,11 @@ AI擅长：
                   </TabsContent>
 
                   {/* 文档上传 */}
-                  <TabsContent value="file" className="mt-4">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer">
-                      <div className="text-2xl mb-2">📎</div>
-                      <p className="text-xs text-gray-600 mb-2">拖拽文件到这里</p>
-                      <Button variant="outline" size="sm" className="text-xs">
+                  <TabsContent value="file" className="mt-6">
+                    <div className="border-2 border-dashed border-border-default/20 rounded-md p-8 text-center hover:border-primary hover:bg-background-ivory-medium transition-all cursor-pointer">
+                      <div className="text-2xl u-mb-text">📎</div>
+                      <p className="text-sm text-text-faded u-mb-text">拖拽文件到这里</p>
+                      <Button variant="outline" size="sm">
                         选择文件
                       </Button>
                     </div>
@@ -200,18 +223,18 @@ AI擅长：
             </div>
 
             {/* 快速生成按钮 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4">
+            <div className="bg-background-main rounded-lg border border-border-default/20 p-6">
               <Button
                 variant="primary"
                 size="lg"
                 onClick={handleGenerate}
                 disabled={!textInput.trim() || isGenerating}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 h-10 text-sm font-medium"
+                className="w-full font-medium"
               >
                 {isGenerating
                   ? (
-                      <div className="flex items-center space-x-2">
-                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <div className="flex items-center u-gap-s">
+                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -219,109 +242,149 @@ AI擅长：
                       </div>
                     )
                   : (
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span>智能生成文章</span>
-                      </div>
+                      <span>智能生成文章</span>
                     )}
               </Button>
             </div>
 
             {/* 历史记录 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200/60">
-                <h3 className="font-semibold text-gray-900 text-sm">最近输入</h3>
+            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+                <h3 className="font-medium text-text-main">最近输入</h3>
               </div>
-              <div className="p-4 space-y-2">
-                <div className="text-xs p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 transition-colors">
+              <div className="p-6 u-gap-s flex flex-col">
+                <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
                   "关于远程工作的思考..."
                 </div>
-                <div className="text-xs p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 transition-colors">
+                <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
                   "今天在咖啡店看到..."
                 </div>
-                <div className="text-xs p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 transition-colors">
+                <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
                   "AI技术的发展..."
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 中间内容预览区 */}
-          <div className="lg:col-span-6 bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden flex flex-col">
+          {/* 中间内容预览区域 */}
+          <div className="lg:col-span-6 flex flex-col u-gap-m">
             {/* 预览工具栏 */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200/60">
+            <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <span>内容预览</span>
+                <h2 className="font-medium text-text-main">
+                  内容预览
                 </h2>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center bg-white rounded-lg border border-gray-200 p-1">
-                    <button type="button" className="px-3 py-1.5 text-xs font-medium text-white bg-blue-500 rounded-md flex items-center space-x-1">
-                      <span>📱</span>
-                      <span>微信</span>
-                    </button>
-                    <button type="button" className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-md flex items-center space-x-1">
-                      <span>🎓</span>
-                      <span>知乎</span>
-                    </button>
-                    <button type="button" className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-md flex items-center space-x-1">
-                      <span>🌸</span>
-                      <span>小红书</span>
-                    </button>
+                <div className="flex items-center u-gap-s">
+                  {/* 平台选择器 */}
+                  <div className="flex items-center bg-background-main rounded-md border border-border-default/20 p-1">
+                    {Object.entries(platforms).map(([id, platform]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => {
+                          if (selectedPlatforms.includes(id)) {
+                            setCurrentPreviewPlatform(id);
+                          } else {
+                            togglePlatform(id);
+                            setCurrentPreviewPlatform(id);
+                          }
+                        }}
+                        className={`px-3 py-2 text-sm font-medium rounded-sm transition-all relative ${
+                          selectedPlatforms.includes(id)
+                            ? currentPreviewPlatform === id
+                              ? 'text-white bg-primary'
+                              : 'text-text-main bg-background-ivory-medium border border-border-default/20'
+                            : 'text-text-faded hover:text-text-main hover:bg-background-ivory-medium'
+                        }`}
+                      >
+                        {platform.name}
+                        {selectedPlatforms.includes(id) && (
+                          <div className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${platform.color}`}></div>
+                        )}
+                      </button>
+                    ))}
                   </div>
+
+                  {/* 平台管理按钮 */}
+                  <Button variant="outline" size="sm">
+                    管理平台
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* 内容预览区 */}
-            <div className="flex-1 p-6 overflow-auto">
-              {generatedContent
-                ? (
-                    <div className="prose max-w-none">
-                      <div className="bg-gradient-to-br from-gray-50 to-white rounded-lg border border-gray-200 p-6">
-                        <pre className="whitespace-pre-wrap font-sans text-gray-800 leading-relaxed text-sm">
-                          {generatedContent}
-                        </pre>
-                      </div>
-                    </div>
-                  )
-                : (
-                    <div className="h-full flex items-center justify-center text-gray-400">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4">📄</div>
-                        <h3 className="text-lg font-medium text-gray-600 mb-2">等待内容生成</h3>
-                        <p className="text-sm text-gray-500">输入你的想法，然后点击"智能生成文章"</p>
-                      </div>
-                    </div>
-                  )}
+            <div className="flex-1 p-8 overflow-auto">
+              {selectedPlatforms.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-text-faded">
+                  <div className="text-center">
+                    <div className="text-6xl u-mb-gutter">🎯</div>
+                    <h3 className="u-display-s u-mb-text">选择发布平台</h3>
+                    <p className="u-paragraph-m">点击上方平台按钮开始创作</p>
+                  </div>
+                </div>
+              ) : generatedContent ? (
+                <div className="prose max-w-none">
+                  {/* 平台信息头部 */}
+                  <div className="flex items-center u-gap-s u-mb-gutter">
+                    <div className={`w-3 h-3 rounded-full ${platforms[currentPreviewPlatform]?.color}`}></div>
+                    <h3 className="font-medium text-text-main">
+                      {platforms[currentPreviewPlatform]?.fullName}
+                      {' '}
+                      预览
+                    </h3>
+                    <span className="text-sm text-text-faded">
+                      (
+                      {selectedPlatforms.length}
+                      {' '}
+                      个平台已选择)
+                    </span>
+                  </div>
+
+                  <div className="bg-background-ivory-medium rounded-md border border-border-default/20 p-8">
+                    <pre className="whitespace-pre-wrap font-sans text-text-main leading-relaxed u-paragraph-m">
+                      {generatedContent}
+                    </pre>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-text-faded">
+                  <div className="text-center">
+                    <div className="text-6xl u-mb-gutter">📄</div>
+                    <h3 className="u-display-s u-mb-text">等待内容生成</h3>
+                    <p className="u-paragraph-m">
+                      已选择
+                      {' '}
+                      {selectedPlatforms.length}
+                      {' '}
+                      个平台，输入想法后点击"智能生成文章"
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 底部操作栏 */}
             {generatedContent && (
-              <div className="border-t border-gray-200 p-4 bg-gray-50/50">
+              <div className="border-t border-border-default/20 p-6 bg-background-ivory-medium">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                  <div className="flex items-center u-gap-l text-sm text-text-faded">
                     <span>
                       字数:
+                      {' '}
                       {generatedContent.length}
                     </span>
                     <span>预计阅读: 2分钟</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" className="text-xs">
-                      🔄 重新生成
+                  <div className="flex items-center u-gap-s">
+                    <Button variant="outline" size="sm">
+                      重新生成
                     </Button>
-                    <Button variant="outline" size="sm" className="text-xs">
-                      ✏️ 编辑
+                    <Button variant="outline" size="sm">
+                      编辑
                     </Button>
-                    <Button variant="primary" size="sm" className="text-xs bg-gradient-to-r from-purple-600 to-purple-700">
-                      🎨 美化排版
+                    <Button variant="primary" size="sm">
+                      美化排版
                     </Button>
                   </div>
                 </div>
@@ -330,106 +393,113 @@ AI擅长：
           </div>
 
           {/* 右侧设置面板 */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 flex flex-col u-gap-m">
             {/* 创作设置 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200/60">
-                <h3 className="font-semibold text-gray-900 flex items-center space-x-2 text-sm">
-                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>创作设置</span>
+            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+                <h3 className="font-medium text-text-main">
+                  创作设置
                 </h3>
               </div>
 
-              <div className="p-4 space-y-4">
+              <div className="p-6 u-gap-m flex flex-col">
                 <div>
-                  <label htmlFor="article-length" className="block text-xs font-medium text-gray-700 mb-2">文章长度</label>
-                  <select id="article-length" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option>📝 短文 (300-500字)</option>
-                    <option>📄 中等 (800-1200字)</option>
-                    <option>📚 长文 (1500-2500字)</option>
+                  <label htmlFor="article-length" className="block text-sm font-medium text-text-main u-mb-text">文章长度</label>
+                  <select id="article-length" className="w-full p-3 border border-border-default/20 rounded-md focus:ring-2 focus:ring-primary focus:border-primary text-text-main">
+                    <option>短文 (300-500字)</option>
+                    <option>中等 (800-1200字)</option>
+                    <option>长文 (1500-2500字)</option>
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="writing-style" className="block text-xs font-medium text-gray-700 mb-2">写作风格</label>
-                  <select id="writing-style" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option>🎯 专业严谨</option>
-                    <option>😊 轻松幽默</option>
-                    <option>🤔 深度思考</option>
-                    <option>❤️ 温暖感性</option>
+                  <label htmlFor="writing-style" className="block text-sm font-medium text-text-main u-mb-text">写作风格</label>
+                  <select id="writing-style" className="w-full p-3 border border-border-default/20 rounded-md focus:ring-2 focus:ring-primary focus:border-primary text-text-main">
+                    <option>专业严谨</option>
+                    <option>轻松幽默</option>
+                    <option>深度思考</option>
+                    <option>温暖感性</option>
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="target-platform" className="block text-xs font-medium text-gray-700 mb-2">目标平台</label>
-                  <select id="target-platform" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option>📱 微信公众号</option>
-                    <option>🎓 知乎专栏</option>
-                    <option>🌸 小红书笔记</option>
-                    <option>🐦 Twitter动态</option>
-                  </select>
+                  <label className="block text-sm font-medium text-text-main u-mb-text">目标平台</label>
+                  <div className="u-gap-s flex flex-col">
+                    {Object.entries(platforms).map(([id, platform]) => (
+                      <label key={id} className="flex items-center u-gap-s cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedPlatforms.includes(id)}
+                          onChange={() => togglePlatform(id)}
+                          className="w-4 h-4 text-primary bg-background-main border-border-default rounded focus:ring-primary focus:ring-2"
+                        />
+                        <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
+                        <span className="text-sm text-text-main">{platform.fullName}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {selectedPlatforms.length > 0 && (
+                    <p className="text-xs text-text-faded mt-2">
+                      已选择
+                      {' '}
+                      {selectedPlatforms.length}
+                      {' '}
+                      个平台
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* 发布设置 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200/60">
-                <h3 className="font-semibold text-gray-900 flex items-center space-x-2 text-sm">
-                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  <span>发布设置</span>
+            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+                <h3 className="font-medium text-text-main">
+                  发布设置
                 </h3>
               </div>
 
-              <div className="p-4 space-y-3">
+              <div className="p-6 u-gap-m flex flex-col">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-700">自动配图</span>
-                  <button type="button" className="w-8 h-4 bg-blue-500 rounded-full relative">
-                    <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                  <span className="text-sm text-text-main">自动配图</span>
+                  <button type="button" className="w-10 h-5 bg-primary rounded-full relative transition-opacity hover:opacity-90">
+                    <div className="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5"></div>
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-700">SEO优化</span>
-                  <button type="button" className="w-8 h-4 bg-gray-300 rounded-full relative">
-                    <div className="w-3 h-3 bg-white rounded-full absolute left-0.5 top-0.5"></div>
+                  <span className="text-sm text-text-main">SEO优化</span>
+                  <button type="button" className="w-10 h-5 bg-border-default rounded-full relative transition-colors hover:bg-primary">
+                    <div className="w-4 h-4 bg-white rounded-full absolute left-0.5 top-0.5"></div>
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-700">定时发布</span>
-                  <button type="button" className="w-8 h-4 bg-gray-300 rounded-full relative">
-                    <div className="w-3 h-3 bg-white rounded-full absolute left-0.5 top-0.5"></div>
+                  <span className="text-sm text-text-main">定时发布</span>
+                  <button type="button" className="w-10 h-5 bg-border-default rounded-full relative transition-colors hover:bg-primary">
+                    <div className="w-4 h-4 bg-white rounded-full absolute left-0.5 top-0.5"></div>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* AI 助手 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200/60">
-                <h3 className="font-semibold text-gray-900 flex items-center space-x-2 text-sm">
-                  <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                  <span>AI 助手</span>
+            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+                <h3 className="font-medium text-text-main">
+                  AI 助手
                 </h3>
               </div>
 
-              <div className="p-4">
-                <div className="space-y-2">
-                  <button type="button" className="w-full text-left p-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                    💡 优化标题
+              <div className="p-6">
+                <div className="u-gap-s flex flex-col">
+                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
+                    优化标题
                   </button>
-                  <button type="button" className="w-full text-left p-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                    🎯 提取关键词
+                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
+                    提取关键词
                   </button>
-                  <button type="button" className="w-full text-left p-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                    📊 内容分析
+                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
+                    内容分析
                   </button>
-                  <button type="button" className="w-full text-left p-2 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                    🎨 风格建议
+                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
+                    风格建议
                   </button>
                 </div>
               </div>
