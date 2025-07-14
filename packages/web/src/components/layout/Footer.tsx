@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { Container } from './Container';
+import { SafeLink } from '../ui/SafeLink';
 
 const Footer = () => {
   const footerLinks = {
@@ -74,9 +75,9 @@ const Footer = () => {
               <ul className="space-y-3">
                 {footerLinks.company.map(link => (
                   <li key={link.name}>
-                    <Link href={link.href} className="text-gray-300 hover:text-white transition-colors no-underline">
+                    <SafeLink href={link.href} className="text-gray-300 hover:text-white transition-colors no-underline">
                       {link.name}
-                    </Link>
+                    </SafeLink>
                   </li>
                 ))}
               </ul>
@@ -89,9 +90,9 @@ const Footer = () => {
               <ul className="space-y-3">
                 {footerLinks.product.map(link => (
                   <li key={link.name}>
-                    <Link href={link.href} className="text-gray-300 hover:text-white transition-colors no-underline">
+                    <SafeLink href={link.href} className="text-gray-300 hover:text-white transition-colors no-underline">
                       {link.name}
-                    </Link>
+                    </SafeLink>
                   </li>
                 ))}
               </ul>
@@ -104,9 +105,9 @@ const Footer = () => {
               <ul className="space-y-3">
                 {footerLinks.support.map(link => (
                   <li key={link.name}>
-                    <Link href={link.href} className="text-gray-300 hover:text-white transition-colors no-underline">
+                    <SafeLink href={link.href} className="text-gray-300 hover:text-white transition-colors no-underline">
                       {link.name}
-                    </Link>
+                    </SafeLink>
                   </li>
                 ))}
               </ul>
@@ -139,15 +140,15 @@ const Footer = () => {
                 © 2024 北京飞脑科技有限公司 (Neurora Technology). 保留所有权利。
               </p>
               <div className="flex space-x-6 mt-4 md:mt-0">
-                <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors no-underline">
+                <SafeLink href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors no-underline">
                   服务条款
-                </Link>
-                <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors no-underline">
+                </SafeLink>
+                <SafeLink href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors no-underline">
                   隐私政策
-                </Link>
-                <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors no-underline">
+                </SafeLink>
+                <SafeLink href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors no-underline">
                   Cookie 政策
-                </Link>
+                </SafeLink>
               </div>
             </div>
           </div>

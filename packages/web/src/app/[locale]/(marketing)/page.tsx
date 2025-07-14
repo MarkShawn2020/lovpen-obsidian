@@ -222,7 +222,7 @@ export default async function Index(props: IIndexProps) {
       </section>
 
       {/* Features Section */}
-      <section className="w-full py-16 lg:py-24 bg-white u-bg-subtle-waves relative">
+      <section id="features" className="w-full py-16 lg:py-24 bg-white u-bg-subtle-waves relative">
         <Container>
           <div className="text-center mb-16">
             <h2 className="u-display-m mb-4 text-text-main">{t('features_title')}</h2>

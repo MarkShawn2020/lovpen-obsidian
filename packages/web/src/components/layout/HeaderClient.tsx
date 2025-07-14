@@ -4,6 +4,7 @@ import { SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { Button } from '../ui/Button';
+import { SmartNavLink } from '../ui/SmartNavLink';
 
 type HeaderClientProps = {
   navigation: Array<{ name: string; href: string }>;
@@ -64,14 +65,26 @@ export const HeaderClient = ({ navigation, isAuthenticated, urls, translations }
         <div className="absolute top-full right-0 w-72 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
           <nav className="p-4">
             {navigation.map(item => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="block text-text-main hover:text-primary transition-colors py-2 no-underline"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
+              item.href === '/features' ? (
+                <SmartNavLink
+                  key={item.name}
+                  href={item.href}
+                  scrollToId="features"
+                  className="block text-text-main hover:text-primary transition-colors py-2 no-underline"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </SmartNavLink>
+              ) : (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="block text-text-main hover:text-primary transition-colors py-2 no-underline"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              )
             ))}
             <div className="flex flex-col space-y-3 pt-4 border-t border-border-default/20">
               {isAuthenticated
