@@ -46,9 +46,10 @@ export class Headings extends UnifiedHtmlPlugin {
 
 			if (needProcessDelimiter || needProcessNumber) {
 				const parser = new DOMParser();
-				const doc = parser.parseFromString(html, "text/html");
+				const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+				const container = doc.body.firstChild as HTMLElement;
 
-				doc.querySelectorAll("h2").forEach((h2, index) => {
+				container.querySelectorAll("h2").forEach((h2, index) => {
 					// 获取标题内容容器
 					const contentSpan = h2.querySelector(".content");
 
@@ -67,7 +68,7 @@ export class Headings extends UnifiedHtmlPlugin {
 						}
 					}
 				});
-				return doc.body.innerHTML;
+				return container.innerHTML;
 			}
 
 			return html;
@@ -82,7 +83,7 @@ export class Headings extends UnifiedHtmlPlugin {
 		const number = (index + 1).toString().padStart(2, "0");
 
 		// 创建序号元素
-		const numberSpan = document.createElement("span");
+		const numberSpan = contentSpan.ownerDocument.createElement("span");
 		numberSpan.setAttribute("leaf", "");
 
 		// 设置样式
@@ -90,12 +91,12 @@ export class Headings extends UnifiedHtmlPlugin {
 		numberSpan.textContent = number;
 
 		// 将序号添加到标题内容开头
-		const wrapper = document.createElement("span");
+		const wrapper = contentSpan.ownerDocument.createElement("span");
 		wrapper.setAttribute("textstyle", "");
 		wrapper.appendChild(numberSpan);
 
 		// 添加换行
-		const breakElement = document.createElement("br");
+		const breakElement = contentSpan.ownerDocument.createElement("br");
 
 		// 插入到内容容器的开头，注意插入顺序非常重要
 		// 先插入序号（应该位于第一行）

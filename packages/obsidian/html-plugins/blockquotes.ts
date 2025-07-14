@@ -20,13 +20,14 @@ export class Blockquotes extends UnifiedHtmlPlugin {
 	process(html: string, settings: NMPSettings): string {
 		try {
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 获取主题色
 			const themeColor = this.getThemeColor(settings);
 
 			// 获取所有引用块
-			const blockquotes = doc.querySelectorAll("blockquote");
+			const blockquotes = container.querySelectorAll("blockquote");
 			if (blockquotes.length === 0) {
 				return html; // 没有引用块，直接返回
 			}
@@ -53,7 +54,7 @@ export class Blockquotes extends UnifiedHtmlPlugin {
 				});
 			});
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("处理引用块时出错:", error);
 			return html;

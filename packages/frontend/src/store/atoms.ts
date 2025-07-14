@@ -12,7 +12,7 @@ export const defaultPersonalInfo: PersonalInfo = {
 
 // 默认的设置
 export const defaultSettings: ViteReactSettings = {
-	defaultStyle: 'obsidian-light',
+	defaultStyle: 'wabi-sabi',
 	defaultHighlight: '默认',
 	defaultTemplate: 'default',
 	useTemplate: false,

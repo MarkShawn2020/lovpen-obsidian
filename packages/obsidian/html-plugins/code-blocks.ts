@@ -77,10 +77,11 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			}
 
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 查找所有代码块
-			const codeBlocks = doc.querySelectorAll("pre code");
+			const codeBlocks = container.querySelectorAll("pre code");
 
 			// 获取代码换行配置
 			const enableCodeWrap = this.getCodeWrapConfig();
@@ -93,7 +94,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 				this.optimizeCodeBlock(pre, codeBlock as HTMLElement, settings.lineNumber, enableCodeWrap);
 			});
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("处理代码块时出错:", error);
 			return html;

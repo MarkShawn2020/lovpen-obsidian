@@ -39,10 +39,11 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private processLinks(html: string, settings: NMPSettings): string {
 		try {
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 查找所有链接
-			const links = doc.querySelectorAll("a");
+			const links = container.querySelectorAll("a");
 			const footnotes: string[] = [];
 
 			links.forEach((link) => {
@@ -70,7 +71,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 						}
 					} else {
 						// 直接将自身转为上标
-						const supElement = document.createElement('sup');
+						const supElement = container.ownerDocument.createElement('sup');
 						supElement.textContent = link.textContent || '';
 						link.replaceWith(supElement);
 					}
@@ -82,7 +83,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 				if (shouldConvert) {
 					// 创建脚注标记
-					const footnoteRef = document.createElement("sup");
+					const footnoteRef = container.ownerDocument.createElement("sup");
 					footnoteRef.textContent = `[${footnotes.length + 1}]`;
 					footnoteRef.style.color = "#3370ff";
 
@@ -109,23 +110,23 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 			// 如果有脚注，添加到文档末尾
 			if (footnotes.length > 0) {
-				const hr = document.createElement("hr");
-				const footnoteSection = document.createElement("section");
+				const hr = container.ownerDocument.createElement("hr");
+				const footnoteSection = container.ownerDocument.createElement("section");
 				footnoteSection.style.fontSize = "14px";
 				footnoteSection.style.color = "#888";
 				footnoteSection.style.marginTop = "30px";
 
 				footnotes.forEach((note) => {
-					const p = document.createElement("p");
+					const p = container.ownerDocument.createElement("p");
 					p.innerHTML = note;
 					footnoteSection.appendChild(p);
 				});
 
-				doc.body.appendChild(hr);
-				doc.body.appendChild(footnoteSection);
+				container.appendChild(hr);
+				container.appendChild(footnoteSection);
 			}
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("处理链接时出错:", error);
 			return html;
@@ -141,12 +142,12 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// 使用离线DOM解析，避免影响页面
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
-			const tempDiv = doc.body.firstChild as HTMLElement;
+			const container = doc.body.firstChild as HTMLElement;
 
 			logger.debug("为微信内容进行样式处理（保留样式表模式）");
 
 			// 清理CSS中可能导致微信显示问题的属性
-			const styleElements = tempDiv.querySelectorAll('style');
+			const styleElements = container.querySelectorAll('style');
 			styleElements.forEach(styleEl => {
 				if (styleEl.textContent) {
 					// 清理可能导致微信问题的CSS属性
@@ -162,7 +163,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			});
 
 			// 获取所有元素，应用微信兼容性的内联样式
-			const allElements = tempDiv.querySelectorAll("*:not(style)");
+			const allElements = container.querySelectorAll("*:not(style)");
 			logger.debug(`处理微信兼容性元素数量: ${allElements.length}`);
 
 			// 只为关键元素添加微信兼容性样式
@@ -171,7 +172,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				this.applyWechatCompatibilityStyles(el);
 			}
 
-			return tempDiv.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("样式内联化处理出错:", error);
 			return html;
@@ -184,7 +185,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private preserveStructure(html: string, settings: NMPSettings): string {
 		try {
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 确保关键容器元素的结构样式
 			const keyContainers = [
@@ -197,7 +199,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			];
 
 			keyContainers.forEach(selector => {
-				const elements = doc.querySelectorAll(selector);
+				const elements = container.querySelectorAll(selector);
 				elements.forEach(element => {
 					const htmlElement = element as HTMLElement;
 					// 强制保持容器结构
@@ -205,7 +207,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				});
 			});
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("保持结构完整性处理出错:", error);
 			return html;
@@ -234,21 +236,22 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private optimizeForWechat(html: string, settings: NMPSettings): string {
 		try {
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 优化图片处理
-			this.optimizeImages(doc);
+			this.optimizeImages(container);
 
 			// 优化表格处理
-			this.optimizeTables(doc);
+			this.optimizeTables(container);
 
 			// 优化代码块处理
-			this.optimizeCodeBlocks(doc);
+			this.optimizeCodeBlocks(container);
 
 			// 清理不兼容的属性和标签
-			this.cleanupIncompatibleContent(doc);
+			this.cleanupIncompatibleContent(container);
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("微信平台优化处理出错:", error);
 			return html;
@@ -393,8 +396,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	/**
 	 * 优化图片处理
 	 */
-	private optimizeImages(doc: Document): void {
-		const images = doc.querySelectorAll('img');
+	private optimizeImages(container: HTMLElement): void {
+		const images = container.querySelectorAll('img');
 		images.forEach(img => {
 			// 确保图片有必要的样式
 			if (!img.hasAttribute('style')) {
@@ -406,8 +409,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	/**
 	 * 优化表格处理
 	 */
-	private optimizeTables(doc: Document): void {
-		const tables = doc.querySelectorAll('table');
+	private optimizeTables(container: HTMLElement): void {
+		const tables = container.querySelectorAll('table');
 		tables.forEach(table => {
 			// 确保表格有基本样式
 			if (!table.hasAttribute('style')) {
@@ -419,8 +422,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	/**
 	 * 优化代码块处理
 	 */
-	private optimizeCodeBlocks(doc: Document): void {
-		const codeBlocks = doc.querySelectorAll('pre code');
+	private optimizeCodeBlocks(container: HTMLElement): void {
+		const codeBlocks = container.querySelectorAll('pre code');
 		codeBlocks.forEach(code => {
 			const pre = code.parentElement;
 			if (pre) {
@@ -458,9 +461,9 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	/**
 	 * 清理不兼容的内容
 	 */
-	private cleanupIncompatibleContent(doc: Document): void {
+	private cleanupIncompatibleContent(container: HTMLElement): void {
 		// 移除可能导致问题的属性
-		const allElements = doc.querySelectorAll('*');
+		const allElements = container.querySelectorAll('*');
 		allElements.forEach(element => {
 			// 移除可能不兼容的class
 			if (element.classList.contains('hljs')) {

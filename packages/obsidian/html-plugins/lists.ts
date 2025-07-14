@@ -20,10 +20,11 @@ export class Lists extends UnifiedHtmlPlugin {
 	process(html: string, settings: NMPSettings): string {
 		try {
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 找到所有的列表
-			const allLists = Array.from(doc.querySelectorAll("ul, ol"));
+			const allLists = Array.from(container.querySelectorAll("ul, ol"));
 			if (allLists.length === 0) {
 				return html; // 没有列表，直接返回
 			}
@@ -40,7 +41,7 @@ export class Lists extends UnifiedHtmlPlugin {
 			});
 
 			// 创建一个新容器来接收转换后的列表
-			const container = document.createElement("div");
+			const tempContainer = container.ownerDocument.createElement("div");
 
 			const themeAccentColor = this.getThemeColor(settings);
 
@@ -60,16 +61,16 @@ export class Lists extends UnifiedHtmlPlugin {
 					parent.replaceChild(newList, list);
 				} else {
 					// 添加到容器
-					container.appendChild(newList);
+					tempContainer.appendChild(newList);
 				}
 			}
 
 			// 如果有直接添加到容器的列表，返回容器内容
-			if (container.children.length > 0) {
-				return container.innerHTML;
+			if (tempContainer.children.length > 0) {
+				return tempContainer.innerHTML;
 			}
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("处理列表时出错:", error);
 			return html;

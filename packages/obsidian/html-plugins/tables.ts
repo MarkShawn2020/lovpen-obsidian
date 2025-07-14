@@ -19,10 +19,11 @@ export class Tables extends UnifiedHtmlPlugin {
 	process(html: string, settings: NMPSettings): string {
 		try {
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 查找所有表格
-			const tables = doc.querySelectorAll("table");
+			const tables = container.querySelectorAll("table");
 
 			tables.forEach((table) => {
 				// 确保表格有正确的微信样式
@@ -60,7 +61,7 @@ export class Tables extends UnifiedHtmlPlugin {
 				});
 			});
 
-			return doc.body.innerHTML;
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("处理表格时出错:", error);
 			return html;

@@ -45,11 +45,14 @@ export class Images extends UnifiedHtmlPlugin {
 
 			logger.debug("图片处理插件开始处理，showImageCaption设置:", showImageCaption);
 			logger.debug("处理前的HTML片段:", html.substring(0, 500) + "...");
+			
+			// 创建一个临时容器来解析HTML片段，避免丢失样式
 			const parser = new DOMParser();
-			const doc = parser.parseFromString(html, "text/html");
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
 
 			// 查找所有图片元素
-			const images = doc.querySelectorAll("img");
+			const images = container.querySelectorAll("img");
 			logger.debug("找到图片数量:", images.length);
 
 			images.forEach((img, index) => {
@@ -115,7 +118,7 @@ export class Images extends UnifiedHtmlPlugin {
 							logger.debug(`为第${index + 1}张图片创建可见的caption`);
 
 							// 创建一个段落元素，使用与现有内容相似的结构
-							const captionP = doc.createElement("p");
+							const captionP = container.ownerDocument.createElement("p");
 							captionP.setAttribute("style",
 								"text-align: center !important; " +
 								"color: #666666 !important; " +
@@ -128,7 +131,7 @@ export class Images extends UnifiedHtmlPlugin {
 							);
 
 							// 创建span元素，使用leaf属性（符合现有结构）
-							const captionSpan = doc.createElement("span");
+							const captionSpan = container.ownerDocument.createElement("span");
 							captionSpan.setAttribute("leaf", "");
 							captionSpan.setAttribute("style",
 								"color: #666666 !important; " +
@@ -148,7 +151,7 @@ export class Images extends UnifiedHtmlPlugin {
 				}
 			});
 
-			const result = doc.body.innerHTML;
+			const result = container.innerHTML;
 			logger.debug("图片处理完成，结果长度:", result.length);
 			logger.debug("处理后的HTML片段:", result.substring(0, 500) + "...");
 			return result;
