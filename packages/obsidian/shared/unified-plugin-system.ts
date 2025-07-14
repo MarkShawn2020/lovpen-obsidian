@@ -379,24 +379,60 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 	 * 处理HTML内容 - 应用所有启用的HTML插件
 	 */
 	public processContent(html: string, settings: NMPSettings): string {
-		logger.debug("[processContent]", settings)
+		console.log("🔌 [插件管理器] 开始处理内容", {
+			inputLength: html.length,
+			inputPreview: html.substring(0, 200) + '...',
+			hasMetaSection: html.includes('claude-meta-section')
+		});
+		logger.debug("[processContent]", settings);
 
 		const htmlPlugins = this.getHtmlPlugins();
+		console.log("🔌 [插件管理器] 获取HTML插件列表", {
+			totalCount: htmlPlugins.length,
+			pluginNames: htmlPlugins.map(p => p.getName())
+		});
 		logger.debug(`开始处理内容，共有 ${htmlPlugins.length} 个HTML插件`);
 
 		let appliedPluginCount = 0;
 
-		const result = htmlPlugins.reduce((processedHtml, plugin) => {
+		const result = htmlPlugins.reduce((processedHtml, plugin, index) => {
 			if (plugin.isEnabled()) {
+				console.log(`🔧 [插件管理器] 应用插件 ${index + 1}/${htmlPlugins.length}: ${plugin.getName()}`, {
+					beforeLength: processedHtml.length,
+					beforeHasMetaSection: processedHtml.includes('claude-meta-section'),
+					beforeHasParagraphs: processedHtml.includes('<p')
+				});
+				
 				logger.debug(`应用HTML插件: ${plugin.getName()}`);
 				appliedPluginCount++;
-				return plugin.process(processedHtml, settings);
+				
+				const pluginResult = plugin.process(processedHtml, settings);
+				
+				console.log(`✅ [插件管理器] 插件 ${plugin.getName()} 处理完成`, {
+					afterLength: pluginResult.length,
+					changed: pluginResult !== processedHtml,
+					afterHasMetaSection: pluginResult.includes('claude-meta-section'),
+					afterHasParagraphs: pluginResult.includes('<p'),
+					lengthDiff: pluginResult.length - processedHtml.length
+				});
+				
+				return pluginResult;
 			} else {
+				console.log(`⏭️ [插件管理器] 跳过禁用插件: ${plugin.getName()}`);
 				logger.debug(`跳过禁用的HTML插件: ${plugin.getName()}`);
 				return processedHtml;
 			}
 		}, html);
 
+		console.log("✅ [插件管理器] 所有插件处理完成", {
+			appliedPluginCount,
+			finalLength: result.length,
+			totalChanged: result !== html,
+			finalHasMetaSection: result.includes('claude-meta-section'),
+			finalHasParagraphs: result.includes('<p'),
+			finalPreview: result.substring(0, 300) + '...'
+		});
+		
 		logger.debug(`内容处理完成，实际应用了 ${appliedPluginCount} 个HTML插件`);
 		return result;
 	}

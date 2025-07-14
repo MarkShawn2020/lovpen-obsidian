@@ -135,13 +135,25 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	async copyArticle() {
+		console.log("📋 [复制功能] 开始复制文章");
+		
 		let content = await this.getArticleContent();
+		
+		console.log("📋 [复制功能] 获取到文章内容", {
+			contentLength: content.length,
+			contentPreview: content.substring(0, 300) + '...',
+			hasMetaSection: content.includes('claude-meta-section'),
+			hasParagraphs: content.includes('<p'),
+			hasStyles: content.includes('style=')
+		});
 
 		// 复制到剪贴板
+		console.log("📋 [复制功能] 准备写入剪贴板");
 		await navigator.clipboard.write([new ClipboardItem({
 			"text/html": new Blob([content], {type: "text/html"}),
 		}),]);
 
+		console.log("✅ [复制功能] 复制完成");
 		new Notice(`已复制到剪贴板！`);
 	}
 
@@ -296,24 +308,60 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	async getArticleContent() {
 		try {
+			console.log("🔄 [内容生成] 开始生成文章内容");
+			
 			const af = this.app.workspace.getActiveFile();
 			let md = "";
 			if (af && af.extension.toLocaleLowerCase() === "md") {
 				md = await this.app.vault.adapter.read(af.path);
 				this.title = af.basename;
+				console.log("📄 [内容生成] 读取Markdown文件", {
+					fileName: af.basename,
+					contentLength: md.length,
+					hasFrontMatter: md.startsWith("---")
+				});
 			} else {
 				md = "没有可渲染的笔记或文件不支持渲染";
+				console.log("⚠️ [内容生成] 无有效文件");
 			}
 
 			if (md.startsWith("---")) {
+				const beforeRemove = md.length;
 				md = md.replace(FRONT_MATTER_REGEX, "");
+				console.log("📝 [内容生成] 移除Front Matter", {
+					beforeLength: beforeRemove,
+					afterLength: md.length
+				});
 			}
 
+			console.log("🔄 [内容生成] 开始Markdown解析");
 			let articleHTML = await this.markedParser.parse(md);
-			articleHTML = this.wrapArticleContent(articleHTML);
+			console.log("✅ [内容生成] Markdown解析完成", {
+				htmlLength: articleHTML.length,
+				hasMetaSection: articleHTML.includes('claude-meta-section'),
+				hasStyles: articleHTML.includes('<style')
+			});
 
+			console.log("📦 [内容生成] 包装文章内容");
+			articleHTML = this.wrapArticleContent(articleHTML);
+			console.log("✅ [内容生成] 包装完成", {
+				wrappedLength: articleHTML.length
+			});
+
+			console.log("🔌 [内容生成] 开始插件处理");
 			const pluginManager = UnifiedPluginManager.getInstance();
+			const beforePlugins = articleHTML;
 			articleHTML = pluginManager.processContent(articleHTML, this.settings);
+			
+			console.log("✅ [内容生成] 插件处理完成", {
+				beforeLength: beforePlugins.length,
+				afterLength: articleHTML.length,
+				changed: beforePlugins !== articleHTML,
+				finalHasMetaSection: articleHTML.includes('claude-meta-section'),
+				finalHasParagraphs: articleHTML.includes('<p'),
+				finalHasStyles: articleHTML.includes('style=')
+			});
+
 			return articleHTML;
 		} catch (error) {
 			logger.error("获取文章内容时出错:", error);

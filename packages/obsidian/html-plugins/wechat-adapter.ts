@@ -22,17 +22,58 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 	process(html: string, settings: NMPSettings): string {
 		try {
+			console.log("🚀 [微信插件] 开始处理", { 
+				inputLength: html.length,
+				inputPreview: html.substring(0, 200) + '...'
+			});
 			logger.debug("开始微信公众号适配处理");
 
+			const originalHtml = html;
+			
 			// 依次执行各个适配步骤
+			console.log("📎 [微信插件] Step 1: 处理链接");
 			html = this.processLinks(html, settings);
+			console.log("📎 [微信插件] Step 1 完成", { 
+				changed: html !== originalHtml,
+				length: html.length 
+			});
+
+			console.log("🎨 [微信插件] Step 2: 内联样式");
+			const beforeInline = html;
 			html = this.inlineStyles(html, settings);
+			console.log("🎨 [微信插件] Step 2 完成", { 
+				changed: html !== beforeInline,
+				length: html.length,
+				hasStyle: html.includes('<style'),
+				styleRemoved: beforeInline.includes('<style') && !html.includes('<style')
+			});
+
+			console.log("🏗️ [微信插件] Step 3: 保持结构");
+			const beforeStructure = html;
 			html = this.preserveStructure(html, settings);
+			console.log("🏗️ [微信插件] Step 3 完成", { 
+				changed: html !== beforeStructure,
+				length: html.length 
+			});
+
+			console.log("⚡ [微信插件] Step 4: 微信优化");
+			const beforeOptimize = html;
 			html = this.optimizeForWechat(html, settings);
+			console.log("⚡ [微信插件] Step 4 完成", { 
+				changed: html !== beforeOptimize,
+				length: html.length 
+			});
+
+			console.log("✅ [微信插件] 处理完成", {
+				finalLength: html.length,
+				totalChanged: html !== originalHtml,
+				finalPreview: html.substring(0, 300) + '...'
+			});
 
 			logger.debug("微信公众号适配处理完成");
 			return html;
 		} catch (error) {
+			console.error("❌ [微信插件] 处理出错:", error);
 			logger.error("微信公众号适配处理出错:", error);
 			return html;
 		}
@@ -290,10 +331,16 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private restructureMetaSection(container: HTMLElement): void {
 		try {
 			const metaSections = container.querySelectorAll('.claude-meta-section');
+			console.log("🔍 [微信插件] 找到元信息区域", { count: metaSections.length });
 			
-			metaSections.forEach(metaSection => {
+			metaSections.forEach((metaSection, index) => {
 				const section = metaSection as HTMLElement;
 				const metaContent = section.querySelector('.claude-meta-content') as HTMLElement;
+				
+				console.log(`📦 [微信插件] 处理元信息区域 ${index + 1}`, {
+					hasContent: !!metaContent,
+					sectionHTML: section.outerHTML.substring(0, 200) + '...'
+				});
 				
 				if (!metaContent) return;
 
@@ -302,11 +349,19 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				const contentStyles = this.extractStyles(metaContent);
 				const mergedContainerStyles = this.mergeStyles(sectionStyles, contentStyles);
 
+				console.log("🎨 [微信插件] 样式合并", {
+					sectionStyles: sectionStyles.substring(0, 100) + '...',
+					contentStyles: contentStyles.substring(0, 100) + '...',
+					mergedStyles: mergedContainerStyles.substring(0, 150) + '...'
+				});
+
 				// 处理元信息项目
 				const metaItems = metaContent.querySelectorAll('.claude-meta-item');
 				const newParagraphs: string[] = [];
 
-				metaItems.forEach(item => {
+				console.log("📋 [微信插件] 处理元信息项目", { itemCount: metaItems.length });
+
+				metaItems.forEach((item, itemIndex) => {
 					const itemElement = item as HTMLElement;
 					const itemStyles = this.extractStyles(itemElement);
 					
@@ -320,6 +375,14 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					if (label && value) {
 						const labelStyles = this.extractStyles(label);
 						const valueStyles = this.extractStyles(value);
+
+						console.log(`🏷️ [微信插件] 项目 ${itemIndex + 1}`, {
+							labelText: label.textContent,
+							valueText: value.textContent,
+							labelStyles: labelStyles.substring(0, 80) + '...',
+							valueStyles: valueStyles.substring(0, 80) + '...',
+							finalStyles: finalParagraphStyles.substring(0, 100) + '...'
+						});
 
 						// 创建微信偏好的p+span结构
 						const paragraph = `<p style="${finalParagraphStyles}">` +
@@ -340,9 +403,18 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					const tags = metaTags.querySelectorAll('.claude-meta-tag');
 					const tagSpans: string[] = [];
 
-					tags.forEach(tag => {
+					console.log("🏷️ [微信插件] 处理标签区域", { 
+						tagCount: tags.length,
+						tagsStyles: tagsStyles.substring(0, 80) + '...'
+					});
+
+					tags.forEach((tag, tagIndex) => {
 						const tagElement = tag as HTMLElement;
 						const tagStyles = this.extractStyles(tagElement);
+						console.log(`🔖 [微信插件] 标签 ${tagIndex + 1}`, {
+							text: tagElement.textContent,
+							styles: tagStyles.substring(0, 60) + '...'
+						});
 						tagSpans.push(`<span style="${tagStyles}">${tagElement.textContent}</span>`);
 					});
 
@@ -354,12 +426,25 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 				// 替换原有的复杂结构
 				if (newParagraphs.length > 0) {
-					section.outerHTML = newParagraphs.join('');
+					const beforeHTML = section.outerHTML;
+					const newHTML = newParagraphs.join('');
+					
+					console.log("🔄 [微信插件] DOM替换", {
+						paragraphCount: newParagraphs.length,
+						beforeLength: beforeHTML.length,
+						afterLength: newHTML.length,
+						beforePreview: beforeHTML.substring(0, 150) + '...',
+						afterPreview: newHTML.substring(0, 150) + '...'
+					});
+					
+					section.outerHTML = newHTML;
 				}
 			});
 
+			console.log("✅ [微信插件] 元信息区域重构完成");
 			logger.debug("元信息区域重构完成");
 		} catch (error) {
+			console.error("❌ [微信插件] 重构元信息区域出错:", error);
 			logger.error("重构元信息区域出错:", error);
 		}
 	}
