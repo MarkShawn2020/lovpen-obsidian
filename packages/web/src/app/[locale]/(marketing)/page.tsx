@@ -204,27 +204,13 @@ export default async function Index(props: IIndexProps) {
         </Container>
       </section>
 
-      {/* AI Process Section */}
-      <section className="w-full py-16 lg:py-24 bg-white u-bg-subtle-dots relative">
+      {/* AI Process & Platform Support Section */}
+      <section className="w-full py-16 lg:py-24 u-bg-ivory-medium u-bg-premium-texture relative">
         <Container>
           <div className="text-center mb-16">
             <h2 className="u-display-m mb-4 text-text-main">{t('ai_process_title')}</h2>
             <p className="u-paragraph-l text-text-faded max-w-3xl mx-auto">
               {t('ai_process_subtitle')}
-            </p>
-          </div>
-
-          <FlowDiagram />
-        </Container>
-      </section>
-
-      {/* Platform Support Section */}
-      <section className="w-full py-16 lg:py-24 u-bg-ivory-medium u-bg-premium-texture relative">
-        <Container>
-          <div className="text-center mb-16">
-            <h2 className="u-display-m mb-4 text-text-main">{t('platforms_title')}</h2>
-            <p className="u-paragraph-l text-text-faded max-w-3xl mx-auto">
-              {t('platforms_subtitle')}
             </p>
           </div>
 
@@ -276,25 +262,25 @@ export default async function Index(props: IIndexProps) {
             </p>
           </div>
 
-          <Tabs defaultValue="tech" className="max-w-4xl mx-auto">
+          <Tabs defaultValue="personal" className="max-w-4xl mx-auto">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="tech">技术博主</TabsTrigger>
-              <TabsTrigger value="lifestyle">生活博主</TabsTrigger>
-              <TabsTrigger value="business">企业团队</TabsTrigger>
               <TabsTrigger value="personal">个人品牌</TabsTrigger>
+              <TabsTrigger value="lifestyle">生活博主</TabsTrigger>
+              <TabsTrigger value="tech">技术博主</TabsTrigger>
+              <TabsTrigger value="business">企业团队</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="tech" className="mt-8">
+            <TabsContent value="personal" className="mt-8">
               <div className="text-center space-y-4">
-                <div className="text-6xl mb-4">🤖</div>
-                <h3 className="u-display-s text-text-main">LovPen 让技术写作更简单</h3>
+                <div className="text-6xl mb-4">💎</div>
+                <h3 className="u-display-s text-text-main">LovPen 放大了我的影响力</h3>
                 <p className="u-paragraph-m text-text-faded">
-                  "我只需要说出技术要点，LovPen 就能基于我的知识库生成专业的技术文章。从算法原理到代码实现，LovPen 都能用我习惯的表达方式完美呈现。"
+                  "有了 LovPen 的帮助，我能保持高频的优质内容输出。LovPen 不仅学会了我的观点表达，还能根据不同平台的用户特点调整内容深度和风格。"
                 </p>
                 <div className="flex items-center justify-center space-x-2 text-sm text-text-faded">
-                  <span className="font-medium">张工</span>
+                  <span className="font-medium">李老师</span>
                   <span>•</span>
-                  <span>全栈开发者</span>
+                  <span>知识博主</span>
                 </div>
               </div>
             </TabsContent>
@@ -314,6 +300,21 @@ export default async function Index(props: IIndexProps) {
               </div>
             </TabsContent>
 
+            <TabsContent value="tech" className="mt-8">
+              <div className="text-center space-y-4">
+                <div className="text-6xl mb-4">🤖</div>
+                <h3 className="u-display-s text-text-main">LovPen 让技术写作更简单</h3>
+                <p className="u-paragraph-m text-text-faded">
+                  "我只需要说出技术要点，LovPen 就能基于我的知识库生成专业的技术文章。从算法原理到代码实现，LovPen 都能用我习惯的表达方式完美呈现。"
+                </p>
+                <div className="flex items-center justify-center space-x-2 text-sm text-text-faded">
+                  <span className="font-medium">张工</span>
+                  <span>•</span>
+                  <span>全栈开发者</span>
+                </div>
+              </div>
+            </TabsContent>
+
             <TabsContent value="business" className="mt-8">
               <div className="text-center space-y-4">
                 <div className="text-6xl mb-4">📈</div>
@@ -325,21 +326,6 @@ export default async function Index(props: IIndexProps) {
                   <span className="font-medium">王总</span>
                   <span>•</span>
                   <span>内容营销负责人</span>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="personal" className="mt-8">
-              <div className="text-center space-y-4">
-                <div className="text-6xl mb-4">💎</div>
-                <h3 className="u-display-s text-text-main">LovPen 放大了我的影响力</h3>
-                <p className="u-paragraph-m text-text-faded">
-                  "有了 LovPen 的帮助，我能保持高频的优质内容输出。LovPen 不仅学会了我的观点表达，还能根据不同平台的用户特点调整内容深度和风格。"
-                </p>
-                <div className="flex items-center justify-center space-x-2 text-sm text-text-faded">
-                  <span className="font-medium">李老师</span>
-                  <span>•</span>
-                  <span>知识博主</span>
                 </div>
               </div>
             </TabsContent>
