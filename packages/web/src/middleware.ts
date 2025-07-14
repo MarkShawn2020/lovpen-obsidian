@@ -53,6 +53,19 @@ export default async function middleware(
       });
     }
 
+    // Handle homepage redirect for authenticated users
+    const { userId } = await auth();
+    if (userId) {
+      const pathname = req.nextUrl.pathname;
+      // Check if user is on root path or localized root path
+      const isRootPath = pathname === '/' || pathname.match(/^\/[a-z]{2}(-[A-Z]{2})?$/);
+      
+      if (isRootPath) {
+        const locale = pathname === '/' ? '' : pathname;
+        return NextResponse.redirect(new URL(`${locale}/create`, req.url));
+      }
+    }
+
     // Skip i18n routing for API routes
     if (req.nextUrl.pathname.startsWith('/api/')) {
       return NextResponse.next();
