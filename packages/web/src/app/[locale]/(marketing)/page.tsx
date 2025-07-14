@@ -81,29 +81,125 @@ export default async function Index(props: IIndexProps) {
               </Button>
             </div>
             
-            {/* AI Demo Preview */}
-            <div className="mt-12 bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-xl">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-                <div className="text-center space-y-3">
-                  <div className="text-4xl mb-2">📱</div>
-                  <div className="space-y-2 text-xs">
-                    <p className="text-text-faded bg-gray-50 p-2 rounded">"刚读完一本书，有个观点..."</p>
-                    <p className="text-text-faded bg-gray-50 p-2 rounded">"会议记录：用户反馈分析"</p>
-                    <p className="text-text-faded bg-gray-50 p-2 rounded">"语音备忘：今天的思考"</p>
+            {/* LovPen Flow System */}
+            <div className="mt-16 relative">
+              <div className="max-w-6xl mx-auto">
+                {/* 输入源环形布局 */}
+                <div className="relative flex items-center justify-center min-h-[500px]">
+                  {/* 输入源 - 左侧 */}
+                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 space-y-4">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{animationDelay: '0s'}}>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">💭</span>
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-800">灵感闪现</p>
+                          <p className="text-gray-600 text-xs">"今天突然想到..."</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{animationDelay: '1s'}}>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">📊</span>
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-800">工作报告</p>
+                          <p className="text-gray-600 text-xs">数据分析文档</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform animate-pulse" style={{animationDelay: '2s'}}>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">🎤</span>
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-800">语音备忘</p>
+                          <p className="text-gray-600 text-xs">随时记录想法</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-text-muted">多样化输入：观点、报告、语音...</p>
+
+                  {/* 流动线条 - 输入到引擎 */}
+                  <div className="absolute left-32 top-1/2 transform -translate-y-1/2">
+                    <div className="flex items-center">
+                      <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+                      </div>
+                      <div className="w-0 h-0 border-l-8 border-l-purple-500 border-t-4 border-b-4 border-t-transparent border-b-transparent"></div>
+                    </div>
+                  </div>
+
+                  {/* LovPen 引擎 - 中心 */}
+                  <div className="relative z-10">
+                    <div className="w-40 h-40 bg-gradient-to-br from-primary to-swatch-cactus rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30">
+                      <div className="text-center text-white">
+                        <div className="text-4xl mb-2">❤️</div>
+                        <div className="text-sm font-bold">LovPen</div>
+                        <div className="text-xs opacity-80">智能引擎</div>
+                      </div>
+                    </div>
+                    {/* 脉动效果 */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-swatch-cactus/20 rounded-full animate-ping"></div>
+                    <div className="absolute -inset-4 bg-gradient-to-br from-primary/10 to-swatch-cactus/10 rounded-full animate-pulse"></div>
+                  </div>
+
+                  {/* 流动线条 - 引擎到输出 */}
+                  <div className="absolute right-32 top-1/2 transform -translate-y-1/2">
+                    <div className="flex items-center">
+                      <div className="w-0 h-0 border-r-8 border-r-green-500 border-t-4 border-b-4 border-t-transparent border-b-transparent"></div>
+                      <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-cyan-400 rounded-full relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 输出平台 - 右侧 */}
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 space-y-4">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">📱</span>
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-800">微信公众号</p>
+                          <p className="text-gray-600 text-xs">专业排版</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">🎓</span>
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-800">知乎/小红书</p>
+                          <p className="text-gray-600 text-xs">精美图文</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg hover:scale-105 transition-transform">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">🌐</span>
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-800">20+平台</p>
+                          <p className="text-gray-600 text-xs">一键分发</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 闭环反馈线 */}
+                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+                    <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20 shadow-lg">
+                      <span className="text-lg">📊</span>
+                      <span className="text-sm text-gray-700">数据反馈优化</span>
+                      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-center items-center lg:flex-row flex-col">
-                  <div className="w-16 h-1 bg-gradient-to-r from-primary to-swatch-cactus lg:rotate-0 rotate-90 lg:mb-0 mb-2"></div>
-                  <div className="w-0 h-0 border-l-8 border-l-swatch-cactus border-t-4 border-b-4 border-t-transparent border-b-transparent lg:ml-2"></div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl mb-2">✨</div>
-                  <p className="text-sm text-text-faded">智能生成美丽图文</p>
-                  <p className="text-xs text-text-muted">多平台精准分发</p>
+
+                {/* 底部说明 */}
+                <div className="text-center mt-8">
+                  <p className="text-lg text-text-faded mb-2">每天的灵感流动，经过 LovPen 智能处理</p>
+                  <p className="text-sm text-text-muted">形成精美内容，流向各大平台，数据闭环优化</p>
                 </div>
               </div>
             </div>
+
           </div>
         </Container>
       </section>
