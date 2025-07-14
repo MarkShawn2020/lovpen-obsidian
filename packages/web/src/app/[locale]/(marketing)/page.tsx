@@ -29,34 +29,34 @@ export default async function Index(props: IIndexProps) {
 
   const features = [
     {
-      icon: '🧠',
-      title: 'LovPen 智能写作',
-      description: '基于你的想法和知识库，LovPen 自动生成符合你风格的高质量内容，告别写作困难症。',
+      icon: '💭',
+      title: '碎片化思考收集',
+      description: '类似flomo的灵感捕捉，支持语音、文字、图片等多种输入。随时记录观点，LovPen帮你汇聚成完整文章。',
     },
     {
-      icon: '🎭',
-      title: '文风学习引擎',
-      description: '分析你喜欢的网页、书籍或名人作品，LovPen 学习并模仿他们的写作风格和表达方式。',
+      icon: '🔗',
+      title: '观点智能整合',
+      description: '将零散的想法、会议记录、读书笔记智能串联，自动发现关联性，组织成逻辑清晰的文章结构。',
     },
     {
-      icon: '📚',
-      title: '个人知识库',
-      description: '整合你的所有资料和灵感，LovPen 在创作时智能引用，让每篇内容都有深度。',
+      icon: '📊',
+      title: '多格式内容输入',
+      description: '支持报告文档、PPT大纲、表格数据等多种格式输入，智能解析并转化为优质图文内容。',
     },
     {
-      icon: '🎨',
-      title: '智能排版系统',
-      description: '根据目标平台和风格偏好，LovPen 自动选择最佳排版方案，让内容视觉效果完美。',
+      icon: '✨',
+      title: '美丽图文生成',
+      description: '自动配图、智能排版、优雅字体，生成值得信赖的专业级图文内容，让每一份作品都赏心悦目。',
     },
     {
-      icon: '🗣️',
-      title: '语音创作助手',
-      description: '支持语音输入和自然对话，随时随地记录灵感，LovPen 帮你整理成完整文章。',
+      icon: '🌐',
+      title: '全平台精准适配',
+      description: '支持微信公众号、知乎、小红书、Twitter、LinkedIn等20+平台，根据平台特性自动优化内容格式。',
     },
     {
-      icon: '🔄',
-      title: 'LovPen 对话编辑',
-      description: '通过自然语言告诉 LovPen 你的修改需求，智能调整内容风格、长度和重点。',
+      icon: '🎯',
+      title: '风格学习引擎',
+      description: '学习你喜欢的作者风格和表达习惯，确保输出内容既保持个人特色，又符合平台调性。',
     },
   ];
 
@@ -84,17 +84,23 @@ export default async function Index(props: IIndexProps) {
             {/* AI Demo Preview */}
             <div className="mt-12 bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-xl">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">💭</div>
-                  <p className="text-sm text-text-faded">"我想写一篇关于AI发展的分析文章"</p>
+                <div className="text-center space-y-3">
+                  <div className="text-4xl mb-2">📱</div>
+                  <div className="space-y-2 text-xs">
+                    <p className="text-text-faded bg-gray-50 p-2 rounded">"刚读完一本书，有个观点..."</p>
+                    <p className="text-text-faded bg-gray-50 p-2 rounded">"会议记录：用户反馈分析"</p>
+                    <p className="text-text-faded bg-gray-50 p-2 rounded">"语音备忘：今天的思考"</p>
+                  </div>
+                  <p className="text-xs text-text-muted">多样化输入：观点、报告、语音...</p>
                 </div>
-                <div className="flex justify-center">
-                  <div className="w-12 h-0.5 bg-gradient-to-r from-primary to-swatch-cactus lg:rotate-0 rotate-90"></div>
-                  <div className="w-0 h-0 border-l-4 border-l-swatch-cactus border-t-2 border-b-2 border-t-transparent border-b-transparent"></div>
+                <div className="flex justify-center items-center lg:flex-row flex-col">
+                  <div className="w-16 h-1 bg-gradient-to-r from-primary to-swatch-cactus lg:rotate-0 rotate-90 lg:mb-0 mb-2"></div>
+                  <div className="w-0 h-0 border-l-8 border-l-swatch-cactus border-t-4 border-b-4 border-t-transparent border-b-transparent lg:ml-2"></div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl mb-2">📝</div>
-                  <p className="text-sm text-text-faded">LovPen 自动生成 4 个平台的定制内容</p>
+                  <div className="text-4xl mb-2">✨</div>
+                  <p className="text-sm text-text-faded">智能生成美丽图文</p>
+                  <p className="text-xs text-text-muted">多平台精准分发</p>
                 </div>
               </div>
             </div>
@@ -263,22 +269,22 @@ export default async function Index(props: IIndexProps) {
             </div>
             
             {/* Trust indicators */}
-            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-sm text-text-faded">
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✓</span>
-                <span>LovPen 驱动，智能创作</span>
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-text-faded max-w-4xl mx-auto">
+              <div className="flex items-center space-x-2 justify-center md:justify-start">
+                <span className="text-green-600 text-lg">✨</span>
+                <span>专业级美丽图文</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✓</span>
-                <span>个性化学习引擎</span>
+              <div className="flex items-center space-x-2 justify-center md:justify-start">
+                <span className="text-green-600 text-lg">🎯</span>
+                <span>值得信赖的内容质量</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✓</span>
-                <span>多平台一键分发</span>
+              <div className="flex items-center space-x-2 justify-center md:justify-start">
+                <span className="text-green-600 text-lg">🌐</span>
+                <span>20+平台精准适配</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✓</span>
-                <span>语音输入支持</span>
+              <div className="flex items-center space-x-2 justify-center md:justify-start">
+                <span className="text-green-600 text-lg">💭</span>
+                <span>碎片化思考整合</span>
               </div>
             </div>
           </div>

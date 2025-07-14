@@ -1,5 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
-import { DemoBanner } from '@/components/DemoBanner';
+import { NotificationBanner } from '@/components/NotificationBanner';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 
@@ -12,7 +12,7 @@ export default async function Layout(props: {
 
   return (
     <>
-      <DemoBanner />
+      <NotificationBanner />
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow">

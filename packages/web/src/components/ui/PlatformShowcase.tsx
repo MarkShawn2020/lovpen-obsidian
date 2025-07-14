@@ -36,11 +36,39 @@ const platforms: Platform[] = [
     bgColor: 'bg-pink-50 border-pink-200',
   },
   {
-    name: 'Twitter',
+    name: 'Twitter/X',
     icon: '🐦',
-    description: '国际传播，全球触达',
+    description: '国际传播，实时动态',
     color: 'text-sky-700',
     bgColor: 'bg-sky-50 border-sky-200',
+  },
+  {
+    name: 'LinkedIn',
+    icon: '💼',
+    description: '商务社交，职场洞察',
+    color: 'text-indigo-700',
+    bgColor: 'bg-indigo-50 border-indigo-200',
+  },
+  {
+    name: 'Medium',
+    icon: '📝',
+    description: '深度思考，优质内容',
+    color: 'text-gray-700',
+    bgColor: 'bg-gray-50 border-gray-200',
+  },
+  {
+    name: 'Bilibili',
+    icon: '📺',
+    description: '年轻社区，创意表达',
+    color: 'text-cyan-700',
+    bgColor: 'bg-cyan-50 border-cyan-200',
+  },
+  {
+    name: '今日头条',
+    icon: '📰',
+    description: '大众传媒，热点追踪',
+    color: 'text-red-700',
+    bgColor: 'bg-red-50 border-red-200',
   },
 ];
 
@@ -48,11 +76,11 @@ const platforms: Platform[] = [
 const lovpenCreationSteps = [
   {
     step: 1,
-    title: '想法输入',
-    description: '语音、文本、对话',
+    title: '碎片化输入',
+    description: '观点、报告、语音...',
     icon: '💭',
     color: 'bg-blue-100 border-blue-200',
-    features: ['语音识别', '自然对话', '灵感记录']
+    features: ['flomo式记录', '多格式支持', '随时随地']
   },
   {
     step: 2,
@@ -64,11 +92,11 @@ const lovpenCreationSteps = [
   },
   {
     step: 3,
-    title: '智能创作',
-    description: '自动成文+排版',
+    title: '美丽图文生成',
+    description: '专业排版+精美配图',
     icon: '✨',
     color: 'bg-green-100 border-green-200',
-    features: ['LovPen 写作', '智能排版', '风格适配']
+    features: ['智能配图', '优雅排版', '品质保证']
   },
   {
     step: 4,
@@ -76,7 +104,15 @@ const lovpenCreationSteps = [
     description: '多平台自动发布',
     icon: '🚀',
     color: 'bg-orange-100 border-orange-200',
-    features: ['格式转换', '定时发布', '数据统计']
+    features: ['格式转换', '定时发布', '自动投放']
+  },
+  {
+    step: 5,
+    title: '数据监控与优化',
+    description: '全流程效果追踪',
+    icon: '📊',
+    color: 'bg-rose-100 border-rose-200',
+    features: ['数据分析', '效果优化', '人工协作']
   },
 ];
 
@@ -84,13 +120,13 @@ const lovpenCreationSteps = [
 const LovPenFlowDiagram = () => (
   <div className="max-w-7xl mx-auto">
     {/* 流程步骤 */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
       {lovpenCreationSteps.map((step, index) => (
         <div key={step.step} className="relative">
           {/* 连接线 */}
           {index < lovpenCreationSteps.length - 1 && (
-            <div className="hidden lg:block absolute top-12 left-full w-8 h-0.5 bg-gradient-to-r from-primary to-swatch-cactus opacity-40 z-0">
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-4 border-l-swatch-cactus border-t-2 border-b-2 border-t-transparent border-b-transparent opacity-60"></div>
+            <div className="hidden lg:block absolute top-12 left-full w-6 h-0.5 bg-gradient-to-r from-primary to-swatch-cactus opacity-40 z-0">
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-3 border-l-swatch-cactus border-t-1 border-b-1 border-t-transparent border-b-transparent opacity-60"></div>
             </div>
           )}
           
@@ -138,7 +174,7 @@ const LovPenFlowDiagram = () => (
       </div>
       <h3 className="text-2xl font-bold text-text-main mt-4 mb-2">LovPen 引擎</h3>
       <p className="text-text-faded max-w-md mx-auto">
-        基于你的知识库和偏好，智能学习你的文风，为每个平台量身定制内容
+        智能整合碎片化思考，生成专业级美丽图文，为20+平台量身定制值得信赖的优质内容
       </p>
     </div>
   </div>
@@ -178,6 +214,13 @@ const PlatformShowcase = ({ className }: PlatformShowcaseProps) => {
         {platforms.map((platform) => (
           <PlatformCard key={platform.name} platform={platform} />
         ))}
+      </div>
+      
+      {/* 更多平台提示 */}
+      <div className="mt-8 text-center">
+        <p className="text-text-faded text-sm">
+          支持20+主流平台，更多平台持续添加中...
+        </p>
       </div>
     </div>
   );
