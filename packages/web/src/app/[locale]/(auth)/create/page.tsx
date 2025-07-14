@@ -216,50 +216,8 @@ AI擅长：
   };
 
   return (
-    <div className="min-h-screen bg-background-main">
-      {/* 简洁工具栏 */}
-      <div className="bg-background-main border-b border-border-default/20 py-4 sticky top-0 z-50">
-        <Container>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center u-gap-l">
-              <div className="flex items-center u-gap-s">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white font-medium text-sm">
-                  L
-                </div>
-                <div>
-                  <h1 className="u-display-s font-serif">LovPen Studio</h1>
-                  <p className="text-sm text-text-faded">智能创作工作台</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center u-gap-s">
-              <Button
-                variant="primary"
-                size="md"
-                disabled={!generatedContent}
-                className="font-medium"
-              >
-                发布
-              </Button>
-
-              {/* 用户头像按钮 */}
-              <div className="relative">
-                <button
-                  type="button"
-                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium hover:opacity-90 transition-opacity"
-                >
-                  M
-                </button>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </div>
-
-      {/* 三栏布局主工作区 */}
-      <Container>
-        <div className="u-grid-desktop u-gap-l u-mt-gutter min-h-[calc(100vh-120px)]">
+    <Container>
+      <div className="u-grid-desktop u-gap-l u-mt-gutter min-h-[calc(100vh-120px)]">
           {/* 左侧输入面板 */}
           <div className="lg:col-span-3 flex flex-col u-gap-m">
             {/* 输入方式选择 */}
@@ -422,8 +380,7 @@ AI擅长：
               generatedContentLength={generatedContent.length}
             />
           </SmartSidebar>
-        </div>
-      </Container>
-    </div>
+      </div>
+    </Container>
   );
 };

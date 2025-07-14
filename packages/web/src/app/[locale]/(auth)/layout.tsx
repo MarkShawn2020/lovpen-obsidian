@@ -1,4 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
+import { AuthLayoutWrapper } from '@/components/layout/AuthLayoutWrapper';
 
 export default async function AuthLayout(props: {
   children: React.ReactNode;
@@ -7,5 +8,5 @@ export default async function AuthLayout(props: {
   const { locale } = await props.params;
   setRequestLocale(locale);
 
-  return props.children;
+  return <AuthLayoutWrapper>{props.children}</AuthLayoutWrapper>;
 }

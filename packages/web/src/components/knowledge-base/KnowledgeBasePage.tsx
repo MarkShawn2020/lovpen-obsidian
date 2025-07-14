@@ -3,6 +3,7 @@
 import type { SearchFilters } from '@/types/knowledge-base';
 import { useUser } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
+import { Container } from '@/components/layout/Container';
 import { KnowledgeBaseClientService } from '@/services/knowledge-base-client';
 
 export function KnowledgeBasePage() {
@@ -55,34 +56,25 @@ export function KnowledgeBasePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">知识库</h1>
-          <p className="text-gray-600">
-            共
-            {total}
-            {' '}
-            个项目
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <Container>
+      <div className="py-6">
         <div className="text-center py-16">
           <h2 className="text-xl font-medium text-gray-900 mb-4">知识库功能正在开发中</h2>
           <p className="text-gray-500">
             基础架构已完成，正在完善UI组件和功能
           </p>
+          <p className="text-gray-500 mt-2">
+            共 {total} 个项目
+          </p>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
