@@ -27,6 +27,7 @@ type PreviewPanel = {
   id: string;
   platform: string;
   title: string;
+  isSelected?: boolean;
 };
 
 type Platform = {
@@ -42,6 +43,8 @@ type PreviewSectionProps = {
   addPreviewPanel: (platform: string) => void;
   removePreviewPanel: (panelId: string) => void;
   reorderPreviewPanels: (panels: PreviewPanel[]) => void;
+  onPanelSelect: (panelId: string, isCtrlClick?: boolean) => void;
+  onBackgroundClick: () => void;
 };
 
 // 可拖拽的预览面板组件
@@ -50,13 +53,15 @@ function DraggablePreviewPanel({
   platforms, 
   generatedContent, 
   removePreviewPanel, 
-  previewPanelsLength 
+  previewPanelsLength,
+  onPanelSelect
 }: {
   panel: PreviewPanel;
   platforms: Record<string, Platform>;
   generatedContent: string;
   removePreviewPanel: (panelId: string) => void;
   previewPanelsLength: number;
+  onPanelSelect: (panelId: string, isCtrlClick?: boolean) => void;
 }) {
   const {
     attributes,
@@ -72,12 +77,35 @@ function DraggablePreviewPanel({
     transition,
   };
 
+  const handlePanelClick = (e: React.MouseEvent) => {
+    // 阻止事件冒泡和默认行为
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // 阻止点击拖拽句柄时触发选择
+    if ((e.target as HTMLElement).closest('[data-drag-handle]')) {
+      return;
+    }
+    
+    // 阻止点击按钮时触发选择
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    
+    onPanelSelect(panel.id, e.ctrlKey || e.metaKey);
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-background-main rounded-lg border border-border-default/20 overflow-hidden flex flex-col min-h-[400px] transition-all duration-200 ${
-        isDragging ? 'opacity-50 shadow-xl scale-105 border-primary/40' : 'shadow-sm hover:shadow-md'
+      onClick={handlePanelClick}
+      className={`bg-background-main rounded-lg border overflow-hidden flex flex-col min-h-[400px] transition-all duration-200 cursor-pointer ${
+        isDragging 
+          ? 'opacity-50 shadow-xl scale-105 border-primary/40' 
+          : panel.isSelected
+            ? 'border-primary/60 shadow-md ring-2 ring-primary/20'
+            : 'border-border-default/20 shadow-sm hover:shadow-md hover:border-primary/30'
       }`}
     >
       {/* 单个预览面板工具栏 */}
@@ -89,6 +117,7 @@ function DraggablePreviewPanel({
               type="button"
               {...attributes}
               {...listeners}
+              data-drag-handle
               className="text-text-faded hover:text-text-main transition-all duration-200 cursor-grab active:cursor-grabbing p-1 hover:bg-background-oat rounded-sm"
               title="拖拽排序"
             >
@@ -113,6 +142,11 @@ function DraggablePreviewPanel({
             </button>
             <div className={`w-3 h-3 rounded-full ${platforms[panel.platform]?.color}`}></div>
             <h3 className="font-medium text-text-main text-sm">{panel.title}</h3>
+            {panel.isSelected && (
+              <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                已选择
+              </div>
+            )}
           </div>
 
           <div className="flex items-center u-gap-s">
@@ -196,11 +230,18 @@ export function PreviewSection({
   addPreviewPanel,
   removePreviewPanel,
   reorderPreviewPanels,
+  onPanelSelect,
+  onBackgroundClick,
 }: PreviewSectionProps) {
   const [selectValue, setSelectValue] = useState('');
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      // 设置激活距离，避免点击事件被拦截
+      activationConstraint: {
+        distance: 8, // 需要拖拽8px才激活拖拽
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -224,21 +265,34 @@ export function PreviewSection({
   };
 
   return (
-    <div className="lg:col-span-6 flex flex-col u-gap-m">
+    <div className="lg:col-span-6 flex flex-col u-gap-m" onClick={onBackgroundClick}>
       {/* 全局工具栏 */}
-      <div className="bg-background-main rounded-lg border border-border-default/20 px-6 py-4">
+      <div 
+        className="bg-background-main rounded-lg border border-border-default/20 px-6 py-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center u-gap-s">
             <h2 className="font-medium text-text-main">内容预览区</h2>
-            {previewPanels.length > 1 && (
-              <span className="text-xs text-text-faded bg-background-oat px-2 py-1 rounded">
-                可拖拽排序
-              </span>
-            )}
+            <div className="flex items-center u-gap-s">
+              {previewPanels.length > 1 && (
+                <span className="text-xs text-text-faded bg-background-oat px-2 py-1 rounded">
+                  可拖拽排序
+                </span>
+              )}
+              {previewPanels.filter(p => p.isSelected).length > 0 && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                  {previewPanels.filter(p => p.isSelected).length} 个已选择
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center u-gap-s">
             {/* 添加预览面板选择器 */}
-            <Select value={selectValue} onValueChange={handleAddPanel}>
+            <Select 
+              value={selectValue} 
+              onValueChange={handleAddPanel}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="+ 添加预览面板" />
               </SelectTrigger>
@@ -285,6 +339,7 @@ export function PreviewSection({
                   generatedContent={generatedContent}
                   removePreviewPanel={removePreviewPanel}
                   previewPanelsLength={previewPanels.length}
+                  onPanelSelect={onPanelSelect}
                 />
               ))
             )}

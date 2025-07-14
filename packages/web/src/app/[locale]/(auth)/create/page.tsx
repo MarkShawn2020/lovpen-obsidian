@@ -5,6 +5,11 @@ import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { PreviewSection } from './preview-section';
+import { SmartSidebar } from '@/components/sidebar/SmartSidebar';
+import { GlobalControls } from '@/components/sidebar/GlobalControls';
+import { PlatformControls } from '@/components/sidebar/PlatformControls';
+import { useSidebarContext } from '@/hooks/useSidebarContext';
+import { Platform } from '@/types/sidebar';
 
 export default function Create() {
   const [isRecording, setIsRecording] = useState(false);
@@ -12,14 +17,60 @@ export default function Create() {
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewPanels, setPreviewPanels] = useState([
-    { id: 'preview-1', platform: 'wechat', title: '微信公众号预览' },
+    { id: 'preview-1', platform: 'wechat', title: '微信公众号预览', isSelected: false },
   ]);
 
-  const platforms: Record<string, { name: string; fullName: string; color: string }> = {
-    wechat: { name: '微信', fullName: '微信公众号', color: 'bg-green-500' },
-    zhihu: { name: '知乎', fullName: '知乎专栏', color: 'bg-blue-500' },
-    xiaohongshu: { name: '小红书', fullName: '小红书笔记', color: 'bg-pink-500' },
-    twitter: { name: 'Twitter', fullName: 'Twitter动态', color: 'bg-sky-500' },
+  // 智能侧边栏状态管理
+  const {
+    sidebarContext,
+    updateContext,
+    updateGlobalSettings,
+    updatePlatformSettings,
+    selectPanels,
+    getSelectedPlatforms,
+  } = useSidebarContext();
+
+  const platforms: Record<string, Platform> = {
+    wechat: { 
+      name: '微信', 
+      fullName: '微信公众号', 
+      color: 'bg-green-500',
+      constraints: {
+        maxCharacters: 2000,
+        supportedFormats: ['text', 'image', 'video'],
+        imageRequirements: { maxSize: '20MB', formats: ['JPG', 'PNG'] }
+      }
+    },
+    zhihu: { 
+      name: '知乎', 
+      fullName: '知乎专栏', 
+      color: 'bg-blue-500',
+      constraints: {
+        maxCharacters: 5000,
+        supportedFormats: ['text', 'image', 'code', 'formula'],
+        imageRequirements: { maxSize: '5MB', formats: ['JPG', 'PNG', 'GIF'] }
+      }
+    },
+    xiaohongshu: { 
+      name: '小红书', 
+      fullName: '小红书笔记', 
+      color: 'bg-pink-500',
+      constraints: {
+        maxCharacters: 1000,
+        supportedFormats: ['text', 'image', 'hashtag'],
+        imageRequirements: { maxSize: '10MB', formats: ['JPG', 'PNG'] }
+      }
+    },
+    twitter: { 
+      name: 'Twitter', 
+      fullName: 'Twitter动态', 
+      color: 'bg-sky-500',
+      constraints: {
+        maxCharacters: 280,
+        supportedFormats: ['text', 'image', 'video', 'link'],
+        imageRequirements: { maxSize: '5MB', formats: ['JPG', 'PNG', 'GIF'] }
+      }
+    },
   };
 
   const addPreviewPanel = (platform: string) => {
@@ -31,6 +82,7 @@ export default function Create() {
       id: newId,
       platform,
       title: `${platformInfo.fullName}预览`,
+      isSelected: false,
     };
     setPreviewPanels([...previewPanels, newPanel]);
   };
@@ -42,9 +94,78 @@ export default function Create() {
   };
 
 
-  const reorderPreviewPanels = (panels: Array<{ id: string; platform: string; title: string }>) => {
-    setPreviewPanels(panels);
+  const reorderPreviewPanels = (panels: Array<{ id: string; platform: string; title: string; isSelected?: boolean }>) => {
+    setPreviewPanels(panels.map(panel => ({ ...panel, isSelected: panel.isSelected ?? false })));
   };
+
+  // 处理面板选择
+  const handlePanelSelect = (panelId: string, isCtrlClick = false) => {
+    let newSelectedPanels: string[] = [];
+    
+    if (!isCtrlClick) {
+      // 普通点击：清除其他选择，只选择当前面板
+      newSelectedPanels = [panelId];
+      setPreviewPanels(panels => 
+        panels.map(panel => ({
+          ...panel,
+          isSelected: panel.id === panelId
+        }))
+      );
+    } else {
+      // Ctrl+点击：切换当前面板选择状态
+      const currentlySelected = previewPanels.filter(p => p.isSelected).map(p => p.id);
+      const isCurrentlySelected = currentlySelected.includes(panelId);
+      
+      if (isCurrentlySelected) {
+        newSelectedPanels = currentlySelected.filter(id => id !== panelId);
+      } else {
+        newSelectedPanels = [...currentlySelected, panelId];
+      }
+      
+      setPreviewPanels(panels => 
+        panels.map(panel => ({
+          ...panel,
+          isSelected: newSelectedPanels.includes(panel.id)
+        }))
+      );
+    }
+    
+    // 直接设置选中的面板，而不是切换
+    selectPanels(newSelectedPanels);
+  };
+
+  // 处理背景点击（清除选择）
+  const handleBackgroundClick = () => {
+    setPreviewPanels(panels => 
+      panels.map(panel => ({ ...panel, isSelected: false }))
+    );
+    selectPanels([]); // 使用 selectPanels 而不是 clearSelection
+  };
+
+  // 处理侧边栏上下文变更
+  const handleContextChange = (updates: Partial<typeof sidebarContext>) => {
+    updateContext(updates);
+    
+    // 如果切换到全局模式或清除选择，同步面板状态
+    if (updates.mode === 'global' || (updates.selectedPanels && updates.selectedPanels.length === 0)) {
+      setPreviewPanels(panels => 
+        panels.map(panel => ({ ...panel, isSelected: false }))
+      );
+    }
+    
+    // 如果指定了选中的面板，同步面板状态
+    if (updates.selectedPanels && updates.selectedPanels.length > 0) {
+      setPreviewPanels(panels => 
+        panels.map(panel => ({
+          ...panel,
+          isSelected: updates.selectedPanels!.includes(panel.id)
+        }))
+      );
+    }
+  };
+
+  // 获取当前选中的平台
+  const selectedPlatforms = getSelectedPlatforms(previewPanels);
 
   const handleVoiceRecord = () => {
     setIsRecording(!isRecording);
@@ -275,105 +396,31 @@ AI擅长：
             addPreviewPanel={addPreviewPanel}
             removePreviewPanel={removePreviewPanel}
             reorderPreviewPanels={reorderPreviewPanels}
+            onPanelSelect={handlePanelSelect}
+            onBackgroundClick={handleBackgroundClick}
           />
 
-          {/* 右侧设置面板 */}
-          <div className="lg:col-span-3 flex flex-col u-gap-m">
-            {/* 创作设置 */}
-            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
-              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-                <h3 className="font-medium text-text-main">
-                  创作设置
-                </h3>
-              </div>
-
-              <div className="p-6 u-gap-m flex flex-col">
-                <div>
-                  <label htmlFor="article-length" className="block text-sm font-medium text-text-main u-mb-text">文章长度</label>
-                  <select id="article-length" className="w-full p-3 border border-border-default/20 rounded-md focus:ring-2 focus:ring-primary focus:border-primary text-text-main">
-                    <option>短文 (300-500字)</option>
-                    <option>中等 (800-1200字)</option>
-                    <option>长文 (1500-2500字)</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="writing-style" className="block text-sm font-medium text-text-main u-mb-text">写作风格</label>
-                  <select id="writing-style" className="w-full p-3 border border-border-default/20 rounded-md focus:ring-2 focus:ring-primary focus:border-primary text-text-main">
-                    <option>专业严谨</option>
-                    <option>轻松幽默</option>
-                    <option>深度思考</option>
-                    <option>温暖感性</option>
-                  </select>
-                </div>
-                <div>
-                  <div className="block text-sm font-medium text-text-main u-mb-text">预览面板</div>
-                  <div className="text-sm text-text-faded">
-                    当前共有
-                    {' '}
-                    {previewPanels.length}
-                    {' '}
-                    个预览面板，每个面板可以独立配置平台和样式。
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 发布设置 */}
-            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
-              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-                <h3 className="font-medium text-text-main">
-                  发布设置
-                </h3>
-              </div>
-
-              <div className="p-6 u-gap-m flex flex-col">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-text-main">自动配图</span>
-                  <button type="button" className="w-10 h-5 bg-primary rounded-full relative transition-opacity hover:opacity-90">
-                    <div className="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-text-main">SEO优化</span>
-                  <button type="button" className="w-10 h-5 bg-border-default rounded-full relative transition-colors hover:bg-primary">
-                    <div className="w-4 h-4 bg-white rounded-full absolute left-0.5 top-0.5"></div>
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-text-main">定时发布</span>
-                  <button type="button" className="w-10 h-5 bg-border-default rounded-full relative transition-colors hover:bg-primary">
-                    <div className="w-4 h-4 bg-white rounded-full absolute left-0.5 top-0.5"></div>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* AI 助手 */}
-            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
-              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-                <h3 className="font-medium text-text-main">
-                  AI 助手
-                </h3>
-              </div>
-
-              <div className="p-6">
-                <div className="u-gap-s flex flex-col">
-                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                    优化标题
-                  </button>
-                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                    提取关键词
-                  </button>
-                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                    内容分析
-                  </button>
-                  <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-                    风格建议
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* 右侧智能设置面板 */}
+          <SmartSidebar
+            context={sidebarContext}
+            onContextChange={handleContextChange}
+          >
+            <GlobalControls
+              settings={sidebarContext.globalSettings}
+              onUpdate={updateGlobalSettings}
+              previewPanelsCount={previewPanels.length}
+              currentMode={sidebarContext.mode}
+            />
+            
+            <PlatformControls
+              platforms={platforms}
+              selectedPlatforms={selectedPlatforms}
+              platformSettings={sidebarContext.platformOverrides}
+              onUpdate={updatePlatformSettings}
+              currentMode={sidebarContext.mode}
+              generatedContentLength={generatedContent.length}
+            />
+          </SmartSidebar>
         </div>
       </Container>
     </div>
