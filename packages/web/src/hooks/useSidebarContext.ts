@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { SidebarContext, SidebarMode, GlobalSettings, PlatformSettings } from '@/types/sidebar';
+import type { GlobalSettings, PlatformSettings, SidebarContext, SidebarMode } from '@/types/sidebar';
+import { useCallback, useState } from 'react';
 
 const defaultGlobalSettings: GlobalSettings = {
   autoImage: true,
@@ -23,7 +23,7 @@ const defaultPlatformSettings: Record<string, PlatformSettings> = {
   },
   zhihu: {
     articleLength: 'long',
-    writingStyle: 'thoughtful', 
+    writingStyle: 'thoughtful',
     imageCompression: 'low',
     linkHandling: 'preserve',
     includeCallToAction: false,
@@ -41,7 +41,7 @@ const defaultPlatformSettings: Record<string, PlatformSettings> = {
   twitter: {
     articleLength: 'short',
     writingStyle: 'casual',
-    imageCompression: 'high', 
+    imageCompression: 'high',
     linkHandling: 'preserve',
     useHashtags: true,
     includeCallToAction: false,
@@ -79,9 +79,10 @@ export function useSidebarContext() {
   }, []);
 
   const selectPanels = useCallback((panelIds: string[]) => {
-    const newMode: SidebarMode = 
-      panelIds.length === 0 ? 'global' :
-      panelIds.length === 1 ? 'platform' : 'multi-select';
+    const newMode: SidebarMode
+      = panelIds.length === 0
+        ? 'global'
+        : panelIds.length === 1 ? 'platform' : 'multi-select';
 
     setSidebarContext(prev => ({
       ...prev,
@@ -91,15 +92,16 @@ export function useSidebarContext() {
   }, []);
 
   const togglePanelSelection = useCallback((panelId: string) => {
-    setSidebarContext(prev => {
+    setSidebarContext((prev) => {
       const isSelected = prev.selectedPanels.includes(panelId);
       const newSelection = isSelected
         ? prev.selectedPanels.filter(id => id !== panelId)
         : [...prev.selectedPanels, panelId];
 
-      const newMode: SidebarMode = 
-        newSelection.length === 0 ? 'global' :
-        newSelection.length === 1 ? 'platform' : 'multi-select';
+      const newMode: SidebarMode
+        = newSelection.length === 0
+          ? 'global'
+          : newSelection.length === 1 ? 'platform' : 'multi-select';
 
       return {
         ...prev,
@@ -119,7 +121,7 @@ export function useSidebarContext() {
 
   // 获取当前选中面板的平台信息
   const getSelectedPlatforms = useCallback((panels: Array<{ id: string; platform: string }>) => {
-    return sidebarContext.selectedPanels.map(panelId => {
+    return sidebarContext.selectedPanels.map((panelId) => {
       const panel = panels.find(p => p.id === panelId);
       return panel?.platform;
     }).filter(Boolean) as string[];
@@ -128,7 +130,9 @@ export function useSidebarContext() {
   // 获取有效的设置（全局 + 平台覆盖）
   const getEffectiveSettings = useCallback((platform?: string) => {
     const global = sidebarContext.globalSettings;
-    if (!platform) return global;
+    if (!platform) {
+      return global;
+    }
 
     const platformOverride = sidebarContext.platformOverrides[platform] || {};
     return {

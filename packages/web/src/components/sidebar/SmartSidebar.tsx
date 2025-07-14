@@ -1,19 +1,19 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { SidebarContext, SidebarMode } from '@/types/sidebar';
+import type { ReactNode } from 'react';
+import type { SidebarContext, SidebarMode } from '@/types/sidebar';
 
-interface SmartSidebarProps {
+type SmartSidebarProps = {
   context: SidebarContext;
   onContextChange: (context: Partial<SidebarContext>) => void;
   children: ReactNode;
-}
+};
 
-interface ConditionalSectionProps {
+type ConditionalSectionProps = {
   when: SidebarMode | 'always';
   currentMode: SidebarMode;
   children: ReactNode;
-}
+};
 
 function ConditionalSection({ when, currentMode, children }: ConditionalSectionProps) {
   if (when === 'always' || when === currentMode) {
@@ -64,7 +64,7 @@ export function SmartSidebar({ context, onContextChange, children }: SmartSideba
               {context.mode === 'multi-select' && `同时调整 ${context.selectedPanels.length} 个平台`}
             </div>
           </div>
-          
+
           <div className="flex items-center u-gap-xs">
             {context.selectedPanels.length > 0 && (
               <div className="flex items-center u-gap-xs">
@@ -76,7 +76,9 @@ export function SmartSidebar({ context, onContextChange, children }: SmartSideba
                   ← 返回
                 </button>
                 <span className="text-xs text-text-faded">
-                  {context.selectedPanels.length} 个平台
+                  {context.selectedPanels.length}
+                  {' '}
+                  个平台
                 </span>
               </div>
             )}

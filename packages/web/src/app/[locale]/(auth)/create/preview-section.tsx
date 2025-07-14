@@ -1,27 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
+import type {
+  DragEndEvent,
+} from '@dnd-kit/core';
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
+  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 
 type PreviewPanel = {
   id: string;
@@ -48,13 +48,13 @@ type PreviewSectionProps = {
 };
 
 // 可拖拽的预览面板组件
-function DraggablePreviewPanel({ 
-  panel, 
-  platforms, 
-  generatedContent, 
-  removePreviewPanel, 
+function DraggablePreviewPanel({
+  panel,
+  platforms,
+  generatedContent,
+  removePreviewPanel,
   previewPanelsLength,
-  onPanelSelect
+  onPanelSelect,
 }: {
   panel: PreviewPanel;
   platforms: Record<string, Platform>;
@@ -81,17 +81,17 @@ function DraggablePreviewPanel({
     // 阻止事件冒泡和默认行为
     e.preventDefault();
     e.stopPropagation();
-    
+
     // 阻止点击拖拽句柄时触发选择
     if ((e.target as HTMLElement).closest('[data-drag-handle]')) {
       return;
     }
-    
+
     // 阻止点击按钮时触发选择
     if ((e.target as HTMLElement).closest('button')) {
       return;
     }
-    
+
     onPanelSelect(panel.id, e.ctrlKey || e.metaKey);
   };
 
@@ -101,8 +101,8 @@ function DraggablePreviewPanel({
       style={style}
       onClick={handlePanelClick}
       className={`bg-background-main rounded-lg border overflow-hidden flex flex-col min-h-[400px] transition-all duration-200 cursor-pointer ${
-        isDragging 
-          ? 'opacity-50 shadow-xl scale-105 border-primary/40' 
+        isDragging
+          ? 'opacity-50 shadow-xl scale-105 border-primary/40'
           : panel.isSelected
             ? 'border-primary/60 shadow-md ring-2 ring-primary/20'
             : 'border-border-default/20 shadow-sm hover:shadow-md hover:border-primary/30'
@@ -121,23 +121,23 @@ function DraggablePreviewPanel({
               className="text-text-faded hover:text-text-main transition-all duration-200 cursor-grab active:cursor-grabbing p-1 hover:bg-background-oat rounded-sm"
               title="拖拽排序"
             >
-              <svg 
-                width="12" 
-                height="12" 
-                viewBox="0 0 12 12" 
-                fill="none" 
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 className="text-current"
               >
-                <circle cx="2" cy="2" r="1" fill="currentColor"/>
-                <circle cx="6" cy="2" r="1" fill="currentColor"/>
-                <circle cx="10" cy="2" r="1" fill="currentColor"/>
-                <circle cx="2" cy="6" r="1" fill="currentColor"/>
-                <circle cx="6" cy="6" r="1" fill="currentColor"/>
-                <circle cx="10" cy="6" r="1" fill="currentColor"/>
-                <circle cx="2" cy="10" r="1" fill="currentColor"/>
-                <circle cx="6" cy="10" r="1" fill="currentColor"/>
-                <circle cx="10" cy="10" r="1" fill="currentColor"/>
+                <circle cx="2" cy="2" r="1" fill="currentColor" />
+                <circle cx="6" cy="2" r="1" fill="currentColor" />
+                <circle cx="10" cy="2" r="1" fill="currentColor" />
+                <circle cx="2" cy="6" r="1" fill="currentColor" />
+                <circle cx="6" cy="6" r="1" fill="currentColor" />
+                <circle cx="10" cy="6" r="1" fill="currentColor" />
+                <circle cx="2" cy="10" r="1" fill="currentColor" />
+                <circle cx="6" cy="10" r="1" fill="currentColor" />
+                <circle cx="10" cy="10" r="1" fill="currentColor" />
               </svg>
             </button>
             <div className={`w-3 h-3 rounded-full ${platforms[panel.platform]?.color}`}></div>
@@ -244,7 +244,7 @@ export function PreviewSection({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleAddPanel = (platform: string) => {
@@ -267,9 +267,9 @@ export function PreviewSection({
   return (
     <div className="lg:col-span-6 flex flex-col u-gap-m" onClick={onBackgroundClick}>
       {/* 全局工具栏 */}
-      <div 
+      <div
         className="bg-background-main rounded-lg border border-border-default/20 px-6 py-4"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center u-gap-s">
@@ -282,15 +282,19 @@ export function PreviewSection({
               )}
               {previewPanels.filter(p => p.isSelected).length > 0 && (
                 <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                  已选 {previewPanels.filter(p => p.isSelected).length} 个
+                  已选
+                  {' '}
+                  {previewPanels.filter(p => p.isSelected).length}
+                  {' '}
+                  个
                 </span>
               )}
             </div>
           </div>
           <div className="flex items-center u-gap-s">
             {/* 添加预览面板选择器 */}
-            <Select 
-              value={selectValue} 
+            <Select
+              value={selectValue}
               onValueChange={handleAddPanel}
             >
               <SelectTrigger className="w-[180px]">
@@ -312,37 +316,39 @@ export function PreviewSection({
       </div>
 
       {/* 可拖拽的预览面板列表 */}
-      <DndContext 
-        sensors={sensors} 
+      <DndContext
+        sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         <div className="flex-1 u-gap-m flex flex-col overflow-auto">
-          <SortableContext 
-            items={previewPanels.map(panel => panel.id)} 
+          <SortableContext
+            items={previewPanels.map(panel => panel.id)}
             strategy={verticalListSortingStrategy}
           >
-            {previewPanels.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-text-faded">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">📱</div>
-                  <p className="text-lg font-medium mb-2">还没有预览面板</p>
-                  <p className="text-sm">点击上方「+ 添加预览面板」开始</p>
-                </div>
-              </div>
-            ) : (
-              previewPanels.map(panel => (
-                <DraggablePreviewPanel
-                  key={panel.id}
-                  panel={panel}
-                  platforms={platforms}
-                  generatedContent={generatedContent}
-                  removePreviewPanel={removePreviewPanel}
-                  previewPanelsLength={previewPanels.length}
-                  onPanelSelect={onPanelSelect}
-                />
-              ))
-            )}
+            {previewPanels.length === 0
+              ? (
+                  <div className="h-full flex items-center justify-center text-text-faded">
+                    <div className="text-center">
+                      <div className="text-6xl mb-4">📱</div>
+                      <p className="text-lg font-medium mb-2">还没有预览面板</p>
+                      <p className="text-sm">点击上方「+ 添加预览面板」开始</p>
+                    </div>
+                  </div>
+                )
+              : (
+                  previewPanels.map(panel => (
+                    <DraggablePreviewPanel
+                      key={panel.id}
+                      panel={panel}
+                      platforms={platforms}
+                      generatedContent={generatedContent}
+                      removePreviewPanel={removePreviewPanel}
+                      previewPanelsLength={previewPanels.length}
+                      onPanelSelect={onPanelSelect}
+                    />
+                  ))
+                )}
           </SortableContext>
         </div>
       </DndContext>

@@ -1,15 +1,15 @@
 'use client';
 
+import type { Platform } from '@/types/sidebar';
 import { useState } from 'react';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { PreviewSection } from './preview-section';
-import { SmartSidebar } from '@/components/sidebar/SmartSidebar';
 import { GlobalControls } from '@/components/sidebar/GlobalControls';
 import { PlatformControls } from '@/components/sidebar/PlatformControls';
+import { SmartSidebar } from '@/components/sidebar/SmartSidebar';
+import { Button } from '@/components/ui/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { useSidebarContext } from '@/hooks/useSidebarContext';
-import { Platform } from '@/types/sidebar';
+import { PreviewSection } from './preview-section';
 
 export default function Create() {
   const [isRecording, setIsRecording] = useState(false);
@@ -31,53 +31,55 @@ export default function Create() {
   } = useSidebarContext();
 
   const platforms: Record<string, Platform> = {
-    wechat: { 
-      name: '微信', 
-      fullName: '微信公众号', 
+    wechat: {
+      name: '微信',
+      fullName: '微信公众号',
       color: 'bg-green-500',
       constraints: {
         maxCharacters: 2000,
         supportedFormats: ['text', 'image', 'video'],
-        imageRequirements: { maxSize: '20MB', formats: ['JPG', 'PNG'] }
-      }
+        imageRequirements: { maxSize: '20MB', formats: ['JPG', 'PNG'] },
+      },
     },
-    zhihu: { 
-      name: '知乎', 
-      fullName: '知乎专栏', 
+    zhihu: {
+      name: '知乎',
+      fullName: '知乎专栏',
       color: 'bg-blue-500',
       constraints: {
         maxCharacters: 5000,
         supportedFormats: ['text', 'image', 'code', 'formula'],
-        imageRequirements: { maxSize: '5MB', formats: ['JPG', 'PNG', 'GIF'] }
-      }
+        imageRequirements: { maxSize: '5MB', formats: ['JPG', 'PNG', 'GIF'] },
+      },
     },
-    xiaohongshu: { 
-      name: '小红书', 
-      fullName: '小红书笔记', 
+    xiaohongshu: {
+      name: '小红书',
+      fullName: '小红书笔记',
       color: 'bg-pink-500',
       constraints: {
         maxCharacters: 1000,
         supportedFormats: ['text', 'image', 'hashtag'],
-        imageRequirements: { maxSize: '10MB', formats: ['JPG', 'PNG'] }
-      }
+        imageRequirements: { maxSize: '10MB', formats: ['JPG', 'PNG'] },
+      },
     },
-    twitter: { 
-      name: 'Twitter', 
-      fullName: 'Twitter动态', 
+    twitter: {
+      name: 'Twitter',
+      fullName: 'Twitter动态',
       color: 'bg-sky-500',
       constraints: {
         maxCharacters: 280,
         supportedFormats: ['text', 'image', 'video', 'link'],
-        imageRequirements: { maxSize: '5MB', formats: ['JPG', 'PNG', 'GIF'] }
-      }
+        imageRequirements: { maxSize: '5MB', formats: ['JPG', 'PNG', 'GIF'] },
+      },
     },
   };
 
   const addPreviewPanel = (platform: string) => {
     const newId = `preview-${Date.now()}`;
     const platformInfo = platforms[platform];
-    if (!platformInfo) return;
-    
+    if (!platformInfo) {
+      return;
+    }
+
     const newPanel = {
       id: newId,
       platform,
@@ -93,7 +95,6 @@ export default function Create() {
     }
   };
 
-
   const reorderPreviewPanels = (panels: Array<{ id: string; platform: string; title: string; isSelected?: boolean }>) => {
     setPreviewPanels(panels.map(panel => ({ ...panel, isSelected: panel.isSelected ?? false })));
   };
@@ -101,43 +102,43 @@ export default function Create() {
   // 处理面板选择
   const handlePanelSelect = (panelId: string, isCtrlClick = false) => {
     let newSelectedPanels: string[] = [];
-    
+
     if (!isCtrlClick) {
       // 普通点击：清除其他选择，只选择当前面板
       newSelectedPanels = [panelId];
-      setPreviewPanels(panels => 
+      setPreviewPanels(panels =>
         panels.map(panel => ({
           ...panel,
-          isSelected: panel.id === panelId
-        }))
+          isSelected: panel.id === panelId,
+        })),
       );
     } else {
       // Ctrl+点击：切换当前面板选择状态
       const currentlySelected = previewPanels.filter(p => p.isSelected).map(p => p.id);
       const isCurrentlySelected = currentlySelected.includes(panelId);
-      
+
       if (isCurrentlySelected) {
         newSelectedPanels = currentlySelected.filter(id => id !== panelId);
       } else {
         newSelectedPanels = [...currentlySelected, panelId];
       }
-      
-      setPreviewPanels(panels => 
+
+      setPreviewPanels(panels =>
         panels.map(panel => ({
           ...panel,
-          isSelected: newSelectedPanels.includes(panel.id)
-        }))
+          isSelected: newSelectedPanels.includes(panel.id),
+        })),
       );
     }
-    
+
     // 直接设置选中的面板，而不是切换
     selectPanels(newSelectedPanels);
   };
 
   // 处理背景点击（清除选择）
   const handleBackgroundClick = () => {
-    setPreviewPanels(panels => 
-      panels.map(panel => ({ ...panel, isSelected: false }))
+    setPreviewPanels(panels =>
+      panels.map(panel => ({ ...panel, isSelected: false })),
     );
     selectPanels([]); // 使用 selectPanels 而不是 clearSelection
   };
@@ -145,21 +146,21 @@ export default function Create() {
   // 处理侧边栏上下文变更
   const handleContextChange = (updates: Partial<typeof sidebarContext>) => {
     updateContext(updates);
-    
+
     // 如果切换到全局模式或清除选择，同步面板状态
     if (updates.mode === 'global' || (updates.selectedPanels && updates.selectedPanels.length === 0)) {
-      setPreviewPanels(panels => 
-        panels.map(panel => ({ ...panel, isSelected: false }))
+      setPreviewPanels(panels =>
+        panels.map(panel => ({ ...panel, isSelected: false })),
       );
     }
-    
+
     // 如果指定了选中的面板，同步面板状态
     if (updates.selectedPanels && updates.selectedPanels.length > 0) {
-      setPreviewPanels(panels => 
+      setPreviewPanels(panels =>
         panels.map(panel => ({
           ...panel,
-          isSelected: updates.selectedPanels!.includes(panel.id)
-        }))
+          isSelected: updates.selectedPanels!.includes(panel.id),
+        })),
       );
     }
   };
@@ -411,7 +412,7 @@ AI擅长：
               previewPanelsCount={previewPanels.length}
               currentMode={sidebarContext.mode}
             />
-            
+
             <PlatformControls
               platforms={platforms}
               selectedPlatforms={selectedPlatforms}

@@ -1,25 +1,25 @@
 'use client';
 
-import { Platform, PlatformSettings } from '@/types/sidebar';
+import type { Platform, PlatformSettings } from '@/types/sidebar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { ConditionalSection } from './SmartSidebar';
 
-interface PlatformControlsProps {
+type PlatformControlsProps = {
   platforms: Record<string, Platform>;
   selectedPlatforms: string[];
   platformSettings: Record<string, PlatformSettings>;
   onUpdate: (platform: string, settings: Partial<PlatformSettings>) => void;
   currentMode: 'global' | 'platform' | 'multi-select';
   generatedContentLength?: number;
-}
+};
 
-export function PlatformControls({ 
-  platforms, 
-  selectedPlatforms, 
-  platformSettings, 
-  onUpdate, 
+export function PlatformControls({
+  platforms,
+  selectedPlatforms,
+  platformSettings,
+  onUpdate,
   currentMode,
-  generatedContentLength = 0
+  generatedContentLength = 0,
 }: PlatformControlsProps) {
   if (selectedPlatforms.length === 0) {
     return null;
@@ -28,12 +28,16 @@ export function PlatformControls({
   // 单平台模式
   if (currentMode === 'platform' && selectedPlatforms.length === 1) {
     const platformId = selectedPlatforms[0];
-    if (!platformId) return null;
-    
+    if (!platformId) {
+      return null;
+    }
+
     const platform = platforms[platformId];
     const settings = platformSettings[platformId] || {};
-    
-    if (!platform) return null;
+
+    if (!platform) {
+      return null;
+    }
 
     const maxChars = platform.constraints?.maxCharacters;
     const isOverLimit = maxChars && generatedContentLength > maxChars;
@@ -45,7 +49,10 @@ export function PlatformControls({
           <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
             <div className="flex items-center u-gap-s">
               <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
-              <h3 className="font-medium text-text-main">{platform.fullName}设置</h3>
+              <h3 className="font-medium text-text-main">
+                {platform.fullName}
+                设置
+              </h3>
             </div>
           </div>
 
@@ -55,11 +62,10 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 文章长度
               </label>
-              <Select 
-                value={settings.articleLength || 'medium'} 
-                onValueChange={(value: 'short' | 'medium' | 'long') => 
-                  onUpdate(platformId, { articleLength: value })
-                }
+              <Select
+                value={settings.articleLength || 'medium'}
+                onValueChange={(value: 'short' | 'medium' | 'long') =>
+                  onUpdate(platformId, { articleLength: value })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -76,11 +82,10 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 写作风格
               </label>
-              <Select 
-                value={settings.writingStyle || 'professional'} 
-                onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') => 
-                  onUpdate(platformId, { writingStyle: value })
-                }
+              <Select
+                value={settings.writingStyle || 'professional'}
+                onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') =>
+                  onUpdate(platformId, { writingStyle: value })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -100,16 +105,23 @@ export function PlatformControls({
                 <div className="flex items-center justify-between u-mb-text">
                   <span className="text-sm font-medium text-text-main">字数限制</span>
                   <span className={`text-xs px-2 py-1 rounded ${
-                    isOverLimit 
-                      ? 'bg-red-100 text-red-700' 
+                    isOverLimit
+                      ? 'bg-red-100 text-red-700'
                       : 'bg-green-100 text-green-700'
-                  }`}>
-                    {generatedContentLength}/{maxChars}
+                  }`}
+                  >
+                    {generatedContentLength}
+                    /
+                    {maxChars}
                   </span>
                 </div>
                 {isOverLimit && (
                   <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                    ⚠️ 内容超出 {platform.name} 平台字数限制
+                    ⚠️ 内容超出
+                    {' '}
+                    {platform.name}
+                    {' '}
+                    平台字数限制
                   </div>
                 )}
               </div>
@@ -120,11 +132,10 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 图片处理
               </label>
-              <Select 
-                value={settings.imageCompression || 'medium'} 
-                onValueChange={(value: 'high' | 'medium' | 'low') => 
-                  onUpdate(platformId, { imageCompression: value })
-                }
+              <Select
+                value={settings.imageCompression || 'medium'}
+                onValueChange={(value: 'high' | 'medium' | 'low') =>
+                  onUpdate(platformId, { imageCompression: value })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -142,11 +153,10 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 链接处理
               </label>
-              <Select 
-                value={settings.linkHandling || 'preserve'} 
-                onValueChange={(value: 'preserve' | 'convert-to-text' | 'footnote') => 
-                  onUpdate(platformId, { linkHandling: value })
-                }
+              <Select
+                value={settings.linkHandling || 'preserve'}
+                onValueChange={(value: 'preserve' | 'convert-to-text' | 'footnote') =>
+                  onUpdate(platformId, { linkHandling: value })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -167,8 +177,8 @@ export function PlatformControls({
                   {settings.useHashtags !== undefined && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-text-main">使用标签</span>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => onUpdate(platformId, { useHashtags: !settings.useHashtags })}
                         className={`w-10 h-5 rounded-full relative transition-colors ${
                           settings.useHashtags ? 'bg-primary' : 'bg-border-default'
@@ -176,15 +186,17 @@ export function PlatformControls({
                       >
                         <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
                           settings.useHashtags ? 'right-0.5' : 'left-0.5'
-                        }`}></div>
+                        }`}
+                        >
+                        </div>
                       </button>
                     </div>
                   )}
                   {settings.includeCallToAction !== undefined && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-text-main">包含行动号召</span>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => onUpdate(platformId, { includeCallToAction: !settings.includeCallToAction })}
                         className={`w-10 h-5 rounded-full relative transition-colors ${
                           settings.includeCallToAction ? 'bg-primary' : 'bg-border-default'
@@ -192,7 +204,9 @@ export function PlatformControls({
                       >
                         <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
                           settings.includeCallToAction ? 'right-0.5' : 'left-0.5'
-                        }`}></div>
+                        }`}
+                        >
+                        </div>
                       </button>
                     </div>
                   )}
@@ -206,12 +220,16 @@ export function PlatformControls({
                 <div className="font-medium u-mb-text">平台要求：</div>
                 {platform.constraints.supportedFormats && (
                   <div>
-                    支持格式: {platform.constraints.supportedFormats.join(', ')}
+                    支持格式:
+                    {' '}
+                    {platform.constraints.supportedFormats.join(', ')}
                   </div>
                 )}
                 {platform.constraints.imageRequirements && (
                   <div>
-                    图片要求: {platform.constraints.imageRequirements.maxSize}
+                    图片要求:
+                    {' '}
+                    {platform.constraints.imageRequirements.maxSize}
                   </div>
                 )}
               </div>
@@ -233,10 +251,13 @@ export function PlatformControls({
               ✂️ 智能裁剪字数
             </button>
             <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-              🎨 应用{platform.name}模板
+              🎨 应用
+              {platform.name}
+              模板
             </button>
             <button type="button" className="w-full text-left p-3 text-sm text-text-main hover:bg-background-ivory-medium rounded-md transition-colors">
-              📤 导出到{platform.name}
+              📤 导出到
+              {platform.name}
             </button>
           </div>
         </div>
@@ -254,7 +275,9 @@ export function PlatformControls({
             <div className="flex items-center justify-between">
               <h3 className="font-medium text-text-main">统一调整</h3>
               <div className="text-xs text-text-faded bg-orange-100 text-orange-700 px-2 py-1 rounded">
-                {selectedPlatforms.length} 个平台
+                {selectedPlatforms.length}
+                {' '}
+                个平台
               </div>
             </div>
           </div>
@@ -264,9 +287,11 @@ export function PlatformControls({
             <div className="u-mb-text">
               <div className="text-sm font-medium text-text-main u-mb-text">已选中：</div>
               <div className="flex flex-wrap u-gap-xs">
-                {selectedPlatforms.map(platformId => {
+                {selectedPlatforms.map((platformId) => {
                   const platform = platforms[platformId];
-                  if (!platform) return null;
+                  if (!platform) {
+                    return null;
+                  }
                   return (
                     <div key={platformId} className="flex items-center u-gap-xs bg-background-ivory-medium px-2 py-1 rounded text-xs">
                       <div className={`w-2 h-2 rounded-full ${platform.color}`}></div>
@@ -303,9 +328,9 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 文章长度
               </label>
-              <Select 
+              <Select
                 onValueChange={(value: 'short' | 'medium' | 'long') => {
-                  selectedPlatforms.forEach(platformId => {
+                  selectedPlatforms.forEach((platformId) => {
                     onUpdate(platformId, { articleLength: value });
                   });
                 }}
@@ -325,9 +350,9 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 写作风格
               </label>
-              <Select 
+              <Select
                 onValueChange={(value: 'professional' | 'casual' | 'thoughtful' | 'warm') => {
-                  selectedPlatforms.forEach(platformId => {
+                  selectedPlatforms.forEach((platformId) => {
                     onUpdate(platformId, { writingStyle: value });
                   });
                 }}
@@ -348,9 +373,9 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 图片处理
               </label>
-              <Select 
+              <Select
                 onValueChange={(value: 'high' | 'medium' | 'low') => {
-                  selectedPlatforms.forEach(platformId => {
+                  selectedPlatforms.forEach((platformId) => {
                     onUpdate(platformId, { imageCompression: value });
                   });
                 }}
@@ -370,9 +395,9 @@ export function PlatformControls({
               <label className="block text-sm font-medium text-text-main u-mb-text">
                 链接处理
               </label>
-              <Select 
+              <Select
                 onValueChange={(value: 'preserve' | 'convert-to-text' | 'footnote') => {
-                  selectedPlatforms.forEach(platformId => {
+                  selectedPlatforms.forEach((platformId) => {
                     onUpdate(platformId, { linkHandling: value });
                   });
                 }}

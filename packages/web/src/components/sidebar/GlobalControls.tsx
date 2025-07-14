@@ -1,21 +1,21 @@
 'use client';
 
-import { GlobalSettings } from '@/types/sidebar';
+import type { GlobalSettings } from '@/types/sidebar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { ConditionalSection } from './SmartSidebar';
 
-interface GlobalControlsProps {
+type GlobalControlsProps = {
   settings: GlobalSettings;
   onUpdate: (settings: Partial<GlobalSettings>) => void;
   previewPanelsCount: number;
   currentMode: 'global' | 'platform' | 'multi-select';
-}
+};
 
-export function GlobalControls({ 
-  settings, 
-  onUpdate, 
-  previewPanelsCount, 
-  currentMode 
+export function GlobalControls({
+  settings,
+  onUpdate,
+  previewPanelsCount,
+  currentMode,
 }: GlobalControlsProps) {
   return (
     <ConditionalSection when="global" currentMode={currentMode}>
@@ -30,11 +30,10 @@ export function GlobalControls({
             <label htmlFor="content-template" className="block text-sm font-medium text-text-main u-mb-text">
               内容模板
             </label>
-            <Select 
-              value={settings.contentTemplate} 
-              onValueChange={(value: 'custom' | 'blog' | 'news' | 'tutorial' | 'review') => 
-                onUpdate({ contentTemplate: value })
-              }
+            <Select
+              value={settings.contentTemplate}
+              onValueChange={(value: 'custom' | 'blog' | 'news' | 'tutorial' | 'review') =>
+                onUpdate({ contentTemplate: value })}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -53,11 +52,10 @@ export function GlobalControls({
             <label htmlFor="target-audience" className="block text-sm font-medium text-text-main u-mb-text">
               目标受众
             </label>
-            <Select 
-              value={settings.targetAudience} 
-              onValueChange={(value: 'general' | 'professional' | 'academic' | 'casual') => 
-                onUpdate({ targetAudience: value })
-              }
+            <Select
+              value={settings.targetAudience}
+              onValueChange={(value: 'general' | 'professional' | 'academic' | 'casual') =>
+                onUpdate({ targetAudience: value })}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -74,7 +72,11 @@ export function GlobalControls({
           <div>
             <div className="block text-sm font-medium text-text-main u-mb-text">预览面板</div>
             <div className="text-sm text-text-faded whitespace-nowrap overflow-hidden text-ellipsis">
-              当前 {previewPanelsCount} 个面板，点击可专门设置
+              当前
+              {' '}
+              {previewPanelsCount}
+              {' '}
+              个面板，点击可专门设置
             </div>
           </div>
         </div>
@@ -89,8 +91,8 @@ export function GlobalControls({
         <div className="p-6 u-gap-m flex flex-col">
           <div className="flex items-center justify-between">
             <span className="text-sm text-text-main">自动配图</span>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => onUpdate({ autoImage: !settings.autoImage })}
               className={`w-10 h-5 rounded-full relative transition-colors ${
                 settings.autoImage ? 'bg-primary' : 'bg-border-default'
@@ -98,14 +100,16 @@ export function GlobalControls({
             >
               <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
                 settings.autoImage ? 'right-0.5' : 'left-0.5'
-              }`}></div>
+              }`}
+              >
+              </div>
             </button>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="text-sm text-text-main">SEO优化</span>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => onUpdate({ seoOptimization: !settings.seoOptimization })}
               className={`w-10 h-5 rounded-full relative transition-colors ${
                 settings.seoOptimization ? 'bg-primary' : 'bg-border-default'
@@ -113,14 +117,16 @@ export function GlobalControls({
             >
               <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
                 settings.seoOptimization ? 'right-0.5' : 'left-0.5'
-              }`}></div>
+              }`}
+              >
+              </div>
             </button>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="text-sm text-text-main">定时发布</span>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => onUpdate({ scheduledPublishing: !settings.scheduledPublishing })}
               className={`w-10 h-5 rounded-full relative transition-colors ${
                 settings.scheduledPublishing ? 'bg-primary' : 'bg-border-default'
@@ -128,7 +134,9 @@ export function GlobalControls({
             >
               <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${
                 settings.scheduledPublishing ? 'right-0.5' : 'left-0.5'
-              }`}></div>
+              }`}
+              >
+              </div>
             </button>
           </div>
         </div>
