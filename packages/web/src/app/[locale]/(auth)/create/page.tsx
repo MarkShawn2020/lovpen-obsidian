@@ -15,7 +15,7 @@ export default function Create() {
     { id: 'preview-1', platform: 'wechat', title: '微信公众号预览' },
   ]);
 
-  const platforms = {
+  const platforms: Record<string, { name: string; fullName: string; color: string }> = {
     wechat: { name: '微信', fullName: '微信公众号', color: 'bg-green-500' },
     zhihu: { name: '知乎', fullName: '知乎专栏', color: 'bg-blue-500' },
     xiaohongshu: { name: '小红书', fullName: '小红书笔记', color: 'bg-pink-500' },
@@ -24,10 +24,13 @@ export default function Create() {
 
   const addPreviewPanel = (platform: string) => {
     const newId = `preview-${Date.now()}`;
+    const platformInfo = platforms[platform];
+    if (!platformInfo) return;
+    
     const newPanel = {
       id: newId,
       platform,
-      title: `${platforms[platform].fullName}预览`,
+      title: `${platformInfo.fullName}预览`,
     };
     setPreviewPanels([...previewPanels, newPanel]);
   };
@@ -38,12 +41,9 @@ export default function Create() {
     }
   };
 
-  const updatePanelPlatform = (panelId: string, platform: string) => {
-    setPreviewPanels(previewPanels.map(panel =>
-      panel.id === panelId
-        ? { ...panel, platform, title: `${platforms[platform].fullName}预览` }
-        : panel,
-    ));
+
+  const reorderPreviewPanels = (panels: Array<{ id: string; platform: string; title: string }>) => {
+    setPreviewPanels(panels);
   };
 
   const handleVoiceRecord = () => {
@@ -274,7 +274,7 @@ AI擅长：
             generatedContent={generatedContent}
             addPreviewPanel={addPreviewPanel}
             removePreviewPanel={removePreviewPanel}
-            updatePanelPlatform={updatePanelPlatform}
+            reorderPreviewPanels={reorderPreviewPanels}
           />
 
           {/* 右侧设置面板 */}
