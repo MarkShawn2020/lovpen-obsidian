@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/utils/Helpers';
 
 type ButtonProps = {
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   asChild?: boolean;
   href?: string;
@@ -15,6 +15,7 @@ const Button = ({ ref, className, variant = 'primary', size = 'md', asChild = fa
   const variants = {
     primary: 'text-white bg-primary hover:opacity-90 shadow-sm',
     secondary: 'text-text-main bg-transparent border border-border-default hover:bg-gray-50 shadow-sm',
+    outline: 'text-primary bg-transparent border border-primary hover:bg-primary hover:text-white shadow-sm',
   };
 
   const sizes = {

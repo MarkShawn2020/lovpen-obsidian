@@ -10,7 +10,7 @@
 	flex-direction: column;
 }
 
-.render-div {
+.render-container {
 	flex: 1;
 	overflow-y: auto;
 }

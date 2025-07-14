@@ -1,8 +1,9 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardIcon } from '@/components/ui/Card';
-import { PlatformShowcase, FlowDiagram } from '@/components/ui/PlatformShowcase';
+import { PlatformShowcase } from '@/components/ui/PlatformShowcase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 
 type IIndexProps = {
@@ -73,8 +74,10 @@ export default async function Index(props: IIndexProps) {
               {t('hero_subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button variant="primary" size="lg">
-                {t('hero_cta_primary')}
+              <Button variant="primary" size="lg" asChild>
+                <Link href="/create">
+                  {t('hero_cta_primary')}
+                </Link>
               </Button>
               <Button variant="secondary" size="lg">
                 {t('hero_cta_secondary')}
@@ -342,8 +345,10 @@ export default async function Index(props: IIndexProps) {
               {t('cta_subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="primary" size="lg" className="text-lg px-8 py-4">
-                {t('cta_button')}
+              <Button variant="primary" size="lg" className="text-lg px-8 py-4" asChild>
+                <Link href="/create">
+                  {t('cta_button')}
+                </Link>
               </Button>
               <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
                 查看 GitHub 源码

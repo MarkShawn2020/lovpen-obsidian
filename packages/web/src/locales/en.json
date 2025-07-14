@@ -39,6 +39,12 @@
     "cta_subtitle": "让 LovPen 学习你的风格，为你创作出独一无二的内容",
     "cta_button": "立即体验 LovPen 创作"
   },
+  "Create": {
+    "meta_title": "开始创作 - LovPen",
+    "meta_description": "选择你喜欢的方式开始创作，语音、文字、文档或对话，LovPen 让每个想法都能变成精彩内容",
+    "hero_title": "开始你的创作之旅",
+    "hero_subtitle": "选择最适合你的输入方式，让 LovPen 帮你把想法变成精美的图文内容"
+  },
   "Counter": {
     "meta_title": "Counter",
     "meta_description": "An example of DB operation",
