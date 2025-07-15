@@ -246,7 +246,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			this.optimizeCodeBlocks(optimizedContainer);
 
 			// 清理不兼容的属性和标签
-			this.cleanupIncompatibleContent(optimizedContainer);
+			// this.cleanupIncompatibleContent(optimizedContainer);
 
 			return optimizedContainer.innerHTML;
 		} catch (error) {
