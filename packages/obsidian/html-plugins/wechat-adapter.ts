@@ -371,9 +371,9 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			value = value.replace(/var\(--[\w-]+\)/g, 'inherit'); // 移除未知变量
 
 			// 检查属性是否兼容微信
-			// if (this.isWechatCompatibleProperty(property)) {
-			// 	rules[property] = value;
-			// }
+			if (this.isWechatCompatibleProperty(property)) {
+				rules[property] = value;
+			}
 		});
 
 		return rules;
