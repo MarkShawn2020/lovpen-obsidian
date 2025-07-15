@@ -2,7 +2,7 @@ import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
 import {copy} from "esbuild-plugin-copy";
-import {existsSync, mkdirSync, watch} from "fs";
+import {existsSync, mkdirSync, watch, writeFileSync} from "fs";
 import path from "path";
 import {execSync} from "child_process";
 
@@ -45,6 +45,18 @@ const syncToObsidian = () => {
 	}
 };
 
+// Native node modules plugin to handle .node files
+const nativeNodeModulesPlugin = {
+	name: 'native-node-modules',
+	setup(build) {
+		// Simply mark .node files as external to avoid bundling them
+		build.onResolve({ filter: /\.node$/ }, args => ({
+			path: args.path,
+			external: true,
+		}))
+	},
+}
+
 const context = await esbuild.context({
 	banner: {
 		js: banner,
@@ -65,6 +77,7 @@ const context = await esbuild.context({
 		"@lezer/common",
 		"@lezer/highlight",
 		"@lezer/lr",
+		// "@css-inline/css-inline",
 		...builtins],
 	format: "cjs",
 	target: "es2018",
@@ -73,6 +86,7 @@ const context = await esbuild.context({
 	treeShaking: true,
 	outfile: "dist/main.js",
 	plugins: [
+		nativeNodeModulesPlugin,
 		copy({
 			// 复制以下资源到 dist/assets 目录
 			assets: [

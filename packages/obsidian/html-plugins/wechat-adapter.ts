@@ -1,19 +1,18 @@
 import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
-import {inlineFragment} from '@css-inline/css-inline'
+import juice from 'juice'
 
 /**
  * 微信公众号适配插件 - 根据微信公众号HTML/CSS支持约束进行适配
  * 主要功能：
  * 1. 链接转脚注处理
- * 2. 移除<style>标签，转换为内联样式（使用inline-css库）
+ * 2. 移除<style>标签，转换为内联样式（使用juice库）
  * 3. 清理微信不支持的CSS属性（position、id、transform等）
  * 4. 应用微信兼容的样式（使用px单位、避免复杂定位）
  * 5. 优化图片、表格、代码块等元素的显示
  *
- * 注意：当前inline-css库的异步特性导致使用了fallback方案
- * 未来改进：建议将整个process方法改为异步以充分利用inline-css库的功能
+ * 注意：使用juice库进行CSS内联化处理，支持完整的CSS选择器和样式处理
  */
 export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	getPluginName(): string {
@@ -184,12 +183,12 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * CSS样式内联化处理 - 使用inline-css库实现
+	 * CSS样式内联化处理 - 使用juice库实现
 	 * 将<style>标签中的CSS规则转换为元素的内联样式
 	 */
 	private inlineStyles(html: string, settings: NMPSettings): string {
 		try {
-			logger.debug("微信CSS内联化处理：使用inline-css库转换CSS为内联样式");
+			logger.debug("微信CSS内联化处理：使用juice库转换CSS为内联样式");
 
 			// 检查是否有style标签需要处理
 			if (!html.includes('<style')) {
@@ -197,25 +196,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				return html;
 			}
 
-			// 使用inline-css库处理CSS内联化
-			const inlineOptions = {
-				url: 'file://', // 必需参数，用于解析相对路径
-				applyStyleTags: true, // 处理<style>标签
-				removeStyleTags: true, // 移除原始<style>标签
-				applyLinkTags: false, // 不处理<link>标签（避免网络请求）
-				removeLinkTags: false, // 保留<link>标签
-				preserveMediaQueries: false, // 不保留媒体查询（微信不支持）
-				applyWidthAttributes: false, // 不应用width属性
-				applyTableAttributes: false, // 不应用表格属性
-				removeHtmlSelectors: false, // 保留class和id属性
-				codeBlocks: {
-					EJS: {start: '<%', end: '%>'},
-					HBS: {start: '{{', end: '}}'}
-				}
-			};
-
-			// 先尝试使用inline-css库，如果失败则使用fallback方案
-			const processedHtml = this.tryInlineCSS(html, inlineOptions);
+			// 使用juice库处理CSS内联化
+			const processedHtml = this.tryInlineCSS(html, {});
 
 			// 后处理：清理微信不兼容的CSS属性
 			const cleanedHtml = this.cleanIncompatibleStyles(processedHtml);
@@ -229,20 +211,25 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 使用@css-inline/css-inline库处理CSS内联化
+	 * 使用juice库处理CSS内联化
 	 */
 	private tryInlineCSS(html: string, options: any): string {
 		try {
-			logger.debug("开始CSS内联化处理 - 使用@css-inline/css-inline");
+			logger.debug("开始CSS内联化处理 - 使用juice");
 
-			// 提取所有CSS内容
-			const cssContent = this.extractCSSContent(html);
-			if (!cssContent) {
-				logger.debug("没有找到CSS内容，跳过内联化处理");
-				return html;
-			}
+			// 配置juice选项
+			const juiceOptions = {
+				removeStyleTags: true,        // 移除<style>标签
+				preserveMediaQueries: false,  // 不保留媒体查询（微信不支持）
+				applyLinkTags: false,         // 不处理<link>标签
+				removeLinkTags: false,        // 保留<link>标签
+				applyWidthAttributes: false,  // 不应用width属性
+				applyTableAttributes: false,  // 不应用表格属性
+				xmlMode: false,               // HTML模式
+				preserveImportant: true       // 保留!important
+			};
 
-			const inlinedHtml = inlineFragment(html, cssContent);
+			const inlinedHtml = juice(html, juiceOptions);
 
 			logger.debug("CSS内联化处理完成");
 			return inlinedHtml;
@@ -253,32 +240,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		}
 	}
 
-	/**
-	 * 提取HTML中的CSS内容
-	 */
-	private extractCSSContent(html: string): string {
-		try {
-			const parser = new DOMParser();
-			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
-			const container = doc.body.firstChild as HTMLElement;
-
-			// 提取所有style标签的内容
-			const styleElements = container.querySelectorAll('style');
-			const cssContent: string[] = [];
-
-			styleElements.forEach(styleElement => {
-				const cssText = styleElement.textContent || '';
-				if (cssText.trim()) {
-					cssContent.push(cssText);
-				}
-			});
-
-			return cssContent.join('\n');
-		} catch (error) {
-			logger.error("提取CSS内容时出错:", error);
-			return '';
-		}
-	}
 
 
 	/**

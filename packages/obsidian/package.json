@@ -10,7 +10,8 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"dependencies": {
-		"@css-inline/css-inline": "^0.15.0",
-		"@lovpen/frontend": "workspace:*"
+		"@css-inline/css-inline-darwin-arm64": "^0.15.0",
+		"@lovpen/frontend": "workspace:*",
+		"juice": "^11.0.1"
 	}
 }
