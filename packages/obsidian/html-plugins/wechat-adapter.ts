@@ -266,7 +266,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// this.convertDivsToSections(container);
 
 			// 2. 强化关键元素的样式权重
-			this.reinforceElementStyles(container);
+			// this.reinforceElementStyles(container);
 
 			return container.innerHTML;
 		} catch (error) {
