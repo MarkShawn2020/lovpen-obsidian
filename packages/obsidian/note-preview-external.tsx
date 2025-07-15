@@ -143,8 +143,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		console.log("📋 [复制功能] 获取到文章内容", {
 			contentLength: content.length,
 			contentPreview: content.substring(0, 300) + '...',
-			hasMetaSection: content.includes('claude-meta-section'),
-			hasParagraphs: content.includes('<p'),
 			hasStyles: content.includes('style=')
 		});
 
@@ -339,7 +337,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			let articleHTML = await this.markedParser.parse(md);
 			console.log("✅ [内容生成] Markdown解析完成", {
 				htmlLength: articleHTML.length,
-				hasMetaSection: articleHTML.includes('claude-meta-section'),
 				hasStyles: articleHTML.includes('<style')
 			});
 
@@ -358,8 +355,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				beforeLength: beforePlugins.length,
 				afterLength: articleHTML.length,
 				changed: beforePlugins !== articleHTML,
-				finalHasMetaSection: articleHTML.includes('claude-meta-section'),
-				finalHasParagraphs: articleHTML.includes('<p'),
 				finalHasStyles: articleHTML.includes('style=')
 			});
 

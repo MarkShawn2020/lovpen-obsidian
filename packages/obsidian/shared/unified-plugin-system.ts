@@ -382,7 +382,6 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 		console.log("🔌 [插件管理器] 开始处理内容", {
 			inputLength: html.length,
 			inputPreview: html.substring(0, 200) + '...',
-			hasMetaSection: html.includes('claude-meta-section')
 		});
 		logger.debug("[processContent]", settings);
 
@@ -399,7 +398,6 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 			if (plugin.isEnabled()) {
 				console.log(`🔧 [插件管理器] 应用插件 ${index + 1}/${htmlPlugins.length}: ${plugin.getName()}`, {
 					beforeLength: processedHtml.length,
-					beforeHasMetaSection: processedHtml.includes('claude-meta-section'),
 					beforeHasParagraphs: processedHtml.includes('<p')
 				});
 				
@@ -411,8 +409,6 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 				console.log(`✅ [插件管理器] 插件 ${plugin.getName()} 处理完成`, {
 					afterLength: pluginResult.length,
 					changed: pluginResult !== processedHtml,
-					afterHasMetaSection: pluginResult.includes('claude-meta-section'),
-					afterHasParagraphs: pluginResult.includes('<p'),
 					lengthDiff: pluginResult.length - processedHtml.length
 				});
 				
@@ -428,8 +424,6 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 			appliedPluginCount,
 			finalLength: result.length,
 			totalChanged: result !== html,
-			finalHasMetaSection: result.includes('claude-meta-section'),
-			finalHasParagraphs: result.includes('<p'),
 			finalPreview: result.substring(0, 300) + '...'
 		});
 		

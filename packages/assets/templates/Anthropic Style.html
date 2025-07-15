@@ -1,4 +1,5 @@
-<div class="rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style" id="js_content">
+<section class="rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style"
+		 id="js_content">
 	<!-- 引言部分 -->
 	{{#if epigraph}}
 	<section class="claude-epigraph">
@@ -15,49 +16,49 @@
 		{{/if}}
 
 		{{#if articleSubtitle}}
-		<div class="claude-subtitle">
+		<section class="claude-subtitle">
 			<p><em>{{articleSubtitle}}</em></p>
-		</div>
+		</section>
 		{{/if}}
 
 		<!-- 文章元信息 - 简洁风格 -->
 		{{#if (or author publishDate tags seriesName episodeNum coverImage recommendation)}}
-		<div class="claude-meta-section">
-			<div class="claude-meta-card">
+		<section class="claude-meta-section">
+			<section class="claude-meta-card">
 				<!-- 核心信息 -->
-				<div class="claude-meta-content">
+				<section class="claude-meta-content">
 					<!-- 基本信息 -->
-					<div class="claude-meta-basic">
+					<section class="claude-meta-basic">
 						{{#if author}}<span class="claude-meta-item">👤 {{author}}</span>{{/if}}
 						{{#if publishDate}}<span class="claude-meta-item">📅 {{publishDate}}</span>{{/if}}
 						{{#if seriesName}}<span class="claude-meta-item">📚 {{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
-					</div>
-					
+					</section>
+
 					<!-- 推荐语 -->
 					{{#if recommendation}}
-					<div class="claude-meta-recommendation">
-						<div class="claude-meta-text">💡 {{recommendation}}</div>
-					</div>
+					<section class="claude-meta-recommendation">
+						<section class="claude-meta-text">💡 {{recommendation}}</section>
+					</section>
 					{{/if}}
-					
+
 					<!-- 封面图 -->
 					{{#if coverImage}}
-					<div class="claude-meta-cover">
+					<section class="claude-meta-cover">
 						<img src="{{coverImage}}" alt="文章封面" class="claude-meta-cover-image">
-					</div>
+					</section>
 					{{/if}}
-					
+
 					<!-- 标签 -->
 					{{#if tags}}
-					<div class="claude-meta-tags">
+					<section class="claude-meta-tags">
 						{{#each tags}}
 						<span class="claude-meta-tag">{{this}}</span>
 						{{/each}}
-					</div>
+					</section>
 					{{/if}}
-				</div>
-			</div>
-		</div>
+				</section>
+			</section>
+		</section>
 		{{/if}}
 
 		<!-- 文章内容 -->
@@ -70,9 +71,9 @@
 	<!-- 页脚信息 -->
 	<footer class="claude-footer">
 		{{#if personalInfo.name}}
-		<div class="claude-personal-info">
+		<section class="claude-personal-info">
 			<hr>
-			<div style="text-align: center; margin-top: 2em;">
+			<section style="text-align: center; margin-top: 2em;">
 				{{#if personalInfo.avatar}}
 				<img alt="{{personalInfo.name}}" src="{{personalInfo.avatar}}"
 					 style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 1em;">
@@ -86,11 +87,11 @@
 					<a href="{{personalInfo.website}}" target="_blank">{{personalInfo.website}}</a>
 				</p>
 				{{/if}}
-			</div>
-		</div>
+			</section>
+		</section>
 		{{/if}}
 	</footer>
-</div>
+</section>
 
 <style>
 	/* Claude Style 内联样式 */
@@ -568,16 +569,16 @@
 		.claude-meta-card {
 			padding: 1em;
 		}
-		
+
 		.claude-meta-content {
 			padding-left: 0.5em;
 		}
-		
+
 		.claude-meta-basic {
 			flex-direction: column;
 			gap: 0.5em;
 		}
-		
+
 		.claude-meta-cover-image {
 			max-width: 150px;
 		}
