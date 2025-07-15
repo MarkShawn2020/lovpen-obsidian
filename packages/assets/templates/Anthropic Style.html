@@ -20,93 +20,39 @@
 		</div>
 		{{/if}}
 
-		<!-- 文章元信息 - Claude风格的优雅显示 -->
-		{{#if (or author publishDate tags seriesName episodeNum coverImage summary recommendation)}}
+		<!-- 文章元信息 - 简洁风格 -->
+		{{#if (or author publishDate tags seriesName episodeNum coverImage recommendation)}}
 		<div class="claude-meta-section">
 			<div class="claude-meta-card">
-				<div class="claude-meta-header">
-					<div class="claude-meta-icon">📝</div>
-					<div class="claude-meta-title">文章信息</div>
-				</div>
+				<!-- 核心信息 -->
 				<div class="claude-meta-content">
-					<!-- 摘要与推荐语 -->
-					{{#if (or summary recommendation)}}
-					<div class="claude-meta-highlights">
-						{{#if summary}}
-						<div class="claude-meta-highlight">
-							<div class="claude-meta-highlight-icon">📋</div>
-							<div class="claude-meta-highlight-content">
-								<div class="claude-meta-highlight-label">摘要</div>
-								<div class="claude-meta-highlight-text">{{summary}}</div>
-							</div>
-						</div>
-						{{/if}}
-						{{#if recommendation}}
-						<div class="claude-meta-highlight">
-							<div class="claude-meta-highlight-icon">💡</div>
-							<div class="claude-meta-highlight-content">
-								<div class="claude-meta-highlight-label">推荐语</div>
-								<div class="claude-meta-highlight-text">{{recommendation}}</div>
-							</div>
-						</div>
-						{{/if}}
+					<!-- 基本信息 -->
+					<div class="claude-meta-basic">
+						{{#if author}}<span class="claude-meta-item">👤 {{author}}</span>{{/if}}
+						{{#if publishDate}}<span class="claude-meta-item">📅 {{publishDate}}</span>{{/if}}
+						{{#if seriesName}}<span class="claude-meta-item">📚 {{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
+					</div>
+					
+					<!-- 推荐语 -->
+					{{#if recommendation}}
+					<div class="claude-meta-recommendation">
+						<div class="claude-meta-text">💡 {{recommendation}}</div>
 					</div>
 					{{/if}}
 					
-					<!-- 基本信息网格 -->
-					<div class="claude-meta-grid">
-						{{#if author}}
-						<div class="claude-meta-item">
-							<div class="claude-meta-icon-small">👤</div>
-							<div class="claude-meta-details">
-								<div class="claude-meta-label">作者</div>
-								<div class="claude-meta-value">{{author}}</div>
-							</div>
-						</div>
-						{{/if}}
-						{{#if publishDate}}
-						<div class="claude-meta-item">
-							<div class="claude-meta-icon-small">📅</div>
-							<div class="claude-meta-details">
-								<div class="claude-meta-label">发布时间</div>
-								<div class="claude-meta-value">{{publishDate}}</div>
-							</div>
-						</div>
-						{{/if}}
-						{{#if seriesName}}
-						<div class="claude-meta-item">
-							<div class="claude-meta-icon-small">📚</div>
-							<div class="claude-meta-details">
-								<div class="claude-meta-label">系列</div>
-								<div class="claude-meta-value">{{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</div>
-							</div>
-						</div>
-						{{/if}}
-						{{#if coverImage}}
-						<div class="claude-meta-item claude-meta-item-wide">
-							<div class="claude-meta-icon-small">🖼️</div>
-							<div class="claude-meta-details">
-								<div class="claude-meta-label">封面</div>
-								<div class="claude-meta-cover">
-									<img src="{{coverImage}}" alt="文章封面" class="claude-meta-cover-image">
-								</div>
-							</div>
-						</div>
-						{{/if}}
+					<!-- 封面图 -->
+					{{#if coverImage}}
+					<div class="claude-meta-cover">
+						<img src="{{coverImage}}" alt="文章封面" class="claude-meta-cover-image">
 					</div>
+					{{/if}}
 					
-					<!-- 标签区域 -->
+					<!-- 标签 -->
 					{{#if tags}}
 					<div class="claude-meta-tags">
-						<div class="claude-meta-tags-title">
-							<span class="claude-meta-tags-icon">🏷️</span>
-							<span>标签</span>
-						</div>
-						<div class="claude-meta-tags-list">
-							{{#each tags}}
-							<span class="claude-meta-tag">{{this}}</span>
-							{{/each}}
-						</div>
+						{{#each tags}}
+						<span class="claude-meta-tag">{{this}}</span>
+						{{/each}}
 					</div>
 					{{/if}}
 				</div>
@@ -526,21 +472,17 @@
 		border: 1px solid rgba(200, 100, 66, 0.2);
 	}
 
-	/* 文章元信息样式 - Claude风格优化版 */
+	/* 文章元信息样式 - 简洁风格 */
 	.claude-meta-section {
 		margin: 2em 8px 3em;
-		position: relative;
 	}
 
 	.claude-meta-card {
-		background: linear-gradient(135deg, rgba(200, 100, 66, 0.06) 0%, rgba(200, 100, 66, 0.02) 100%);
-		border: 2px solid rgba(200, 100, 66, 0.12);
-		border-radius: 16px;
-		padding: 0;
+		background: rgba(200, 100, 66, 0.03);
+		border: 1px solid rgba(200, 100, 66, 0.15);
+		border-radius: 8px;
+		padding: 1.5em;
 		position: relative;
-		overflow: hidden;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-		transition: all 0.3s ease;
 	}
 
 	.claude-meta-card::before {
@@ -548,258 +490,96 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		width: 5px;
+		width: 3px;
 		height: 100%;
-		background: linear-gradient(to bottom, rgb(200, 100, 66), rgba(200, 100, 66, 0.7));
-	}
-
-	.claude-meta-header {
-		background: linear-gradient(135deg, rgba(200, 100, 66, 0.12) 0%, rgba(200, 100, 66, 0.08) 100%);
-		padding: 1em 1.5em;
-		border-bottom: 1px solid rgba(200, 100, 66, 0.15);
-		display: flex;
-		align-items: center;
-		gap: 0.8em;
-	}
-
-	.claude-meta-icon {
-		font-size: 1.2em;
-		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-	}
-
-	.claude-meta-title {
-		font-size: 1em;
-		font-weight: 700;
-		color: rgb(200, 100, 66);
-		letter-spacing: 0.02em;
+		background: rgb(200, 100, 66);
+		border-radius: 0 0 0 8px;
 	}
 
 	.claude-meta-content {
-		padding: 1.5em;
+		padding-left: 1em;
 	}
 
-	.claude-meta-highlights {
-		margin-bottom: 1.5em;
-		padding-bottom: 1.5em;
-		border-bottom: 1px solid rgba(200, 100, 66, 0.1);
-	}
-
-	.claude-meta-highlight {
+	.claude-meta-basic {
 		display: flex;
-		align-items: flex-start;
+		flex-wrap: wrap;
 		gap: 1em;
-		margin-bottom: 1.2em;
-		padding: 1.2em;
-		background: linear-gradient(135deg, rgba(200, 100, 66, 0.06) 0%, rgba(200, 100, 66, 0.02) 100%);
-		border-radius: 12px;
-		border: 1px solid rgba(200, 100, 66, 0.1);
-	}
-
-	.claude-meta-highlight:last-child {
-		margin-bottom: 0;
-	}
-
-	.claude-meta-highlight-icon {
-		font-size: 1.4em;
-		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-		flex-shrink: 0;
-		margin-top: 0.2em;
-	}
-
-	.claude-meta-highlight-content {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.claude-meta-highlight-label {
-		color: rgb(200, 100, 66);
-		font-weight: 700;
-		font-size: 0.9em;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		margin-bottom: 0.6em;
-		opacity: 0.9;
-	}
-
-	.claude-meta-highlight-text {
-		color: rgb(63, 63, 63);
-		font-size: 0.95em;
-		line-height: 1.6;
-		font-weight: 400;
-		word-break: break-word;
-		font-style: italic;
-	}
-
-	.claude-meta-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 1.2em;
-		margin-bottom: 1.5em;
+		margin-bottom: 1em;
 	}
 
 	.claude-meta-item {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.8em;
-		padding: 0.8em 1em;
-		background: rgba(255, 255, 255, 0.6);
-		border-radius: 10px;
-		border: 1px solid rgba(200, 100, 66, 0.08);
-		transition: all 0.2s ease;
-	}
-
-	.claude-meta-item:hover {
-		background: rgba(255, 255, 255, 0.8);
-		border-color: rgba(200, 100, 66, 0.15);
-		transform: translateY(-1px);
-	}
-
-	.claude-meta-item-wide {
-		grid-column: span 2;
-	}
-
-	.claude-meta-icon-small {
-		font-size: 1em;
-		line-height: 1;
-		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-		flex-shrink: 0;
-	}
-
-	.claude-meta-details {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.claude-meta-label {
-		color: rgb(200, 100, 66);
-		font-weight: 600;
-		font-size: 0.8em;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-bottom: 0.3em;
-		opacity: 0.9;
-	}
-
-	.claude-meta-value {
 		color: rgb(63, 63, 63);
+		font-size: 0.9em;
 		font-weight: 500;
-		font-size: 0.95em;
-		line-height: 1.4;
-		word-break: break-word;
+	}
+
+	.claude-meta-recommendation {
+		margin-bottom: 1em;
+		padding: 0.8em 0;
+		background: rgba(200, 100, 66, 0.03);
+		border-radius: 4px;
+	}
+
+	.claude-meta-text {
+		color: rgb(63, 63, 63);
+		font-size: 0.9em;
+		line-height: 1.5;
+		font-style: italic;
+		margin: 0;
 	}
 
 	.claude-meta-cover {
-		margin-top: 0.5em;
+		margin-bottom: 1em;
+		text-align: center;
 	}
 
 	.claude-meta-cover-image {
-		width: 100%;
 		max-width: 200px;
 		height: auto;
-		border-radius: 8px;
+		border-radius: 6px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		border: 1px solid rgba(200, 100, 66, 0.1);
 	}
 
 	.claude-meta-tags {
-		border-top: 1px solid rgba(200, 100, 66, 0.1);
-		padding-top: 1.2em;
-	}
-
-	.claude-meta-tags-title {
-		display: flex;
-		align-items: center;
-		gap: 0.5em;
-		margin-bottom: 0.8em;
-		font-size: 0.9em;
-		font-weight: 600;
-		color: rgb(200, 100, 66);
-	}
-
-	.claude-meta-tags-icon {
-		font-size: 1em;
-		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-	}
-
-	.claude-meta-tags-list {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.6em;
+		gap: 0.5em;
 	}
 
 	.claude-meta-tag {
-		display: inline-flex;
-		align-items: center;
-		background: linear-gradient(135deg, rgba(200, 100, 66, 0.12) 0%, rgba(200, 100, 66, 0.08) 100%);
+		display: inline-block;
+		background: rgba(200, 100, 66, 0.1);
 		color: rgb(200, 100, 66);
-		padding: 0.4em 0.9em;
-		border-radius: 20px;
+		padding: 0.3em 0.8em;
+		border-radius: 16px;
 		font-size: 0.8em;
-		font-weight: 600;
+		font-weight: 500;
 		border: 1px solid rgba(200, 100, 66, 0.2);
-		transition: all 0.2s ease;
-		position: relative;
 	}
 
 	.claude-meta-tag::before {
 		content: '#';
-		margin-right: 0.3em;
+		margin-right: 0.2em;
 		opacity: 0.7;
-	}
-
-	.claude-meta-tag:hover {
-		background: linear-gradient(135deg, rgba(200, 100, 66, 0.18) 0%, rgba(200, 100, 66, 0.12) 100%);
-		border-color: rgba(200, 100, 66, 0.3);
-		transform: translateY(-1px);
-		box-shadow: 0 2px 6px rgba(200, 100, 66, 0.2);
 	}
 
 	/* 响应式优化 */
 	@media (max-width: 768px) {
-		.claude-meta-grid {
-			grid-template-columns: 1fr;
-			gap: 1em;
-		}
-		
-		.claude-meta-header {
-			padding: 0.8em 1em;
-		}
-		
-		.claude-meta-content {
+		.claude-meta-card {
 			padding: 1em;
 		}
 		
-		.claude-meta-item {
-			padding: 0.6em 0.8em;
+		.claude-meta-content {
+			padding-left: 0.5em;
 		}
 		
-		.claude-meta-item-wide {
-			grid-column: span 1;
+		.claude-meta-basic {
+			flex-direction: column;
+			gap: 0.5em;
 		}
 		
 		.claude-meta-cover-image {
 			max-width: 150px;
-		}
-		
-		.claude-meta-highlights {
-			margin-bottom: 1em;
-			padding-bottom: 1em;
-		}
-		
-		.claude-meta-highlight {
-			margin-bottom: 1em;
-			padding: 1em;
-			flex-direction: column;
-			gap: 0.8em;
-		}
-		
-		.claude-meta-highlight-icon {
-			margin-top: 0;
-			align-self: flex-start;
-		}
-		
-		.claude-meta-highlight-text {
-			font-size: 0.9em;
 		}
 	}
 

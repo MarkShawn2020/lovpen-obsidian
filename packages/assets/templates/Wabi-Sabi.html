@@ -390,6 +390,119 @@
             letter-spacing: 0.05em;
         }
 
+        /* 文章元信息样式 - 侘寂风格 */
+        .wabi-sabi-container .wabi-sabi-meta-section {
+            margin: 2em 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-card {
+            background: rgba(139, 115, 85, 0.02);
+            border: 1px solid rgba(139, 115, 85, 0.1);
+            border-radius: 12px;
+            padding: 2em;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(139, 115, 85, 0.3) 25%,
+                rgba(90, 108, 87, 0.4) 50%,
+                rgba(139, 115, 85, 0.3) 75%,
+                transparent 100%);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-content {
+            text-align: center;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-basic {
+            display: flex;
+            justify-content: center;
+            gap: 1.5em;
+            flex-wrap: wrap;
+            margin-bottom: 1.5em;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-item {
+            color: #5a5a5a;
+            font-size: 0.9em;
+            font-weight: 400;
+            padding: 0.4em 1em;
+            background: rgba(139, 115, 85, 0.05);
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-recommendation {
+            margin-bottom: 1.5em;
+            padding: 1.2em;
+            background: rgba(90, 108, 87, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(90, 108, 87, 0.08);
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-text {
+            color: #444;
+            font-size: 0.95em;
+            line-height: 1.6;
+            font-style: italic;
+            margin: 0;
+            text-align: center;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-cover {
+            margin-bottom: 1.5em;
+            text-align: center;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-cover-image {
+            max-width: 240px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(139, 115, 85, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-cover-image:hover {
+            transform: translateY(-2px);
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.8em;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-tag {
+            display: inline-block;
+            background: rgba(139, 115, 85, 0.08);
+            color: #8b7355;
+            padding: 0.4em 1em;
+            border-radius: 16px;
+            font-size: 0.8em;
+            font-weight: 500;
+            border: 1px solid rgba(139, 115, 85, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .wabi-sabi-container .wabi-sabi-meta-tag:hover {
+            background: rgba(139, 115, 85, 0.12);
+            transform: translateY(-1px);
+        }
+
         /* 响应式设计：保持在不同设备上的优雅 */
         @media (max-width: 768px) {
             .wabi-sabi-container .article-header {
@@ -408,9 +521,21 @@
                 text-indent: 1.5em;
             }
             
-            .wabi-sabi-container .article-meta {
+            .wabi-sabi-container .wabi-sabi-meta-section {
+                margin: 1.5em 0;
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-card {
+                padding: 1.5em;
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-basic {
                 flex-direction: column;
-                gap: 0.8em;
+                gap: 1em;
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-cover-image {
+                max-width: 200px;
             }
         }
 
@@ -465,17 +590,51 @@
                 border-bottom-color: rgba(166, 139, 106, 0.15);
             }
             
-            .wabi-sabi-container .article-meta span {
-                background: rgba(166, 139, 106, 0.08);
-                color: #a8a5a2;
-            }
-            
             .wabi-sabi-container .article-signature {
                 color: #888;
             }
             
             .wabi-sabi-container .article-date {
                 color: #666 !important;
+            }
+            
+            /* Meta卡片深色模式样式 */
+            .wabi-sabi-container .wabi-sabi-meta-card {
+                background: rgba(166, 139, 106, 0.03);
+                border-color: rgba(166, 139, 106, 0.12);
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-card::before {
+                background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(166, 139, 106, 0.4) 25%,
+                    rgba(106, 124, 103, 0.5) 50%,
+                    rgba(166, 139, 106, 0.4) 75%,
+                    transparent 100%);
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-item {
+                background: rgba(166, 139, 106, 0.08);
+                color: #a8a5a2;
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-recommendation {
+                background: rgba(106, 124, 103, 0.05);
+                border-color: rgba(106, 124, 103, 0.12);
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-text {
+                color: #b8b4b1;
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-tag {
+                background: rgba(166, 139, 106, 0.12);
+                color: #a68b6a;
+                border-color: rgba(166, 139, 106, 0.2);
+            }
+            
+            .wabi-sabi-container .wabi-sabi-meta-tag:hover {
+                background: rgba(166, 139, 106, 0.16);
             }
         }
     </style>
@@ -495,19 +654,44 @@
             <p class="article-subtitle">{{subtitle}}</p>
             {{/if}}
             
-            <div class="article-meta">
-                {{#if author}}
-                <span>{{author}}</span>
-                {{/if}}
-                
-                {{#if date}}
-                <span>{{date}}</span>
-                {{/if}}
-                
-                {{#if category}}
-                <span>{{category}}</span>
-                {{/if}}
+            <!-- 文章元信息 - 侘寂风格 -->
+            {{#if (or author publishDate tags seriesName episodeNum coverImage recommendation)}}
+            <div class="wabi-sabi-meta-section">
+                <div class="wabi-sabi-meta-card">
+                    <div class="wabi-sabi-meta-content">
+                        <!-- 基本信息 -->
+                        <div class="wabi-sabi-meta-basic">
+                            {{#if author}}<span class="wabi-sabi-meta-item">{{author}}</span>{{/if}}
+                            {{#if publishDate}}<span class="wabi-sabi-meta-item">{{publishDate}}</span>{{/if}}
+                            {{#if seriesName}}<span class="wabi-sabi-meta-item">{{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
+                        </div>
+                        
+                        <!-- 推荐语 -->
+                        {{#if recommendation}}
+                        <div class="wabi-sabi-meta-recommendation">
+                            <div class="wabi-sabi-meta-text">{{recommendation}}</div>
+                        </div>
+                        {{/if}}
+                        
+                        <!-- 封面图 -->
+                        {{#if coverImage}}
+                        <div class="wabi-sabi-meta-cover">
+                            <img src="{{coverImage}}" alt="文章封面" class="wabi-sabi-meta-cover-image">
+                        </div>
+                        {{/if}}
+                        
+                        <!-- 标签 -->
+                        {{#if tags}}
+                        <div class="wabi-sabi-meta-tags">
+                            {{#each tags}}
+                            <span class="wabi-sabi-meta-tag">{{this}}</span>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
             </div>
+            {{/if}}
         </header>
         
         <!-- 正文内容 -->
