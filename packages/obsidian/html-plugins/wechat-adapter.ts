@@ -674,7 +674,48 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	private optimizeTables(container: HTMLElement): void {
-		// 已在applyEssentialStyles中处理
+		try {
+			const tables = container.querySelectorAll('table');
+			
+			tables.forEach(table => {
+				const htmlTable = table as HTMLElement;
+				
+				// 确保表格有完整的宽度样式，防止被微信压缩
+				const existingStyle = htmlTable.getAttribute('style') || '';
+				const styleRules = this.parseInlineStyle(existingStyle);
+				
+				// 强制设置表格宽度和布局
+				styleRules['width'] = '100%';
+				styleRules['table-layout'] = 'fixed';
+				styleRules['word-wrap'] = 'break-word';
+				styleRules['margin'] = '1.5em 0';
+				styleRules['border-collapse'] = 'collapse';
+				
+				// 应用样式
+				const newStyle = this.stringifyStyleRules(styleRules);
+				htmlTable.setAttribute('style', newStyle);
+				
+				// 处理表格单元格，确保文本换行
+				const cells = table.querySelectorAll('td, th');
+				cells.forEach(cell => {
+					const htmlCell = cell as HTMLElement;
+					const cellStyle = htmlCell.getAttribute('style') || '';
+					const cellRules = this.parseInlineStyle(cellStyle);
+					
+					// 确保单元格内容可以换行
+					cellRules['word-wrap'] = 'break-word';
+					cellRules['word-break'] = 'break-all';
+					cellRules['white-space'] = 'normal';
+					
+					const newCellStyle = this.stringifyStyleRules(cellRules);
+					htmlCell.setAttribute('style', newCellStyle);
+				});
+			});
+			
+			logger.debug("表格优化完成");
+		} catch (error) {
+			logger.error("优化表格时出错:", error);
+		}
 	}
 
 	private optimizeCodeBlocks(container: HTMLElement): void {
