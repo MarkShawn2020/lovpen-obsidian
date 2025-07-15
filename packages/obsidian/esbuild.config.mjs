@@ -80,8 +80,6 @@ const context = await esbuild.context({
 				{from: ['./manifest.json'], to: ['./manifest.json'], outDir: './dist'},
 				{from: ['../assets/**/*'], to: ['./assets/'], outDir: './dist'},
 				{from: ['../frontend/dist/**/*'], to: ['./frontend/'], outDir: './dist'},
-				// 复制@css-inline/css-inline的完整模块
-				{from: ['../../node_modules/@css-inline/**/*'], to: ['./node_modules/@css-inline/'], outDir: './dist'},
 			],
 			verbose: true, // 输出复制操作的日志，便于调试
 		}),

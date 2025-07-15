@@ -1,6 +1,7 @@
 import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
+import {inlineFragment} from '@css-inline/css-inline'
 
 /**
  * 微信公众号适配插件 - 根据微信公众号HTML/CSS支持约束进行适配
@@ -10,7 +11,7 @@ import {logger} from "../../shared/src/logger";
  * 3. 清理微信不支持的CSS属性（position、id、transform等）
  * 4. 应用微信兼容的样式（使用px单位、避免复杂定位）
  * 5. 优化图片、表格、代码块等元素的显示
- * 
+ *
  * 注意：当前inline-css库的异步特性导致使用了fallback方案
  * 未来改进：建议将整个process方法改为异步以充分利用inline-css库的功能
  */
@@ -208,8 +209,8 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				applyTableAttributes: false, // 不应用表格属性
 				removeHtmlSelectors: false, // 保留class和id属性
 				codeBlocks: {
-					EJS: { start: '<%', end: '%>' },
-					HBS: { start: '{{', end: '}}' }
+					EJS: {start: '<%', end: '%>'},
+					HBS: {start: '{{', end: '}}'}
 				}
 			};
 
@@ -233,94 +234,22 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private tryInlineCSS(html: string, options: any): string {
 		try {
 			logger.debug("开始CSS内联化处理 - 使用@css-inline/css-inline");
-			
+
 			// 提取所有CSS内容
 			const cssContent = this.extractCSSContent(html);
-			
 			if (!cssContent) {
 				logger.debug("没有找到CSS内容，跳过内联化处理");
 				return html;
 			}
-			
-			// 动态导入@css-inline/css-inline库
-			const cssInlineModule = this.loadCssInlineModule();
-			if (!cssInlineModule) {
-				logger.error("无法加载@css-inline/css-inline模块");
-				return html;
-			}
-			
-			// 使用@css-inline/css-inline库进行内联化处理
-			const inlinedHtml = cssInlineModule.inlineFragment(html, cssContent);
-			
+
+			const inlinedHtml = inlineFragment(html, cssContent);
+
 			logger.debug("CSS内联化处理完成");
 			return inlinedHtml;
 		} catch (error) {
 			logger.error("CSS内联化处理出错:", error);
 			// 降级到原始HTML
 			return html;
-		}
-	}
-
-	/**
-	 * 动态加载@css-inline/css-inline模块
-	 */
-	private loadCssInlineModule(): any {
-		try {
-			console.log("🔍 [微信插件] 尝试加载@css-inline/css-inline模块");
-			
-			// 方法1: 直接require
-			try {
-				const cssInlineModule = require('@css-inline/css-inline');
-				if (cssInlineModule && cssInlineModule.inlineFragment) {
-					console.log("✅ [微信插件] 成功通过require加载@css-inline/css-inline");
-					logger.debug("模块可用函数:", Object.keys(cssInlineModule));
-					return cssInlineModule;
-				}
-			} catch (error) {
-				console.log("❌ [微信插件] require方式加载失败:", error.message);
-			}
-			
-			// 方法2: 尝试从不同路径加载
-			const possiblePaths = [
-				'@css-inline/css-inline',
-				'./node_modules/@css-inline/css-inline',
-				'../node_modules/@css-inline/css-inline',
-				'../../node_modules/@css-inline/css-inline',
-				'../../../node_modules/@css-inline/css-inline'
-			];
-			
-			for (const path of possiblePaths) {
-				try {
-					const cssInlineModule = require(path);
-					if (cssInlineModule && cssInlineModule.inlineFragment) {
-						console.log(`✅ [微信插件] 成功从路径 ${path} 加载@css-inline/css-inline`);
-						logger.debug("模块可用函数:", Object.keys(cssInlineModule));
-						return cssInlineModule;
-					}
-				} catch (error) {
-					console.log(`❌ [微信插件] 从路径 ${path} 加载失败:`, error.message);
-				}
-			}
-			
-			// 方法3: 尝试使用 (global as any) 或 (window as any)
-			try {
-				const globalModule = (global as any)['@css-inline/css-inline'] || (window as any)['@css-inline/css-inline'];
-				if (globalModule && globalModule.inlineFragment) {
-					console.log("✅ [微信插件] 成功从全局对象加载@css-inline/css-inline");
-					logger.debug("模块可用函数:", Object.keys(globalModule));
-					return globalModule;
-				}
-			} catch (error) {
-				console.log("❌ [微信插件] 从全局对象加载失败:", error.message);
-			}
-			
-			console.error("❌ [微信插件] 所有加载方式都失败了");
-			logger.error("无法加载@css-inline/css-inline模块");
-			return null;
-		} catch (error) {
-			console.error("❌ [微信插件] 加载@css-inline/css-inline时出现严重错误:", error);
-			logger.error("严重错误:", error);
-			return null;
 		}
 	}
 
@@ -332,18 +261,18 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
 			const container = doc.body.firstChild as HTMLElement;
-			
+
 			// 提取所有style标签的内容
 			const styleElements = container.querySelectorAll('style');
 			const cssContent: string[] = [];
-			
+
 			styleElements.forEach(styleElement => {
 				const cssText = styleElement.textContent || '';
 				if (cssText.trim()) {
 					cssContent.push(cssText);
 				}
 			});
-			
+
 			return cssContent.join('\n');
 		} catch (error) {
 			logger.error("提取CSS内容时出错:", error);
@@ -351,17 +280,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		}
 	}
 
-
-
-
-
-
-
-	
-	
-	
-	
-	
 
 	/**
 	 * 清理微信不兼容的CSS样式
@@ -377,7 +295,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			allElements.forEach(element => {
 				const htmlElement = element as HTMLElement;
 				const style = htmlElement.getAttribute('style');
-				
+
 				if (style) {
 					const cleanedStyle = this.cleanStyleString(style);
 					if (cleanedStyle) {
@@ -488,10 +406,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			return container.innerHTML;
 		}
 	}
-
-
-
-
 
 
 	/**
