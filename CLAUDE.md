@@ -14,6 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 你无需自行构建，因为本地已有 pnpm dev 启动
 - 你无需构建项目进行测试，因为本地在run dev
 - 请不要build，check就可以
+- 你只需要pnpm check 检测语法问题即可，不用 build，因为会干扰本地的dev
 
 ## 项目架构
 

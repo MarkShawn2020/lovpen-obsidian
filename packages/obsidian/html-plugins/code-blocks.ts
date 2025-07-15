@@ -29,7 +29,8 @@ export class CardDataManager {
 	}
 
 	public restoreCard(html: string): string {
-		for (const [key, value] of this.cardData.entries()) {
+		const entries = Array.from(this.cardData.entries());
+		for (const [key, value] of entries) {
 			const exp = `<section[^>]*\\\\sdata-id="${key}"[^>]*>(.*?)<\\\\/section>`;
 			const regex = new RegExp(exp, "gs");
 			if (!regex.test(html)) {
@@ -58,9 +59,13 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	 */
 	getMetaConfig() {
 		return {
-			codeWrap: {
+			preventWrap: {
 				type: "switch" as const,
-				title: "代码换行"
+				title: "阻止换行"
+			},
+			enableHighlight: {
+				type: "switch" as const,
+				title: "启用代码高亮"
 			}
 		};
 	}
@@ -84,14 +89,16 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			const codeBlocks = container.querySelectorAll("pre code");
 
 			// 获取代码换行配置
-			const enableCodeWrap = this.getCodeWrapConfig();
+			const preventWrap = this.getPreventWrapConfig();
+			// 获取代码高亮配置
+			const enableHighlight = this.getHighlightConfig();
 
 			codeBlocks.forEach((codeBlock) => {
 				const pre = codeBlock.parentElement;
 				if (!pre) return;
 
 				// 为Obsidian内部渲染优化代码块
-				this.optimizeCodeBlock(pre, codeBlock as HTMLElement, settings.lineNumber, enableCodeWrap);
+				this.optimizeCodeBlock(pre, codeBlock as HTMLElement, settings.lineNumber, preventWrap, enableHighlight, settings);
 			});
 
 			return container.innerHTML;
@@ -102,32 +109,51 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 获取代码换行配置
+	 * 获取阻止换行配置
 	 */
-	private getCodeWrapConfig(): boolean {
-		return this.getConfig().codeWrap as boolean ?? false;
+	private getPreventWrapConfig(): boolean {
+		return this.getConfig().preventWrap as boolean ?? true;
+	}
+
+	/**
+	 * 获取代码高亮配置
+	 */
+	private getHighlightConfig(): boolean {
+		return this.getConfig().enableHighlight as boolean ?? true;
 	}
 
 	/**
 	 * 优化代码块显示
 	 */
-	private optimizeCodeBlock(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, enableWrap: boolean): void {
+	private optimizeCodeBlock(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, preventWrap: boolean, enableHighlight: boolean, settings: NMPSettings): void {
 		// 应用基础样式
 		this.applyBaseStyles(pre, codeElement);
 
 		// 处理行号显示
 		if (showLineNumbers) {
-			this.addLineNumbers(codeElement);
+			this.addLineNumbers(codeElement, preventWrap);
+			// 为不换行模式的行号预留左边距
+			if (preventWrap) {
+				pre.style.paddingLeft = "5em";
+			}
+		} else {
+			// 确保没有行号时不设置左边距
+			pre.style.paddingLeft = "12px"; // 恢复默认padding
 		}
 
 		// 处理语法高亮
-		this.processHighlighting(codeElement);
+		if (enableHighlight) {
+			this.processHighlighting(codeElement);
+			this.applyHighlightStyles(codeElement, settings);
+		} else {
+			this.removeHighlighting(codeElement);
+		}
 
 		// 应用换行设置
-		this.applyWrapSettings(pre, codeElement, enableWrap);
+		this.applyWrapSettings(pre, codeElement, preventWrap);
 
 		// 添加数据属性
-		this.addMetadata(pre, codeElement, enableWrap);
+		this.addMetadata(pre, codeElement, preventWrap, enableHighlight);
 	}
 
 	/**
@@ -158,19 +184,52 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	/**
 	 * 添加行号
 	 */
-	private addLineNumbers(codeElement: HTMLElement): void {
+	private addLineNumbers(codeElement: HTMLElement, preventWrap: boolean): void {
 		let content = codeElement.innerHTML;
 
 		// 清理首尾换行符
 		content = content.replace(/^\n+/, '').replace(/\n+$/, '');
 
 		const lines = content.split("\n");
-		const numberedLines = lines.map((line, index) => {
-			const lineNumber = index + 1;
-			return `<span style="color: var(--text-faint); display: inline-block; width: 2.5em; text-align: right; padding-right: 1em; margin-right: 0.5em; border-right: 1px solid var(--background-modifier-border); user-select: none;">${lineNumber}</span>${line}`;
-		}).join("\n");
-
-		codeElement.innerHTML = numberedLines;
+		
+		if (preventWrap) {
+			// 阻止换行模式：使用CSS计数器实现行号，避免影响横向滚动
+			codeElement.style.counterReset = "line";
+			codeElement.style.position = "relative";
+			
+			// 为每一行添加计数器
+			const numberedLines = lines.map((line, index) => {
+				return `<span style="counter-increment: line; position: relative; display: block;">${line}</span>`;
+			}).join("");
+			
+			codeElement.innerHTML = numberedLines;
+			
+			// 添加CSS样式来显示行号
+			const style = document.createElement('style');
+			style.textContent = `
+				.code-with-line-numbers span:before {
+					content: counter(line);
+					position: absolute;
+					left: -4em;
+					width: 2.5em;
+					text-align: right;
+					color: var(--text-faint);
+					border-right: 1px solid var(--background-modifier-border);
+					padding-right: 1em;
+					margin-right: 0.5em;
+					user-select: none;
+				}
+			`;
+			document.head.appendChild(style);
+			codeElement.classList.add('code-with-line-numbers');
+		} else {
+			// 允许换行模式：使用传统的行号显示方式
+			const numberedLines = lines.map((line, index) => {
+				const lineNumber = index + 1;
+				return `<span style="color: var(--text-faint); display: inline-block; width: 2.5em; text-align: right; padding-right: 1em; margin-right: 0.5em; border-right: 1px solid var(--background-modifier-border); user-select: none;">${lineNumber}</span>${line}`;
+			}).join("\n");
+			codeElement.innerHTML = numberedLines;
+		}
 	}
 
 	/**
@@ -190,18 +249,18 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	/**
 	 * 应用换行设置
 	 */
-	private applyWrapSettings(pre: HTMLElement, codeElement: HTMLElement, enableWrap: boolean): void {
-		const wrapStyles = enableWrap ? {
-			whiteSpace: "pre-wrap",
-			wordBreak: "break-all",
-			overflowX: "visible",
-			wordWrap: "break-word"
-		} : {
+	private applyWrapSettings(pre: HTMLElement, codeElement: HTMLElement, preventWrap: boolean): void {
+		const wrapStyles = preventWrap ? {
 			whiteSpace: "pre",
 			wordBreak: "normal",
 			overflowX: "auto",
 			wordWrap: "normal",
 			overflowWrap: "normal"
+		} : {
+			whiteSpace: "pre-wrap",
+			wordBreak: "break-all",
+			overflowX: "visible",
+			wordWrap: "break-word"
 		};
 
 		// 应用到pre和code元素
@@ -214,17 +273,19 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	/**
 	 * 添加元数据属性
 	 */
-	private addMetadata(pre: HTMLElement, codeElement: HTMLElement, enableWrap: boolean): void {
+	private addMetadata(pre: HTMLElement, codeElement: HTMLElement, preventWrap: boolean, enableHighlight: boolean): void {
 		pre.setAttribute('data-code-block', 'true');
 		pre.setAttribute('data-language', this.extractLanguage(codeElement));
-		pre.setAttribute('data-wrap-enabled', enableWrap.toString());
+		pre.setAttribute('data-prevent-wrap', preventWrap.toString());
+		pre.setAttribute('data-highlight-enabled', enableHighlight.toString());
 	}
 
 	/**
 	 * 提取语言标识
 	 */
 	private extractLanguage(codeElement: HTMLElement): string {
-		for (const className of codeElement.classList) {
+		const classList = Array.from(codeElement.classList);
+		for (const className of classList) {
 			if (className.startsWith('language-')) {
 				return className.replace('language-', '');
 			}
@@ -312,4 +373,47 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		codeElement.innerHTML = html;
 		logger.debug("已优化代码缩进处理");
 	}
+
+	/**
+	 * 应用高亮样式
+	 */
+	private applyHighlightStyles(codeElement: HTMLElement, settings: NMPSettings): void {
+		try {
+			// 保持现有的高亮HTML结构
+			// 全局的高亮样式CSS会由note-preview-external.tsx中的getCSS()方法处理
+			// 这里只需要确保高亮的HTML结构被保留
+			logger.debug("保持代码高亮HTML结构");
+		} catch (error) {
+			logger.error("应用高亮样式时出错:", error);
+		}
+	}
+
+	/**
+	 * 移除高亮样式
+	 */
+	private removeHighlighting(codeElement: HTMLElement): void {
+		try {
+			// 获取纯文本内容，移除所有高亮HTML标签
+			const textContent = codeElement.textContent || codeElement.innerText || '';
+			
+			// 重新设置为纯文本内容
+			codeElement.innerHTML = textContent;
+			
+			// 移除所有高亮相关的class
+			codeElement.classList.remove('hljs');
+			
+			// 移除所有以language-开头的类
+			const classList = Array.from(codeElement.classList);
+			classList.forEach(cls => {
+				if (cls.startsWith('language-')) {
+					codeElement.classList.remove(cls);
+				}
+			});
+			
+			logger.debug("已移除代码高亮样式，恢复纯文本显示");
+		} catch (error) {
+			logger.error("移除高亮样式时出错:", error);
+		}
+	}
+
 }
