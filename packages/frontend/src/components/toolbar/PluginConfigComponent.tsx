@@ -5,7 +5,7 @@ import {PluginData} from "../../types";
 import {persistentStorageService} from "../../services/persistentStorage";
 
 import {logger} from "../../../../shared/src/logger";
-import {ChevronDown, Info, Plug, Settings} from "lucide-react";
+import {ChevronDown, debug, Plug, Settings} from "lucide-react";
 
 const STORAGE_KEY_PREFIX = 'lovpen-config';
 
@@ -65,7 +65,7 @@ export const ConfigComponent = <T extends PluginData>({
 					setLocalConfig(mergedConfig);
 					// 同时更新item.config
 					Object.assign(item.config, mergedConfig);
-					logger.info(`[PluginConfigComponent] Loaded persisted config for ${item.name}`);
+					logger.debug(`[PluginConfigComponent] Loaded persisted config for ${item.name}`);
 				}
 			} catch (error) {
 				logger.error(`[PluginConfigComponent] Failed to load persisted config for ${item.name}:`, error);
@@ -104,7 +104,7 @@ export const ConfigComponent = <T extends PluginData>({
 				{...localConfig, enabled},
 				item.metaConfig
 			);
-			logger.info(`[PluginConfigComponent] Saved plugin enabled state: ${item.name} = ${enabled}`);
+			logger.debug(`[PluginConfigComponent] Saved plugin enabled state: ${item.name} = ${enabled}`);
 		} catch (error) {
 			logger.error(`[PluginConfigComponent] Failed to save plugin enabled state:`, error);
 		}
@@ -132,7 +132,7 @@ export const ConfigComponent = <T extends PluginData>({
 				newConfig,
 				item.metaConfig
 			);
-			logger.info(`[PluginConfigComponent] Saved plugin config: ${item.name}.${key} = ${value}`);
+			logger.debug(`[PluginConfigComponent] Saved plugin config: ${item.name}.${key} = ${value}`);
 		} catch (error) {
 			logger.error(`[PluginConfigComponent] Failed to save plugin config:`, error);
 		}
@@ -217,7 +217,7 @@ export const ConfigComponent = <T extends PluginData>({
 							<div key={key}
 								 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 p-2 sm:p-3 bg-white border border-gray-200 rounded-lg">
 								<div className="flex items-center gap-2">
-									<Info className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
+									<debug className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
 									<span className="text-xs sm:text-sm font-medium text-gray-700">{meta.title}</span>
 								</div>
 								<div onClick={(e) => e.stopPropagation()} className="w-full sm:w-auto">

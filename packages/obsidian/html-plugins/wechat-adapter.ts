@@ -38,15 +38,15 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				length: html.length
 			});
 
-			// console.log("🎨 [微信插件] Step 2: 内联样式");
-			// const beforeInline = html;
-			// html = this.inlineStyles(html, settings);
-			// console.log("🎨 [微信插件] Step 2 完成", {
-			// 	changed: html !== beforeInline,
-			// 	length: html.length,
-			// 	hasStyle: html.includes('<style'),
-			// 	styleRemoved: beforeInline.includes('<style') && !html.includes('<style')
-			// });
+			console.log("🎨 [微信插件] Step 2: 内联样式");
+			const beforeInline = html;
+			html = this.inlineStyles(html, settings);
+			console.log("🎨 [微信插件] Step 2 完成", {
+				changed: html !== beforeInline,
+				length: html.length,
+				hasStyle: html.includes('<style'),
+				styleRemoved: beforeInline.includes('<style') && !html.includes('<style')
+			});
 
 			console.log("🏗️ [微信插件] Step 3: 保持结构");
 			const beforeStructure = html;
@@ -198,15 +198,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// 2. 将CSS规则应用到对应元素的内联样式
 			this.applyCSSRulesToElements(container, cssRules);
 
-			// 3. 移除<style>标签（微信不支持）
-			const styleElements = container.querySelectorAll('style');
-			styleElements.forEach(styleEl => {
-				styleEl.remove();
-			});
-
-			// 4. 清理微信不兼容的CSS属性
-			this.cleanIncompatibleCSSProperties(container);
-
 			logger.debug(`微信CSS内联化完成，处理元素数量: ${container.querySelectorAll('*').length}`);
 			return container.innerHTML;
 		} catch (error) {
@@ -272,7 +263,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			logger.debug("开始保护HTML结构，防止微信编辑器破坏");
 
 			// 1. 转换关键div为section标签（微信对section更宽松）
-			this.convertDivsToSections(container);
+			// this.convertDivsToSections(container);
 
 			// 2. 强化关键元素的样式权重
 			this.reinforceElementStyles(container);
@@ -369,12 +360,12 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				// 处理 var(--varName) 格式
 				const varRegex = new RegExp(`var\\(--${varName}\\)`, 'g');
 				value = value.replace(varRegex, varValue);
-				
+
 				// 处理 var(--varName, default) 格式
 				const varWithDefaultRegex = new RegExp(`var\\(--${varName}\\s*,\\s*([^)]+)\\)`, 'g');
 				value = value.replace(varWithDefaultRegex, varValue);
 			});
-			
+
 			// 处理剩余的未知CSS变量（使用默认值或移除）
 			value = value.replace(/var\(--[\w-]+\s*,\s*([^)]+)\)/g, '$1'); // 使用默认值
 			value = value.replace(/var\(--[\w-]+\)/g, 'inherit'); // 移除未知变量
@@ -470,42 +461,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 清理微信不兼容的CSS属性
-	 */
-	private cleanIncompatibleCSSProperties(container: HTMLElement): void {
-		const allElements = container.querySelectorAll('*');
-
-		allElements.forEach(element => {
-			const htmlElement = element as HTMLElement;
-
-			// 移除id属性（微信会删除）
-			if (htmlElement.hasAttribute('id')) {
-				htmlElement.removeAttribute('id');
-			}
-
-			// 清理内联样式中的不兼容属性
-			const style = htmlElement.getAttribute('style');
-			if (style) {
-				const rules = this.parseInlineStyle(style);
-				const cleanedRules: Record<string, string> = {};
-
-				Object.entries(rules).forEach(([property, value]) => {
-					if (this.isWechatCompatibleProperty(property)) {
-						cleanedRules[property] = value;
-					}
-				});
-
-				const cleanedStyle = this.stringifyStyleRules(cleanedRules);
-				if (cleanedStyle) {
-					htmlElement.setAttribute('style', cleanedStyle);
-				} else {
-					htmlElement.removeAttribute('style');
-				}
-			}
-		});
-	}
-
-	/**
 	 * 检查CSS属性是否与微信兼容
 	 * 基于微信公众号实际支持的CSS属性列表
 	 */
@@ -590,32 +545,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				variables[varName] = varValue;
 			}
 		}
-
-		// 添加常用的代码块相关CSS变量的默认值（微信兼容）
-		const codeBlockDefaults = {
-			'code-background': '#f6f8fa',
-			'code-normal': '#24292e',
-			'text-faint': '#888888',
-			'background-modifier-border': '#e1e4e8',
-			'font-monospace': '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace',
-			'text-normal': '#24292e',
-			'background-primary': '#ffffff',
-			'background-secondary': '#f6f8fa',
-			'text-accent': '#0366d6',
-			'text-muted': '#6a737d',
-			'border-color': '#e1e4e8',
-			'success-color': '#28a745',
-			'warning-color': '#ffc107',
-			'error-color': '#dc3545',
-			'info-color': '#17a2b8'
-		};
-
-		// 将默认值添加到变量映射中（如果不存在）
-		Object.entries(codeBlockDefaults).forEach(([key, value]) => {
-			if (!variables[key]) {
-				variables[key] = value;
-			}
-		});
 
 		logger.debug("提取CSS变量完成:", Object.keys(variables));
 		return variables;
@@ -710,42 +639,42 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private optimizeTables(container: HTMLElement): void {
 		try {
 			const tables = container.querySelectorAll('table');
-			
+
 			tables.forEach(table => {
 				const htmlTable = table as HTMLElement;
-				
+
 				// 确保表格有完整的宽度样式，防止被微信压缩
 				const existingStyle = htmlTable.getAttribute('style') || '';
 				const styleRules = this.parseInlineStyle(existingStyle);
-				
+
 				// 强制设置表格宽度和布局
 				styleRules['width'] = '100%';
 				styleRules['table-layout'] = 'fixed';
 				styleRules['word-wrap'] = 'break-word';
 				styleRules['margin'] = '1.5em 0';
 				styleRules['border-collapse'] = 'collapse';
-				
+
 				// 应用样式
 				const newStyle = this.stringifyStyleRules(styleRules);
 				htmlTable.setAttribute('style', newStyle);
-				
+
 				// 处理表格单元格，确保文本换行
 				const cells = table.querySelectorAll('td, th');
 				cells.forEach(cell => {
 					const htmlCell = cell as HTMLElement;
 					const cellStyle = htmlCell.getAttribute('style') || '';
 					const cellRules = this.parseInlineStyle(cellStyle);
-					
+
 					// 确保单元格内容可以换行
 					cellRules['word-wrap'] = 'break-word';
 					cellRules['word-break'] = 'break-all';
 					cellRules['white-space'] = 'normal';
-					
+
 					const newCellStyle = this.stringifyStyleRules(cellRules);
 					htmlCell.setAttribute('style', newCellStyle);
 				});
 			});
-			
+
 			logger.debug("表格优化完成");
 		} catch (error) {
 			logger.error("优化表格时出错:", error);
@@ -755,27 +684,27 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private optimizeCodeBlocks(container: HTMLElement): void {
 		try {
 			const codeBlocks = container.querySelectorAll('pre code');
-			
+
 			if (codeBlocks.length === 0) {
 				return;
 			}
-			
+
 			// 获取第一个代码块的高亮样式（假设页面中所有代码块使用同样的样式）
 			const firstPre = (codeBlocks[0] as HTMLElement).parentElement as HTMLElement;
 			const highlightStyle = firstPre.getAttribute('data-highlight-style') || 'default';
-			
+
 			// 添加内部样式表而不是转换类名
 			this.addCodeHighlightInternalStyles(container, highlightStyle);
-			
+
 			// 只处理CSS变量替换，保持HTML结构不变
 			codeBlocks.forEach(codeBlock => {
 				const code = codeBlock as HTMLElement;
 				const pre = code.parentElement as HTMLElement;
-				
+
 				// 只优化CSS变量，不改变HTML结构
 				this.optimizeCodeBlockCSSVariables(pre, code);
 			});
-			
+
 			logger.debug("代码块微信优化完成（内部样式表方案）");
 		} catch (error) {
 			logger.error("优化代码块时出错:", error);
@@ -789,31 +718,31 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		try {
 			// 获取真实的高亮CSS内容
 			const highlightCSS = this.getHighlightCSSContent(highlightStyle);
-			
+
 			if (!highlightCSS) {
 				logger.warn(`无法获取高亮样式: ${highlightStyle}`);
 				return;
 			}
-			
+
 			// 创建内部样式表
 			const styleElement = container.ownerDocument.createElement('style');
 			styleElement.setAttribute('type', 'text/css');
 			styleElement.setAttribute('data-wechat-highlight', highlightStyle);
-			
+
 			// 处理CSS内容：替换CSS变量为实际值，确保微信兼容
 			const processedCSS = this.processHighlightCSSForWechat(highlightCSS);
-			
+
 			styleElement.textContent = processedCSS;
-			
+
 			// 添加到容器开头
 			if (container.firstChild) {
 				container.insertBefore(styleElement, container.firstChild);
 			} else {
 				container.appendChild(styleElement);
 			}
-			
+
 			logger.debug(`已添加微信兼容的代码高亮样式表: ${highlightStyle}`);
-			
+
 		} catch (error) {
 			logger.error("添加代码高亮内部样式时出错:", error);
 		}
@@ -825,19 +754,19 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private getHighlightCSSContent(highlightStyle: string): string | null {
 		try {
 			// 从AssetsManager获取真实的高亮CSS
-			const assetsManager = (global as any).AssetsManager?.getInstance?.() || 
-								(window as any).AssetsManager?.getInstance?.();
-			
+			const assetsManager = (global as any).AssetsManager?.getInstance?.() ||
+				(window as any).AssetsManager?.getInstance?.();
+
 			if (assetsManager && assetsManager.getHighlight) {
 				const highlight = assetsManager.getHighlight(highlightStyle);
 				if (highlight && highlight.css) {
 					return highlight.css;
 				}
 			}
-			
+
 			// 如果无法获取真实CSS，使用预定义的样式
 			return this.getBuiltinHighlightCSS(highlightStyle);
-			
+
 		} catch (error) {
 			logger.error("获取高亮CSS内容时出错:", error);
 			return this.getBuiltinHighlightCSS(highlightStyle);
@@ -850,7 +779,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	private processHighlightCSSForWechat(css: string): string {
 		try {
 			let processedCSS = css;
-			
+
 			// 1. 替换CSS变量为实际值
 			const cssVariableMap = {
 				'--code-background': '#f6f8fa',
@@ -859,18 +788,18 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				'--background-modifier-border': '#e1e4e8',
 				'--font-monospace': '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace'
 			};
-			
+
 			Object.entries(cssVariableMap).forEach(([variable, value]) => {
 				const regex = new RegExp(`var\\(${variable}\\)`, 'g');
 				processedCSS = processedCSS.replace(regex, value);
 			});
-			
+
 			// 2. 移除微信不支持的CSS属性
 			processedCSS = processedCSS.replace(/user-select:[^;]+;/g, '');
 			processedCSS = processedCSS.replace(/-webkit-user-select:[^;]+;/g, '');
 			processedCSS = processedCSS.replace(/overflow-x:[^;]+;/g, '');
 			processedCSS = processedCSS.replace(/overflow-y:[^;]+;/g, '');
-			
+
 			// 3. 添加行号样式（如果不存在）
 			if (!processedCSS.includes('.line-number')) {
 				processedCSS += `
@@ -884,7 +813,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	border-right: 1px solid #e0e0e0 !important;
 }`;
 			}
-			
+
 			// 4. 确保基础代码块样式
 			processedCSS += `
 pre[data-code-block] {
@@ -910,9 +839,9 @@ pre[data-code-block] code {
 	font-family: inherit !important;
 	white-space: pre !important;
 }`;
-			
+
 			return processedCSS;
-			
+
 		} catch (error) {
 			logger.error("处理高亮CSS时出错:", error);
 			return css;
@@ -1064,7 +993,7 @@ pre[data-code-block] code {
 					.replace(/#6a737d/g, '#6272a4')
 					.replace(/#6f42c1/g, '#50fa7b')
 					.replace(/#005cc5/g, '#bd93f9');
-			
+
 			case 'atom-one-dark':
 			case 'monokai':
 				return baseCSS.replace(/#24292e/g, '#abb2bf')
@@ -1074,7 +1003,7 @@ pre[data-code-block] code {
 					.replace(/#6a737d/g, '#5c6370')
 					.replace(/#6f42c1/g, '#61afef')
 					.replace(/#005cc5/g, '#d19a66');
-			
+
 			default:
 				return baseCSS;
 		}
@@ -1096,11 +1025,11 @@ pre[data-code-block] code {
 						.replace(/var\(--background-modifier-border\)/g, '#e1e4e8')
 						.replace(/var\(--font-monospace\)/g, '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace')
 						.replace(/var\(--[^)]+\)/g, 'inherit');
-					
+
 					element.setAttribute('style', optimizedStyle);
 				}
 			});
-			
+
 			// 优化行号中的CSS变量
 			const lineNumbers = code.querySelectorAll('.line-number');
 			lineNumbers.forEach(lineNumber => {
@@ -1110,11 +1039,11 @@ pre[data-code-block] code {
 					const optimizedStyle = style
 						.replace(/var\(--text-faint\)/g, '#888888')
 						.replace(/var\(--background-modifier-border\)/g, '#e0e0e0');
-					
+
 					htmlElement.setAttribute('style', optimizedStyle);
 				}
 			});
-			
+
 		} catch (error) {
 			logger.error("优化代码块CSS变量时出错:", error);
 		}
