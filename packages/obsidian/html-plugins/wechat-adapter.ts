@@ -283,13 +283,13 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			this.convertDivsToSections(container);
 
 			// 2. 为meta card结构添加保护性样式
-			this.protectMetaCardStructure(container);
+			// this.protectMetaCardStructure(container);
 
 			// 3. 强化关键元素的样式权重
 			this.reinforceElementStyles(container);
 
 			// 4. 预防微信的结构重组
-			this.preventStructureReorganization(container);
+			// this.preventStructureReorganization(container);
 
 			return container.innerHTML;
 		} catch (error) {
