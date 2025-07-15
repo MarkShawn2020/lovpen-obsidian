@@ -27,12 +27,6 @@ export class CodeHighlight extends UnifiedMarkdownPlugin {
 				if (lang && lang.trim().toLocaleLowerCase() == 'mermaid') return code;
 				if (lang && lang.startsWith('ad-')) return code;
 
-				// 如果启用了微信代码格式化，跳过高亮处理
-				if (this.settings && this.settings.enableWeixinCodeFormat) {
-					logger.debug("微信代码格式化已启用，跳过高亮处理");
-					return code;
-				}
-
 				if (lang && hljs.getLanguage(lang)) {
 					try {
 						const result = hljs.highlight(code, {language: lang});
