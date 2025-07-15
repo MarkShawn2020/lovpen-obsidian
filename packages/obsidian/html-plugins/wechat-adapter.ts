@@ -233,18 +233,194 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	 */
 	private tryInlineCSS(html: string, options: any): string {
 		try {
-			// 由于inline-css是异步的，这里使用一个简单的fallback方案
-			// 在实际项目中，建议将整个process方法改为异步处理
+			// 由于inline-css是异步的，我们需要实现一个真正的同步CSS内联化方案
+			logger.debug("开始CSS内联化处理");
 			
-			// Fallback方案：简单地移除<style>标签并保留内容
-			// 这至少能保证基本功能不受影响
-			const processedHtml = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, '');
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+			const container = doc.body.firstChild as HTMLElement;
 			
-			logger.debug("使用fallback方案处理CSS内联化");
-			return processedHtml;
+			// 1. 提取所有CSS规则
+			const cssRules = this.extractAndParseCSSRules(container);
+			console.log("🎨 [微信插件] 提取到CSS规则数量:", cssRules.length);
+			
+			// 2. 将CSS规则应用到对应元素
+			this.applyRulesToElements(container, cssRules);
+			
+			// 3. 移除<style>标签
+			const styleElements = container.querySelectorAll('style');
+			styleElements.forEach(style => style.remove());
+			
+			logger.debug("CSS内联化处理完成");
+			return container.innerHTML;
 		} catch (error) {
 			logger.error("CSS内联化处理出错:", error);
 			return html;
+		}
+	}
+
+	/**
+	 * 提取并解析CSS规则
+	 */
+	private extractAndParseCSSRules(container: HTMLElement): Array<{ selector: string, rules: Record<string, string> }> {
+		const cssRules: Array<{ selector: string, rules: Record<string, string> }> = [];
+		
+		// 提取所有style标签的内容
+		const styleElements = container.querySelectorAll('style');
+		
+		styleElements.forEach(styleElement => {
+			const cssText = styleElement.textContent || '';
+			const rules = this.parseCSSText(cssText);
+			cssRules.push(...rules);
+		});
+		
+		return cssRules;
+	}
+	
+	/**
+	 * 解析CSS文本为规则对象
+	 */
+	private parseCSSText(cssText: string): Array<{ selector: string, rules: Record<string, string> }> {
+		const rules: Array<{ selector: string, rules: Record<string, string> }> = [];
+		
+		try {
+			// 移除注释
+			cssText = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+			
+			// 提取CSS变量
+			const cssVariables = this.extractCSSVariables(cssText);
+			
+			// 匹配CSS规则
+			const ruleRegex = /([^{]+)\{([^}]+)\}/g;
+			let match;
+			
+			while ((match = ruleRegex.exec(cssText)) !== null) {
+				const selector = match[1].trim();
+				const declarations = match[2].trim();
+				
+				// 跳过@规则和伪类（微信不支持）
+				if (selector.startsWith('@') || selector.includes('::') ||
+					selector.includes(':hover') || selector.includes(':focus') ||
+					selector.includes(':active') || selector.includes(':before') ||
+					selector.includes(':after')) {
+					continue;
+				}
+				
+				// 解析声明为键值对
+				const ruleObj = this.parseDeclarations(declarations, cssVariables);
+				
+				if (Object.keys(ruleObj).length > 0) {
+					rules.push({
+						selector: selector,
+						rules: ruleObj
+					});
+				}
+			}
+		} catch (error) {
+			logger.error("解析CSS文本时出错:", error);
+		}
+		
+		return rules;
+	}
+	
+	/**
+	 * 解析CSS声明为键值对
+	 */
+	private parseDeclarations(declarations: string, cssVariables: Record<string, string>): Record<string, string> {
+		const rules: Record<string, string> = {};
+		
+		// 分割声明
+		const declarationArray = declarations.split(';').map(d => d.trim()).filter(d => d);
+		
+		declarationArray.forEach(declaration => {
+			const colonIndex = declaration.indexOf(':');
+			if (colonIndex === -1) return;
+			
+			const property = declaration.substring(0, colonIndex).trim();
+			let value = declaration.substring(colonIndex + 1).trim();
+			
+			// 替换CSS变量
+			Object.entries(cssVariables).forEach(([varName, varValue]) => {
+				const varRegex = new RegExp(`var\\(--${varName}\\)`, 'g');
+				value = value.replace(varRegex, varValue);
+				
+				const varWithDefaultRegex = new RegExp(`var\\(--${varName}\\s*,\\s*([^)]+)\\)`, 'g');
+				value = value.replace(varWithDefaultRegex, varValue);
+			});
+			
+			// 处理剩余的未知CSS变量
+			value = value.replace(/var\(--[\w-]+\s*,\s*([^)]+)\)/g, '$1');
+			value = value.replace(/var\(--[\w-]+\)/g, 'inherit');
+			
+			// 检查属性是否兼容微信
+			if (this.isWechatCompatibleProperty(property)) {
+				rules[property] = value;
+			}
+		});
+		
+		return rules;
+	}
+	
+	/**
+	 * 提取CSS变量
+	 */
+	private extractCSSVariables(css: string): Record<string, string> {
+		const variables: Record<string, string> = {};
+		
+		// 提取:root中的CSS变量
+		const rootRuleRegex = /:root\s*\{([^}]+)\}/g;
+		let match;
+		
+		while ((match = rootRuleRegex.exec(css)) !== null) {
+			const declarations = match[1];
+			const varRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+			let varMatch;
+			
+			while ((varMatch = varRegex.exec(declarations)) !== null) {
+				const varName = varMatch[1];
+				const varValue = varMatch[2].trim();
+				variables[varName] = varValue;
+			}
+		}
+		
+		return variables;
+	}
+	
+	/**
+	 * 将CSS规则应用到对应元素
+	 */
+	private applyRulesToElements(container: HTMLElement, cssRules: Array<{ selector: string, rules: Record<string, string> }>): void {
+		cssRules.forEach(cssRule => {
+			try {
+				// 查找匹配的元素
+				const elements = container.querySelectorAll(cssRule.selector);
+				
+				elements.forEach(element => {
+					const htmlElement = element as HTMLElement;
+					this.mergeStylesToElement(htmlElement, cssRule.rules);
+				});
+			} catch (selectorError) {
+				// 如果选择器无效，跳过
+				console.warn(`跳过无效选择器: ${cssRule.selector}`);
+			}
+		});
+	}
+	
+	/**
+	 * 将样式规则合并到元素的内联样式
+	 */
+	private mergeStylesToElement(element: HTMLElement, rules: Record<string, string>): void {
+		const existingStyle = element.getAttribute('style') || '';
+		const existingRules = this.parseInlineStyle(existingStyle);
+		
+		// 合并规则（内联样式优先级更高）
+		const mergedRules = {...rules, ...existingRules};
+		
+		// 转换为内联样式字符串
+		const newStyleString = this.stringifyStyleRules(mergedRules);
+		
+		if (newStyleString) {
+			element.setAttribute('style', newStyleString);
 		}
 	}
 
