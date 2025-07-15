@@ -285,9 +285,9 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		const styleElements = container.querySelectorAll('style');
 
 		styleElements.forEach(styleElement => {
-			const cssText = styleElement.textContent || '';
-			const rules = this.parseCSSText(cssText);
-			cssRules.push(...rules);
+			// const cssText = styleElement.textContent || '';
+			// const rules = this.parseCSSText(cssText);
+			// cssRules.push(...rules);
 		});
 
 		return cssRules;
