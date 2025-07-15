@@ -5,7 +5,7 @@ import {PluginData} from "../../types";
 import {persistentStorageService} from "../../services/persistentStorage";
 
 import {logger} from "../../../../shared/src/logger";
-import {ChevronDown, debug, Plug, Settings} from "lucide-react";
+import {ChevronDown, Bug, Plug, Settings} from "lucide-react";
 
 const STORAGE_KEY_PREFIX = 'lovpen-config';
 
@@ -217,7 +217,7 @@ export const ConfigComponent = <T extends PluginData>({
 							<div key={key}
 								 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 p-2 sm:p-3 bg-white border border-gray-200 rounded-lg">
 								<div className="flex items-center gap-2">
-									<debug className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
+									<Bug className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
 									<span className="text-xs sm:text-sm font-medium text-gray-700">{meta.title}</span>
 								</div>
 								<div onClick={(e) => e.stopPropagation()} className="w-full sm:w-auto">

@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 禁止写回退策略
 - 禁止写测试方案
 - 不允许加重试机制
+- 你不要 pnpm dev 测试
 
 ## 项目选型
 - 包管理器：pnpm
