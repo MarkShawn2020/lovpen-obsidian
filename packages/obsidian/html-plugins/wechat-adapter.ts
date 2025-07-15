@@ -2,9 +2,6 @@ import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
 import juice from 'juice'
-import postcss from 'postcss'
-// @ts-ignore - postcss-custom-properties doesn't have TypeScript declarations
-import postcssCustomProperties from 'postcss-custom-properties'
 
 /**
  * 微信公众号适配插件 - 根据微信公众号HTML/CSS支持约束进行适配
@@ -15,7 +12,9 @@ import postcssCustomProperties from 'postcss-custom-properties'
  * 4. 应用微信兼容的样式（使用px单位、避免复杂定位）
  * 5. 优化图片、表格、代码块等元素的显示
  *
- * 注意：使用juice库进行CSS内联化处理，支持完整的CSS选择器和样式处理
+ * 注意：
+ * - CSS变量处理已移至插件系统层面，在所有插件执行前通过PostCSS预处理
+ * - 本插件专注于juice内联化和微信平台特定的适配处理
  */
 export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	getPluginName(): string {
@@ -172,78 +171,30 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				return html;
 			}
 
-			// 首先使用PostCSS处理CSS变量
-			html = this.resolveCSSVariables(html);
-
-			// 然后使用juice库处理CSS内联化
-			html = juice(html, {
-				removeStyleTags: true,
-				// preservePseudos: true,
-				inlinePseudoElements: true,
-
+			// 使用juice库处理CSS内联化
+			// 注意：CSS变量已在插件系统层面通过PostCSS预处理
+			// juice需要处理完整的HTML文档，包括<style>标签和内容
+			const processedHtml = juice(html, {
+				removeStyleTags: true,           // 移除<style>标签
+				preserveMediaQueries: false,     // 不保留媒体查询（微信不支持）
+				applyWidthAttributes: false,    // 不应用width属性
+				xmlMode: false,                 // HTML模式
+				preserveImportant: true,        // 保留!important
+				insertPreservedExtraCss: false, // 不插入额外CSS
+				inlinePseudoElements: true,     // 内联伪元素
+				preservePseudos: false,         // 不保留伪类（微信不支持）
+				preserveFontFaces: false,       // 不保留@font-face（微信不支持）
+				preserveKeyFrames: false        // 不保留@keyframes（微信不支持）
 			});
 
 			// 后处理：清理微信不兼容的CSS属性
-			// html = this.cleanIncompatibleStyles(html);
+			// html = this.cleanIncompatibleStyles(processedHtml);
 
 			logger.debug("微信CSS内联化完成");
-			return html;
+			return processedHtml;
 		} catch (error) {
 			logger.error("CSS内联化处理出错:", error);
 			return html;
-		}
-	}
-
-	/**
-	 * 使用PostCSS处理CSS变量，将var()函数替换为实际值
-	 */
-	private resolveCSSVariables(html: string): string {
-		try {
-			logger.debug("开始PostCSS处理CSS变量");
-
-			const parser = new DOMParser();
-			const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
-			const container = doc.body.firstChild as HTMLElement;
-
-			// 查找所有style标签
-			const styleElements = container.querySelectorAll('style');
-			
-			if (styleElements.length === 0) {
-				logger.debug("没有找到style标签，跳过CSS变量处理");
-				return html;
-			}
-
-			// 配置PostCSS处理器
-			const processor = postcss([
-				postcssCustomProperties({
-					preserve: false, // 不保留原始的CSS变量
-					enableCustomPropertySets: false, // 禁用自定义属性集
-					warnings: false // 禁用警告
-				})
-			]);
-
-			// 处理每个style标签
-			styleElements.forEach(styleElement => {
-				const cssText = styleElement.textContent || '';
-				if (cssText.trim()) {
-					try {
-						// 使用PostCSS处理CSS变量
-						const result = processor.process(cssText, { from: undefined });
-						styleElement.textContent = result.css;
-						logger.debug(`已处理CSS变量，原始长度: ${cssText.length}, 处理后长度: ${result.css.length}`);
-					} catch (cssError) {
-						logger.warn(`PostCSS处理CSS变量时出错，保留原始CSS:`, cssError);
-						// 如果处理失败，保留原始CSS
-					}
-				}
-			});
-
-			logger.debug("PostCSS CSS变量处理完成");
-			return container.innerHTML;
-
-		} catch (error) {
-			logger.error("处理CSS变量时出错:", error);
-			return html; // 如果处理失败，返回原始HTML
 		}
 	}
 

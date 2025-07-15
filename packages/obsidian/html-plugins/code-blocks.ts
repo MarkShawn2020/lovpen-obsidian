@@ -250,6 +250,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	 * 应用代码块样式
 	 */
 	private applyCodeBlockStyles(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, highlightStyle: string): void {
+		console.warn(`applyCodeBlockStyles: `, {highlightStyle});
 		// Pre元素样式
 		pre.style.background = "var(--code-background)";
 		pre.style.padding = showLineNumbers ? "12px 12px 12px 12px" : "12px";
