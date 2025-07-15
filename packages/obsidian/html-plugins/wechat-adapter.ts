@@ -38,15 +38,15 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				length: html.length
 			});
 
-			console.log("🎨 [微信插件] Step 2: 内联样式");
-			const beforeInline = html;
-			html = this.inlineStyles(html, settings);
-			console.log("🎨 [微信插件] Step 2 完成", {
-				changed: html !== beforeInline,
-				length: html.length,
-				hasStyle: html.includes('<style'),
-				styleRemoved: beforeInline.includes('<style') && !html.includes('<style')
-			});
+			// console.log("🎨 [微信插件] Step 2: 内联样式");
+			// const beforeInline = html;
+			// html = this.inlineStyles(html, settings);
+			// console.log("🎨 [微信插件] Step 2 完成", {
+			// 	changed: html !== beforeInline,
+			// 	length: html.length,
+			// 	hasStyle: html.includes('<style'),
+			// 	styleRemoved: beforeInline.includes('<style') && !html.includes('<style')
+			// });
 
 			console.log("🏗️ [微信插件] Step 3: 保持结构");
 			const beforeStructure = html;
@@ -364,11 +364,20 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			const property = declaration.substring(0, colonIndex).trim();
 			let value = declaration.substring(colonIndex + 1).trim();
 
-			// 替换CSS变量
+			// 替换CSS变量（支持带默认值的语法）
 			Object.entries(cssVariables).forEach(([varName, varValue]) => {
+				// 处理 var(--varName) 格式
 				const varRegex = new RegExp(`var\\(--${varName}\\)`, 'g');
 				value = value.replace(varRegex, varValue);
+				
+				// 处理 var(--varName, default) 格式
+				const varWithDefaultRegex = new RegExp(`var\\(--${varName}\\s*,\\s*([^)]+)\\)`, 'g');
+				value = value.replace(varWithDefaultRegex, varValue);
 			});
+			
+			// 处理剩余的未知CSS变量（使用默认值或移除）
+			value = value.replace(/var\(--[\w-]+\s*,\s*([^)]+)\)/g, '$1'); // 使用默认值
+			value = value.replace(/var\(--[\w-]+\)/g, 'inherit'); // 移除未知变量
 
 			// 检查属性是否兼容微信
 			if (this.isWechatCompatibleProperty(property)) {
@@ -582,8 +591,33 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			}
 		}
 
-		// 直接返回提取的变量，不强制覆盖为特定主题
-		// 微信适配插件只处理平台兼容性，不应该改变视觉样式
+		// 添加常用的代码块相关CSS变量的默认值（微信兼容）
+		const codeBlockDefaults = {
+			'code-background': '#f6f8fa',
+			'code-normal': '#24292e',
+			'text-faint': '#888888',
+			'background-modifier-border': '#e1e4e8',
+			'font-monospace': '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace',
+			'text-normal': '#24292e',
+			'background-primary': '#ffffff',
+			'background-secondary': '#f6f8fa',
+			'text-accent': '#0366d6',
+			'text-muted': '#6a737d',
+			'border-color': '#e1e4e8',
+			'success-color': '#28a745',
+			'warning-color': '#ffc107',
+			'error-color': '#dc3545',
+			'info-color': '#17a2b8'
+		};
+
+		// 将默认值添加到变量映射中（如果不存在）
+		Object.entries(codeBlockDefaults).forEach(([key, value]) => {
+			if (!variables[key]) {
+				variables[key] = value;
+			}
+		});
+
+		logger.debug("提取CSS变量完成:", Object.keys(variables));
 		return variables;
 	}
 
@@ -719,8 +753,373 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	}
 
 	private optimizeCodeBlocks(container: HTMLElement): void {
-		// 已在applyEssentialStyles中处理
+		try {
+			const codeBlocks = container.querySelectorAll('pre code');
+			
+			if (codeBlocks.length === 0) {
+				return;
+			}
+			
+			// 获取第一个代码块的高亮样式（假设页面中所有代码块使用同样的样式）
+			const firstPre = (codeBlocks[0] as HTMLElement).parentElement as HTMLElement;
+			const highlightStyle = firstPre.getAttribute('data-highlight-style') || 'default';
+			
+			// 添加内部样式表而不是转换类名
+			this.addCodeHighlightInternalStyles(container, highlightStyle);
+			
+			// 只处理CSS变量替换，保持HTML结构不变
+			codeBlocks.forEach(codeBlock => {
+				const code = codeBlock as HTMLElement;
+				const pre = code.parentElement as HTMLElement;
+				
+				// 只优化CSS变量，不改变HTML结构
+				this.optimizeCodeBlockCSSVariables(pre, code);
+			});
+			
+			logger.debug("代码块微信优化完成（内部样式表方案）");
+		} catch (error) {
+			logger.error("优化代码块时出错:", error);
+		}
 	}
+
+	/**
+	 * 添加代码高亮内部样式表
+	 */
+	private addCodeHighlightInternalStyles(container: HTMLElement, highlightStyle: string): void {
+		try {
+			// 获取真实的高亮CSS内容
+			const highlightCSS = this.getHighlightCSSContent(highlightStyle);
+			
+			if (!highlightCSS) {
+				logger.warn(`无法获取高亮样式: ${highlightStyle}`);
+				return;
+			}
+			
+			// 创建内部样式表
+			const styleElement = container.ownerDocument.createElement('style');
+			styleElement.setAttribute('type', 'text/css');
+			styleElement.setAttribute('data-wechat-highlight', highlightStyle);
+			
+			// 处理CSS内容：替换CSS变量为实际值，确保微信兼容
+			const processedCSS = this.processHighlightCSSForWechat(highlightCSS);
+			
+			styleElement.textContent = processedCSS;
+			
+			// 添加到容器开头
+			if (container.firstChild) {
+				container.insertBefore(styleElement, container.firstChild);
+			} else {
+				container.appendChild(styleElement);
+			}
+			
+			logger.debug(`已添加微信兼容的代码高亮样式表: ${highlightStyle}`);
+			
+		} catch (error) {
+			logger.error("添加代码高亮内部样式时出错:", error);
+		}
+	}
+
+	/**
+	 * 获取高亮样式的CSS内容
+	 */
+	private getHighlightCSSContent(highlightStyle: string): string | null {
+		try {
+			// 从AssetsManager获取真实的高亮CSS
+			const assetsManager = (global as any).AssetsManager?.getInstance?.() || 
+								(window as any).AssetsManager?.getInstance?.();
+			
+			if (assetsManager && assetsManager.getHighlight) {
+				const highlight = assetsManager.getHighlight(highlightStyle);
+				if (highlight && highlight.css) {
+					return highlight.css;
+				}
+			}
+			
+			// 如果无法获取真实CSS，使用预定义的样式
+			return this.getBuiltinHighlightCSS(highlightStyle);
+			
+		} catch (error) {
+			logger.error("获取高亮CSS内容时出错:", error);
+			return this.getBuiltinHighlightCSS(highlightStyle);
+		}
+	}
+
+	/**
+	 * 处理高亮CSS使其兼容微信
+	 */
+	private processHighlightCSSForWechat(css: string): string {
+		try {
+			let processedCSS = css;
+			
+			// 1. 替换CSS变量为实际值
+			const cssVariableMap = {
+				'--code-background': '#f6f8fa',
+				'--code-normal': '#24292e',
+				'--text-faint': '#888888',
+				'--background-modifier-border': '#e1e4e8',
+				'--font-monospace': '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace'
+			};
+			
+			Object.entries(cssVariableMap).forEach(([variable, value]) => {
+				const regex = new RegExp(`var\\(${variable}\\)`, 'g');
+				processedCSS = processedCSS.replace(regex, value);
+			});
+			
+			// 2. 移除微信不支持的CSS属性
+			processedCSS = processedCSS.replace(/user-select:[^;]+;/g, '');
+			processedCSS = processedCSS.replace(/-webkit-user-select:[^;]+;/g, '');
+			processedCSS = processedCSS.replace(/overflow-x:[^;]+;/g, '');
+			processedCSS = processedCSS.replace(/overflow-y:[^;]+;/g, '');
+			
+			// 3. 添加行号样式（如果不存在）
+			if (!processedCSS.includes('.line-number')) {
+				processedCSS += `
+.line-number {
+	color: #888888 !important;
+	display: inline-block !important;
+	width: 2.5em !important;
+	text-align: right !important;
+	padding-right: 1em !important;
+	margin-right: 0.5em !important;
+	border-right: 1px solid #e0e0e0 !important;
+}`;
+			}
+			
+			// 4. 确保基础代码块样式
+			processedCSS += `
+pre[data-code-block] {
+	background: #f6f8fa !important;
+	padding: 16px !important;
+	margin: 16px 0 !important;
+	font-size: 14px !important;
+	line-height: 1.45 !important;
+	color: #24292e !important;
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+	border-radius: 6px !important;
+	border: 1px solid #e1e4e8 !important;
+	white-space: pre !important;
+}
+
+pre[data-code-block] code {
+	background: transparent !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	font-size: inherit !important;
+	line-height: inherit !important;
+	color: inherit !important;
+	font-family: inherit !important;
+	white-space: pre !important;
+}`;
+			
+			return processedCSS;
+			
+		} catch (error) {
+			logger.error("处理高亮CSS时出错:", error);
+			return css;
+		}
+	}
+
+	/**
+	 * 内置的高亮样式（备用方案）
+	 */
+	private getBuiltinHighlightCSS(highlightStyle: string): string {
+		const baseCSS = `
+/* 基础代码高亮样式 */
+.hljs {
+	color: #24292e;
+	background: #f6f8fa;
+}
+
+.hljs-keyword {
+	color: #d73a49;
+	font-weight: bold;
+}
+
+.hljs-string {
+	color: #032f62;
+}
+
+.hljs-number {
+	color: #005cc5;
+}
+
+.hljs-comment {
+	color: #6a737d;
+	font-style: italic;
+}
+
+.hljs-function {
+	color: #6f42c1;
+}
+
+.hljs-variable {
+	color: #e36209;
+}
+
+.hljs-type {
+	color: #6f42c1;
+}
+
+.hljs-built_in {
+	color: #005cc5;
+}
+
+.hljs-operator {
+	color: #d73a49;
+}
+
+.hljs-literal {
+	color: #005cc5;
+}
+
+.hljs-meta {
+	color: #6a737d;
+}
+
+.hljs-tag {
+	color: #22863a;
+}
+
+.hljs-attribute {
+	color: #6f42c1;
+}
+
+.hljs-name {
+	color: #22863a;
+}
+
+.hljs-title {
+	color: #6f42c1;
+}
+
+.hljs-params {
+	color: #24292e;
+}
+
+.hljs-property {
+	color: #005cc5;
+}
+
+.hljs-symbol {
+	color: #005cc5;
+}
+
+.hljs-bullet {
+	color: #005cc5;
+}
+
+.hljs-regexp {
+	color: #032f62;
+}
+
+.hljs-link {
+	color: #032f62;
+}
+
+.hljs-section {
+	color: #005cc5;
+}
+
+.hljs-quote {
+	color: #6a737d;
+}
+
+.hljs-doctag {
+	color: #6a737d;
+}
+
+.hljs-formula {
+	color: #24292e;
+}
+
+.hljs-selector-tag {
+	color: #22863a;
+}
+
+.hljs-selector-id {
+	color: #6f42c1;
+}
+
+.hljs-selector-class {
+	color: #6f42c1;
+}
+
+.hljs-title.function_ {
+	color: #6f42c1;
+}
+
+.hljs-variable.language_ {
+	color: #e36209;
+}`;
+
+		// 根据不同样式调整颜色
+		switch (highlightStyle) {
+			case 'github-dark':
+			case 'vs2015':
+			case 'obsidian':
+				return baseCSS.replace(/#24292e/g, '#f8f8f2')
+					.replace(/#f6f8fa/g, '#282a36')
+					.replace(/#d73a49/g, '#ff79c6')
+					.replace(/#032f62/g, '#f1fa8c')
+					.replace(/#6a737d/g, '#6272a4')
+					.replace(/#6f42c1/g, '#50fa7b')
+					.replace(/#005cc5/g, '#bd93f9');
+			
+			case 'atom-one-dark':
+			case 'monokai':
+				return baseCSS.replace(/#24292e/g, '#abb2bf')
+					.replace(/#f6f8fa/g, '#282c34')
+					.replace(/#d73a49/g, '#c678dd')
+					.replace(/#032f62/g, '#98c379')
+					.replace(/#6a737d/g, '#5c6370')
+					.replace(/#6f42c1/g, '#61afef')
+					.replace(/#005cc5/g, '#d19a66');
+			
+			default:
+				return baseCSS;
+		}
+	}
+
+	/**
+	 * 优化代码块CSS变量（保持HTML结构不变）
+	 */
+	private optimizeCodeBlockCSSVariables(pre: HTMLElement, code: HTMLElement): void {
+		try {
+			// 只替换内联样式中的CSS变量，不改变HTML结构
+			[pre, code].forEach(element => {
+				const style = element.getAttribute('style');
+				if (style) {
+					const optimizedStyle = style
+						.replace(/var\(--code-background\)/g, '#f6f8fa')
+						.replace(/var\(--code-normal\)/g, '#24292e')
+						.replace(/var\(--text-faint\)/g, '#888888')
+						.replace(/var\(--background-modifier-border\)/g, '#e1e4e8')
+						.replace(/var\(--font-monospace\)/g, '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace')
+						.replace(/var\(--[^)]+\)/g, 'inherit');
+					
+					element.setAttribute('style', optimizedStyle);
+				}
+			});
+			
+			// 优化行号中的CSS变量
+			const lineNumbers = code.querySelectorAll('.line-number');
+			lineNumbers.forEach(lineNumber => {
+				const htmlElement = lineNumber as HTMLElement;
+				const style = htmlElement.getAttribute('style');
+				if (style) {
+					const optimizedStyle = style
+						.replace(/var\(--text-faint\)/g, '#888888')
+						.replace(/var\(--background-modifier-border\)/g, '#e0e0e0');
+					
+					htmlElement.setAttribute('style', optimizedStyle);
+				}
+			});
+			
+		} catch (error) {
+			logger.error("优化代码块CSS变量时出错:", error);
+		}
+	}
+
 
 	/**
 	 * 清理不兼容的内容
@@ -729,11 +1128,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		// 移除可能导致问题的属性
 		const allElements = container.querySelectorAll('*');
 		allElements.forEach(element => {
-			// 移除可能不兼容的class
-			if (element.classList.contains('hljs')) {
-				element.classList.remove('hljs');
-			}
-
 			// 清理空的属性
 			if (element.hasAttribute('class') && !element.getAttribute('class')?.trim()) {
 				element.removeAttribute('class');
