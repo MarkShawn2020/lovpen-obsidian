@@ -66,6 +66,10 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			enableHighlight: {
 				type: "switch" as const,
 				title: "启用代码高亮"
+			},
+			showLineNumbers: {
+				type: "switch" as const,
+				title: "显示行号"
 			}
 		};
 	}
@@ -92,13 +96,15 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			const preventWrap = this.getPreventWrapConfig();
 			// 获取代码高亮配置
 			const enableHighlight = this.getHighlightConfig();
+			// 获取行号显示配置
+			const showLineNumbers = this.getShowLineNumbersConfig();
 
 			codeBlocks.forEach((codeBlock) => {
 				const pre = codeBlock.parentElement;
 				if (!pre) return;
 
 				// 为Obsidian内部渲染优化代码块
-				this.optimizeCodeBlock(pre, codeBlock as HTMLElement, settings.lineNumber, preventWrap, enableHighlight, settings);
+				this.optimizeCodeBlock(pre, codeBlock as HTMLElement, showLineNumbers, preventWrap, enableHighlight, settings);
 			});
 
 			return container.innerHTML;
@@ -120,6 +126,13 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	 */
 	private getHighlightConfig(): boolean {
 		return this.getConfig().enableHighlight as boolean ?? true;
+	}
+
+	/**
+	 * 获取行号显示配置
+	 */
+	private getShowLineNumbersConfig(): boolean {
+		return this.getConfig().showLineNumbers as boolean ?? false;
 	}
 
 	/**
@@ -153,7 +166,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		this.applyWrapSettings(pre, codeElement, preventWrap);
 
 		// 添加数据属性
-		this.addMetadata(pre, codeElement, preventWrap, enableHighlight);
+		this.addMetadata(pre, codeElement, showLineNumbers, preventWrap, enableHighlight);
 	}
 
 	/**
@@ -273,11 +286,12 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	/**
 	 * 添加元数据属性
 	 */
-	private addMetadata(pre: HTMLElement, codeElement: HTMLElement, preventWrap: boolean, enableHighlight: boolean): void {
+	private addMetadata(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, preventWrap: boolean, enableHighlight: boolean): void {
 		pre.setAttribute('data-code-block', 'true');
 		pre.setAttribute('data-language', this.extractLanguage(codeElement));
 		pre.setAttribute('data-prevent-wrap', preventWrap.toString());
 		pre.setAttribute('data-highlight-enabled', enableHighlight.toString());
+		pre.setAttribute('data-show-line-numbers', showLineNumbers.toString());
 	}
 
 	/**
