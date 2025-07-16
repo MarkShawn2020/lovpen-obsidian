@@ -45,10 +45,10 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 	if (loading) {
 		return (
 			<div className="w-full p-8 text-center">
-				<div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-					<Loader className="animate-spin w-8 h-8 text-blue-600 mx-auto mb-3"/>
-					<h3 className="text-lg font-medium text-gray-900 mb-2">加载样式资源</h3>
-					<p className="text-sm text-gray-600">正在加载模板、主题和高亮样式...</p>
+				<div className="bg-[#F7F4EC] border border-[#E8E6DC] rounded-2xl p-6">
+					<Loader className="animate-spin w-8 h-8 text-[#D97757] mx-auto mb-4"/>
+					<h3 className="text-lg font-semibold text-[#181818] mb-2">加载样式资源</h3>
+					<p className="text-sm text-[#87867F]">正在加载模板、主题和高亮样式...</p>
 				</div>
 			</div>
 		);
@@ -57,12 +57,12 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 	if (error) {
 		return (
 			<div className="w-full p-8 text-center">
-				<div className="bg-red-50 border border-red-200 rounded-xl p-6">
-					<div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-						<span className="text-red-600 text-lg">⚠️</span>
+				<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6">
+					<div className="w-8 h-8 bg-[#F7F4EC] rounded-xl flex items-center justify-center mx-auto mb-4">
+						<span className="text-[#D97757] text-lg">⚠️</span>
 					</div>
-					<h3 className="text-lg font-medium text-gray-900 mb-2">加载失败</h3>
-					<p className="text-sm text-red-600">资源加载失败: {error}</p>
+					<h3 className="text-lg font-semibold text-[#181818] mb-2">加载失败</h3>
+					<p className="text-sm text-[#D97757]">资源加载失败: {error}</p>
 				</div>
 			</div>
 		);
@@ -86,16 +86,16 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 	return (
 		<div className="space-y-6">
 			{/* 样式选择卡片 */}
-			<div className="grid grid-cols-1 gap-4">
+			<div className="grid grid-cols-1 gap-6">
 				{/* 模板选择器 */}
-				<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-					<div className="flex items-center gap-3 mb-3">
-						<div className="p-2 bg-blue-100 rounded-lg">
-							<Layout className="h-5 w-5 text-blue-600"/>
+				<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+					<div className="flex items-center gap-4 mb-4">
+						<div className="p-3 bg-[#F7F4EC] rounded-xl">
+							<Layout className="h-5 w-5 text-[#D97757]"/>
 						</div>
 						<div>
-							<h4 className="font-semibold text-gray-900">页面模板</h4>
-							<p className="text-sm text-gray-600">选择内容布局模板</p>
+							<h4 className="font-semibold text-[#181818]">页面模板</h4>
+							<p className="text-sm text-[#87867F]">选择内容布局模板</p>
 						</div>
 					</div>
 					<Select value={settings.useTemplate ? settings.defaultTemplate : "none"}
@@ -114,14 +114,14 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 				</div>
 
 				{/* 主题选择器 */}
-				<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-					<div className="flex items-center gap-3 mb-3">
-						<div className="p-2 bg-purple-100 rounded-lg">
-							<Palette className="h-5 w-5 text-purple-600"/>
+				<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+					<div className="flex items-center gap-4 mb-4">
+						<div className="p-3 bg-[#F7F4EC] rounded-xl">
+							<Palette className="h-5 w-5 text-[#B49FD8]"/>
 						</div>
 						<div>
-							<h4 className="font-semibold text-gray-900">视觉主题</h4>
-							<p className="text-sm text-gray-600">选择界面风格主题</p>
+							<h4 className="font-semibold text-[#181818]">视觉主题</h4>
+							<p className="text-sm text-[#87867F]">选择界面风格主题</p>
 						</div>
 					</div>
 					<Select value={settings.defaultStyle} onValueChange={onThemeChange}>
@@ -140,14 +140,14 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 			</div>
 
 			{/* 代码高亮选择器 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-				<div className="flex items-center gap-3 mb-3">
-					<div className="p-2 bg-green-100 rounded-lg">
-						<Code className="h-5 w-5 text-green-600"/>
+			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+				<div className="flex items-center gap-4 mb-4">
+					<div className="p-3 bg-[#F7F4EC] rounded-xl">
+						<Code className="h-5 w-5 text-[#629A90]"/>
 					</div>
 					<div>
-						<h4 className="font-semibold text-gray-900">代码高亮</h4>
-						<p className="text-sm text-gray-600">选择代码语法高亮样式</p>
+						<h4 className="font-semibold text-[#181818]">代码高亮</h4>
+						<p className="text-sm text-[#87867F]">选择代码语法高亮样式</p>
 					</div>
 				</div>
 				<Select value={settings.defaultHighlight} onValueChange={onHighlightChange}>
@@ -165,27 +165,27 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 			</div>
 
 			{/* 主题色选择器 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-				<div className="flex items-center gap-3 mb-4">
-					<div className="p-2 bg-orange-100 rounded-lg">
-						<Eye className="h-5 w-5 text-orange-600"/>
+			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+				<div className="flex items-center gap-4 mb-4">
+					<div className="p-3 bg-[#F7F4EC] rounded-xl">
+						<Eye className="h-5 w-5 text-[#C2C07D]"/>
 					</div>
 					<div>
-						<h4 className="font-semibold text-gray-900">自定义主题色</h4>
-						<p className="text-sm text-gray-600">启用个性化颜色配置</p>
+						<h4 className="font-semibold text-[#181818]">自定义主题色</h4>
+						<p className="text-sm text-[#87867F]">启用个性化颜色配置</p>
 					</div>
 				</div>
 
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium text-gray-700">启用主题色</span>
-						<div className="flex items-center gap-2">
+						<span className="text-sm font-medium text-[#181818]">启用主题色</span>
+						<div className="flex items-center gap-3">
 							<ToggleSwitch
 								size={'small'}
 								checked={settings.enableThemeColor}
 								onChange={onThemeColorToggle}
 							/>
-							<span className="text-sm text-gray-500">
+							<span className="text-sm text-[#87867F]">
 								{settings.enableThemeColor ? "已启用" : "已禁用"}
 							</span>
 						</div>
@@ -193,27 +193,27 @@ export const StyleSettings: React.FC<StyleSettingsProps> = ({
 
 					{settings.enableThemeColor && (
 						<div
-							className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
+							className="p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl">
 							<div className="flex items-center gap-4">
 								<div className="flex items-center gap-3">
 									<input
-										className="w-12 h-12 rounded-lg border-2 border-white shadow-md cursor-pointer"
+										className="w-12 h-12 rounded-xl border-2 border-white shadow-md cursor-pointer"
 										type="color"
-										value={settings.themeColor || "#7852ee"}
+										value={settings.themeColor || "#D97757"}
 										onInput={handleColorInput}
 										onChange={handleColorChange}
 									/>
 									<div
-										className="w-12 h-12 rounded-lg border-2 border-white shadow-md"
+										className="w-12 h-12 rounded-xl border-2 border-white shadow-md"
 										style={{
-											backgroundColor: settings.themeColor || "#7852ee",
+											backgroundColor: settings.themeColor || "#D97757",
 										}}
 									/>
 								</div>
 								<div className="flex-1">
-									<div className="text-sm font-medium text-gray-700 mb-1">当前主题色</div>
-									<div className="text-xs font-mono text-gray-500 bg-white px-2 py-1 rounded border">
-										{settings.themeColor || "#7852ee"}
+									<div className="text-sm font-medium text-[#181818] mb-1">当前主题色</div>
+									<div className="text-xs font-mono text-[#87867F] bg-white px-3 py-2 rounded-xl border border-[#E8E6DC]">
+										{settings.themeColor || "#D97757"}
 									</div>
 								</div>
 							</div>

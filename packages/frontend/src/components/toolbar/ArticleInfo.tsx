@@ -318,10 +318,10 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 	};
 
 	return (
-		<div className="w-full space-y-3 sm:space-y-4">
-			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-				<h3 className="text-base sm:text-lg font-semibold">文章基本信息</h3>
-				<div className="flex space-x-1 sm:space-x-2">
+		<div className="w-full space-y-6">
+			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+				<h3 className="text-lg font-semibold text-[#181818] tracking-tight">文章基本信息</h3>
+				<div className="flex space-x-2">
 					<AIAnalysisSplitButton
 						isGenerating={isAIGenerating}
 						isDisabled={!settings.authKey || settings.authKey.trim() === ''}
@@ -332,139 +332,139 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 						onClick={handleClearAll}
 						size="sm"
 						variant="outline"
-						className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm px-2 sm:px-3"
+						className="text-[#87867F] hover:text-[#181818] hover:bg-[#F0EEE6] border-[#E8E6DC] text-sm px-3 py-2 rounded-xl font-medium transition-all"
 					>
 						🗑️ 清空
 					</Button>
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				{/* 作者 */}
 				<div>
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						作者
 					</label>
 					<input
 						type="text"
 						value={articleInfo.author}
 						onChange={(e) => handleInputChange('author', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
 						placeholder="输入作者名称"
 					/>
 				</div>
 
 				{/* 发布日期 */}
 				<div>
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						发布日期
 					</label>
 					<input
 						type="date"
 						value={articleInfo.publishDate}
 						onChange={(e) => handleInputChange('publishDate', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
 					/>
 				</div>
 
 				{/* 文章标题 */}
 				<div className="sm:col-span-2">
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						文章标题
 					</label>
 					<input
 						type="text"
 						value={articleInfo.articleTitle}
 						onChange={(e) => handleInputChange('articleTitle', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
 						placeholder="输入文章标题"
 					/>
 				</div>
 
 				{/* 副标题 */}
 				<div className="sm:col-span-2">
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						副标题
 					</label>
 					<input
 						type="text"
 						value={articleInfo.articleSubtitle}
 						onChange={(e) => handleInputChange('articleSubtitle', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
 						placeholder="输入副标题"
 					/>
 				</div>
 
 				{/* 期数 */}
 				<div>
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						期数
 					</label>
 					<input
 						type="text"
 						value={articleInfo.episodeNum}
 						onChange={(e) => handleInputChange('episodeNum', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
 						placeholder="如：第 51 期"
 					/>
 				</div>
 
 				{/* 系列名称 */}
 				<div>
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						系列名称
 					</label>
 					<input
 						type="text"
 						value={articleInfo.seriesName}
 						onChange={(e) => handleInputChange('seriesName', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
 						placeholder="如：人文与科技"
 					/>
 				</div>
 
 				{/* 摘要 */}
 				<div className="sm:col-span-2">
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						摘要
 					</label>
 					<textarea
 						value={articleInfo.summary}
 						onChange={(e) => handleInputChange('summary', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] h-24 resize-none text-sm transition-all"
 						placeholder="输入文章摘要，简要概括文章主要内容"
 					/>
 				</div>
 
 				{/* 推荐语 */}
 				<div className="sm:col-span-2">
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						推荐语
 					</label>
 					<textarea
 						value={articleInfo.recommendation}
 						onChange={(e) => handleInputChange('recommendation', e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 sm:h-24 resize-none text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] h-24 resize-none text-sm transition-all"
 						placeholder="输入推荐语，吸引读者阅读的亮点或价值"
 					/>
 				</div>
 
 				{/* 标签 */}
 				<div className="sm:col-span-2">
-					<label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+					<label className="block text-sm font-medium text-[#181818] mb-2">
 						标签
 					</label>
 					<textarea
 						value={articleInfo.tags.join(', ')}
 						onChange={(e) => handleTagsChange(e.target.value)}
-						className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-16 sm:h-20 resize-none text-xs sm:text-sm"
+						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] h-20 resize-none text-sm transition-all"
 						placeholder="输入标签，支持逗号、换行、分号分隔"
 					/>
-					<div className="mt-2 flex flex-wrap gap-1 sm:gap-2">
+					<div className="mt-3 flex flex-wrap gap-2">
 						{articleInfo.tags.map((tag, index) => (
 							<span
 								key={index}
-								className="inline-block bg-blue-100 text-blue-800 text-xs sm:text-sm px-2 py-1 rounded-full"
+								className="inline-block bg-[#F7F4EC] text-[#181818] text-sm px-3 py-1 rounded-full border border-[#E8E6DC]"
 							>
 								{tag}
 							</span>

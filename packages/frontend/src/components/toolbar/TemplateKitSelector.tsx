@@ -201,11 +201,11 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 
 	if (loading) {
 		return (
-			<div className="w-full p-3 sm:p-6 text-center">
-				<div className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6">
-					<Loader className="animate-spin w-6 h-6 sm:w-8 sm:h-8 text-gray-600 mx-auto mb-3"/>
-					<h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">加载模板套装</h3>
-					<p className="text-xs sm:text-sm text-gray-600">正在加载可用的模板套装...</p>
+			<div className="w-full p-6 text-center">
+				<div className="bg-[#F7F4EC] border border-[#E8E6DC] rounded-2xl p-6">
+					<Loader className="animate-spin w-8 h-8 text-[#D97757] mx-auto mb-4"/>
+					<h3 className="text-lg font-semibold text-[#181818] mb-2">加载模板套装</h3>
+					<p className="text-sm text-[#87867F]">正在加载可用的模板套装...</p>
 				</div>
 			</div>
 		);
@@ -213,13 +213,13 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 
 	if (error) {
 		return (
-			<div className="w-full p-3 sm:p-6 text-center">
-				<div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-6">
-					<AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600 mx-auto mb-3"/>
-					<h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">加载失败</h3>
-					<p className="text-xs sm:text-sm text-red-600 mb-4">{error}</p>
-					<Button onClick={loadKits} variant="outline" size="sm" className="text-xs sm:text-sm">
-						<RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-2"/>
+			<div className="w-full p-6 text-center">
+				<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6">
+					<AlertCircle className="w-8 h-8 text-[#D97757] mx-auto mb-4"/>
+					<h3 className="text-lg font-semibold text-[#181818] mb-2">加载失败</h3>
+					<p className="text-sm text-[#D97757] mb-4">{error}</p>
+					<Button onClick={loadKits} variant="outline" size="sm" className="text-sm border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium">
+						<RefreshCw className="w-4 h-4 mr-2"/>
 						重试
 					</Button>
 				</div>
@@ -228,23 +228,23 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 	}
 
 	return (
-		<div className="space-y-4 sm:space-y-6">
+		<div className="space-y-6">
 			{/* 套装选择器头部 */}
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-				<div className="flex items-center gap-2 sm:gap-3">
-					<div className="p-2 bg-purple-100 rounded-lg">
-						<Package className="w-5 h-5 text-purple-600"/>
+				<div className="flex items-center gap-4">
+					<div className="p-3 bg-[#F7F4EC] rounded-xl">
+						<Package className="w-5 h-5 text-[#B49FD8]"/>
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-gray-900">模板套装</h3>
+						<h3 className="text-lg font-semibold text-[#181818] tracking-tight">模板套装</h3>
 					</div>
 				</div>
-				<div className="flex gap-2">
-					<Button onClick={handleCreateKit} variant="outline" size="sm">
+				<div className="flex gap-3">
+					<Button onClick={handleCreateKit} variant="outline" size="sm" className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium px-4 py-2">
 						<Plus className="w-4 h-4 mr-2"/>
 						创建套装
 					</Button>
-					<Button onClick={loadKits} variant="outline" size="sm">
+					<Button onClick={loadKits} variant="outline" size="sm" className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium px-4 py-2">
 						<RefreshCw className="w-4 h-4 mr-2"/>
 						刷新
 					</Button>
@@ -253,51 +253,51 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 
 
 			{/* 套装列表 */}
-			<div className="space-y-3">
-				<h4 className="text-sm font-medium text-gray-700">可用套装</h4>
-				<div className="grid grid-cols-1 gap-3">
+			<div className="space-y-4">
+				<h4 className="text-sm font-medium text-[#181818]">可用套装</h4>
+				<div className="grid grid-cols-1 gap-4">
 					{kits.map((kit) => (
 						<div
 							key={kit.basicInfo.id}
-							className={`p-3 border rounded-lg cursor-pointer transition-all ${
+							className={`p-4 border rounded-2xl cursor-pointer transition-all ${
 								selectedKitId === kit.basicInfo.id
-									? 'border-purple-300 bg-purple-50'
-									: 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+									? 'border-[#D97757] bg-[#F7F4EC]'
+									: 'border-[#E8E6DC] bg-white hover:border-[#D97757] hover:bg-[#F7F4EC]'
 							}`}
 							onClick={() => handleKitSelect(kit.basicInfo.id)}
 						>
-							<div className="flex items-start gap-3">
+							<div className="flex items-start gap-4">
 								{/* 小预览缩略图 */}
 								<div
-									className="flex-shrink-0 w-16 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded border overflow-hidden">
+									className="flex-shrink-0 w-16 h-12 bg-gradient-to-br from-[#F7F4EC] to-[#E8E6DC] rounded-xl border border-[#E8E6DC] overflow-hidden">
 									<div className="w-full h-full p-1">
 										<div className="w-full h-2 bg-white rounded-sm mb-1"></div>
-										<div className="w-3/4 h-1 bg-gray-400 rounded-sm mb-1"></div>
-										<div className="w-full h-1 bg-gray-300 rounded-sm mb-1"></div>
-										<div className="w-1/2 h-1 bg-gray-300 rounded-sm"></div>
+										<div className="w-3/4 h-1 bg-[#87867F] rounded-sm mb-1"></div>
+										<div className="w-full h-1 bg-[#E8E6DC] rounded-sm mb-1"></div>
+										<div className="w-1/2 h-1 bg-[#E8E6DC] rounded-sm"></div>
 									</div>
 								</div>
 
 								<div className="flex-1">
-									<div className="flex items-center gap-2 mb-1">
-										<h5 className="text-sm font-medium text-gray-900">{kit.basicInfo.name}</h5>
+									<div className="flex items-center gap-2 mb-2">
+										<h5 className="text-sm font-medium text-[#181818]">{kit.basicInfo.name}</h5>
 										{getKitStatusBadge(kit)}
 									</div>
-									<p className="text-xs text-gray-600 mb-2">{kit.basicInfo.description}</p>
-									<div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+									<p className="text-xs text-[#87867F] mb-3">{kit.basicInfo.description}</p>
+									<div className="flex items-center gap-2 text-xs text-[#87867F] mb-3">
 										<span>主题: {kit.styleConfig.theme}</span>
 										<span>•</span>
 										<span>高亮: {kit.styleConfig.codeHighlight}</span>
 									</div>
-									<div className="flex flex-wrap gap-1">
+									<div className="flex flex-wrap gap-2">
 										{kit.basicInfo.tags.slice(0, 3).map((tag, index) => (
-											<Badge key={index} variant="outline" className="text-xs">
+											<Badge key={index} variant="outline" className="text-xs border-[#E8E6DC] text-[#87867F]">
 												{tag}
 											</Badge>
 										))}
 										{kit.basicInfo.tags.length > 3 && (
 											<span
-												className="text-xs text-gray-500">+{kit.basicInfo.tags.length - 3}</span>
+												className="text-xs text-[#87867F]">+{kit.basicInfo.tags.length - 3}</span>
 										)}
 									</div>
 								</div>
@@ -305,14 +305,14 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 									<Button
 										variant="ghost"
 										size="sm"
-										className="h-6 w-6 p-0"
+										className="h-8 w-8 p-0 hover:bg-[#F0EEE6] rounded-lg"
 										onClick={(e) => {
 											e.stopPropagation();
 											setPreviewKit(kit);
 											setShowPreviewModal(true);
 										}}
 									>
-										<Eye className="w-3 h-3"/>
+										<Eye className="w-4 h-4 text-[#87867F]"/>
 									</Button>
 								</div>
 							</div>
@@ -322,14 +322,14 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 			</div>
 
 			{/* 高级样式配置 */}
-			<div className="border-t border-gray-200 pt-6">
-				<div className="flex items-center gap-3 mb-4">
-					<div className="p-2 bg-indigo-100 rounded-lg">
-						<Palette className="w-5 h-5 text-indigo-600"/>
+			<div className="border-t border-[#E8E6DC] pt-6">
+				<div className="flex items-center gap-4 mb-6">
+					<div className="p-3 bg-[#F7F4EC] rounded-xl">
+						<Palette className="w-5 h-5 text-[#97B5D5]"/>
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-gray-900">高级样式配置</h3>
-						<p className="text-sm text-gray-600">微调当前套装的样式设置</p>
+						<h3 className="text-lg font-semibold text-[#181818] tracking-tight">高级样式配置</h3>
+						<p className="text-sm text-[#87867F]">微调当前套装的样式设置</p>
 					</div>
 				</div>
 
