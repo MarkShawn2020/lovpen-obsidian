@@ -22,7 +22,7 @@
     "commit": "commit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "db-server:file": "pglite-server --db=local.db",
+    "db-server:file": "pglite-server --db=local.db --port 5433",
     "db-server:memory": "pglite-server --port 5433",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
