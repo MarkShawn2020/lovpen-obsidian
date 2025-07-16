@@ -218,168 +218,168 @@ AI擅长：
   return (
     <Container>
       <div className="u-grid-desktop u-gap-l u-mt-gutter min-h-[calc(100vh-120px)]">
-          {/* 左侧输入面板 */}
-          <div className="lg:col-span-3 flex flex-col u-gap-m">
-            {/* 输入方式选择 */}
-            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
-              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-                <h3 className="font-medium text-text-main">
-                  创作输入
-                </h3>
-              </div>
-
-              <div className="p-6">
-                <Tabs defaultValue="voice">
-                  <TabsList className="flex w-full border-b border-border-default/20">
-                    <TabsTrigger value="voice" className="px-4 py-2 font-medium text-sm">
-                      语音
-                    </TabsTrigger>
-                    <TabsTrigger value="text" className="px-4 py-2 font-medium text-sm">
-                      文字
-                    </TabsTrigger>
-                    <TabsTrigger value="file" className="px-4 py-2 font-medium text-sm">
-                      文档
-                    </TabsTrigger>
-                  </TabsList>
-
-                  {/* 语音输入 */}
-                  <TabsContent value="voice" className="mt-6">
-                    <div className="text-center">
-                      <div className={`w-16 h-16 mx-auto u-mb-text rounded-full flex items-center justify-center text-xl transition-all ${
-                        isRecording
-                          ? 'bg-primary/20 border-2 border-primary animate-pulse'
-                          : 'bg-background-ivory-medium border-2 border-border-default/20 hover:border-primary cursor-pointer'
-                      }`}
-                      >
-                        {isRecording ? '🎙️' : '🎤'}
-                      </div>
-                      <Button
-                        variant={isRecording ? 'secondary' : 'primary'}
-                        size="md"
-                        onClick={handleVoiceRecord}
-                        className="w-full u-mb-text"
-                      >
-                        {isRecording ? '停止录音' : '开始语音'}
-                      </Button>
-                      <p className="text-sm text-text-faded">
-                        {isRecording ? '正在录音中...' : '点击开始语音输入'}
-                      </p>
-                    </div>
-                  </TabsContent>
-
-                  {/* 文字输入 */}
-                  <TabsContent value="text" className="mt-6">
-                    <div className="u-gap-m flex flex-col">
-                      <textarea
-                        placeholder="在这里输入你的想法、观点或灵感..."
-                        className="w-full h-32 p-4 border border-border-default/20 rounded-md resize-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text-main"
-                        value={textInput}
-                        onChange={e => setTextInput(e.target.value)}
-                      />
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-text-faded">
-                          {textInput.length}
-                          {' '}
-                          字符
-                        </span>
-                        <Button variant="outline" size="sm" onClick={() => setTextInput('')}>
-                          清空
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  {/* 文档上传 */}
-                  <TabsContent value="file" className="mt-6">
-                    <div className="border-2 border-dashed border-border-default/20 rounded-md p-8 text-center hover:border-primary hover:bg-background-ivory-medium transition-all cursor-pointer">
-                      <div className="text-2xl u-mb-text">📎</div>
-                      <p className="text-sm text-text-faded u-mb-text">拖拽文件到这里</p>
-                      <Button variant="outline" size="sm">
-                        选择文件
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
+        {/* 左侧输入面板 */}
+        <div className="lg:col-span-3 flex flex-col u-gap-m">
+          {/* 输入方式选择 */}
+          <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+            <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+              <h3 className="font-medium text-text-main">
+                创作输入
+              </h3>
             </div>
 
-            {/* 快速生成按钮 */}
-            <div className="bg-background-main rounded-lg border border-border-default/20 p-6">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleGenerate}
-                disabled={!textInput.trim() || isGenerating}
-                className="w-full font-medium"
-              >
-                {isGenerating
-                  ? (
-                      <div className="flex items-center u-gap-s">
-                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>AI 创作中...</span>
-                      </div>
-                    )
-                  : (
-                      <span>智能生成文章</span>
-                    )}
-              </Button>
-            </div>
+            <div className="p-6">
+              <Tabs defaultValue="voice">
+                <TabsList className="flex w-full border-b border-border-default/20">
+                  <TabsTrigger value="voice" className="px-4 py-2 font-medium text-sm">
+                    语音
+                  </TabsTrigger>
+                  <TabsTrigger value="text" className="px-4 py-2 font-medium text-sm">
+                    文字
+                  </TabsTrigger>
+                  <TabsTrigger value="file" className="px-4 py-2 font-medium text-sm">
+                    文档
+                  </TabsTrigger>
+                </TabsList>
 
-            {/* 历史记录 */}
-            <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
-              <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
-                <h3 className="font-medium text-text-main">最近输入</h3>
-              </div>
-              <div className="p-6 u-gap-s flex flex-col">
-                <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
-                  "关于远程工作的思考..."
-                </div>
-                <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
-                  "今天在咖啡店看到..."
-                </div>
-                <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
-                  "AI技术的发展..."
-                </div>
-              </div>
+                {/* 语音输入 */}
+                <TabsContent value="voice" className="mt-6">
+                  <div className="text-center">
+                    <div className={`w-16 h-16 mx-auto u-mb-text rounded-full flex items-center justify-center text-xl transition-all ${
+                      isRecording
+                        ? 'bg-primary/20 border-2 border-primary animate-pulse'
+                        : 'bg-background-ivory-medium border-2 border-border-default/20 hover:border-primary cursor-pointer'
+                    }`}
+                    >
+                      {isRecording ? '🎙️' : '🎤'}
+                    </div>
+                    <Button
+                      variant={isRecording ? 'secondary' : 'primary'}
+                      size="md"
+                      onClick={handleVoiceRecord}
+                      className="w-full u-mb-text"
+                    >
+                      {isRecording ? '停止录音' : '开始语音'}
+                    </Button>
+                    <p className="text-sm text-text-faded">
+                      {isRecording ? '正在录音中...' : '点击开始语音输入'}
+                    </p>
+                  </div>
+                </TabsContent>
+
+                {/* 文字输入 */}
+                <TabsContent value="text" className="mt-6">
+                  <div className="u-gap-m flex flex-col">
+                    <textarea
+                      placeholder="在这里输入你的想法、观点或灵感..."
+                      className="w-full h-32 p-4 border border-border-default/20 rounded-md resize-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text-main"
+                      value={textInput}
+                      onChange={e => setTextInput(e.target.value)}
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-text-faded">
+                        {textInput.length}
+                        {' '}
+                        字符
+                      </span>
+                      <Button variant="outline" size="sm" onClick={() => setTextInput('')}>
+                        清空
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* 文档上传 */}
+                <TabsContent value="file" className="mt-6">
+                  <div className="border-2 border-dashed border-border-default/20 rounded-md p-8 text-center hover:border-primary hover:bg-background-ivory-medium transition-all cursor-pointer">
+                    <div className="text-2xl u-mb-text">📎</div>
+                    <p className="text-sm text-text-faded u-mb-text">拖拽文件到这里</p>
+                    <Button variant="outline" size="sm">
+                      选择文件
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
 
-          {/* 中间内容预览区域 */}
-          <PreviewSection
-            previewPanels={previewPanels}
-            platforms={platforms}
-            generatedContent={generatedContent}
-            addPreviewPanel={addPreviewPanel}
-            removePreviewPanel={removePreviewPanel}
-            reorderPreviewPanels={reorderPreviewPanels}
-            onPanelSelect={handlePanelSelect}
-            onBackgroundClick={handleBackgroundClick}
+          {/* 快速生成按钮 */}
+          <div className="bg-background-main rounded-lg border border-border-default/20 p-6">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleGenerate}
+              disabled={!textInput.trim() || isGenerating}
+              className="w-full font-medium"
+            >
+              {isGenerating
+                ? (
+                    <div className="flex items-center u-gap-s">
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>AI 创作中...</span>
+                    </div>
+                  )
+                : (
+                    <span>智能生成文章</span>
+                  )}
+            </Button>
+          </div>
+
+          {/* 历史记录 */}
+          <div className="bg-background-main rounded-lg border border-border-default/20 overflow-hidden">
+            <div className="bg-background-ivory-medium px-6 py-4 border-b border-border-default/20">
+              <h3 className="font-medium text-text-main">最近输入</h3>
+            </div>
+            <div className="p-6 u-gap-s flex flex-col">
+              <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
+                "关于远程工作的思考..."
+              </div>
+              <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
+                "今天在咖啡店看到..."
+              </div>
+              <div className="text-sm p-3 bg-background-ivory-medium rounded-md cursor-pointer hover:bg-background-oat transition-colors">
+                "AI技术的发展..."
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 中间内容预览区域 */}
+        <PreviewSection
+          previewPanels={previewPanels}
+          platforms={platforms}
+          generatedContent={generatedContent}
+          addPreviewPanel={addPreviewPanel}
+          removePreviewPanel={removePreviewPanel}
+          reorderPreviewPanels={reorderPreviewPanels}
+          onPanelSelect={handlePanelSelect}
+          onBackgroundClick={handleBackgroundClick}
+        />
+
+        {/* 右侧智能设置面板 */}
+        <SmartSidebar
+          context={sidebarContext}
+          onContextChange={handleContextChange}
+        >
+          <GlobalControls
+            settings={sidebarContext.globalSettings}
+            onUpdate={updateGlobalSettings}
+            previewPanelsCount={previewPanels.length}
+            currentMode={sidebarContext.mode}
           />
 
-          {/* 右侧智能设置面板 */}
-          <SmartSidebar
-            context={sidebarContext}
-            onContextChange={handleContextChange}
-          >
-            <GlobalControls
-              settings={sidebarContext.globalSettings}
-              onUpdate={updateGlobalSettings}
-              previewPanelsCount={previewPanels.length}
-              currentMode={sidebarContext.mode}
-            />
-
-            <PlatformControls
-              platforms={platforms}
-              selectedPlatforms={selectedPlatforms}
-              platformSettings={sidebarContext.platformOverrides}
-              onUpdate={updatePlatformSettings}
-              currentMode={sidebarContext.mode}
-              generatedContentLength={generatedContent.length}
-            />
-          </SmartSidebar>
+          <PlatformControls
+            platforms={platforms}
+            selectedPlatforms={selectedPlatforms}
+            platformSettings={sidebarContext.platformOverrides}
+            onUpdate={updatePlatformSettings}
+            currentMode={sidebarContext.mode}
+            generatedContentLength={generatedContent.length}
+          />
+        </SmartSidebar>
       </div>
     </Container>
   );

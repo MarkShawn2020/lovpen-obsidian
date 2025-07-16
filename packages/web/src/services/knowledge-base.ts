@@ -1,7 +1,7 @@
 import type { KnowledgeItem, PlatformIntegration, SearchFilters, SearchResult } from '@/types/knowledge-base';
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import { db } from '@/libs/DB';
 import { knowledgeItemsSchema, platformIntegrationsSchema } from '@/models/Schema';
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 
 export class KnowledgeBaseService {
   // 获取知识库项目列表
@@ -105,14 +105,28 @@ export class KnowledgeBaseService {
   // 更新知识库项目
   static async updateKnowledgeItem(id: string, userId: string, updates: Partial<KnowledgeItem>): Promise<KnowledgeItem> {
     const updateData: any = {};
-    
-    if (updates.title !== undefined) updateData.title = updates.title;
-    if (updates.content !== undefined) updateData.content = updates.content;
-    if (updates.rawContent !== undefined) updateData.rawContent = updates.rawContent;
-    if (updates.metadata !== undefined) updateData.metadata = updates.metadata;
-    if (updates.embedding !== undefined) updateData.embedding = updates.embedding;
-    if (updates.tags !== undefined) updateData.tags = updates.tags;
-    if (updates.processingStatus !== undefined) updateData.processingStatus = updates.processingStatus;
+
+    if (updates.title !== undefined) {
+      updateData.title = updates.title;
+    }
+    if (updates.content !== undefined) {
+      updateData.content = updates.content;
+    }
+    if (updates.rawContent !== undefined) {
+      updateData.rawContent = updates.rawContent;
+    }
+    if (updates.metadata !== undefined) {
+      updateData.metadata = updates.metadata;
+    }
+    if (updates.embedding !== undefined) {
+      updateData.embedding = updates.embedding;
+    }
+    if (updates.tags !== undefined) {
+      updateData.tags = updates.tags;
+    }
+    if (updates.processingStatus !== undefined) {
+      updateData.processingStatus = updates.processingStatus;
+    }
 
     const result = await db
       .update(knowledgeItemsSchema)
@@ -153,9 +167,9 @@ export class KnowledgeBaseService {
           eq(knowledgeItemsSchema.userId, userId),
           or(
             ilike(knowledgeItemsSchema.title, searchPattern),
-            ilike(knowledgeItemsSchema.content, searchPattern)
-          )
-        )
+            ilike(knowledgeItemsSchema.content, searchPattern),
+          ),
+        ),
       )
       .limit(limit);
 
@@ -253,11 +267,19 @@ export class PlatformIntegrationService {
   // 更新平台集成
   static async updatePlatformIntegration(id: string, userId: string, updates: Partial<PlatformIntegration>): Promise<PlatformIntegration> {
     const updateData: any = {};
-    
-    if (updates.authData !== undefined) updateData.authData = updates.authData;
-    if (updates.syncSettings !== undefined) updateData.syncSettings = updates.syncSettings;
-    if (updates.lastSync !== undefined) updateData.lastSync = updates.lastSync ? new Date(updates.lastSync) : null;
-    if (updates.isActive !== undefined) updateData.isActive = updates.isActive;
+
+    if (updates.authData !== undefined) {
+      updateData.authData = updates.authData;
+    }
+    if (updates.syncSettings !== undefined) {
+      updateData.syncSettings = updates.syncSettings;
+    }
+    if (updates.lastSync !== undefined) {
+      updateData.lastSync = updates.lastSync ? new Date(updates.lastSync) : null;
+    }
+    if (updates.isActive !== undefined) {
+      updateData.isActive = updates.isActive;
+    }
 
     const result = await db
       .update(platformIntegrationsSchema)

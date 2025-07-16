@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import { Container } from './Container';
 import { SafeLink } from '../ui/SafeLink';
+import { Container } from './Container';
 
 const Footer = () => {
   const footerLinks = {

@@ -141,7 +141,7 @@ export default async function Docs(props: IDocsProps) {
             <p className="text-text-faded mb-4">
               {t('help_description')}
             </p>
-            <SafeLink 
+            <SafeLink
               href="/support"
               className="inline-block bg-primary text-white px-6 py-2 rounded-md hover:opacity-90 transition-opacity"
             >

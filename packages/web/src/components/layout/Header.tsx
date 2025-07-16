@@ -39,24 +39,26 @@ const Header = async () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             {navigation.map(item => (
-              item.href === '/features' ? (
-                <SmartNavLink
-                  key={item.name}
-                  href={item.href}
-                  scrollToId="features"
-                  className="text-text-main hover:text-primary transition-colors no-underline"
-                >
-                  {item.name}
-                </SmartNavLink>
-              ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-text-main hover:text-primary transition-colors no-underline"
-                >
-                  {item.name}
-                </Link>
-              )
+              item.href === '/features'
+                ? (
+                    <SmartNavLink
+                      key={item.name}
+                      href={item.href}
+                      scrollToId="features"
+                      className="text-text-main hover:text-primary transition-colors no-underline"
+                    >
+                      {item.name}
+                    </SmartNavLink>
+                  )
+                : (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-text-main hover:text-primary transition-colors no-underline"
+                    >
+                      {item.name}
+                    </Link>
+                  )
             ))}
           </nav>
 

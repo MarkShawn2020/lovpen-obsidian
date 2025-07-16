@@ -59,7 +59,7 @@ export default async function middleware(
       const pathname = req.nextUrl.pathname;
       // Check if user is on root path or localized root path
       const isRootPath = pathname === '/' || pathname.match(/^\/[a-z]{2}(-[A-Z]{2})?$/);
-      
+
       if (isRootPath) {
         const locale = pathname === '/' ? '' : pathname;
         return NextResponse.redirect(new URL(`${locale}/create`, req.url));

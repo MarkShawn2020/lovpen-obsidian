@@ -1,22 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 import { KnowledgeBaseService } from '@/services/knowledge-base';
 
 export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const url = new URL(request.url);
     const searchParams = url.searchParams;
-    
+
     const limit = Number(searchParams.get('limit')) || 20;
     const offset = Number(searchParams.get('offset')) || 0;
     const query = searchParams.get('query');
-    
+
     // Parse filters
     const filters: any = {};
     if (searchParams.get('platforms')) {
@@ -57,11 +58,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to fetch knowledge items:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch knowledge items',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
     console.error('Failed to create knowledge item:', error);
     return NextResponse.json(
       { error: 'Failed to create knowledge item' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 import { KnowledgeBaseService } from '@/services/knowledge-base';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -25,18 +26,18 @@ export async function GET(
     console.error('Failed to fetch knowledge item:', error);
     return NextResponse.json(
       { error: 'Failed to fetch knowledge item' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -50,18 +51,18 @@ export async function PUT(
     console.error('Failed to update knowledge item:', error);
     return NextResponse.json(
       { error: 'Failed to update knowledge item' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -74,7 +75,7 @@ export async function DELETE(
     console.error('Failed to delete knowledge item:', error);
     return NextResponse.json(
       { error: 'Failed to delete knowledge item' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

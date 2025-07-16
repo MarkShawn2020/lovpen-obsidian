@@ -1,13 +1,12 @@
 'use client';
 
+import { useClerk, useUser } from '@clerk/nextjs';
+import { LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
-import { useClerk } from '@clerk/nextjs';
-import { User, Settings, LogOut } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/Button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,12 +45,16 @@ export function AuthNavbar() {
   };
 
   const getUserDisplayName = () => {
-    if (!user) return 'User';
+    if (!user) {
+      return 'User';
+    }
     return user.fullName || user.firstName || user.emailAddresses[0]?.emailAddress || 'User';
   };
 
   const getUserInitials = () => {
-    if (!user) return 'U';
+    if (!user) {
+      return 'U';
+    }
     if (user.firstName && user.lastName && user.firstName.length > 0 && user.lastName.length > 0) {
       return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     }
@@ -79,7 +82,7 @@ export function AuthNavbar() {
 
           {/* Navigation */}
           <nav className="flex items-center u-gap-l">
-            {navigationItems.map((item) => (
+            {navigationItems.map(item => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -105,7 +108,7 @@ export function AuthNavbar() {
                 发布
               </Button>
             )}
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -146,8 +149,8 @@ export function AuthNavbar() {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={handleSignOut} 
+                <DropdownMenuItem
+                  onClick={handleSignOut}
                   variant="destructive"
                   disabled={!isLoaded}
                   className="focus:bg-destructive/10 focus:text-destructive"

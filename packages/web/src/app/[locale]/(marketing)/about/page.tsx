@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
 import { SafeLink } from '@/components/ui/SafeLink';
-import Link from 'next/link';
 
 type IAboutProps = {
   params: Promise<{ locale: string }>;

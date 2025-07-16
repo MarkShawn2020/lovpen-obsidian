@@ -10,7 +10,7 @@ export class KnowledgeBaseClientService {
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     params.append('offset', offset.toString());
-    
+
     if (filters.platforms?.length) {
       params.append('platforms', filters.platforms.join(','));
     }
@@ -31,7 +31,7 @@ export class KnowledgeBaseClientService {
     }
 
     const response = await fetch(`/api/knowledge-base?${params}`);
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || 'Failed to fetch knowledge items');
@@ -50,7 +50,7 @@ export class KnowledgeBaseClientService {
     params.append('limit', limit.toString());
 
     const response = await fetch(`/api/knowledge-base?${params}`);
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || 'Failed to search knowledge items');
@@ -63,11 +63,11 @@ export class KnowledgeBaseClientService {
   // 根据ID获取单个知识库项目
   static async getKnowledgeItem(id: string): Promise<KnowledgeItem | null> {
     const response = await fetch(`/api/knowledge-base/${id}`);
-    
+
     if (response.status === 404) {
       return null;
     }
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || 'Failed to fetch knowledge item');
@@ -78,7 +78,7 @@ export class KnowledgeBaseClientService {
 
   // 创建知识库项目
   static async createKnowledgeItem(
-    item: Omit<KnowledgeItem, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+    item: Omit<KnowledgeItem, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
   ): Promise<KnowledgeItem> {
     const response = await fetch('/api/knowledge-base', {
       method: 'POST',
@@ -99,7 +99,7 @@ export class KnowledgeBaseClientService {
   // 更新知识库项目
   static async updateKnowledgeItem(
     id: string,
-    updates: Partial<KnowledgeItem>
+    updates: Partial<KnowledgeItem>,
   ): Promise<KnowledgeItem> {
     const response = await fetch(`/api/knowledge-base/${id}`, {
       method: 'PUT',

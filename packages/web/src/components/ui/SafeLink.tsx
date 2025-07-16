@@ -1,13 +1,13 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { ReactNode } from 'react';
 import { cn } from '@/utils/Helpers';
 
-interface SafeLinkProps {
+type SafeLinkProps = {
   href: string;
   children: ReactNode;
   className?: string;
   showComingSoon?: boolean;
-}
+};
 
 // Define implemented routes - update this list as routes are implemented
 const IMPLEMENTED_ROUTES = [
@@ -67,7 +67,7 @@ function isRoutePlanned(href: string): boolean {
 export function SafeLink({ href, children, className, showComingSoon = true }: SafeLinkProps) {
   const implemented = isRouteImplemented(href);
   const planned = isRoutePlanned(href);
-  
+
   // Handle hash links (anchors) - these should be treated as "planned" features
   if (href.startsWith('#')) {
     if (showComingSoon) {
@@ -75,7 +75,7 @@ export function SafeLink({ href, children, className, showComingSoon = true }: S
         <span
           className={cn(
             'relative cursor-not-allowed opacity-60 text-text-faded group',
-            className
+            className,
           )}
           title="Coming soon"
         >
@@ -88,7 +88,7 @@ export function SafeLink({ href, children, className, showComingSoon = true }: S
     }
     return <span className={className}>{children}</span>;
   }
-  
+
   if (implemented) {
     return (
       <Link href={href} className={className}>
@@ -96,13 +96,13 @@ export function SafeLink({ href, children, className, showComingSoon = true }: S
       </Link>
     );
   }
-  
+
   if (planned && showComingSoon) {
     return (
       <span
         className={cn(
           'relative cursor-not-allowed opacity-60 text-text-faded group',
-          className
+          className,
         )}
         title="Coming soon"
       >
@@ -113,7 +113,7 @@ export function SafeLink({ href, children, className, showComingSoon = true }: S
       </span>
     );
   }
-  
+
   // Fallback for external links or unplanned routes
   return (
     <Link href={href} className={className}>

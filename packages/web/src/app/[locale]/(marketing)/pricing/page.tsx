@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@/components/ui/Button';
-import Link from 'next/link';
 
 type IPricingProps = {
   params: Promise<{ locale: string }>;

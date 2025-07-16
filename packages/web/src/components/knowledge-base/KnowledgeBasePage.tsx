@@ -71,7 +71,11 @@ export function KnowledgeBasePage() {
             基础架构已完成，正在完善UI组件和功能
           </p>
           <p className="text-gray-500 mt-2">
-            共 {total} 个项目
+            共
+            {' '}
+            {total}
+            {' '}
+            个项目
           </p>
         </div>
       </div>
