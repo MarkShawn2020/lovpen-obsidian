@@ -78,7 +78,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		if (settings) {
 			const personalInfo = settings.personalInfo || {
 				name: '',
-				avatar: '',
+				avatar: { type: 'default' },
 				bio: '',
 				email: '',
 				website: ''

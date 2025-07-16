@@ -3,10 +3,18 @@ import './types/global';
 
 export type {LovpenReactAPI} from './types/global';
 
+// Avatar configuration interface
+export interface AvatarConfig {
+	type: 'default' | 'uploaded' | 'initials';
+	data?: string; // base64 encoded image data
+	initials?: string; // user name initials
+	backgroundColor?: string; // background color for initials
+}
+
 // Personal info interface
 export interface PersonalInfo {
 	name: string;
-	avatar: string;
+	avatar?: AvatarConfig; // 改为可选的 AvatarConfig 对象
 	bio: string;
 	email?: string;
 	website?: string;

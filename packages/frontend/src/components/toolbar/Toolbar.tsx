@@ -65,7 +65,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		pluginsCount: plugins?.length || 0,
 		settingsKeys: Object.keys(settings || {}),
 		showStyleUI: settings?.showStyleUI,
-		expandedSections: settings?.expandedAccordionSections
+		expandedSections: settings?.expandedAccordionSections,
+		personalInfo: settings?.personalInfo,
+		avatarConfig: settings?.personalInfo?.avatar,
+		userName: settings?.personalInfo?.name
 	});
 
 	// 使用本地状态管理当前选中的tab
@@ -323,8 +326,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				}}>
 				<BrandSection
 					onCopy={onCopy}
-					onDistribute={onDistribute}
 					onSettings={() => setIsSettingsModalOpen(true)}
+					avatarConfig={settings.personalInfo?.avatar}
+					userName={settings.personalInfo?.name}
 				/>
 
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">

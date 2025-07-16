@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from '../ui/button';
 import {FormInput} from '../ui/FormInput';
-import {PersonalInfo} from '../../types';
+import {PersonalInfo, AvatarConfig} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {persistentStorageService} from '../../services/persistentStorage';
-import {AtSign, Camera, Globe, RotateCcw, Save, User, UserCircle} from 'lucide-react';
+import {AtSign, Globe, RotateCcw, Save, UserCircle} from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
+import {AvatarUpload} from '../ui/AvatarUpload';
 
 interface PersonalInfoSettingsProps {
 	onClose: () => void;
@@ -15,7 +16,9 @@ interface PersonalInfoSettingsProps {
 
 const defaultPersonalInfo: PersonalInfo = {
 	name: '',
-	avatar: '',
+	avatar: {
+		type: 'default'
+	},
 	bio: '',
 	email: '',
 	website: ''
@@ -44,8 +47,6 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 		...personalInfo
 	}));
 
-	const [previewUrl, setPreviewUrl] = useState<string>('');
-
 	// 只在组件初始化时设置 localInfo，避免覆盖用户输入
 	useEffect(() => {
 		console.log('[PersonalInfoSettings] Initial personalInfo:', personalInfo);
@@ -72,50 +73,26 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 		});
 	};
 
-	const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (!file) return;
+	const handleAvatarConfigChange = async (avatarConfig: AvatarConfig) => {
+		console.log('[PersonalInfoSettings] Avatar config changed:', avatarConfig);
+		
+		const newInfo = {
+			...localInfo,
+			avatar: avatarConfig
+		};
+		
+		setLocalInfo(newInfo);
+		
+		// 实时更新 Jotai 状态，确保头像持久化
+		console.log('[PersonalInfoSettings] Auto-updating avatar config to Jotai state');
+		updatePersonalInfo(newInfo);
 
-		// 验证文件类型
-		if (!file.type.startsWith('image/')) {
-			alert('请选择图片文件');
-			return;
-		}
-
-		// 验证文件大小（限制2MB）
-		if (file.size > 2 * 1024 * 1024) {
-			alert('图片文件不能超过2MB');
-			return;
-		}
-
+		// 持久化个人信息
 		try {
-			// 转换为base64
-			const reader = new FileReader();
-			reader.onload = async (e) => {
-				const base64 = e.target?.result as string;
-				const newInfo = {
-					...localInfo,
-					avatar: base64
-				};
-				setLocalInfo(newInfo);
-				setPreviewUrl(base64);
-
-				// 实时更新 Jotai 状态，确保头像持久化
-				console.log('[PersonalInfoSettings] Auto-updating avatar to Jotai state');
-				updatePersonalInfo(newInfo);
-
-				// 持久化个人信息
-				try {
-					await persistentStorageService.savePersonalInfo(newInfo);
-					logger.info('[PersonalInfoSettings] Personal info with avatar saved successfully');
-				} catch (error) {
-					logger.error('[PersonalInfoSettings] Failed to save personal info with avatar:', error);
-				}
-			};
-			reader.readAsDataURL(file);
+			await persistentStorageService.savePersonalInfo(newInfo);
+			logger.info('[PersonalInfoSettings] Personal info with avatar config saved successfully');
 		} catch (error) {
-			logger.error('处理头像文件失败:', error);
-			alert('处理头像文件失败');
+			logger.error('[PersonalInfoSettings] Failed to save personal info with avatar config:', error);
 		}
 	};
 
@@ -140,54 +117,33 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 	const handleReset = () => {
 		if (confirm('确定要重置个人信息吗？')) {
 			setLocalInfo(defaultPersonalInfo);
-			setPreviewUrl('');
+			updatePersonalInfo(defaultPersonalInfo);
 		}
 	};
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-6">
 			{/* 头部说明 */}
-			<div className="text-center mb-4">
-				<h3 className="text-lg font-semibold text-gray-900 mb-1">个人信息设置</h3>
-				<p className="text-sm text-gray-600">配置您的个人资料，用于AI生成的内容中</p>
+			<div className="text-center">
+				<h3 className="text-lg font-semibold text-[#181818] mb-2 tracking-tight">个人信息设置</h3>
+				<p className="text-sm text-[#87867F]">配置您的个人资料，用于AI生成的内容中</p>
+			</div>
+
+			{/* 头像管理区域 */}
+			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+				<h4 className="text-base font-semibold text-[#181818] mb-4 tracking-tight">头像设置</h4>
+				<AvatarUpload
+					currentConfig={localInfo.avatar}
+					userName={localInfo.name}
+					onConfigChange={handleAvatarConfigChange}
+					size="lg"
+				/>
 			</div>
 
 			{/* 基本信息表单 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+				<h4 className="text-base font-semibold text-[#181818] mb-4 tracking-tight">基本资料</h4>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* 头像上传区域 */}
-					<div className="space-y-3 md:col-span-2">
-						<label className="block text-sm font-medium text-gray-700">头像</label>
-						<div className="flex items-center gap-4">
-							<div className="relative group">
-								<div
-									className="w-16 h-16 rounded-full border-2 border-gray-200 flex items-center justify-center bg-gray-50 overflow-hidden">
-									{(localInfo.avatar || previewUrl) ? (
-										<img
-											src={previewUrl || localInfo.avatar}
-											alt="头像预览"
-											className="w-full h-full object-cover"
-										/>
-									) : (
-										<User className="w-6 h-6 text-gray-400"/>
-									)}
-								</div>
-								<div
-									className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-									<Camera className="w-4 h-4 text-white"/>
-								</div>
-							</div>
-							<div className="flex-1">
-								<input
-									type="file"
-									accept="image/*"
-									onChange={handleAvatarChange}
-									className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer cursor-pointer"
-								/>
-								<p className="text-xs text-gray-500 mt-1">支持 JPG、PNG、GIF 格式，大小不超过 2MB</p>
-							</div>
-						</div>
-					</div>
 
 					{/* 姓名 */}
 					<FormInput
@@ -223,15 +179,15 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 
 					{/* 个人简介 */}
 					<div className="space-y-2 md:col-span-2">
-						<label className="block text-sm font-medium text-gray-700">个人简介</label>
+						<label className="block text-sm font-medium text-[#181818]">个人简介</label>
 						<textarea
 							value={localInfo.bio}
 							onChange={(e) => handleInputChange('bio', e.target.value)}
 							placeholder="介绍一下您自己..."
 							rows={3}
-							className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-0 resize-none transition-colors"
+							className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] resize-none transition-all text-sm"
 						/>
-						<p className="text-xs text-gray-500">简介信息将会在AI生成的内容中作为作者介绍使用</p>
+						<p className="text-xs text-[#87867F]">简介信息将会在AI生成的内容中作为作者介绍使用</p>
 					</div>
 				</div>
 			</div>
@@ -241,7 +197,7 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 				<Button
 					onClick={handleReset}
 					variant="outline"
-					className="text-red-600 border-red-300 hover:bg-red-50"
+					className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium"
 				>
 					<RotateCcw className="w-4 h-4 mr-2"/>
 					重置信息
@@ -251,7 +207,7 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 						console.log('[PersonalInfoSettings] Save button clicked!');
 						handleSave();
 					}}
-					className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+					className="bg-[#D97757] hover:bg-[#CC785C] text-white shadow-sm rounded-xl font-medium px-6 py-2"
 				>
 					<Save className="w-4 h-4 mr-2"/>
 					保存设置

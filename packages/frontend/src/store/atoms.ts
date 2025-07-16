@@ -4,7 +4,9 @@ import {PersonalInfo, ViteReactSettings} from '../types';
 // 默认的个人信息
 export const defaultPersonalInfo: PersonalInfo = {
 	name: '',
-	avatar: '',
+	avatar: {
+		type: 'default'
+	},
 	bio: '',
 	email: '',
 	website: ''

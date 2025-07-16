@@ -1,14 +1,27 @@
 import React, {useState} from "react";
 import packageJson from "../../../package.json";
-import {Copy, Settings, Key, User} from "lucide-react";
+import {Copy, Key, Settings} from "lucide-react";
+import {AvatarConfig} from "../../types";
+import {Avatar, AvatarFallback, AvatarImage} from "../ui/avatar";
 
 interface BrandSectionProps {
 	onCopy: () => void;
 	onSettings?: () => void;
 	onAuthManage?: () => void;
+	avatarConfig?: AvatarConfig;
+	userName?: string;
 }
 
-export const BrandSection: React.FC<BrandSectionProps> = ({onCopy, onSettings}) => {
+
+export const BrandSection: React.FC<BrandSectionProps> = ({
+															  onCopy,
+															  onSettings,
+															  onAuthManage,
+															  avatarConfig,
+															  userName
+														  }) => {
+	const [showDropdown, setShowDropdown] = useState(false);
+
 	return (
 		<>
 			{/* 品牌标题栏 */}
@@ -21,33 +34,84 @@ export const BrandSection: React.FC<BrandSectionProps> = ({onCopy, onSettings}) 
 							</div>
 							<div className="flex items-center gap-2">
 								<h1 className="text-xl font-semibold text-[#181818] tracking-tight">Lovpen</h1>
-								<span className="bg-[#F0EEE6] text-[#87867F] text-xs font-medium px-2 py-1 rounded-full">
+								<span
+									className="bg-[#F0EEE6] text-[#87867F] text-xs font-medium px-2 py-1 rounded-full">
 									v{packageJson.version}
 								</span>
 							</div>
 						</div>
 
-						<div className="flex items-center gap-3">
-							{onSettings && (
-								<button
-									onClick={onSettings}
-									className="inline-flex items-center justify-center w-10 h-10 bg-transparent border border-[#87867F] text-[#181818] rounded-xl transition-all hover:bg-[#F0EEE6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#87867F]"
+						<div className="relative">
+							<Avatar
+
+
+								onClick={() => setShowDropdown(!showDropdown)}
+									className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
+
+							>
+								<AvatarImage/>
+								<AvatarFallback
+									className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 text-[#D97757] shadow-sm"
 								>
-									<Settings className="h-4 w-4"/>
-								</button>
+									{userName?.[0] ?? "L"}
+								</AvatarFallback>
+							</Avatar>
+
+							{/* 下拉菜单 */}
+							{showDropdown && (
+								<div
+									className="absolute top-12 right-0 w-48 bg-white border border-[#E8E6DC] rounded-xl shadow-lg z-50 py-2">
+									<div className="px-3 py-2 border-b border-[#F0EEE6]">
+										<p className="text-xs text-[#87867F] font-medium">用户设置</p>
+									</div>
+
+									{onSettings && (
+										<button
+											onClick={() => {
+												onSettings();
+												setShowDropdown(false);
+											}}
+											className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#181818] hover:bg-[#F7F4EC] transition-colors"
+										>
+											<Settings className="h-4 w-4 text-[#87867F]"/>
+											<span>应用设置</span>
+										</button>
+									)}
+
+									{onAuthManage && (
+										<button
+											onClick={() => {
+												onAuthManage();
+												setShowDropdown(false);
+											}}
+											className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#181818] hover:bg-[#F7F4EC] transition-colors"
+										>
+											<Key className="h-4 w-4 text-[#87867F]"/>
+											<span>Auth 管理</span>
+										</button>
+									)}
+								</div>
+							)}
+
+							{/* 点击外部关闭下拉菜单 */}
+							{showDropdown && (
+								<div
+									className="fixed inset-0 z-40"
+									onClick={() => setShowDropdown(false)}
+								/>
 							)}
 						</div>
 					</div>
 				</div>
 			</div>
 
-			{/* 悬浮复制按钮 */}
+			{/* 悬浮复制按钮 - 更低调和更多边距 */}
 			<button
 				onClick={onCopy}
-				className="fixed top-4 right-4 z-50 inline-flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-sm border border-[#E8E6DC] text-[#87867F] rounded-xl shadow-sm transition-all hover:bg-[#D97757] hover:text-white hover:scale-110 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:ring-offset-2"
+				className="fixed top-6 right-6 z-40 inline-flex items-center justify-center w-9 h-9 bg-white/60 backdrop-blur-sm border border-[#E8E6DC]/50 text-[#87867F]/70 rounded-xl shadow-sm transition-all hover:bg-[#D97757] hover:text-white hover:scale-105 hover:shadow-md hover:border-[#D97757] focus:outline-none focus:ring-2 focus:ring-[#D97757]/50 focus:ring-offset-2"
 				title="复制内容"
 			>
-				<Copy className="h-4 w-4"/>
+				<Copy className="h-3.5 w-3.5"/>
 			</button>
 		</>
 	);
