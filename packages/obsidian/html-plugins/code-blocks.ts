@@ -68,6 +68,10 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 				type: "select" as const,
 				title: "代码高亮样式",
 				options: this.getHighlightOptions()
+			},
+			macWindow: {
+				type: "switch" as const,
+				title: "Mac 风格窗口"
 			}
 		};
 	}
@@ -93,13 +97,14 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			// 获取插件配置
 			const showLineNumbers = this.getShowLineNumbersConfig();
 			const highlightStyle = this.getHighlightStyleConfig();
+			const macWindow = this.getMacWindowConfig();
 
 			codeBlocks.forEach((codeBlock) => {
 				const pre = codeBlock.parentElement;
 				if (!pre) return;
 
 				// 渲染代码块
-				this.renderCodeBlock(pre, codeBlock as HTMLElement, showLineNumbers, highlightStyle, settings);
+				this.renderCodeBlock(pre, codeBlock as HTMLElement, showLineNumbers, highlightStyle, macWindow, settings);
 			});
 
 			return container.innerHTML;
@@ -173,16 +178,24 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	}
 
 	/**
+	 * 获取 Mac 窗口装饰配置
+	 */
+	private getMacWindowConfig(): boolean {
+		return this.getConfig().macWindow as boolean ?? false;
+	}
+
+	/**
 	 * 渲染代码块 - 单一函数处理所有渲染逻辑
 	 *
 	 * 转换步骤：
 	 * 1. 提取代码内容和语言
 	 * 2. 处理语法高亮
 	 * 3. 添加行号（如果启用）
-	 * 4. 应用样式
-	 * 5. 设置元数据
+	 * 4. 添加 Mac 风格装饰（如果启用）
+	 * 5. 应用样式
+	 * 6. 设置元数据
 	 */
-	private renderCodeBlock(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, highlightStyle: string, settings: NMPSettings): void {
+	private renderCodeBlock(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, highlightStyle: string, macWindow: boolean, settings: NMPSettings): void {
 		// 步骤1: 提取代码内容和语言
 		const codeContent = codeElement.textContent || codeElement.innerText || '';
 		const language = this.extractLanguage(codeElement);
@@ -204,13 +217,18 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			processedContent = this.addLineNumbersToHighlightedCode(processedContent);
 		}
 
-		// 步骤4: 应用样式
+		// 步骤4: 添加 Mac 风格装饰（如果启用）
+		if (macWindow) {
+			this.wrapWithMacWindow(pre, language);
+		}
+
+		// 步骤5: 应用样式
 		this.applyCodeBlockStyles(pre, codeElement, showLineNumbers, highlightStyle);
 
-		// 步骤5: 设置处理后的内容
+		// 步骤6: 设置处理后的内容
 		codeElement.innerHTML = processedContent;
 
-		// 步骤6: 设置元数据
+		// 步骤7: 设置元数据
 		this.setMetadata(pre, language, showLineNumbers, highlightStyle);
 
 		logger.debug(`代码块渲染完成: 语言=${language}, 行号=${showLineNumbers}, 高亮=${highlightStyle}`);
@@ -230,9 +248,38 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 为已高亮的代码添加行号，保持highlight.js结构
+	 * 为已高亮的代码添加行号，处理 shiki 和 hljs 不同的结构
 	 */
 	private addLineNumbersToHighlightedCode(content: string): string {
+		// 检查是否是 shiki 生成的内容（包含 .line span）
+		const isShikiContent = content.includes('<span class="line">');
+		
+		if (isShikiContent) {
+			// 处理 shiki 生成的内容
+			return this.addLineNumbersToShikiContent(content);
+		} else {
+			// 处理传统的 hljs 内容
+			return this.addLineNumbersToHljsContent(content);
+		}
+	}
+
+	/**
+	 * 为 shiki 内容添加行号
+	 */
+	private addLineNumbersToShikiContent(content: string): string {
+		// shiki 已经将每行包装在 <span class="line"> 中
+		let lineNumber = 1;
+		return content.replace(/<span class="line">/g, () => {
+			const lineNumberSpan = `<span class="line-number" style="color: var(--text-faint); display: inline-block; width: 2.5em; text-align: right; padding-right: 1em; margin-right: 0.5em; border-right: 1px solid var(--background-modifier-border); user-select: none; font-variant-numeric: tabular-nums;">${lineNumber}</span>`;
+			lineNumber++;
+			return lineNumberSpan + '<span class="line">';
+		});
+	}
+
+	/**
+	 * 为 hljs 内容添加行号
+	 */
+	private addLineNumbersToHljsContent(content: string): string {
 		// 清理首尾换行符
 		content = content.replace(/^\n+/, '').replace(/\n+$/, '');
 
@@ -250,40 +297,96 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	 * 应用代码块样式
 	 */
 	private applyCodeBlockStyles(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, highlightStyle: string): void {
-		console.warn(`applyCodeBlockStyles: `, {highlightStyle});
-		// Pre元素样式
-		pre.style.background = "var(--code-background)";
-		pre.style.padding = showLineNumbers ? "12px 12px 12px 12px" : "12px";
+		console.debug(`applyCodeBlockStyles: `, {highlightStyle});
+		
+		// 检查是否是 Mac 窗口样式
+		const isMacWindow = pre.classList.contains('mac-code-window');
+		
+		// 获取实际的CSS变量值（用于微信兼容性）
+		const cssVariables = this.resolveCSSVariables(highlightStyle);
+		
+		// 检查是否包含 shiki 生成的内容（通过检测 .line span 标签）
+		const isShikiBlock = codeElement.innerHTML.includes('<span class="line">');
+		
+		if (isShikiBlock) {
+			// 处理 shiki 高亮的代码块
+			logger.debug("检测到 shiki 高亮内容");
+			
+			// 应用主题背景色（从自定义主题获取）
+			const themeColors = this.getThemeColors(highlightStyle);
+			pre.style.background = themeColors.background;
+			pre.style.color = themeColors.foreground;
+		} else {
+			// 回退到原有的 hljs 样式处理，使用实际的CSS值
+			pre.style.background = cssVariables.codeBackground;
+			pre.style.color = cssVariables.codeNormal;
+			
+			// 添加CSS类以支持更好的样式选择器
+			if (highlightStyle !== "none") {
+				if (!codeElement.classList.contains("hljs")) {
+					codeElement.classList.add("hljs");
+				}
+				codeElement.classList.add(`hljs-${highlightStyle}`);
+			}
+		}
+		
+		// 根据是否为 Mac 窗口设置不同的 padding
+		if (isMacWindow) {
+			// Mac 窗口需要为标题栏留出空间，保持紧凑布局
+			pre.style.padding = "40px 12px 8px 12px"; // 顶部40px为标题栏留空间，其他边更紧凑
+		} else {
+			// 普通代码块使用紧凑的 padding
+			pre.style.padding = "8px 12px 8px 12px"; // 更紧凑的四边padding
+		}
+		
+		// 通用样式设置
 		pre.style.margin = "0";
 		pre.style.fontSize = "14px";
-		pre.style.lineHeight = "1.5";
-		pre.style.color = "var(--code-normal)";
-		pre.style.fontFamily = "var(--font-monospace)";
-		pre.style.borderRadius = "4px";
-		pre.style.border = "1px solid var(--background-modifier-border)";
+		pre.style.lineHeight = "1.4";
+		pre.style.fontFamily = cssVariables.fontMonospace;
+		pre.style.borderRadius = "8px";
+		pre.style.border = `1px solid ${cssVariables.borderColor}`;
 		pre.style.whiteSpace = "pre";
 		pre.style.overflowX = "auto";
+		pre.style.position = isMacWindow ? "relative" : "static";
 
-		// Code元素样式
+		// Code 元素样式
 		codeElement.style.background = "transparent";
-		codeElement.style.padding = "0";
+		codeElement.style.padding = "0 0 16px 0"; // 底部16px padding为横向滚动条留出空间
 		codeElement.style.margin = "0";
+		codeElement.style.border = "none";
+		codeElement.style.borderRadius = "0";
 		codeElement.style.fontSize = "inherit";
 		codeElement.style.lineHeight = "inherit";
-		codeElement.style.color = "inherit";
 		codeElement.style.fontFamily = "inherit";
 		codeElement.style.whiteSpace = "pre";
-		codeElement.style.overflowX = "auto";
+		codeElement.style.display = "block";
+		codeElement.style.color = "inherit";
+	}
 
-		// 添加CSS类以支持更好的样式选择器
-		if (highlightStyle !== "none") {
-			// 确保highlight.js类存在
-			if (!codeElement.classList.contains("hljs")) {
-				codeElement.classList.add("hljs");
+	/**
+	 * 根据主题名称获取主题颜色
+	 */
+	private getThemeColors(highlightStyle: string): {background: string, foreground: string} {
+		// 默认颜色
+		const defaultColors = {
+			background: "var(--code-background)",
+			foreground: "var(--code-normal)"
+		};
+		
+		// Anthropic 主题颜色映射
+		const anthropicColors: Record<string, {background: string, foreground: string}> = {
+			'anthropic-light': {
+				background: "#F9F9F7",
+				foreground: "#2B2A27"
+			},
+			'anthropic-dark': {
+				background: "#141413", 
+				foreground: "#E8E3DC"
 			}
-			// 添加特定的高亮样式类
-			codeElement.classList.add(`hljs-${highlightStyle}`);
-		}
+		};
+		
+		return anthropicColors[highlightStyle] || defaultColors;
 	}
 
 
@@ -321,6 +424,175 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	}
 
 	/**
+	 * 用 CSS-based Mac 风格装饰代码块
+	 */
+	private wrapWithMacWindow(pre: HTMLElement, language: string): void {
+		// 添加 Mac 风格的 CSS 类
+		pre.classList.add('mac-code-window');
+		pre.setAttribute('data-language', language || 'code');
+		
+		// 创建内联样式以支持伪元素
+		this.addMacWindowStyles();
+		
+		// 添加语言标签 DOM 元素
+		this.addLanguageLabel(pre, language);
+	}
+	
+	/**
+	 * 添加语言标签 DOM 元素
+	 */
+	private addLanguageLabel(pre: HTMLElement, language: string): void {
+		// 检查是否已经有语言标签
+		const existingLabel = pre.querySelector('.mac-code-language-label');
+		if (existingLabel) {
+			existingLabel.remove();
+		}
+		
+		if (language && language !== 'text') {
+			const label = document.createElement('span');
+			label.className = 'mac-code-language-label';
+			label.textContent = language.toUpperCase();
+			label.style.cssText = `
+				position: absolute;
+				top: 8px;
+				right: 12px;
+				color: #666;
+				font-size: 11px;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+				font-weight: 500;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				z-index: 3;
+				pointer-events: none;
+			`;
+			
+			// 深色主题调整
+			if (pre.style.background?.includes('#141413') || 
+				pre.getAttribute('data-highlight-style')?.includes('dark')) {
+				label.style.color = '#a0a0a0';
+			}
+			
+			pre.appendChild(label);
+		}
+	}
+
+	/**
+	 * 添加 Mac 窗口的 CSS 样式
+	 */
+	private addMacWindowStyles(): void {
+		// 检查是否已经添加过样式
+		if (document.getElementById('mac-code-window-styles')) {
+			return;
+		}
+
+		const style = document.createElement('style');
+		style.id = 'mac-code-window-styles';
+		style.textContent = `
+			.mac-code-window {
+				position: relative !important;
+				border-radius: 8px !important;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+				overflow: visible !important;
+			}
+
+			/* 标题栏背景 */
+			.mac-code-window::before {
+				content: '' !important;
+				position: absolute !important;
+				top: 0 !important;
+				left: 0 !important;
+				right: 0 !important;
+				height: 32px !important;
+				background: linear-gradient(180deg, #e8e8e8 0%, #d5d5d5 100%) !important;
+				border-radius: 8px 8px 0 0 !important;
+				border-bottom: 1px solid #c0c0c0 !important;
+				z-index: 10 !important;
+				pointer-events: none !important;
+			}
+
+			/* 交通灯按钮 */
+			.mac-code-window::after {
+				content: '' !important;
+				position: absolute !important;
+				top: 10px !important;
+				left: 12px !important;
+				width: 52px !important;
+				height: 12px !important;
+				background-image: 
+					radial-gradient(circle 6px at 6px 6px, #ff5f57 100%, transparent 100%),
+					radial-gradient(circle 6px at 26px 6px, #ffbd2e 100%, transparent 100%),
+					radial-gradient(circle 6px at 46px 6px, #28ca42 100%, transparent 100%) !important;
+				background-size: 52px 12px !important;
+				background-repeat: no-repeat !important;
+				z-index: 11 !important;
+				pointer-events: none !important;
+			}
+
+			/* 深色主题调整 */
+			.mac-code-window[data-highlight-style*="dark"]::before,
+			.mac-code-window[style*="background: rgb(20, 20, 19)"]::before,
+			.mac-code-window[style*="background: #141413"]::before {
+				background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%) !important;
+				border-bottom: 1px solid #2a2a2a !important;
+			}
+
+			/* 确保代码内容不被标题栏遮挡 */
+			.mac-code-window code {
+				position: relative !important;
+				z-index: 5 !important;
+			}
+
+			/* 自定义横向滚动条样式 */
+			.mac-code-window::-webkit-scrollbar,
+			pre[data-code-block="true"]::-webkit-scrollbar {
+				height: 12px;
+			}
+
+			.mac-code-window::-webkit-scrollbar-track,
+			pre[data-code-block="true"]::-webkit-scrollbar-track {
+				background: transparent;
+				border: 4px solid transparent;
+				background-clip: content-box;
+				border-radius: 8px;
+			}
+
+			.mac-code-window::-webkit-scrollbar-thumb,
+			pre[data-code-block="true"]::-webkit-scrollbar-thumb {
+				background-color: rgba(0, 0, 0, 0.2);
+				border-radius: 8px;
+				border: 2px solid transparent;
+				background-clip: content-box;
+			}
+
+			.mac-code-window::-webkit-scrollbar-thumb:hover,
+			pre[data-code-block="true"]::-webkit-scrollbar-thumb:hover {
+				background-color: rgba(0, 0, 0, 0.3);
+			}
+
+			/* 深色主题滚动条调整 */
+			.mac-code-window[data-highlight-style*="dark"]::-webkit-scrollbar-thumb,
+			pre[data-code-block="true"][data-highlight-style*="dark"]::-webkit-scrollbar-thumb {
+				background-color: rgba(255, 255, 255, 0.3);
+			}
+
+			.mac-code-window[data-highlight-style*="dark"]::-webkit-scrollbar-thumb:hover,
+			pre[data-code-block="true"][data-highlight-style*="dark"]::-webkit-scrollbar-thumb:hover {
+				background-color: rgba(255, 255, 255, 0.4);
+			}
+		`;
+		
+		document.head.appendChild(style);
+		
+		// 强制刷新样式
+		setTimeout(() => {
+			const elements = document.querySelectorAll('.mac-code-window');
+			elements.forEach(el => {
+				(el as HTMLElement).style.display = 'block';
+			});
+		}, 10);
+	}
+
+	/**
 	 * 设置元数据属性
 	 */
 	private setMetadata(pre: HTMLElement, language: string, showLineNumbers: boolean, highlightStyle: string): void {
@@ -328,6 +600,35 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		pre.setAttribute('data-language', language);
 		pre.setAttribute('data-show-line-numbers', showLineNumbers.toString());
 		pre.setAttribute('data-highlight-style', highlightStyle);
+	}
+
+	/**
+	 * 将CSS变量解析为实际值，用于微信等不支持CSS变量的环境
+	 */
+	private resolveCSSVariables(highlightStyle: string): {
+		fontMonospace: string;
+		borderColor: string;
+		codeBackground: string;
+		codeNormal: string;
+	} {
+		// 检测是否为深色主题
+		const isDark = highlightStyle?.toLowerCase().includes('dark') || 
+		               highlightStyle?.toLowerCase().includes('night') ||
+		               highlightStyle?.toLowerCase().includes('black');
+
+		return {
+			// 等宽字体
+			fontMonospace: "'JetBrains Mono', 'Source Code Pro', 'Monaco', 'Consolas', 'Courier New', monospace",
+			
+			// 边框颜色
+			borderColor: isDark ? "#3a3a3a" : "#e1e1e1",
+			
+			// 代码块背景色
+			codeBackground: isDark ? "#2d2d2d" : "#f6f6f6",
+			
+			// 代码文本颜色
+			codeNormal: isDark ? "#d8dee9" : "#2e3440"
+		};
 	}
 
 }

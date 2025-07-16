@@ -568,7 +568,22 @@ ${highlight.css}
 		const isWechatMode = settings.enableWeixinCodeFormat || 
 			(settings.wxInfo && settings.wxInfo.length > 0) ||
 			(settings as any).platform === 'wechat' ||
-			(settings as any).wechatModeEnabled;
+			(settings as any).wechatModeEnabled ||
+			// 检查是否启用了微信公众号适配插件
+			this.getHtmlPlugins().some(plugin => 
+				plugin.getName() === "微信公众号适配插件" && plugin.isEnabled()
+			);
+		
+		console.log("🔍 [插件管理器] 微信模式检测", {
+			enableWeixinCodeFormat: settings.enableWeixinCodeFormat,
+			hasWxInfo: settings.wxInfo && settings.wxInfo.length > 0,
+			platform: (settings as any).platform,
+			wechatModeEnabled: (settings as any).wechatModeEnabled,
+			hasWechatPlugin: this.getHtmlPlugins().some(plugin => 
+				plugin.getName() === "微信公众号适配插件" && plugin.isEnabled()
+			),
+			isWechatMode
+		});
 		
 		if (isWechatMode) {
 			console.log("🎨 [插件管理器] 检测到微信模式，开始CSS预处理");

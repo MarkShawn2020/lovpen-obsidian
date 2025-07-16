@@ -176,15 +176,16 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// juice需要处理完整的HTML文档，包括<style>标签和内容
 			const processedHtml = juice(html, {
 				removeStyleTags: true,           // 移除<style>标签
-				preserveMediaQueries: false,     // 不保留媒体查询（微信不支持）
-				applyWidthAttributes: false,    // 不应用width属性
-				xmlMode: false,                 // HTML模式
-				preserveImportant: true,        // 保留!important
-				insertPreservedExtraCss: false, // 不插入额外CSS
-				inlinePseudoElements: true,     // 内联伪元素
-				preservePseudos: false,         // 不保留伪类（微信不支持）
-				preserveFontFaces: false,       // 不保留@font-face（微信不支持）
-				preserveKeyFrames: false        // 不保留@keyframes（微信不支持）
+				inlinePseudoElements: true,
+				// preserveMediaQueries: false,     // 不保留媒体查询（微信不支持）
+				// applyWidthAttributes: false,    // 不应用width属性
+				// xmlMode: false,                 // HTML模式
+				// preserveImportant: true,        // 保留!important
+				// insertPreservedExtraCss: false, // 不插入额外CSS
+				// inlinePseudoElements: true,     // 内联伪元素
+				// preservePseudos: false,         // 不保留伪类（微信不支持）
+				// preserveFontFaces: false,       // 不保留@font-face（微信不支持）
+				// preserveKeyFrames: false        // 不保留@keyframes（微信不支持）
 			});
 
 			// 后处理：清理微信不兼容的CSS属性

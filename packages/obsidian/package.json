@@ -15,5 +15,8 @@
 		"juice": "^11.0.1",
 		"postcss": "^8.5.6",
 		"postcss-custom-properties": "^14.0.6"
+	},
+	"devDependencies": {
+		"shiki": "^3.8.0"
 	}
 }

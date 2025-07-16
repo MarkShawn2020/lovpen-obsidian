@@ -2,6 +2,7 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"baseUrl": ".",
+		"skipLibCheck": true,
 		"paths": {
 			"@/*": [
 				"../frontend/src/*"
