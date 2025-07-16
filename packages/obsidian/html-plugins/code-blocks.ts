@@ -81,12 +81,6 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			// 首先处理微信公众号卡片恢复
 			html = CardDataManager.getInstance().restoreCard(html);
 
-			// 如果启用了微信代码格式化，跳过此插件的其他处理
-			if (settings.enableWeixinCodeFormat) {
-				logger.debug("微信代码格式化已启用，跳过代码块处理插件");
-				return html;
-			}
-
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
 			const container = doc.body.firstChild as HTMLElement;
@@ -253,7 +247,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	private addLineNumbersToHighlightedCode(content: string): string {
 		// 检查是否是 shiki 生成的内容（包含 .line span）
 		const isShikiContent = content.includes('<span class="line">');
-		
+
 		if (isShikiContent) {
 			// 处理 shiki 生成的内容
 			return this.addLineNumbersToShikiContent(content);
@@ -298,38 +292,15 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	 */
 	private applyCodeBlockStyles(pre: HTMLElement, codeElement: HTMLElement, showLineNumbers: boolean, highlightStyle: string): void {
 		console.debug(`applyCodeBlockStyles: `, {highlightStyle});
-		
+
 		// 检查是否是 Mac 窗口样式
 		const isMacWindow = pre.classList.contains('mac-code-window');
-		
-		// 获取实际的CSS变量值（用于微信兼容性）
-		const cssVariables = this.resolveCSSVariables(highlightStyle);
-		
-		// 检查是否包含 shiki 生成的内容（通过检测 .line span 标签）
-		const isShikiBlock = codeElement.innerHTML.includes('<span class="line">');
-		
-		if (isShikiBlock) {
-			// 处理 shiki 高亮的代码块
-			logger.debug("检测到 shiki 高亮内容");
-			
-			// 应用主题背景色（从自定义主题获取）
-			const themeColors = this.getThemeColors(highlightStyle);
-			pre.style.background = themeColors.background;
-			pre.style.color = themeColors.foreground;
-		} else {
-			// 回退到原有的 hljs 样式处理，使用实际的CSS值
-			pre.style.background = cssVariables.codeBackground;
-			pre.style.color = cssVariables.codeNormal;
-			
-			// 添加CSS类以支持更好的样式选择器
-			if (highlightStyle !== "none") {
-				if (!codeElement.classList.contains("hljs")) {
-					codeElement.classList.add("hljs");
-				}
-				codeElement.classList.add(`hljs-${highlightStyle}`);
-			}
-		}
-		
+
+		// 应用主题背景色（从自定义主题获取）
+		const themeColors = this.getThemeColors(highlightStyle);
+		pre.style.background = themeColors.background;
+		pre.style.color = themeColors.foreground;
+
 		// 根据是否为 Mac 窗口设置不同的 padding
 		if (isMacWindow) {
 			// Mac 窗口需要为标题栏留出空间，保持紧凑布局
@@ -338,14 +309,14 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 			// 普通代码块使用紧凑的 padding
 			pre.style.padding = "8px 12px 8px 12px"; // 更紧凑的四边padding
 		}
-		
+
 		// 通用样式设置
 		pre.style.margin = "0";
 		pre.style.fontSize = "14px";
 		pre.style.lineHeight = "1.4";
-		pre.style.fontFamily = cssVariables.fontMonospace;
+		// pre.style.fontFamily = cssVariables.fontMonospace;
 		pre.style.borderRadius = "8px";
-		pre.style.border = `1px solid ${cssVariables.borderColor}`;
+		pre.style.border = `1px solid rgba(200, 100, 66, 0.2)`;
 		pre.style.whiteSpace = "pre";
 		pre.style.overflowX = "auto";
 		pre.style.position = isMacWindow ? "relative" : "static";
@@ -365,28 +336,169 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 	}
 
 	/**
-	 * 根据主题名称获取主题颜色
+	 * 根据主题名称获取主题颜色 - 标准化实现
+	 * 支持：1) 从shiki主题JSON提取 2) 从AssetsManager获取 3) 智能默认值
 	 */
-	private getThemeColors(highlightStyle: string): {background: string, foreground: string} {
-		// 默认颜色
-		const defaultColors = {
-			background: "var(--code-background)",
-			foreground: "var(--code-normal)"
-		};
-		
-		// Anthropic 主题颜色映射
-		const anthropicColors: Record<string, {background: string, foreground: string}> = {
-			'anthropic-light': {
-				background: "#F9F9F7",
-				foreground: "#2B2A27"
-			},
-			'anthropic-dark': {
-				background: "#141413", 
-				foreground: "#E8E3DC"
+	private getThemeColors(highlightStyle: string): { background: string, foreground: string } {
+		try {
+			// 1. 尝试从shiki主题提取颜色
+			const shikiColors = this.extractShikiThemeColors(highlightStyle);
+			if (shikiColors) {
+				return shikiColors;
 			}
-		};
+
+			// 2. 从AssetsManager获取高亮样式并解析颜色
+			const assetsColors = this.extractAssetsThemeColors(highlightStyle);
+			if (assetsColors) {
+				return assetsColors;
+			}
+
+			// 3. 智能默认值（基于主题名称的亮暗判定）
+			return this.getDefaultThemeColors(highlightStyle);
+		} catch (error) {
+			logger.warn(`获取主题颜色失败: ${highlightStyle}`, error);
+			return this.getDefaultThemeColors(highlightStyle);
+		}
+	}
+
+	/**
+	 * 从shiki主题JSON中提取全局颜色
+	 */
+	private extractShikiThemeColors(themeName: string): { background: string, foreground: string } | null {
+		try {
+			// 尝试从文件系统直接读取主题JSON
+			const themeColors = this.loadShikiThemeFromFile(themeName);
+			if (themeColors) {
+				return themeColors;
+			}
+		} catch (error) {
+			logger.debug(`shiki主题颜色提取失败: ${themeName}`, error);
+		}
+		return null;
+	}
+
+	/**
+	 * 从文件系统动态加载shiki主题JSON
+	 */
+	private loadShikiThemeFromFile(themeName: string): { background: string, foreground: string } | null {
+		try {
+			const assetsManager = this.getAssetsManager();
+			if (!assetsManager) return null;
+
+			// 尝试从assets/themes/目录读取主题JSON文件
+			const themeFilePath = `${assetsManager.themesPath}${themeName}.json`;
+			
+			// 这是异步操作，但我们需要同步返回，所以使用缓存机制
+			// 实际应该重构为异步方法，但现在先返回null让其他方法处理
+			return null;
+		} catch (error) {
+			logger.debug(`动态加载shiki主题失败: ${themeName}`, error);
+		}
+		return null;
+	}
+
+	/**
+	 * 从AssetsManager的高亮样式中提取颜色
+	 */
+	private extractAssetsThemeColors(highlightStyle: string): { background: string, foreground: string } | null {
+		try {
+			const assetsManager = this.getAssetsManager();
+			if (!assetsManager) return null;
+
+			const highlight = assetsManager.getHighlight(highlightStyle);
+			if (!highlight || !highlight.css) return null;
+
+			// 从CSS中提取背景色和前景色
+			return this.parseColorsFromCSS(highlight.css);
+		} catch (error) {
+			logger.debug(`AssetsManager主题颜色提取失败: ${highlightStyle}`, error);
+		}
+		return null;
+	}
+
+	/**
+	 * 从CSS文本中解析背景色和前景色
+	 */
+	private parseColorsFromCSS(css: string): { background: string, foreground: string } | null {
+		try {
+			// 查找.hljs或类似的根选择器
+			const backgroundMatch = css.match(/\.hljs[^{]*\{[^}]*background[^:]*:\s*([^;]+);/i);
+			const colorMatch = css.match(/\.hljs[^{]*\{[^}]*color[^:]*:\s*([^;]+);/i);
+
+			if (backgroundMatch && colorMatch) {
+				return {
+					background: backgroundMatch[1].trim(),
+					foreground: colorMatch[1].trim()
+				};
+			}
+		} catch (error) {
+			logger.debug('CSS颜色解析失败', error);
+		}
+		return null;
+	}
+
+	/**
+	 * 获取智能默认颜色（基于亮暗判定）
+	 */
+	private getDefaultThemeColors(highlightStyle: string): { background: string, foreground: string } {
+		const isDark = this.isThemeDark(highlightStyle);
 		
-		return anthropicColors[highlightStyle] || defaultColors;
+		return {
+			background: isDark ? "#2d2d2d" : "#f6f6f6",
+			foreground: isDark ? "#d8dee9" : "#2e3440"
+		};
+	}
+
+	/**
+	 * 标准化的主题亮暗判定
+	 * 支持：1) 名称模式匹配 2) 颜色亮度计算
+	 */
+	private isThemeDark(themeIdentifier: string | { background: string }): boolean {
+		// 如果传入的是颜色对象，基于背景色亮度判定
+		if (typeof themeIdentifier === 'object') {
+			return this.isColorDark(themeIdentifier.background);
+		}
+
+		// 基于名称模式匹配
+		const themeName = themeIdentifier.toLowerCase();
+		const darkKeywords = ['dark', 'night', 'black', 'shadow', 'obsidian', 'midnight', 'carbon'];
+		
+		return darkKeywords.some(keyword => themeName.includes(keyword));
+	}
+
+	/**
+	 * 基于RGB值计算颜色亮度，判定是否为深色
+	 */
+	private isColorDark(color: string): boolean {
+		try {
+			// 处理hex颜色
+			if (color.startsWith('#')) {
+				const hex = color.replace('#', '');
+				const r = parseInt(hex.substr(0, 2), 16);
+				const g = parseInt(hex.substr(2, 2), 16);
+				const b = parseInt(hex.substr(4, 2), 16);
+				
+				// 使用相对亮度公式
+				const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+				return luminance < 0.5;
+			}
+			
+			// 处理rgb/rgba颜色
+			const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+			if (rgbMatch) {
+				const r = parseInt(rgbMatch[1]);
+				const g = parseInt(rgbMatch[2]);
+				const b = parseInt(rgbMatch[3]);
+				
+				const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+				return luminance < 0.5;
+			}
+		} catch (error) {
+			logger.debug('颜色亮度计算失败', error);
+		}
+		
+		// 默认返回false（浅色）
+		return false;
 	}
 
 
@@ -430,14 +542,14 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		// 添加 Mac 风格的 CSS 类
 		pre.classList.add('mac-code-window');
 		pre.setAttribute('data-language', language || 'code');
-		
+
 		// 创建内联样式以支持伪元素
 		this.addMacWindowStyles();
-		
+
 		// 添加语言标签 DOM 元素
 		this.addLanguageLabel(pre, language);
 	}
-	
+
 	/**
 	 * 添加语言标签 DOM 元素
 	 */
@@ -447,7 +559,7 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		if (existingLabel) {
 			existingLabel.remove();
 		}
-		
+
 		if (language && language !== 'text') {
 			const label = document.createElement('span');
 			label.className = 'mac-code-language-label';
@@ -465,13 +577,13 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 				z-index: 3;
 				pointer-events: none;
 			`;
-			
+
 			// 深色主题调整
-			if (pre.style.background?.includes('#141413') || 
+			if (pre.style.background?.includes('#141413') ||
 				pre.getAttribute('data-highlight-style')?.includes('dark')) {
 				label.style.color = '#a0a0a0';
 			}
-			
+
 			pre.appendChild(label);
 		}
 	}
@@ -580,9 +692,9 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 				background-color: rgba(255, 255, 255, 0.4);
 			}
 		`;
-		
+
 		document.head.appendChild(style);
-		
+
 		// 强制刷新样式
 		setTimeout(() => {
 			const elements = document.querySelectorAll('.mac-code-window');
@@ -611,21 +723,19 @@ export class CodeBlocks extends UnifiedHtmlPlugin {
 		codeBackground: string;
 		codeNormal: string;
 	} {
-		// 检测是否为深色主题
-		const isDark = highlightStyle?.toLowerCase().includes('dark') || 
-		               highlightStyle?.toLowerCase().includes('night') ||
-		               highlightStyle?.toLowerCase().includes('black');
+		// 使用标准化的亮暗判定
+		const isDark = this.isThemeDark(highlightStyle);
 
 		return {
 			// 等宽字体
 			fontMonospace: "'JetBrains Mono', 'Source Code Pro', 'Monaco', 'Consolas', 'Courier New', monospace",
-			
+
 			// 边框颜色
 			borderColor: isDark ? "#3a3a3a" : "#e1e1e1",
-			
+
 			// 代码块背景色
 			codeBackground: isDark ? "#2d2d2d" : "#f6f6f6",
-			
+
 			// 代码文本颜色
 			codeNormal: isDark ? "#d8dee9" : "#2e3440"
 		};
