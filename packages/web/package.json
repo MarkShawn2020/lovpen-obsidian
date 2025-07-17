@@ -1,6 +1,6 @@
 {
   "name": "@lovpen/web",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Ixartz (https://github.com/ixartz)",
   "engines": {
     "node": ">=20"
@@ -52,6 +52,10 @@
     "@sentry/nextjs": "^9.37.0",
     "@supabase/supabase-js": "^2.51.0",
     "@t3-oss/env-nextjs": "^0.13.8",
+    "@tanstack/query-sync-storage-persister": "^5.83.0",
+    "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-query-devtools": "^5.83.0",
+    "@tanstack/react-query-persist-client": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

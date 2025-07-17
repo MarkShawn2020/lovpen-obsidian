@@ -53,6 +53,11 @@ export default async function middleware(
       });
     }
 
+    // Skip i18n routing for API routes
+    if (req.nextUrl.pathname.startsWith('/api/')) {
+      return NextResponse.next();
+    }
+
     // Handle homepage redirect for authenticated users
     const { userId } = await auth();
     if (userId) {
@@ -61,16 +66,24 @@ export default async function middleware(
       const isRootPath = pathname === '/' || pathname.match(/^\/[a-z]{2}(-[A-Z]{2})?$/);
 
       if (isRootPath) {
-        const locale = pathname === '/' ? '' : pathname;
-        return NextResponse.redirect(new URL(`${locale}/create`, req.url));
+        // Let i18n routing handle the request first to get proper locale
+        const i18nResponse = handleI18nRouting(request);
+        
+        // If i18n routing returns a redirect, follow it
+        if (i18nResponse.status === 307 || i18nResponse.status === 308) {
+          const redirectUrl = new URL(i18nResponse.headers.get('location') || '/', req.url);
+          // Add /create to the redirected path
+          redirectUrl.pathname = redirectUrl.pathname.replace(/\/$/, '') + '/create';
+          return NextResponse.redirect(redirectUrl);
+        }
+        
+        // For direct access, determine the correct locale path
+        const createPath = pathname === '/' ? '/create' : `${pathname}/create`;
+        return NextResponse.redirect(new URL(createPath, req.url));
       }
     }
 
-    // Skip i18n routing for API routes
-    if (req.nextUrl.pathname.startsWith('/api/')) {
-      return NextResponse.next();
-    }
-
+    // Handle i18n routing for non-redirect cases
     return handleI18nRouting(request);
   })(request, event);
 }

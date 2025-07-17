@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { Fira_Code, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { PostHogProvider } from '@/components/analytics/PostHogProvider';
+import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { routing } from '@/libs/I18nRouting';
 import { ClerkLocalizations } from '@/utils/AppConfig';
 import '@/styles/global.css';
@@ -91,9 +92,11 @@ export default async function RootLayout(props: {
           }}
         >
           <NextIntlClientProvider>
-            <PostHogProvider>
-              {props.children}
-            </PostHogProvider>
+            <ReactQueryProvider>
+              <PostHogProvider>
+                {props.children}
+              </PostHogProvider>
+            </ReactQueryProvider>
           </NextIntlClientProvider>
         </ClerkProvider>
       </body>
