@@ -293,6 +293,15 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					});
 				}
 
+				// Add personalInfo to template data
+				meta.personalInfo = {
+					name: this.settings.personalInfo?.name || '',
+					avatar: this.settings.personalInfo?.avatar || '',
+					bio: this.settings.personalInfo?.bio || '',
+					email: this.settings.personalInfo?.email || '',
+					website: this.settings.personalInfo?.website || ''
+				};
+
 				logger.debug("传递至模板的元数据:", meta);
 
 				html = templateManager.applyTemplate(html, this.settings.defaultTemplate, meta);

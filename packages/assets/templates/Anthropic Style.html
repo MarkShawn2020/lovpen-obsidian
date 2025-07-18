@@ -29,7 +29,7 @@
 				<section class="claude-meta-content">
 					<!-- 基本信息 -->
 					<section class="claude-meta-basic">
-						{{#if author}}<span class="claude-meta-item">👤 {{author}}</span>{{/if}}
+						{{#if author}}<span class="claude-meta-item">{{#if personalInfo.avatar}}<img src="{{personalInfo.avatar}}" alt="{{author}}" class="claude-author-avatar">{{else}}👤{{/if}} {{author}}</span>{{/if}}
 						{{#if publishDate}}<span class="claude-meta-item">📅 {{publishDate}}</span>{{/if}}
 						{{#if seriesName}}<span class="claude-meta-item">📚 {{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
 					</section>
@@ -506,12 +506,29 @@
 		flex-wrap: wrap;
 		gap: 1em;
 		margin-bottom: 1em;
+		align-items: center;
 	}
 
 	.claude-meta-item {
 		color: rgb(63, 63, 63);
 		font-size: 0.9em;
 		font-weight: 500;
+		white-space: nowrap;
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+	}
+
+	.claude-author-avatar {
+		width: 16px !important;
+		height: 16px !important;
+		border-radius: 50% !important;
+		object-fit: cover !important;
+		flex-shrink: 0 !important;
+		margin: 0 !important;
+		display: inline-block !important;
+		vertical-align: middle !important;
+		box-shadow: none !important;
 	}
 
 	.claude-meta-recommendation {
@@ -527,6 +544,7 @@
 		line-height: 1.5;
 		font-style: italic;
 		margin: 0;
+		padding: 0.5em 0;
 	}
 
 	.claude-meta-cover {
