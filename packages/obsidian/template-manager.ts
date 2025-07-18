@@ -1,6 +1,6 @@
 import Handlebars from 'handlebars';
 import {App, Notice} from 'obsidian';
-
+import {Marked} from 'marked';
 
 import {logger} from "../shared/src/logger";
 import {TemplateKit, TemplateKitOperationResult} from './template-kit-types';
@@ -146,6 +146,26 @@ export default class TemplateManager {
 			const values = args.slice(0, -1);
 			// 检查是否有任何值为真值
 			return values.some(value => !!value);
+		});
+
+		// 注册 markdown 辅助函数，用于渲染 Markdown 内容
+		Handlebars.registerHelper('markdown', function (content) {
+			if (!content || typeof content !== 'string') {
+				return '';
+			}
+			try {
+				// 使用 marked 将 Markdown 转换为 HTML
+				const simpleMarked = new Marked({
+					breaks: true,  // 支持换行符转换
+					gfm: true,     // 支持 GitHub Flavored Markdown
+				});
+				// 使用同步方式处理简单的 Markdown 内容
+				const html = simpleMarked.parse(content) as string;
+				return new Handlebars.SafeString(html);
+			} catch (error) {
+				logger.warn('[TemplateManager] Markdown 渲染失败:', error);
+				return content; // 失败时返回原始内容
+			}
 		});
 
 		const data = compiledTemplate(templateData, {

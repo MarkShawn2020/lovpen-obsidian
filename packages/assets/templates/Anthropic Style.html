@@ -72,21 +72,26 @@
 	<footer class="claude-footer">
 		{{#if personalInfo.name}}
 		<section class="claude-personal-info">
-			<hr>
-			<section style="text-align: center; margin-top: 2em;">
-				{{#if personalInfo.avatar}}
-				<img alt="{{personalInfo.name}}" src="{{personalInfo.avatar}}"
-					 style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 1em;">
-				{{/if}}
-				<p><strong>{{personalInfo.name}}</strong></p>
-				{{#if personalInfo.bio}}
-				<p style="color: var(--text-secondary); font-size: 0.9em; margin: 0.5em 0;">{{personalInfo.bio}}</p>
-				{{/if}}
-				{{#if personalInfo.website}}
-				<p style="font-size: 0.8em; color: var(--text-tertiary);">
-					<a href="{{personalInfo.website}}" target="_blank">{{personalInfo.website}}</a>
-				</p>
-				{{/if}}
+			<hr class="claude-personal-divider">
+			<section class="claude-personal-card">
+				<section class="claude-personal-content{{#unless personalInfo.avatar}} claude-personal-content-no-avatar{{/unless}}">
+					{{#if personalInfo.avatar}}
+					<section class="claude-personal-avatar">
+						<img alt="{{personalInfo.name}}" src="{{personalInfo.avatar}}" class="claude-personal-avatar-img">
+					</section>
+					{{/if}}
+					<section class="claude-personal-details">
+						<h3 class="claude-personal-name">{{personalInfo.name}}</h3>
+						{{#if personalInfo.bio}}
+						<div class="claude-personal-bio">{{markdown personalInfo.bio}}</div>
+						{{/if}}
+						{{#if personalInfo.website}}
+						<p class="claude-personal-website">
+							<a href="{{personalInfo.website}}" target="_blank" class="claude-personal-link">{{personalInfo.website}}</a>
+						</p>
+						{{/if}}
+					</section>
+				</section>
 			</section>
 		</section>
 		{{/if}}
@@ -467,10 +472,134 @@
 
 	.claude-personal-info {
 		margin: 2em 8px;
+	}
+
+	.claude-personal-divider {
+		border: none;
+		height: 1px;
+		background: rgba(200, 100, 66, 0.3);
+		margin: 2em 0 1.5em;
+	}
+
+	.claude-personal-card {
+		background: rgba(200, 100, 66, 0.03);
+		border: 1px solid rgba(200, 100, 66, 0.15);
+		border-radius: 12px;
 		padding: 1.5em;
-		background: rgba(200, 100, 66, 0.05);
-		border-radius: 8px;
-		border: 1px solid rgba(200, 100, 66, 0.2);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.claude-personal-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 3px;
+		height: 100%;
+		background: rgb(200, 100, 66);
+		border-radius: 0 0 0 12px;
+	}
+
+	.claude-personal-content {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		padding-left: 1em;
+	}
+
+	.claude-personal-avatar {
+		flex-shrink: 0;
+	}
+
+	.claude-personal-avatar-img {
+		width: 48px !important;
+		height: 48px !important;
+		border-radius: 50% !important;
+		object-fit: cover !important;
+		border: 2px solid rgba(200, 100, 66, 0.2) !important;
+		box-shadow: 0 2px 8px rgba(200, 100, 66, 0.1) !important;
+		display: block !important;
+		margin: 0 !important;
+	}
+
+	.claude-personal-details {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.claude-personal-name {
+		font-size: 1.1em;
+		font-weight: bold;
+		color: rgb(200, 100, 66);
+		margin: 0 0 0.3em 0;
+		line-height: 1.3;
+	}
+
+	.claude-personal-bio {
+		font-size: 0.9em;
+		color: rgb(63, 63, 63);
+		line-height: 1.4;
+		margin: 0 0 0.5em 0;
+	}
+
+	.claude-personal-bio ul {
+		margin: 0;
+		padding-left: 1.2em;
+		list-style-type: disc;
+	}
+
+	.claude-personal-bio li {
+		margin: 0.2em 0;
+		color: rgb(63, 63, 63);
+	}
+
+	.claude-personal-bio li::marker {
+		color: rgb(200, 100, 66);
+	}
+
+	.claude-personal-bio p {
+		margin: 0.3em 0;
+	}
+
+	.claude-personal-website {
+		margin: 0;
+	}
+
+	.claude-personal-link {
+		font-size: 0.8em;
+		color: rgba(200, 100, 66, 0.8);
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+		transition: border-bottom-color 0.2s ease;
+	}
+
+	.claude-personal-link:hover {
+		border-bottom-color: rgba(200, 100, 66, 0.8);
+	}
+
+	/* 无头像时的居中布局 - 使用CSS条件布局 */
+	.claude-personal-content:not(:has(.claude-personal-avatar)) {
+		flex-direction: column;
+		text-align: center;
+		gap: 0.5em;
+	}
+
+	.claude-personal-content:not(:has(.claude-personal-avatar)) .claude-personal-name {
+		font-size: 1.2em;
+		margin-bottom: 0.5em;
+	}
+
+	/* 兼容性备用方案 - 当没有头像时使用单独的类 */
+	.claude-personal-content-no-avatar {
+		flex-direction: column;
+		text-align: center;
+		gap: 0.5em;
+	}
+
+	.claude-personal-content-no-avatar .claude-personal-name {
+		font-size: 1.2em;
+		margin-bottom: 0.5em;
 	}
 
 	/* 文章元信息样式 - 简洁风格 */
@@ -599,6 +728,34 @@
 
 		.claude-meta-cover-image {
 			max-width: 150px;
+		}
+
+		.claude-personal-card {
+			padding: 1em;
+		}
+
+		.claude-personal-content {
+			flex-direction: column;
+			text-align: center;
+			gap: 0.8em;
+			padding-left: 0.5em;
+		}
+
+		.claude-personal-avatar-img {
+			width: 40px !important;
+			height: 40px !important;
+		}
+
+		.claude-personal-name {
+			font-size: 1em;
+		}
+
+		.claude-personal-bio {
+			font-size: 0.85em;
+		}
+
+		.claude-personal-link {
+			font-size: 0.75em;
 		}
 	}
 
