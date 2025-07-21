@@ -29,7 +29,7 @@
 				<section class="claude-meta-content">
 					<!-- 基本信息 -->
 					<section class="claude-meta-basic">
-						{{#if author}}<span class="claude-meta-item">{{#if personalInfo.avatar}}<img src="{{personalInfo.avatar}}" alt="{{author}}" class="claude-author-avatar">{{else}}👤{{/if}} {{author}}</span>{{/if}}
+						{{#if author}}<span class="claude-meta-item">{{#if personalInfo.avatar}}<img src="{{personalInfo.avatar}}" alt="" class="claude-author-avatar">{{else}}👤{{/if}} {{author}}</span>{{/if}}
 						{{#if publishDate}}<span class="claude-meta-item">📅 {{publishDate}}</span>{{/if}}
 						{{#if seriesName}}<span class="claude-meta-item">📚 {{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
 					</section>
@@ -44,7 +44,7 @@
 					<!-- 封面图 -->
 					{{#if coverImage}}
 					<section class="claude-meta-cover">
-						<img src="{{coverImage}}" alt="文章封面" class="claude-meta-cover-image">
+						<img src="{{coverImage}}" alt="" class="claude-meta-cover-image">
 					</section>
 					{{/if}}
 
@@ -77,7 +77,7 @@
 				<section class="claude-personal-content{{#unless personalInfo.avatar}} claude-personal-content-no-avatar{{/unless}}">
 					{{#if personalInfo.avatar}}
 					<section class="claude-personal-avatar">
-						<img alt="{{personalInfo.name}}" src="{{personalInfo.avatar}}" class="claude-personal-avatar-img">
+						<img alt="" src="{{personalInfo.avatar}}" class="claude-personal-avatar-img">
 					</section>
 					{{/if}}
 					<section class="claude-personal-details">
@@ -521,6 +521,7 @@
 		box-shadow: 0 2px 8px rgba(200, 100, 66, 0.1) !important;
 		display: block !important;
 		margin: 0 !important;
+		background: rgba(200, 100, 66, 0.1) !important;
 	}
 
 	.claude-personal-details {
@@ -658,6 +659,8 @@
 		display: inline-block !important;
 		vertical-align: middle !important;
 		box-shadow: none !important;
+		background: rgba(200, 100, 66, 0.1) !important;
+		border: 1px solid rgba(200, 100, 66, 0.2) !important;
 	}
 
 	.claude-meta-recommendation {
@@ -686,6 +689,10 @@
 		height: auto;
 		border-radius: 6px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		background: rgba(200, 100, 66, 0.05);
+		border: 1px solid rgba(200, 100, 66, 0.1);
+		display: block;
+		margin: 0 auto;
 	}
 
 	.claude-meta-tags {

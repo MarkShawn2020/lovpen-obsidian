@@ -9,8 +9,40 @@ const root = createRoot(container)
 
 // Mock props for development
 const mockProps = {
-  content: '# 测试标题\n\n这是一个测试内容。',
-  onContentChange: (content: string) => console.log('Content changed:', content),
+  settings: {
+    defaultStyle: 'default',
+    defaultHighlight: 'default',
+    defaultTemplate: 'default',
+    useTemplate: false,
+    lastSelectedTemplate: '',
+    enableThemeColor: false,
+    themeColor: '#007acc',
+    useCustomCss: false,
+    authKey: '',
+    wxInfo: [],
+    expandedAccordionSections: [],
+    showStyleUI: true,
+    personalInfo: {
+      name: '',
+      avatar: { type: 'default' as const },
+      bio: '',
+      email: '',
+      website: ''
+    }
+  },
+  articleHTML: '<h1>测试标题</h1><p>这是一个测试内容。</p>',
+  cssContent: 'body { font-family: system-ui; }',
+  plugins: [],
+  onRefresh: () => console.log('Refresh clicked'),
+  onCopy: () => console.log('Copy clicked'),
+  onDistribute: () => console.log('Distribute clicked'),
+  onTemplateChange: (template: string) => console.log('Template changed:', template),
+  onThemeChange: (theme: string) => console.log('Theme changed:', theme),
+  onHighlightChange: (highlight: string) => console.log('Highlight changed:', highlight),
+  onThemeColorToggle: (enabled: boolean) => console.log('Theme color toggle:', enabled),
+  onThemeColorChange: (color: string) => console.log('Theme color changed:', color),
+  onRenderArticle: () => console.log('Render article'),
+  onSaveSettings: () => console.log('Save settings'),
   onUpdateCSSVariables: () => console.log('CSS variables updated'),
 }
 
