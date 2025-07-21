@@ -1,7 +1,8 @@
-import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
 import juice from 'juice'
+
+import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/plugin/html-plugin";
 
 /**
  * 微信公众号适配插件 - 根据微信公众号HTML/CSS支持约束进行适配

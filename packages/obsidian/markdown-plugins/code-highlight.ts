@@ -2,11 +2,11 @@ import {createHighlighter} from "shiki";
 import {MarkedExtension} from "marked";
 import {markedHighlight} from "marked-highlight";
 import {CodeRenderer} from "./code";
-import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/unified-plugin-system";
 
 import {logger} from "../../shared/src/logger";
 import anthropicLight from "../../assets/themes/anthropic-light.json";
 import anthropicDark from "../../assets/themes/anthropic-dark.json";
+import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
 export class CodeHighlight extends UnifiedMarkdownPlugin {
 	private highlighter: any = null;

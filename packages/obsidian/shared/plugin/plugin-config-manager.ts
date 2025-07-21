@@ -1,7 +1,7 @@
-import {NMPSettings} from "../settings";
+import {NMPSettings} from "../../settings";
 
 
-import {logger} from "../../shared/src/logger";
+import {logger} from "@lovpen/shared/src/logger";
 
 /**
  * 通用插件配置接口

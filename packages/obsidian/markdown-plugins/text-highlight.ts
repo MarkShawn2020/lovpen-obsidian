@@ -1,5 +1,6 @@
 import {Lexer, MarkedExtension, Token, Tokens} from "marked";
-import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/unified-plugin-system";
+
+import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
 const highlightRegex = /^==(.*?)==/;
 

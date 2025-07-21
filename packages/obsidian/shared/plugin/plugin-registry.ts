@@ -1,30 +1,30 @@
 import {UnifiedPluginManager} from "./unified-plugin-system";
 
-import {CalloutRenderer} from "../markdown-plugins/callouts";
-import {LocalFile} from "../markdown-plugins/local-file";
-import {CodeHighlight} from "../markdown-plugins/code-highlight";
-import {EmbedBlockMark} from "../markdown-plugins/embed-block-mark";
-import {SVGIcon} from "../markdown-plugins/icons";
-import {LinkRenderer} from "../markdown-plugins/link";
-import {FootnoteRenderer} from "../markdown-plugins/footnote";
-import {TextHighlight} from "../markdown-plugins/text-highlight";
-import {CodeRenderer} from "../markdown-plugins/code";
-import {MathRenderer} from "../markdown-plugins/math";
+import {CalloutRenderer} from "../../markdown-plugins/callouts";
+import {LocalFile} from "../../markdown-plugins/local-file";
+import {CodeHighlight} from "../../markdown-plugins/code-highlight";
+import {EmbedBlockMark} from "../../markdown-plugins/embed-block-mark";
+import {SVGIcon} from "../../markdown-plugins/icons";
+import {LinkRenderer} from "../../markdown-plugins/link";
+import {FootnoteRenderer} from "../../markdown-plugins/footnote";
+import {TextHighlight} from "../../markdown-plugins/text-highlight";
+import {CodeRenderer} from "../../markdown-plugins/code";
+import {MathRenderer} from "../../markdown-plugins/math";
 
-import {Images} from "../html-plugins/images";
-import {Blockquotes} from "../html-plugins/blockquotes";
-import {CodeBlocks} from "../html-plugins/code-blocks";
-import {Headings} from "../html-plugins/headings";
-import {Lists} from "../html-plugins/lists";
-import {Tables} from "../html-plugins/tables";
-import {WechatAdapterPlugin} from "../html-plugins/wechat-adapter";
+import {Images} from "../../html-plugins/images";
+import {Blockquotes} from "../../html-plugins/blockquotes";
+import {CodeBlocks} from "../../html-plugins/code-blocks";
+import {Headings} from "../../html-plugins/headings";
+import {Lists} from "../../html-plugins/lists";
+import {Tables} from "../../html-plugins/tables";
+import {WechatAdapterPlugin} from "../../html-plugins/wechat-adapter";
 
 
-import {NMPSettings} from "../settings";
+import {NMPSettings} from "../../settings";
 import {App} from "obsidian";
-import AssetsManager from "../assets";
+import AssetsManager from "../../assets";
 
-import {logger} from "../../shared/src/logger";
+import {logger} from "@lovpen/shared/src/logger";
 
 /**
  * 插件注册器 - 统一管理所有插件的注册

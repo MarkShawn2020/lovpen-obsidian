@@ -1,8 +1,9 @@
-import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 
 
 import {logger} from "../../shared/src/logger";
+
+import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/plugin/html-plugin";
 
 /**
  * 引用块处理插件 - 处理微信公众号中的引用块格式

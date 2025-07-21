@@ -2,11 +2,13 @@ import {Marked} from "marked";
 import {App, Vault} from "obsidian";
 import {NMPSettings} from "../settings";
 import AssetsManager from "../assets";
-import {IMarkdownPlugin, UnifiedPluginManager} from "../shared/unified-plugin-system";
-import {initializePluginSystem} from "../shared/plugin-registry";
+import {UnifiedPluginManager} from "../shared/plugin/unified-plugin-system";
+import {initializePluginSystem} from "../shared/plugin/plugin-registry";
 import {FootnoteRenderer} from "./footnote";
 
 import {logger} from "../../shared/src/logger";
+
+import {IMarkdownPlugin} from "../shared/plugin/types";
 
 export interface MDRendererCallback {
 	settings: NMPSettings;

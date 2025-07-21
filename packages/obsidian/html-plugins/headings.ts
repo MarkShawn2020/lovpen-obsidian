@@ -1,8 +1,9 @@
-import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
-import {UniversalPluginMetaConfig} from "../shared/plugin-config-manager";
+import {UniversalPluginMetaConfig} from "../shared/plugin/plugin-config-manager";
 
 
 import {logger} from "../../shared/src/logger";
+
+import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/plugin/html-plugin";
 
 /**
  * 标题处理插件 - 处理微信公众号中的标题格式

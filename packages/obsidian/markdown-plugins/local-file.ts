@@ -1,9 +1,9 @@
 import {MarkedExtension, Token, Tokens} from "marked";
 import {MarkdownView, requestUrl, TAbstractFile, TFile} from "obsidian";
 import {NMPSettings} from "../settings";
-import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/unified-plugin-system";
 
 import {logger} from "../../shared/src/logger";
+import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
 declare module 'obsidian' {
 	interface Vault {

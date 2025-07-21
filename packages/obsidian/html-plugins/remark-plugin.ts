@@ -1,6 +1,6 @@
 import {NMPSettings} from "../settings";
 import {App} from "obsidian";
-import {PluginConfigManager, UniversalPluginConfig, UniversalPluginMetaConfig} from "../shared/plugin-config-manager";
+import {PluginConfigManager, UniversalPluginConfig, UniversalPluginMetaConfig} from "../shared/plugin/plugin-config-manager";
 
 import {logger} from "../../shared/src/logger";
 

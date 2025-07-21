@@ -1,8 +1,9 @@
-import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
-import {UniversalPluginMetaConfig} from "../shared/plugin-config-manager";
+import {UniversalPluginMetaConfig} from "../shared/plugin/plugin-config-manager";
 
 import {logger} from "../../shared/src/logger";
+
+import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/plugin/html-plugin";
 
 /**
  * 图片处理插件 - 处理微信公众号中的图片格式

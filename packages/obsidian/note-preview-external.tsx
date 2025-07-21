@@ -7,7 +7,7 @@ import {CardDataManager} from "./html-plugins/code-blocks";
 import {MDRendererCallback} from "./markdown-plugins/rehype-plugin";
 import {LocalImageManager} from "./markdown-plugins/local-file";
 import {MarkedParser} from "./markdown-plugins/parser";
-import {UnifiedPluginManager} from "./shared/unified-plugin-system";
+import {UnifiedPluginManager} from "./shared/plugin/unified-plugin-system";
 import {NMPSettings} from "./settings";
 import TemplateManager from "./template-manager";
 import {ReactAPIService} from "./services/ReactAPIService";

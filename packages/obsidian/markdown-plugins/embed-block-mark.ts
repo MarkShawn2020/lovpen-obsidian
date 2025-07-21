@@ -1,5 +1,6 @@
 import {MarkedExtension, Tokens} from "marked";
-import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/unified-plugin-system";
+
+import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
 const BlockMarkRegex = /^\^[0-9A-Za-z-]+$/;
 

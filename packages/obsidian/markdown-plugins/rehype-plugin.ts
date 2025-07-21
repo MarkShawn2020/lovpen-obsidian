@@ -2,7 +2,7 @@ import {Marked, MarkedExtension} from "marked";
 import {App, Vault} from "obsidian";
 import {NMPSettings} from "../settings";
 import AssetsManager from "../assets";
-import {PluginConfigManager, UniversalPluginConfig, UniversalPluginMetaConfig} from "../shared/plugin-config-manager";
+import {PluginConfigManager, UniversalPluginConfig, UniversalPluginMetaConfig} from "../shared/plugin/plugin-config-manager";
 
 export interface MDRendererCallback {
 	settings: NMPSettings;

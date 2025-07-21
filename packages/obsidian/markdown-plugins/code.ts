@@ -3,11 +3,11 @@ import {Tokens} from "marked";
 import {MarkdownView} from "obsidian";
 import {WeixinCodeFormatter} from "./weixin-code-formatter";
 import {GetCallout} from "./callouts";
-import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/unified-plugin-system";
 import {MathRendererQueue} from "./math";
 import {CardDataManager} from "../html-plugins/code-blocks";
 
 import {logger} from "../../shared/src/logger";
+import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
 const MermaidSectionClassName = "note-mermaid";
 const MermaidImgClassName = "note-mermaid-img";

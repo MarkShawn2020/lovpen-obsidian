@@ -1,7 +1,8 @@
-import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/unified-plugin-system";
 import {NMPSettings} from "../settings";
 import {logger} from "../../shared/src/logger";
 import AssetsManager, {Highlight} from "../assets";
+
+import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/plugin/html-plugin";
 
 /**
  * 微信公众号卡片数据管理器

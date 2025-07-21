@@ -1,10 +1,10 @@
 import {MarkedExtension, Token, Tokens} from "marked";
 import {requestUrl} from "obsidian";
 import {NMPSettings} from "../settings";
-import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/unified-plugin-system";
 import {MDRendererCallback} from "./parser";
 
 import {logger} from "../../shared/src/logger";
+import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
 const inlineRule = /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\\n\$]))\1/;
 const blockRule = /^(\${1,2})\n((?:\\[^]|[^\\])+?)\n\1(?:\n|$)/;

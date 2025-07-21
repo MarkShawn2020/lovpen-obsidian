@@ -1,6 +1,6 @@
 import {IRemarkPlugin} from "./remark-plugin";
 import {NMPSettings} from "../settings";
-import {BasePluginManager} from "../shared/base-plugin-manager";
+import {BasePluginManager} from "../shared/plugin/base-plugin-manager";
 
 import {logger} from "../../shared/src/logger";
 
