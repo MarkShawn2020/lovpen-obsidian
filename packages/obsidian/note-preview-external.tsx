@@ -797,6 +797,7 @@ ${customCSS}`;
 				website: this.settings.personalInfo?.website || ''
 			},
 			aiPromptTemplate: this.settings.aiPromptTemplate || '',
+			aiModel: this.settings.aiModel || 'claude-3-5-haiku-latest',
 		};
 
 		// 获取统一插件数据

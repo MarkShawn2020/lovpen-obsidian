@@ -1,7 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from '../ui/button';
 import {FormInput} from '../ui/FormInput';
-import {ViteReactSettings} from '../../types';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	SelectGroup,
+	SelectLabel,
+} from '../ui/select';
+import {AIModel, ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {
 	Bot,
@@ -18,11 +27,53 @@ import {
 	Tag,
 	User,
 	XCircle,
-	Zap
+	Zap,
+	Brain,
+	Target
 } from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 
 // import {requestUrl} from "obsidian"; // 移除直接导入，改为动态require
+
+// 可用的AI模型定义
+const AVAILABLE_MODELS: AIModel[] = [
+	{
+		id: 'claude-3-5-haiku-latest',
+		name: 'Claude 3.5 Haiku',
+		description: '快速响应，成本最低',
+		category: 'fast',
+		pricing: 'low',
+		recommended: true
+	},
+	{
+		id: 'claude-3-5-sonnet-latest',
+		name: 'Claude 3.5 Sonnet',
+		description: '平衡性能与成本',
+		category: 'balanced',
+		pricing: 'medium'
+	},
+	{
+		id: 'claude-3-7-sonnet-latest',
+		name: 'Claude 3.7 Sonnet',
+		description: '更强推理能力',
+		category: 'balanced',
+		pricing: 'medium'
+	},
+	{
+		id: 'claude-sonnet-4-0',
+		name: 'Claude Sonnet 4',
+		description: '高性能模型',
+		category: 'powerful',
+		pricing: 'medium'
+	},
+	{
+		id: 'claude-opus-4-0',
+		name: 'Claude Opus 4',
+		description: '最强大的模型',
+		category: 'powerful',
+		pricing: 'high'
+	}
+];
 
 interface AISettingsProps {
 	onClose: () => void;
@@ -43,6 +94,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 	} = useSettings(onSaveSettings, undefined, onSettingsChange);
 	const [claudeApiKey, setClaudeApiKey] = useState<string>(settings.authKey || '');
 	const [aiPromptTemplate, setAiPromptTemplate] = useState<string>(settings.aiPromptTemplate || '');
+	const [selectedModel, setSelectedModel] = useState<string>(settings.aiModel || 'claude-3-5-haiku-latest');
 	const [isTestingConnection, setIsTestingConnection] = useState(false);
 	const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 	const [errorMessage, setErrorMessage] = useState<string>('');
@@ -50,7 +102,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 	useEffect(() => {
 		setClaudeApiKey(settings.authKey || '');
 		setAiPromptTemplate(settings.aiPromptTemplate || '');
-	}, [settings.authKey, settings.aiPromptTemplate]);
+		setSelectedModel(settings.aiModel || 'claude-3-5-haiku-latest');
+	}, [settings.authKey, settings.aiPromptTemplate, settings.aiModel]);
 
 	const handleApiKeyChange = (value: string) => {
 		setClaudeApiKey(value);
@@ -64,6 +117,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setAiPromptTemplate(value);
 		// 实时更新 Jotai 状态
 		updateSettings({aiPromptTemplate: value.trim()});
+	};
+
+	const handleModelChange = (modelId: string) => {
+		setSelectedModel(modelId);
+		setConnectionStatus('idle');
+		setErrorMessage('');
+		// 实时更新 Jotai 状态
+		updateSettings({aiModel: modelId});
 	};
 
 	const testConnection = async () => {
@@ -93,7 +154,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 					'anthropic-version': '2023-06-01'
 				},
 				body: JSON.stringify({
-					model: 'claude-3-5-haiku-latest',
+					model: selectedModel,
 					max_tokens: 10,
 					messages: [
 						{
@@ -123,7 +184,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		// 使用jotai更新设置
 		updateSettings({
 			authKey: claudeApiKey.trim(),
-			aiPromptTemplate: aiPromptTemplate.trim()
+			aiPromptTemplate: aiPromptTemplate.trim(),
+			aiModel: selectedModel
 		});
 		saveSettings();
 		logger.info('AI设置已保存');
@@ -134,6 +196,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		if (confirm('确定要清空所有AI设置吗？')) {
 			setClaudeApiKey('');
 			setAiPromptTemplate('');
+			setSelectedModel('claude-3-5-haiku-latest');
 			setConnectionStatus('idle');
 			setErrorMessage('');
 		}
@@ -255,6 +318,99 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						icon={Key}
 						className="font-mono text-sm"
 					/>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+							<Brain className="w-4 h-4 text-indigo-600"/>
+							AI 模型选择
+						</label>
+						<Select value={selectedModel} onValueChange={handleModelChange}>
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder="选择 AI 模型" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel className="flex items-center gap-2">
+										<Zap className="w-3 h-3"/>
+										快速响应
+									</SelectLabel>
+									{AVAILABLE_MODELS.filter(m => m.category === 'fast').map(model => (
+										<SelectItem key={model.id} value={model.id}>
+											<div className="flex items-center justify-between w-full">
+												<div>
+													<span className="font-medium">{model.name}</span>
+													{model.recommended && (
+														<span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">推荐</span>
+													)}
+													<div className="text-xs text-gray-500">{model.description}</div>
+												</div>
+											</div>
+										</SelectItem>
+									))}
+								</SelectGroup>
+								
+								<SelectGroup>
+									<SelectLabel className="flex items-center gap-2">
+										<Target className="w-3 h-3"/>
+										平衡性能
+									</SelectLabel>
+									{AVAILABLE_MODELS.filter(m => m.category === 'balanced').map(model => (
+										<SelectItem key={model.id} value={model.id}>
+											<div className="flex items-center justify-between w-full">
+												<div>
+													<span className="font-medium">{model.name}</span>
+													<div className="text-xs text-gray-500">{model.description}</div>
+												</div>
+											</div>
+										</SelectItem>
+									))}
+								</SelectGroup>
+								
+								<SelectGroup>
+									<SelectLabel className="flex items-center gap-2">
+										<Brain className="w-3 h-3"/>
+										强大推理
+									</SelectLabel>
+									{AVAILABLE_MODELS.filter(m => m.category === 'powerful').map(model => (
+										<SelectItem key={model.id} value={model.id}>
+											<div className="flex items-center justify-between w-full">
+												<div>
+													<span className="font-medium">{model.name}</span>
+													<div className="text-xs text-gray-500">{model.description}</div>
+												</div>
+											</div>
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+						
+						{/* 显示当前选择模型的详细信息 */}
+						{(() => {
+							const currentModel = AVAILABLE_MODELS.find(m => m.id === selectedModel);
+							if (currentModel) {
+								const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
+									currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
+								const priceText = currentModel.pricing === 'low' ? '低成本' :
+									currentModel.pricing === 'medium' ? '中等成本' : '高成本';
+								
+								return (
+									<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+										<div className="flex items-center justify-between">
+											<div className="text-sm text-gray-700">
+												<span className="font-medium">当前选择：</span> {currentModel.name}
+											</div>
+											<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
+												{priceText}
+											</div>
+										</div>
+										<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
+									</div>
+								);
+							}
+							return null;
+						})()}
+					</div>
 
 					<div className="flex items-center justify-between">
 						<Button

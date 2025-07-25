@@ -27,7 +27,8 @@ export const defaultSettings: ViteReactSettings = {
 	expandedAccordionSections: [],
 	showStyleUI: true,
 	personalInfo: defaultPersonalInfo,
-	aiPromptTemplate: ''
+	aiPromptTemplate: '',
+	aiModel: 'claude-3-5-haiku-latest'
 };
 
 // 个人信息的atom

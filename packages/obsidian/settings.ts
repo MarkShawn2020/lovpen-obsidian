@@ -85,6 +85,8 @@ interface SettingsData {
 	// ===== AI设置 =====
 	/** AI提示词模板 */
 	aiPromptTemplate?: string;
+	/** AI模型选择 */
+	aiModel?: string;
 }
 
 // 定义分发服务配置类型
@@ -130,6 +132,7 @@ export class NMPSettings implements SettingsData {
 		website: ''
 	};
 	aiPromptTemplate: string = '';
+	aiModel: string = 'claude-3-5-haiku-latest';
 
 	// 私有构造函数 - 所有默认值已通过属性初始化
 	private constructor() {

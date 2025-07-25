@@ -20,6 +20,16 @@ export interface PersonalInfo {
 	website?: string;
 }
 
+// AI Model interface
+export interface AIModel {
+	id: string;
+	name: string;
+	description: string;
+	category: 'fast' | 'balanced' | 'powerful';
+	pricing: 'low' | 'medium' | 'high';
+	recommended?: boolean;
+}
+
 // Template Kit types
 export interface TemplateKit {
 	basicInfo: {
@@ -68,6 +78,7 @@ export interface ViteReactSettings {
 	showStyleUI: boolean;
 	personalInfo: PersonalInfo;
 	aiPromptTemplate?: string;
+	aiModel?: string; // 用户选择的AI模型ID
 }
 
 // Configuration option types

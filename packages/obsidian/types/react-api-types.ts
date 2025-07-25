@@ -32,6 +32,7 @@ export interface ReactSettings {
 	showStyleUI: boolean;
 	personalInfo: PersonalInfo;
 	aiPromptTemplate: string;
+	aiModel: string;
 
 	[key: string]: any; // 添加索引签名以支持动态属性访问
 }
