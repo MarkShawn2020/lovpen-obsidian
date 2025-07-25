@@ -1,0 +1,341 @@
+/* ========================================
+   LovPen 模板兼容性样式
+   将旧的CSS选择器映射到新的统一结构
+   ======================================== */
+
+/* === Anthropic Style 兼容性映射 === */
+
+/* 主容器映射：原有的 .rich_media_content 映射到统一容器 */
+.lovpen-unified-container[data-theme="anthropic"] {
+  /* 继承所有针对 .rich_media_content 的样式 */
+  background: rgb(250, 249, 245) !important;
+  border-radius: 12px;
+  padding: 8px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* 为了完全兼容，创建别名类 */
+.lovpen-unified-container.rich_media_content,
+.lovpen-unified-container.js_underline_content,
+.lovpen-unified-container.autoTypeSetting24psection,
+.lovpen-unified-container.fix_apple_default_style {
+  /* 这些类名的样式会自动应用 */
+}
+
+/* 主内容区域映射 */
+.lovpen-unified-container .lovpen-article-content {
+  /* 映射原有的 .claude-main-content 样式 */
+}
+
+/* 为向后兼容，创建样式别名 */
+.lovpen-unified-container .claude-main-content {
+  /* 直接映射到新的内容区域 */
+  all: inherit;
+}
+
+/* 元信息区域映射 */
+.lovpen-unified-container .lovpen-meta-section {
+  /* 对应原有的 .claude-meta-section */
+}
+
+.lovpen-unified-container .lovpen-meta-card {
+  /* 对应原有的 .claude-meta-card */
+}
+
+/* 个人信息区域映射 */
+.lovpen-unified-container .lovpen-personal-info {
+  /* 对应原有的 .claude-personal-info */
+}
+
+/* === Wabi-Sabi Style 兼容性映射 === */
+
+.lovpen-unified-container[data-theme="wabi-sabi"] {
+  /* 应用 Wabi-Sabi 的容器样式 */
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif CJK JP", serif;
+  background: linear-gradient(145deg, #fefcf8 0%, #f7f5f1 100%);
+  color: #2a2a2a;
+  line-height: 1.75;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  
+  /* 营造纸张质感的背景纹理 */
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(139, 115, 85, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(90, 108, 87, 0.02) 1px, transparent 1px);
+  background-size: 120px 120px, 80px 80px;
+}
+
+/* 为向后兼容Wabi-Sabi的类名创建映射 */
+.lovpen-unified-container[data-theme="wabi-sabi"] .wabi-sabi-container {
+  /* 直接继承容器样式 */
+  all: inherit;
+}
+
+/* === 通用兼容性规则 === */
+
+/* 确保所有文本样式能正确继承 */
+.lovpen-unified-container h1,
+.lovpen-unified-container h2,
+.lovpen-unified-container h3,
+.lovpen-unified-container h4,
+.lovpen-unified-container h5,
+.lovpen-unified-container h6 {
+  /* 继承用户自定义的标题样式 */
+}
+
+.lovpen-unified-container p {
+  /* 继承用户自定义的段落样式 */
+}
+
+.lovpen-unified-container ul,
+.lovpen-unified-container ol {
+  /* 继承用户自定义的列表样式 */
+}
+
+.lovpen-unified-container blockquote {
+  /* 继承用户自定义的引用样式 */
+}
+
+.lovpen-unified-container code,
+.lovpen-unified-container pre {
+  /* 继承用户自定义的代码样式 */
+}
+
+.lovpen-unified-container img {
+  /* 继承用户自定义的图片样式 */
+}
+
+.lovpen-unified-container table,
+.lovpen-unified-container th,
+.lovpen-unified-container td {
+  /* 继承用户自定义的表格样式 */
+}
+
+.lovpen-unified-container a {
+  /* 继承用户自定义的链接样式 */
+}
+
+/* === 特定兼容性映射 === */
+
+/* 如果用户的CSS中使用了这些选择器，现在也能正常工作 */
+
+/* Anthropic 样式的具体兼容性映射 */
+.lovpen-unified-container .claude-main-content h1,
+.lovpen-unified-container[data-theme="anthropic"] h1 {
+  font-size: 1.6em;
+  font-weight: bold;
+  margin: 4em auto 2em;
+  text-align: center;
+  line-height: 1.75;
+  display: table;
+  padding: 0.3em 1em;
+  background: rgb(200, 100, 66);
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
+  color: white !important;
+}
+
+.lovpen-unified-container .claude-main-content h2,
+.lovpen-unified-container[data-theme="anthropic"] h2 {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin: 4em auto 2em;
+  text-align: center;
+  line-height: 1.75;
+  display: table;
+  padding: 0.3em 1em;
+  background: rgb(200, 100, 66);
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;
+  color: white !important;
+}
+
+.lovpen-unified-container .claude-main-content h3,
+.lovpen-unified-container[data-theme="anthropic"] h3 {
+  border-left: 4px solid rgb(200, 100, 66);
+  border-bottom: 1px dashed rgb(200, 100, 66);
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 2em 8px 0.75em 0px;
+  text-align: left;
+  line-height: 1.2;
+  padding-left: 12px;
+  color: rgb(63, 63, 63);
+}
+
+.lovpen-unified-container .claude-main-content p,
+.lovpen-unified-container[data-theme="anthropic"] p {
+  margin: 1.5em 8px;
+  text-align: justify;
+  line-height: 1.75;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  color: rgb(34, 34, 34);
+  word-break: break-word;
+  hyphens: auto;
+  box-sizing: border-box;
+}
+
+/* Wabi-Sabi 样式的具体兼容性映射 */
+.lovpen-unified-container[data-theme="wabi-sabi"] h1 {
+  font-size: 1.8em;
+  font-weight: 300;
+  color: #2a2a2a;
+  margin: 2.5em 0 1.2em 0;
+  text-align: center;
+  position: relative;
+  letter-spacing: 0.05em;
+}
+
+.lovpen-unified-container[data-theme="wabi-sabi"] h2 {
+  font-size: 1.5em;
+  font-weight: 300;
+  color: #333;
+  margin: 2.2em 0 1em 0;
+  position: relative;
+  text-align: left;
+  padding-left: 1em;
+}
+
+.lovpen-unified-container[data-theme="wabi-sabi"] h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 1.2em;
+  background: linear-gradient(to bottom,
+    rgba(139, 115, 85, 0.8),
+    rgba(90, 108, 87, 0.6));
+  border-radius: 2px;
+}
+
+.lovpen-unified-container[data-theme="wabi-sabi"] p {
+  margin-bottom: 1.8em;
+  text-align: justify;
+  color: #3a3a3a;
+  font-size: 1.05em;
+  text-indent: 2em;
+  position: relative;
+}
+
+/* === 深度兼容性支持 === */
+
+/* 支持用户可能使用的深层选择器 */
+.lovpen-unified-container .claude-main-content strong,
+.lovpen-unified-container .claude-main-content b,
+.lovpen-unified-container[data-theme="anthropic"] strong,
+.lovpen-unified-container[data-theme="anthropic"] b {
+  font-weight: bold;
+  color: rgb(200, 100, 66);
+}
+
+.lovpen-unified-container .claude-main-content em,
+.lovpen-unified-container .claude-main-content i,
+.lovpen-unified-container[data-theme="anthropic"] em,
+.lovpen-unified-container[data-theme="anthropic"] i {
+  font-style: italic;
+  color: rgb(200, 100, 66);
+}
+
+.lovpen-unified-container .claude-main-content blockquote,
+.lovpen-unified-container[data-theme="anthropic"] blockquote {
+  margin: 1.5em 8px;
+  padding: 1em;
+  background: rgba(200, 100, 66, 0.1);
+  border-left: 4px solid rgb(200, 100, 66);
+  border-radius: 6px;
+  color: rgb(34, 34, 34);
+  font-style: italic;
+}
+
+/* === CSS变量支持 === */
+
+/* 为主题系统提供CSS变量，便于用户自定义 */
+.lovpen-unified-container[data-theme="anthropic"] {
+  --primary-color: rgb(200, 100, 66);
+  --background-color: rgb(250, 249, 245);
+  --text-color: rgb(34, 34, 34);
+  --secondary-text-color: rgb(63, 63, 63);
+  --border-radius: 8px;
+  --spacing-unit: 8px;
+}
+
+.lovpen-unified-container[data-theme="wabi-sabi"] {
+  --primary-color: rgba(139, 115, 85, 0.8);
+  --secondary-color: rgba(90, 108, 87, 0.6);
+  --background-color: linear-gradient(145deg, #fefcf8 0%, #f7f5f1 100%);
+  --text-color: #2a2a2a;
+  --secondary-text-color: #3a3a3a;
+  --border-radius: 8px;
+  --spacing-unit: 1em;
+}
+
+/* 用户可以在自己的CSS中使用这些变量 */
+.lovpen-unified-container {
+  /* 示例：用户可以这样使用变量 */
+  /* color: var(--text-color, #333); */
+  /* background: var(--background-color, #fff); */
+}
+
+/* === 调试和开发辅助 === */
+
+/* 在开发模式下可以启用这些样式来调试布局 */
+/*
+.lovpen-unified-container[data-debug="true"] * {
+  outline: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.lovpen-unified-container[data-debug="true"] *:hover {
+  background: rgba(255, 0, 0, 0.1) !important;
+}
+*/
+
+/* === 响应式兼容性 === */
+
+@media (max-width: 768px) {
+  /* 确保移动端的样式兼容性 */
+  .lovpen-unified-container {
+    padding: 0.5rem;
+  }
+  
+  .lovpen-unified-container .claude-main-content,
+  .lovpen-unified-container[data-theme="anthropic"] {
+    padding: 4px;
+  }
+  
+  .lovpen-unified-container .claude-main-content p,
+  .lovpen-unified-container .claude-main-content ul,
+  .lovpen-unified-container .claude-main-content ol,
+  .lovpen-unified-container .claude-main-content blockquote,
+  .lovpen-unified-container[data-theme="anthropic"] p,
+  .lovpen-unified-container[data-theme="anthropic"] ul,
+  .lovpen-unified-container[data-theme="anthropic"] ol,
+  .lovpen-unified-container[data-theme="anthropic"] blockquote {
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+}
+
+/* === 打印样式兼容性 === */
+
+@media print {
+  .lovpen-unified-container {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+  
+  .lovpen-unified-container .lovpen-top-accent {
+    display: none;
+  }
+  
+  .lovpen-unified-container .lovpen-meta-card {
+    border: 1pt solid #ccc;
+    background: none;
+  }
+}
