@@ -93,7 +93,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 					'anthropic-version': '2023-06-01'
 				},
 				body: JSON.stringify({
-					model: 'claude-3-sonnet-20240229',
+					model: 'claude-3-5-haiku-latest',
 					max_tokens: 10,
 					messages: [
 						{
