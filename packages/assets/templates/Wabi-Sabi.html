@@ -1,7 +1,7 @@
-<section class="rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style"
+<section class="wabi-sabi-container rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style"
 		 id="js_content">
 	<!-- 顶部装饰条 -->
-	<div class="top-accent"></div>
+	<section class="top-accent"></section>
 
 	<!-- 文章头部 -->
 	<header class="article-header">
@@ -15,41 +15,41 @@
 
 		<!-- 文章元信息 - 侘寂风格 -->
 		{{#if (or author publishDate tags seriesName episodeNum coverImage recommendation)}}
-		<div class="wabi-sabi-meta-section">
-			<div class="wabi-sabi-meta-card">
-				<div class="wabi-sabi-meta-content">
+		<section class="wabi-sabi-meta-section">
+			<section class="wabi-sabi-meta-card">
+				<section class="wabi-sabi-meta-content">
 					<!-- 基本信息 -->
-					<div class="wabi-sabi-meta-basic">
+					<section class="wabi-sabi-meta-basic">
 						{{#if author}}<span class="wabi-sabi-meta-item">{{author}}</span>{{/if}}
 						{{#if publishDate}}<span class="wabi-sabi-meta-item">{{publishDate}}</span>{{/if}}
 						{{#if seriesName}}<span class="wabi-sabi-meta-item">{{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
-					</div>
+					</section>
 
 					<!-- 推荐语 -->
 					{{#if recommendation}}
-					<div class="wabi-sabi-meta-recommendation">
-						<div class="wabi-sabi-meta-text">{{recommendation}}</div>
-					</div>
+					<section class="wabi-sabi-meta-recommendation">
+						<section class="wabi-sabi-meta-text">{{recommendation}}</section>
+					</section>
 					{{/if}}
 
 					<!-- 封面图 -->
 					{{#if coverImage}}
-					<div class="wabi-sabi-meta-cover">
+					<section class="wabi-sabi-meta-cover">
 						<img src="{{coverImage}}" alt="文章封面" class="wabi-sabi-meta-cover-image">
-					</div>
+					</section>
 					{{/if}}
 
 					<!-- 标签 -->
 					{{#if tags}}
-					<div class="wabi-sabi-meta-tags">
+					<section class="wabi-sabi-meta-tags">
 						{{#each tags}}
 						<span class="wabi-sabi-meta-tag">{{this}}</span>
 						{{/each}}
-					</div>
+					</section>
 					{{/if}}
-				</div>
-			</div>
-		</div>
+				</section>
+			</section>
+		</section>
 		{{/if}}
 	</header>
 
@@ -61,11 +61,11 @@
 	<!-- 文章底部 -->
 	<footer class="article-footer">
 		{{#if signature}}
-		<div class="article-signature">{{signature}}</div>
+		<section class="article-signature">{{signature}}</section>
 		{{/if}}
 
 		{{#if publishDate}}
-		<div class="article-date">{{publishDate}}</div>
+		<section class="article-date">{{publishDate}}</section>
 		{{/if}}
 	</footer>
 </section>
