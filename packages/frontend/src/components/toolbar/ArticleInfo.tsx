@@ -251,7 +251,7 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 					'anthropic-version': '2023-06-01'
 				},
 				body: JSON.stringify({
-					model: 'claude-3-sonnet-20240229',
+					model: settings.aiModel || 'claude-3-5-haiku-latest',
 					max_tokens: 1000,
 					messages: [
 						{
