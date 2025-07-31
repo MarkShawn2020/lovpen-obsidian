@@ -1,0 +1,146 @@
+<section class="rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style"
+		 id="js_content" style="background: #faf9f5 !important; position: relative;">
+	
+	<!-- 渐变背景层 - 使用多个div模拟渐变 -->
+	<div style="position: absolute; top: 0; left: 0; right: 0; height: 20%; background: #000000; z-index: 0;"></div>
+	<div style="position: absolute; top: 20%; left: 0; right: 0; height: 5%; background: #050302; z-index: 0;"></div>
+	<div style="position: absolute; top: 25%; left: 0; right: 0; height: 5%; background: #0a0605; z-index: 0;"></div>
+	<div style="position: absolute; top: 30%; left: 0; right: 0; height: 5%; background: #0f0907; z-index: 0;"></div>
+	<div style="position: absolute; top: 35%; left: 0; right: 0; height: 5%; background: #140c0a; z-index: 0;"></div>
+	<div style="position: absolute; top: 40%; left: 0; right: 0; height: 5%; background: #1a0f0a; z-index: 0;"></div>
+	<div style="position: absolute; top: 45%; left: 0; right: 0; height: 5%; background: #1f1208; z-index: 0;"></div>
+	<div style="position: absolute; top: 50%; left: 0; right: 0; height: 5%; background: #241505; z-index: 0;"></div>
+	<div style="position: absolute; top: 55%; left: 0; right: 0; height: 5%; background: #2a1005; z-index: 0;"></div>
+	<div style="position: absolute; top: 60%; left: 0; right: 0; height: 5%; background: #301a0a; z-index: 0;"></div>
+	<div style="position: absolute; top: 65%; left: 0; right: 0; height: 5%; background: #36240f; z-index: 0;"></div>
+	<div style="position: absolute; top: 70%; left: 0; right: 0; height: 5%; background: #3c2e14; z-index: 0;"></div>
+	<div style="position: absolute; top: 75%; left: 0; right: 0; height: 5%; background: #423819; z-index: 0;"></div>
+	<div style="position: absolute; top: 80%; left: 0; right: 0; height: 5%; background: #48421e; z-index: 0;"></div>
+	<div style="position: absolute; top: 85%; left: 0; right: 0; height: 5%; background: #4e4c23; z-index: 0;"></div>
+	<div style="position: absolute; top: 90%; left: 0; right: 0; height: 5%; background: #545628; z-index: 0;"></div>
+	<div style="position: absolute; top: 95%; left: 0; right: 0; height: 5%; background: #5a602d; z-index: 0;"></div>
+	
+	<!-- 内容容器 -->
+	<div style="position: relative; z-index: 1;">
+		
+		<!-- 引言部分 -->
+		{{#if epigraph}}
+		<section style="background: rgba(255, 107, 53, 0.1); border-left: 4px solid #ff6b35; padding: 16px; margin: 24px 16px; border-radius: 8px;">
+			{{#each epigraph}}
+			<p style="margin: 8px 0; color: #ff6b35 !important; font-size: 17px; font-weight: bold;">{{this}}</p>
+			{{/each}}
+		</section>
+		{{/if}}
+
+		<!-- 标题部分 -->
+		{{#if articleTitle}}
+		<h1 style="font-size: 32px; font-weight: 700; text-align: center; margin: 32px 16px 16px; color: #ff6b35; text-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);">{{articleTitle}}</h1>
+		{{/if}}
+
+		{{#if articleSubtitle}}
+		<p style="text-align: center; margin: 16px 16px 32px; color: #666; font-size: 18px; font-style: italic;">{{articleSubtitle}}</p>
+		{{/if}}
+
+		<!-- 文章元信息 -->
+		{{#if (or author publishDate tags seriesName episodeNum recommendation)}}
+		<section style="background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 107, 53, 0.2); border-radius: 12px; padding: 20px; margin: 24px 16px; border-left: 4px solid #ff6b35;">
+			{{#if (or author publishDate seriesName episodeNum)}}
+			<p style="margin: 0 0 12px 0; color: #666; font-size: 14px;">
+				{{#if author}}<span style="margin-right: 16px;">{{#if personalInfo.avatar}}<img src="{{personalInfo.avatar}}" style="width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; margin-right: 4px;">{{else}}👤{{/if}} {{author}}</span>{{/if}}
+				{{#if publishDate}}<span style="margin-right: 16px;">📅 {{publishDate}}</span>{{/if}}
+				{{#if seriesName}}<span>🚀 {{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
+			</p>
+			{{/if}}
+			
+			{{#if recommendation}}
+			<p style="margin: 12px 0; padding: 12px; background: rgba(255, 107, 53, 0.05); border-radius: 8px; border-left: 3px solid #ff6b35; color: #333; font-style: italic;">💡 {{recommendation}}</p>
+			{{/if}}
+			
+			{{#if tags}}
+			<p style="margin: 12px 0 0 0;">
+				{{#each tags}}
+				<span style="display: inline-block; background: rgba(255, 107, 53, 0.1); color: #ff6b35; padding: 4px 12px; border-radius: 20px; font-size: 13px; margin: 4px 4px 4px 0; border: 1px solid rgba(255, 107, 53, 0.3);">#{{this}}</span>
+				{{/each}}
+			</p>
+			{{/if}}
+		</section>
+		{{/if}}
+
+		<!-- 文章内容 -->
+		<section class="lovpen" id="article-section" style="padding: 0 16px;">
+			{{{content}}}
+		</section>
+
+		<!-- 页脚个人信息 -->
+		{{#if personalInfo.name}}
+		<section style="margin: 48px 16px 24px;">
+			<hr style="border: none; height: 1px; background: #ff6b35; opacity: 0.3; margin: 32px 0;">
+			<section style="background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 107, 53, 0.2); border-radius: 12px; padding: 24px; border-left: 4px solid #ff6b35;">
+				{{#if personalInfo.avatar}}
+				<p style="text-align: center; margin-bottom: 16px;">
+					<img src="{{personalInfo.avatar}}" style="width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(255, 107, 53, 0.3);">
+				</p>
+				{{/if}}
+				<h3 style="text-align: center; font-size: 20px; font-weight: bold; color: #ff6b35; margin: 0 0 8px 0;">{{personalInfo.name}}</h3>
+				{{#if personalInfo.bio}}
+				<p style="text-align: center; color: #666; font-size: 14px; line-height: 1.6; margin: 8px 0;">{{personalInfo.bio}}</p>
+				{{/if}}
+				{{#if personalInfo.website}}
+				<p style="text-align: center; margin: 8px 0 0 0;">
+					<a href="{{personalInfo.website}}" target="_blank" style="color: #ff9558; text-decoration: none; font-size: 13px;">{{personalInfo.website}}</a>
+				</p>
+				{{/if}}
+			</section>
+		</section>
+		{{/if}}
+	</div>
+</section>
+
+<!-- 阶段样式定义 - 用于内容标记 -->
+<script type="text/template" id="stage-styles">
+// 创世期（Genesis）- 深黑到余烬橙
+.stage-genesis {
+	style: "background: linear-gradient(180deg, #000000 0%, #0d0705 25%, #1a0f0a 50%, #2a1005 100%); padding: 48px 24px; margin: 32px 0; border-radius: 12px; color: #e0e0e0; position: relative; overflow: hidden;"
+}
+
+// 探索期（Struggle）- 黑色到迷雾灰
+.stage-struggle {
+	style: "background: linear-gradient(180deg, #000000 0%, #0a0a0a 25%, #1f1f1f 50%, #2f2f2f 100%); padding: 48px 24px; margin: 32px 0; border-radius: 12px; color: #d1d5db; position: relative; overflow: hidden;"
+}
+
+// 突破期（Breakthrough）- 黑色到黎明金
+.stage-breakthrough {
+	style: "background: linear-gradient(180deg, #000000 0%, #1a0a00 25%, #2a1a0a 50%, #4a3015 100%); padding: 48px 24px; margin: 32px 0; border-radius: 12px; color: #fef3c7; position: relative; overflow: hidden;"
+}
+
+// 扩张期（Expansion）- 黑色到活力紫
+.stage-expansion {
+	style: "background: linear-gradient(180deg, #000000 0%, #140a14 25%, #2a142a 50%, #4c2348 100%); padding: 48px 24px; margin: 32px 0; border-radius: 12px; color: #f3e8ff; position: relative; overflow: hidden;"
+}
+
+// 成熟期（Mastery）- 黑色到深邃蓝
+.stage-mastery {
+	style: "background: linear-gradient(180deg, #000000 0%, #050a14 25%, #0a1628 50%, #132d4f 100%); padding: 48px 24px; margin: 32px 0; border-radius: 12px; color: #e0e7ff; position: relative; overflow: hidden;"
+}
+</script>
+
+<!-- 使用SVG渐变的备选方案 -->
+<div style="display: none;">
+使用示例（SVG渐变背景）：
+
+&lt;section style="padding: 48px 24px; margin: 32px 0; border-radius: 12px; position: relative; overflow: hidden;"&gt;
+  &lt;svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;" preserveAspectRatio="none"&gt;
+    &lt;defs&gt;
+      &lt;linearGradient id="genesis-gradient" x1="0%" y1="0%" x2="0%" y2="100%"&gt;
+        &lt;stop offset="0%" style="stop-color:#000000;stop-opacity:1" /&gt;
+        &lt;stop offset="50%" style="stop-color:#1a0f0a;stop-opacity:1" /&gt;
+        &lt;stop offset="100%" style="stop-color:#2a1005;stop-opacity:1" /&gt;
+      &lt;/linearGradient&gt;
+    &lt;/defs&gt;
+    &lt;rect width="100%" height="100%" fill="url(#genesis-gradient)" /&gt;
+  &lt;/svg&gt;
+  &lt;div style="position: relative; z-index: 1; color: #e0e0e0;"&gt;
+    内容...
+  &lt;/div&gt;
+&lt;/section&gt;
+</div>

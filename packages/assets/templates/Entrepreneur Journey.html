@@ -1,0 +1,278 @@
+<section class="rich_media_content js_underline_content autoTypeSetting24psection fix_apple_default_style"
+		 id="js_content">
+	<!-- 主要内容容器 - 应用多阶段渐变背景 -->
+	<section class="entrepreneur-journey-container" id="render-container">
+		
+		<!-- 引言部分 -->
+		{{#if epigraph}}
+		<section class="entrepreneur-epigraph entrepreneur-stage entrepreneur-stage-genesis">
+			<div class="stage-content">
+				{{#each epigraph}}
+				<p><strong>{{this}}</strong></p>
+				{{/each}}
+			</div>
+		</section>
+		{{/if}}
+
+		<!-- 标题和元信息 -->
+		<section class="entrepreneur-header entrepreneur-stage entrepreneur-stage-genesis">
+			{{#if articleTitle}}
+			<h1 class="entrepreneur-title">{{articleTitle}}</h1>
+			{{/if}}
+
+			{{#if articleSubtitle}}
+			<div class="entrepreneur-subtitle">
+				<p><em>{{articleSubtitle}}</em></p>
+			</div>
+			{{/if}}
+
+			<!-- 文章元信息 -->
+			{{#if (or author publishDate tags seriesName episodeNum coverImage recommendation)}}
+			<div class="entrepreneur-meta-section">
+				<div class="entrepreneur-meta-card">
+					<div class="entrepreneur-meta-content">
+						<!-- 基本信息 -->
+						<div class="entrepreneur-meta-basic">
+							{{#if author}}<span class="entrepreneur-meta-item">{{#if personalInfo.avatar}}<img src="{{personalInfo.avatar}}" alt="" class="entrepreneur-author-avatar">{{else}}👤{{/if}} {{author}}</span>{{/if}}
+							{{#if publishDate}}<span class="entrepreneur-meta-item">📅 {{publishDate}}</span>{{/if}}
+							{{#if seriesName}}<span class="entrepreneur-meta-item">🚀 {{seriesName}}{{#if episodeNum}} · 第{{episodeNum}}期{{/if}}</span>{{/if}}
+						</div>
+
+						<!-- 推荐语 -->
+						{{#if recommendation}}
+						<div class="entrepreneur-meta-quote">
+							<div class="entrepreneur-meta-text">💡 {{recommendation}}</div>
+						</div>
+						{{/if}}
+
+						<!-- 封面图 -->
+						{{#if coverImage}}
+						<div class="entrepreneur-meta-cover">
+							<img src="{{coverImage}}" alt="" class="entrepreneur-meta-cover-image">
+						</div>
+						{{/if}}
+
+						<!-- 标签 -->
+						{{#if tags}}
+						<div class="entrepreneur-meta-tags">
+							{{#each tags}}
+							<span class="entrepreneur-meta-tag">{{this}}</span>
+							{{/each}}
+						</div>
+						{{/if}}
+					</div>
+				</div>
+			</div>
+			{{/if}}
+		</section>
+
+		<!-- 文章主要内容 -->
+		<section class="lovpen entrepreneur-content" id="article-section">
+			{{{content}}}
+		</section>
+
+		<!-- 页脚信息 -->
+		<footer class="entrepreneur-footer entrepreneur-stage entrepreneur-stage-mastery">
+			{{#if personalInfo.name}}
+			<div class="entrepreneur-personal-info">
+				<hr class="entrepreneur-personal-divider">
+				<div class="entrepreneur-personal-card">
+					<div class="entrepreneur-personal-content{{#unless personalInfo.avatar}} entrepreneur-personal-content-no-avatar{{/unless}}">
+						{{#if personalInfo.avatar}}
+						<div class="entrepreneur-personal-avatar">
+							<img alt="" src="{{personalInfo.avatar}}" class="entrepreneur-personal-avatar-img">
+						</div>
+						{{/if}}
+						<div class="entrepreneur-personal-details">
+							<h3 class="entrepreneur-personal-name">{{personalInfo.name}}</h3>
+							{{#if personalInfo.bio}}
+							<div class="entrepreneur-personal-bio">{{markdown personalInfo.bio}}</div>
+							{{/if}}
+							{{#if personalInfo.website}}
+							<p class="entrepreneur-personal-website">
+								<a href="{{personalInfo.website}}" target="_blank" class="entrepreneur-personal-link">{{personalInfo.website}}</a>
+							</p>
+							{{/if}}
+						</div>
+					</div>
+				</div>
+			</div>
+			{{/if}}
+		</footer>
+
+		<!-- 阶段指示器 -->
+		<div class="entrepreneur-stage-indicator">
+			<div class="stage-dot active" data-stage="创世期"></div>
+			<div class="stage-dot" data-stage="探索期"></div>
+			<div class="stage-dot" data-stage="突破期"></div>
+			<div class="stage-dot" data-stage="扩张期"></div>
+			<div class="stage-dot" data-stage="成熟期"></div>
+		</div>
+	</section>
+</section>
+
+<style>
+	/* Entrepreneur Journey 多阶段渐变模板样式 */
+	
+	/* 清除默认背景 */
+	.rich_media_content {
+		background: transparent !important;
+		padding: 0;
+		margin: 0;
+	}
+	
+	/* 元信息卡片样式 */
+	.entrepreneur-meta-card {
+		background: rgba(0, 0, 0, 0.5);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 1.5em;
+		margin: 1em 0;
+		backdrop-filter: blur(10px);
+	}
+	
+	.entrepreneur-meta-basic {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1em;
+		margin-bottom: 1em;
+	}
+	
+	.entrepreneur-meta-item {
+		font-size: 0.9em;
+		opacity: 0.8;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+	}
+	
+	.entrepreneur-author-avatar {
+		width: 20px !important;
+		height: 20px !important;
+		border-radius: 50% !important;
+		object-fit: cover !important;
+		margin: 0 !important;
+		box-shadow: none !important;
+	}
+	
+	.entrepreneur-meta-quote {
+		padding: 1em;
+		margin: 1em 0;
+		border-left: 3px solid currentColor;
+		opacity: 0.9;
+	}
+	
+	.entrepreneur-meta-cover-image {
+		max-width: 100%;
+		height: auto;
+		border-radius: 8px;
+		margin: 1em 0;
+	}
+	
+	.entrepreneur-meta-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em;
+		margin-top: 1em;
+	}
+	
+	.entrepreneur-meta-tag {
+		background: rgba(255, 255, 255, 0.1);
+		padding: 0.3em 0.8em;
+		border-radius: 20px;
+		font-size: 0.8em;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+	
+	/* 个人信息卡片 */
+	.entrepreneur-personal-card {
+		background: rgba(0, 0, 0, 0.5);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 1.5em;
+		backdrop-filter: blur(10px);
+	}
+	
+	.entrepreneur-personal-content {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+	}
+	
+	.entrepreneur-personal-avatar-img {
+		width: 50px !important;
+		height: 50px !important;
+		border-radius: 50% !important;
+		object-fit: cover !important;
+	}
+	
+	.entrepreneur-personal-name {
+		font-size: 1.2em;
+		font-weight: 600;
+		margin: 0 0 0.3em 0;
+	}
+	
+	.entrepreneur-personal-bio {
+		font-size: 0.9em;
+		opacity: 0.8;
+		line-height: 1.5;
+	}
+	
+	.entrepreneur-personal-link {
+		text-decoration: none;
+		opacity: 0.7;
+		transition: opacity 0.3s ease;
+	}
+	
+	.entrepreneur-personal-link:hover {
+		opacity: 1;
+	}
+	
+	.entrepreneur-personal-content-no-avatar {
+		flex-direction: column;
+		text-align: center;
+	}
+	
+	.entrepreneur-personal-divider {
+		border: none;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, currentColor, transparent);
+		margin: 2em 0;
+		opacity: 0.3;
+	}
+	
+	/* 文章内容区域样式调整 */
+	.entrepreneur-content {
+		padding: var(--spacing-xl, 2em);
+		min-height: 300vh; /* 确保有足够的滚动空间展示所有渐变阶段 */
+	}
+	
+	/* 用户可以在文章中使用的阶段标记 */
+	.stage-genesis,
+	.stage-struggle,
+	.stage-breakthrough,
+	.stage-expansion,
+	.stage-mastery {
+		position: relative;
+		padding: 2em;
+		margin: 2em 0;
+		min-height: 50vh;
+	}
+	
+	/* 响应式设计 */
+	@media (max-width: 768px) {
+		.entrepreneur-meta-basic {
+			flex-direction: column;
+			gap: 0.5em;
+		}
+		
+		.entrepreneur-personal-content {
+			flex-direction: column;
+			text-align: center;
+		}
+		
+		.entrepreneur-content {
+			padding: 1em;
+		}
+	}
+</style>

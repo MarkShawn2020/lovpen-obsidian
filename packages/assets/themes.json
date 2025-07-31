@@ -202,5 +202,11 @@
 		"className": "mweb-toothpaste",
 		"desc": "MWeb-Themes https://github.com/imageslr/mweb-themes",
 		"author": "imageslr"
+	},
+	{
+		"name": "Entrepreneur Journey",
+		"className": "entrepreneur-journey",
+		"desc": "创业者成长之旅：5阶段纵向渐变，从创世到成熟的完整历程",
+		"author": "Lovpen Team"
 	}
 ]
