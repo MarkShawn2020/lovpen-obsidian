@@ -49,8 +49,7 @@ export default defineConfig(({ mode }) => {
 		esbuild: {
 			jsx: 'transform',
 			jsxFactory: 'React.createElement',
-			jsxFragment: 'React.Fragment',
-			jsxInject: `import React from 'react'`
+			jsxFragment: 'React.Fragment'
 		},
 		
 		// Optimizations for better HMR

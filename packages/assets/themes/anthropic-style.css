@@ -165,6 +165,14 @@
 	color: var(--primary-color);
 }
 
+/* 修复标题内加粗文字颜色冲突 */
+#render-container  h1 strong,
+#render-container  h1 b,
+#render-container  h2 strong,
+#render-container  h2 b {
+	color: var(--text-on-primary) !important;
+}
+
 /* === 图片样式 === */
 #render-container  img {
 	display: block;
