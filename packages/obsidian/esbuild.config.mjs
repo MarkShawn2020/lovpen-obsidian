@@ -22,10 +22,11 @@ const syncToObsidian = () => {
 	if (obsidianPluginPath) {
 		// 检查目标目录是否存在，不存在则创建
 		if (!existsSync(obsidianPluginPath)) {
-			console.log(`📁 Creating Obsidian plugin directory: ${obsidianPluginPath}`);
+			const shortPath = obsidianPluginPath.replace(process.env.HOME, '~');
+			console.log(`📁 Creating plugin directory: ${shortPath}`);
 			try {
 				mkdirSync(obsidianPluginPath, {recursive: true});
-				console.log(`✅ Directory created successfully`);
+				console.log(`✅ Directory created`);
 			} catch (error) {
 				console.error(`❌ Failed to create directory: ${error.message}`);
 				process.exit(1);
@@ -33,13 +34,14 @@ const syncToObsidian = () => {
 		}
 
 		try {
-			execSync(`rsync -a packages/obsidian/dist/ "${obsidianPluginPath}"`, {
-				stdio: 'inherit',
+			execSync(`rsync -a -q packages/obsidian/dist/ "${obsidianPluginPath}"`, {
+				stdio: 'pipe',
 				cwd: path.resolve('../..')
 			});
-			console.log(`🔄 Synced to Obsidian plugin directory: ${obsidianPluginPath}`);
+			const shortPath = obsidianPluginPath.replace(process.env.HOME, '~');
+			console.log(`✅ Synced to vault: ${shortPath.split('/').slice(-1)[0]}`);
 		} catch (error) {
-			console.error('❌ Failed to sync to Obsidian:', error.message);
+			console.error('❌ Sync failed:', error.message);
 			process.exit(1);
 		}
 	}
@@ -95,8 +97,20 @@ const context = await esbuild.context({
 				{from: ['../assets/**/*'], to: ['./assets/'], outDir: './dist'},
 				{from: ['../frontend/dist/**/*'], to: ['./frontend/'], outDir: './dist'},
 			],
-			verbose: true, // 输出复制操作的日志，便于调试
+			verbose: false, // 关闭详细日志
 		}),
+		// 构建摘要插件
+		{
+			name: 'build-summary',
+			setup(build) {
+				build.onEnd((result) => {
+					if (result.errors.length === 0 && !prod) {
+						// 简洁的构建完成信息
+						console.log(`✨ Build complete`);
+					}
+				});
+			},
+		},
 		// 构建完成后自动同步插件
 		{
 			name: 'obsidian-sync',
@@ -122,14 +136,16 @@ if (prod) {
 	// 初始构建完成后的同步已在 onEnd 钩子中处理
 
 	let rebuildTimeout;
+	let changedFiles = new Set();
 	const debounceRebuild = () => {
 		clearTimeout(rebuildTimeout);
 		rebuildTimeout = setTimeout(async () => {
 			try {
-				console.log('🔄 Frontend assets changed, rebuilding...');
+				const fileCount = changedFiles.size;
+				console.log(`🔄 Detected ${fileCount} file change${fileCount > 1 ? 's' : ''}, rebuilding...`);
+				changedFiles.clear();
 				await context.rebuild();
-				console.log('✅ Rebuild completed');
-				// syncToObsidian(); // 已在 onEnd 钩子中处理
+				// console.log('✅ Rebuild completed'); // 已由其他插件处理
 			} catch (error) {
 				console.error('❌ Rebuild failed:', error);
 			}
@@ -139,11 +155,11 @@ if (prod) {
 	// 监听变化，触发重新构建
 	['../frontend/dist', "../assets"].forEach((p) => {
 		const targetPath = path.resolve(p)
-		console.log(`🔍 Watching: ${p}`);
+		console.log(`👀 Watching: ${p}`);
 		try {
 			watch(targetPath, {recursive: true}, (eventType, filename) => {
 				if (filename) {
-					console.log(`📁 Frontend file changed: ${filename} (${eventType})`);
+					changedFiles.add(filename);
 					debounceRebuild();
 				}
 			});
