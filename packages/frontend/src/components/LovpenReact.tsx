@@ -36,16 +36,10 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	const lastCssContentRef = useRef<string>("");
 	const lastArticleHTMLRef = useRef<string>("");
 
-	// 调试：检查传入的设置数据
+	// 仅在必要时记录关键信息
 	if ((window as any).__LOVPEN_HMR_MODE__) {
-		console.log('[LovpenReact] HMR Mode Active');
+		logger.debug('HMR Mode Active');
 	}
-	logger.debug("[LovpenReact] Component render started", {
-		articleHTMLLength: articleHTML?.length || 0,
-		cssContentLength: cssContent?.length || 0,
-		cssContentHash: cssContent ? cssContent.substring(0, 50) + "..." : "",
-		currentTheme: settings.defaultStyle
-	});
 
 	const [isMessageVisible, setIsMessageVisible] = useState(false);
 	const [messageTitle, setMessageTitle] = useState("");
@@ -65,17 +59,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 
 	// 组件挂载检查
 	useEffect(() => {
-		logger.debug("[mount-useEffect] Component mounted");
-
 		return () => {
-			logger.debug("[mount-useEffect] Component will unmount");
+			logger.debug("Component unmounting");
 		};
 	}, []);
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
 		if (!isInitializedRef.current && settings) {
-			console.log("[jotai-init] First initialization, settings:", settings);
 			const personalInfo = settings.personalInfo || {
 				name: '',
 				avatar: { type: 'default' },
@@ -84,16 +75,12 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 				website: ''
 			};
 
-			console.log("[jotai-init] Initializing Jotai with settings:", settings);
-			console.log("[jotai-init] Initializing Jotai with personalInfo:", personalInfo);
-
 			initializeSettings({
 				settings,
 				personalInfo
 			});
 
-			logger.debug("[jotai-init] Jotai state initialized with settings:", settings);
-			logger.debug("[jotai-init] Personal info:", personalInfo);
+			logger.debug("Jotai state initialized");
 			
 			isInitializedRef.current = true;
 		}
@@ -106,15 +93,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		const articleChanged = articleHTML !== lastArticleHTMLRef.current;
 		
 		if (cssChanged || articleChanged) {
-			logger.debug("[content-update] Updating CSS and article content", {
-				cssChanged,
-				articleChanged,
-				cssContentLength: cssContent?.length || 0,
-				articleHTMLLength: articleHTML?.length || 0,
-				hasStyleRef: !!styleElRef.current,
-				hasArticleRef: !!articleDivRef.current
-			});
-			
 			if (cssChanged && styleElRef.current) {
 				styleElRef.current.textContent = cssContent;
 				lastCssContentRef.current = cssContent;
@@ -262,15 +240,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 					flexShrink: 0 // 防止被压缩
 				}}
 			>
-				{(() => {
-					logger.debug("[LovpenReact] 渲染工具栏", {
-						pluginsCount: plugins?.length || 0,
-						settingsKeys: Object.keys(settings || {}),
-						hasOnCopy: !!onCopy,
-						hasOnDistribute: !!onDistribute
-					});
-					return (
-						<Toolbar
+				<Toolbar
 							settings={settings}
 							plugins={plugins}
 							articleHTML={articleHTML}
@@ -290,9 +260,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 							onArticleInfoChange={onArticleInfoChange}
 							onPersonalInfoChange={onPersonalInfoChange}
 							onSettingsChange={onSettingsChange}
-						/>
-					);
-				})()}
+					/>
 			</div>
 
 			{/* 消息模态框 */}

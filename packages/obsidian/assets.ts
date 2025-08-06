@@ -2,6 +2,7 @@ import * as zip from "@zip.js/zip.js";
 import {App, FileSystemAdapter, Notice, PluginManifest, requestUrl, TAbstractFile} from "obsidian";
 import DefaultHighlight from "./default-highlight";
 import DefaultTheme from "./default-theme";
+import {logger} from "../shared/src/logger";
 
 
 export interface Theme {
@@ -75,7 +76,7 @@ export default class AssetsManager {
 				this.themes.push(...themes);
 			}
 		} catch (error) {
-			console.error(error);
+			logger.error('Failed to parse themes.json:', error);
 			new Notice('themes.json解析失败！');
 		}
 	}
@@ -90,7 +91,7 @@ export default class AssetsManager {
 				}
 			}
 		} catch (error) {
-			console.error(error);
+			logger.error('Failed to read CSS:', error);
 			new Notice('读取CSS失败！');
 		}
 	}
@@ -106,7 +107,7 @@ export default class AssetsManager {
 				this.customCSS = cssContent;
 			}
 		} catch (error) {
-			console.error(error);
+			logger.error('Failed to read CSS:', error);
 			new Notice('读取CSS失败！');
 		}
 	}
@@ -130,7 +131,7 @@ export default class AssetsManager {
 				}
 			}
 		} catch (error) {
-			console.error(error);
+			logger.error('Failed to parse highlights.json:', error);
 			new Notice('highlights.json解析失败！');
 		}
 	}
@@ -179,7 +180,7 @@ export default class AssetsManager {
 			await this.loadAssets();
 			new Notice('主题下载完成！');
 		} catch (error) {
-			console.error(error);
+			logger.error('Failed to download themes:', error);
 			await this.removeThemes();
 			new Notice('主题下载失败, 请检查网络！');
 		}
@@ -229,7 +230,7 @@ export default class AssetsManager {
 			await this.loadAssets();
 			new Notice('清空完成！');
 		} catch (error) {
-			console.error(error);
+			logger.error('Failed to remove themes:', error);
 			new Notice('清空主题失败！');
 		}
 	}
