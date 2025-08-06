@@ -475,11 +475,61 @@ ${customCSS}`;
 
 	private async loadExternalReactApp() {
 		try {
+			// Check if we should use HMR mode (development)
+			const isDevMode = process.env.NODE_ENV !== 'production' || (window as any).__LOVPEN_DEV_MODE__;
+			const viteDevServerUrl = 'http://localhost:5173';
+			
+			if (isDevMode) {
+				// Try to load from Vite dev server first
+				try {
+					logger.debug("[HMR] 尝试从 Vite Dev Server 加载:", viteDevServerUrl);
+					
+					// Check if dev server is running
+					const response = await fetch(`${viteDevServerUrl}/src/dev.tsx`);
+					if (response.ok) {
+						// Load Vite client for HMR
+						const viteClientScript = document.createElement('script');
+						viteClientScript.type = 'module';
+						viteClientScript.src = `${viteDevServerUrl}/@vite/client`;
+						document.head.appendChild(viteClientScript);
+						
+						// Load the dev module
+						const moduleScript = document.createElement('script');
+						moduleScript.type = 'module';
+						moduleScript.src = `${viteDevServerUrl}/src/dev.tsx`;
+						document.head.appendChild(moduleScript);
+						
+						// Wait for the library to be available
+						await new Promise<void>((resolve) => {
+							let attempts = 0;
+							const checkInterval = setInterval(() => {
+								if ((window as any).LovpenReactLib || attempts > 50) {
+									clearInterval(checkInterval);
+									resolve();
+								}
+								attempts++;
+							}, 100);
+						});
+						
+						this.externalReactLib = (window as any).LovpenReactLib;
+						
+						if (this.externalReactLib) {
+							logger.info("[HMR] 成功加载 Vite Dev Server 的 React 应用（支持 HMR）");
+							this.setupGlobalAPI();
+							return;
+						}
+					}
+				} catch (devError) {
+					logger.warn("[HMR] Vite Dev Server 未运行或无法连接，回退到打包版本", devError.message);
+				}
+			}
+			
+			// Fall back to bundled version (production mode or dev server not available)
 			const adapter = this.app.vault.adapter;
 			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
 			const scriptPath = `${pluginDir}/frontend/lovpen-react.iife.js`;
 
-			logger.debug("加载React应用:", scriptPath);
+			logger.debug("加载打包版本的React应用:", scriptPath);
 			const scriptContent = await adapter.read(scriptPath);
 
 			// 创建script标签并执行
@@ -497,7 +547,7 @@ ${customCSS}`;
 				(window as any).lovpenReact;
 
 			if (this.externalReactLib) {
-				logger.debug("外部React应用加载成功", {
+				logger.debug("外部React应用加载成功（打包版本）", {
 					availableMethods: Object.keys(this.externalReactLib),
 					hasMount: typeof this.externalReactLib.mount === 'function',
 					hasUpdate: typeof this.externalReactLib.update === 'function',
@@ -525,6 +575,12 @@ ${customCSS}`;
 
 	private async loadExternalCSS(pluginDir: string) {
 		try {
+			// Check if we're in HMR mode - CSS is handled by Vite in dev mode
+			if ((window as any).__LOVPEN_HMR_MODE__) {
+				logger.debug("[HMR] CSS 由 Vite Dev Server 管理");
+				return;
+			}
+			
 			const cssPath = `${pluginDir}/frontend/style.css`;
 			const adapter = this.app.vault.adapter;
 			const cssContent = await adapter.read(cssPath);

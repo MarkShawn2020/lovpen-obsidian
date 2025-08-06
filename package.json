@@ -6,6 +6,7 @@
 	"packageManager": "pnpm@10.12.1",
 	"scripts": {
 		"dev": "turbo dev",
+		"dev:hmr": "node scripts/dev-hmr.mjs",
 		"dev:obsidian": "turbo dev",
 		"build": "turbo build",
 		"check": "turbo check",

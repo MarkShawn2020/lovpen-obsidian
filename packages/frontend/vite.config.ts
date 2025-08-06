@@ -5,35 +5,54 @@ import path from "path"
 import tailwindcss from "@tailwindcss/vite"
 import { codeInspectorPlugin } from 'code-inspector-plugin'
 
-export default defineConfig({
-	plugins: [
-		react(), 
-		tailwindcss(),
-		codeInspectorPlugin({
-			bundler: 'vite',
-		})
-	],
-	resolve: {
-		alias: {
-			"@": path.resolve(__dirname, "./src"),
+export default defineConfig(({ mode }) => {
+	const isDev = mode === 'development';
+	
+	return {
+		plugins: [
+			react(), 
+			tailwindcss(),
+			codeInspectorPlugin({
+				bundler: 'vite',
+			})
+		],
+		resolve: {
+			alias: {
+				"@": path.resolve(__dirname, "./src"),
+			},
 		},
-	},
-
-	build: {
-		outDir: './dist',
-		emptyOutDir: true,
-		lib: {
-			entry: 'src/main.tsx',
-			name: 'LovpenReact',
-			fileName: 'lovpen-react',
-			formats: ['iife']
-		},
-		rollupOptions: {
-			output: {
-				inlineDynamicImports: true,
-				exports: "named",
+		
+		// Dev server configuration for HMR
+		server: {
+			port: 5173,
+			host: 'localhost',
+			cors: {
+				origin: '*',
+				credentials: true
+			},
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type'
 			}
 		},
-		minify: false,
+
+		build: {
+			outDir: './dist',
+			emptyOutDir: true,
+			lib: {
+				entry: 'src/main.tsx',
+				name: 'LovpenReact',
+				fileName: 'lovpen-react',
+				formats: ['iife']
+			},
+			rollupOptions: {
+				output: {
+					inlineDynamicImports: true,
+					exports: "named",
+				}
+			},
+			minify: false,
+		}
 	}
 })
