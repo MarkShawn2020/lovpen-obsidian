@@ -36,10 +36,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	const lastCssContentRef = useRef<string>("");
 	const lastArticleHTMLRef = useRef<string>("");
 
-	// 仅在必要时记录关键信息
-	if ((window as any).__LOVPEN_HMR_MODE__) {
-		logger.debug('HMR Mode Active');
-	}
+	// HMR模式检查
 
 	const [isMessageVisible, setIsMessageVisible] = useState(false);
 	const [messageTitle, setMessageTitle] = useState("");
@@ -57,12 +54,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		}
 	});
 
-	// 组件挂载检查
-	useEffect(() => {
-		return () => {
-			logger.debug("Component unmounting");
-		};
-	}, []);
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -80,7 +71,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 				personalInfo
 			});
 
-			logger.debug("Jotai state initialized");
 			
 			isInitializedRef.current = true;
 		}

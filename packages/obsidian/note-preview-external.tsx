@@ -86,9 +86,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 		// 确保设置实例是最新的
 		this.settings = this.getPluginSettings();
-		logger.debug("onOpen时更新设置实例", this.settings.getAllSettings());
-		logger.debug("onOpen时personalInfo:", this.settings.personalInfo);
-		logger.debug("onOpen时authKey:", this.settings.authKey);
 
 		await this.buildUI();
 		this.listeners = [this.workspace.on("active-leaf-change", () => this.update()),];
@@ -131,31 +128,18 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 			// 更新React组件的props但不重新触发onArticleInfoChange
 			await this.updateExternalReactComponent();
-			logger.debug('[updateArticleContentOnly] 更新了文章内容');
 		} catch (error) {
 			logger.error('[updateArticleContentOnly] 更新文章内容失败:', error);
 		}
 	}
 
 	async copyArticle() {
-		console.log("🚨🚨🚨 [复制功能] COPY ARTICLE CALLED! 🚨🚨🚨");
-		console.log("📋 [复制功能] 开始复制文章");
-		
 		let content = await this.getArticleContent();
-		
-		console.log("📋 [复制功能] 获取到文章内容", {
-			contentLength: content.length,
-			contentPreview: content.substring(0, 300) + '...',
-			hasStyles: content.includes('style=')
-		});
 
 		// 复制到剪贴板
-		console.log("📋 [复制功能] 准备写入剪贴板");
 		await navigator.clipboard.write([new ClipboardItem({
 			"text/html": new Blob([content], {type: "text/html"}),
 		}),]);
-
-		console.log("✅ [复制功能] 复制完成");
 		new Notice(`已复制到剪贴板！`);
 	}
 
@@ -174,14 +158,10 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			return;
 		}
 
-		logger.debug(`[updateCSSVariables] 当前主题: ${this.settings.defaultStyle}`);
-
 		if (this.settings.enableThemeColor) {
 			noteContainer.style.setProperty("--primary-color", this.settings.themeColor || "#7852ee");
-			logger.debug(`应用自定义主题色：${this.settings.themeColor}`);
 		} else {
 			noteContainer.style.removeProperty("--primary-color");
-			logger.debug("恢复使用主题文件中的颜色");
 		}
 
 		const listItems = noteContainer.querySelectorAll("li");
@@ -200,7 +180,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		let html = `<section class="${className}" id="article-section">${article}</section>`;
 
 		if (this.settings.useTemplate) {
-			logger.debug("应用模板：", this.settings.defaultTemplate);
 			try {
 				const templateManager = TemplateManager.getInstance();
 				const file = this.app.workspace.getActiveFile();
@@ -217,11 +196,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				if (this.toolbarArticleInfo?.articleTitle && this.toolbarArticleInfo.articleTitle.trim() !== '') {
 					// 优先级1: 基本信息中的标题
 					finalTitle = this.toolbarArticleInfo.articleTitle.trim();
-					logger.debug('[wrapArticleContent] 使用基本信息中的标题:', finalTitle);
 				} else if (meta.articleTitle && String(meta.articleTitle).trim() !== '') {
 					// 优先级2: frontmatter中的标题
 					finalTitle = String(meta.articleTitle).trim();
-					logger.debug('[wrapArticleContent] 使用frontmatter中的标题:', finalTitle);
 				}
 
 				// 设置最终的标题
@@ -235,11 +212,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				if (this.toolbarArticleInfo && 'author' in this.toolbarArticleInfo) {
 					// 如果基本信息存在author字段（即使为空），则使用它
 					finalAuthor = this.toolbarArticleInfo.author?.trim() || '';
-					logger.debug('[wrapArticleContent] 使用基本信息中的作者:', finalAuthor || '(空)');
 				} else if (meta.author && String(meta.author).trim() !== '') {
 					// 只有在基本信息没有author字段时，才使用frontmatter
 					finalAuthor = String(meta.author).trim();
-					logger.debug('[wrapArticleContent] 使用frontmatter中的作者:', finalAuthor);
 				}
 
 				// 设置最终的作者（可能为空）
@@ -251,20 +226,16 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				if (this.toolbarArticleInfo && 'publishDate' in this.toolbarArticleInfo) {
 					// 如果基本信息存在publishDate字段（即使为空），则使用它
 					finalPublishDate = this.toolbarArticleInfo.publishDate?.trim() || '';
-					logger.debug('[wrapArticleContent] 使用基本信息中的发布日期:', finalPublishDate || '(空)');
 				} else if (meta.publishDate && String(meta.publishDate).trim() !== '') {
 					// 只有在基本信息没有publishDate字段时，才使用frontmatter
 					finalPublishDate = String(meta.publishDate).trim();
-					logger.debug('[wrapArticleContent] 使用frontmatter中的发布日期:', finalPublishDate);
 				}
 
 				// 设置最终的发布日期（可能为空）
 				meta.publishDate = finalPublishDate;
 
 				// 然后用工具栏的基本信息覆盖frontmatter（除了articleTitle、author、publishDate已经特殊处理）
-				logger.debug('[wrapArticleContent] 检查toolbarArticleInfo:', this.toolbarArticleInfo);
 				if (this.toolbarArticleInfo) {
-					logger.debug("[wrapArticleContent] 使用工具栏基本信息覆盖frontmatter:", this.toolbarArticleInfo);
 					// 只覆盖有值的字段
 					Object.keys(this.toolbarArticleInfo).forEach(key => {
 						// articleTitle、author、publishDate已经在上面特殊处理了，跳过
@@ -291,7 +262,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					website: this.settings.personalInfo?.website || ''
 				};
 
-				logger.debug("传递至模板的元数据:", meta);
 
 				html = templateManager.applyTemplate(html, this.settings.defaultTemplate, meta);
 			} catch (error) {
@@ -305,56 +275,25 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	async getArticleContent() {
 		try {
-			console.log("🔄 [内容生成] 开始生成文章内容");
 			
 			const af = this.app.workspace.getActiveFile();
 			let md = "";
 			if (af && af.extension.toLocaleLowerCase() === "md") {
 				md = await this.app.vault.adapter.read(af.path);
 				this.title = af.basename;
-				console.log("📄 [内容生成] 读取Markdown文件", {
-					fileName: af.basename,
-					contentLength: md.length,
-					hasFrontMatter: md.startsWith("---")
-				});
 			} else {
 				md = "没有可渲染的笔记或文件不支持渲染";
-				console.log("⚠️ [内容生成] 无有效文件");
 			}
 
 			if (md.startsWith("---")) {
-				const beforeRemove = md.length;
 				md = md.replace(FRONT_MATTER_REGEX, "");
-				console.log("📝 [内容生成] 移除Front Matter", {
-					beforeLength: beforeRemove,
-					afterLength: md.length
-				});
 			}
 
-			console.log("🔄 [内容生成] 开始Markdown解析");
 			let articleHTML = await this.markedParser.parse(md);
-			console.log("✅ [内容生成] Markdown解析完成", {
-				htmlLength: articleHTML.length,
-				hasStyles: articleHTML.includes('<style')
-			});
-
-			console.log("📦 [内容生成] 包装文章内容");
 			articleHTML = this.wrapArticleContent(articleHTML);
-			console.log("✅ [内容生成] 包装完成", {
-				wrappedLength: articleHTML.length
-			});
 
-			console.log("🔌 [内容生成] 开始插件处理");
 			const pluginManager = UnifiedPluginManager.getInstance();
-			const beforePlugins = articleHTML;
 			articleHTML = pluginManager.processContent(articleHTML, this.settings);
-			
-			console.log("✅ [内容生成] 插件处理完成", {
-				beforeLength: beforePlugins.length,
-				afterLength: articleHTML.length,
-				changed: beforePlugins !== articleHTML,
-				finalHasStyles: articleHTML.includes('style=')
-			});
 
 			return articleHTML;
 		} catch (error) {
@@ -364,16 +303,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	getCSS() {
-		logger.debug(`[getCSS] 当前主题: ${this.currentTheme}, 设置中的主题: ${this.settings.defaultStyle}`);
-
 		const theme = this.assetsManager.getTheme(this.currentTheme);
 		const highlight = this.assetsManager.getHighlight(this.currentHighlight);
 		const customCSS = this.settings.useCustomCss ? this.assetsManager.customCSS : "";
-
-		logger.debug(`[getCSS] 主题对象:`, theme ? `${theme.name}` : 'undefined');
-		logger.debug(`[getCSS] 主题CSS长度:`, theme?.css?.length || 0);
-		logger.debug(`[getCSS] 是否使用模板:`, this.settings.useTemplate);
-		logger.debug(`[getCSS] 当前模板:`, this.settings.defaultTemplate);
 
 		let themeColorCSS = "";
 
@@ -402,7 +334,6 @@ ${InlineCSS}
 ${highlightCss}
 
 ${customCSS}`;
-			logger.debug(`[getCSS] 模板模式: 跳过主题CSS以避免冲突`);
 		} else {
 			// 不使用模板时，正常加载所有样式
 			finalCSS = `${themeColorCSS}
@@ -414,10 +345,7 @@ ${highlightCss}
 ${themeCss}
 
 ${customCSS}`;
-			logger.debug(`[getCSS] 常规模式: 加载所有样式`);
 		}
-
-		logger.debug(`[getCSS] 最终CSS长度:`, finalCSS.length);
 		return finalCSS;
 	}
 
@@ -449,12 +377,6 @@ ${customCSS}`;
 		this.reactContainer.id = 'lovpen-react-container';
 		this.container.appendChild(this.reactContainer);
 
-		logger.debug("UI构建完成", {
-			containerExists: !!this.container,
-			reactContainerExists: !!this.reactContainer,
-			reactContainerInDOM: document.contains(this.reactContainer),
-			containerChildren: this.container.children.length
-		});
 
 		// 渲染外部React组件
 		await this.updateExternalReactComponent();
@@ -463,7 +385,6 @@ ${customCSS}`;
 	private getPluginSettings(): NMPSettings {
 		const plugin = (this.app as any).plugins.plugins["lovpen"];
 		if (plugin && plugin.settings) {
-			logger.debug("获取到主插件的设置实例");
 			return plugin.settings;
 		}
 
@@ -479,7 +400,6 @@ ${customCSS}`;
 			
 			// Try to load from Vite dev server first
 			try {
-				logger.debug("[HMR] Checking Vite Dev Server:", viteDevServerUrl);
 				
 				// Check if dev server is running with a simple ping
 				const response = await fetch(`${viteDevServerUrl}/@vite/client`, { 
@@ -488,7 +408,6 @@ ${customCSS}`;
 				});
 				
 				if (response.ok || response.status === 200) {
-					logger.info("[HMR] Vite Dev Server detected, loading with HMR support");
 					
 					// Clear any previous scripts to ensure fresh load
 					const existingScripts = document.querySelectorAll('script[data-lovpen-hmr]');
@@ -549,7 +468,6 @@ ${customCSS}`;
 					}
 				}
 			} catch (devError) {
-				logger.debug("[HMR] Vite Dev Server not available, using bundled version");
 			}
 			
 			// Fall back to bundled version (production mode or dev server not available)
@@ -557,7 +475,6 @@ ${customCSS}`;
 			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
 			const scriptPath = `${pluginDir}/frontend/lovpen-react.iife.js`;
 
-			logger.debug("加载打包版本的React应用:", scriptPath);
 			const scriptContent = await adapter.read(scriptPath);
 
 			// 创建script标签并执行
@@ -633,7 +550,6 @@ ${customCSS}`;
 	}
 
 	private loadFallbackComponent() {
-		logger.debug("使用回退方案：原始React组件");
 		// 这里可以导入原始的React组件作为备用
 		// 暂时不实现，仅记录日志
 	}
@@ -1226,9 +1142,7 @@ ${customCSS}`;
 		}
 
 		// 将文章信息保存到toolbarArticleInfo中，用于渲染时合并
-		logger.debug('[handleArticleInfoChange] 文章信息已更新:', info);
 		this.toolbarArticleInfo = info;
-		logger.debug('[handleArticleInfoChange] toolbarArticleInfo已设置:', this.toolbarArticleInfo);
 
 		// 设置标志位并异步更新
 		this.isUpdatingFromToolbar = true;
@@ -1247,7 +1161,6 @@ ${customCSS}`;
 			return;
 		}
 
-		logger.debug('[handlePersonalInfoChange] 个人信息已更新:', info);
 		logger.debug('[handlePersonalInfoChange] 更新前的设置:', this.settings.personalInfo);
 		this.settings.personalInfo = info;
 		logger.debug('[handlePersonalInfoChange] 更新后的设置:', this.settings.personalInfo);

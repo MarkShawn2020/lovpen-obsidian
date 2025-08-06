@@ -8,7 +8,7 @@ export interface LoggerConfig {
 
 // 默认配置
 export const defaultLoggerConfig: LoggerConfig = {
-	level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+	level: process.env.NODE_ENV === 'development' ? 'warn' : 'error',
 	enableInProduction: false,
 	timestamp: false
 };
