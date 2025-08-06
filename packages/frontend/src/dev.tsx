@@ -17,35 +17,39 @@ const mountedRoots = new Map<HTMLElement, ReactDOM.Root>()
 // Create the external library interface for Obsidian plugin
 const LovpenReactLib: ExternalReactLib = {
   mount: async (container: HTMLElement, props: any) => {
-    console.log('[HMR] Mounting React component', { container, props })
-    let root = mountedRoots.get(container)
+    console.log('[HMR] Mounting React component', { container, props });
+    let root = mountedRoots.get(container);
     if (!root) {
-      root = ReactDOM.createRoot(container)
-      mountedRoots.set(container, root)
+      root = ReactDOM.createRoot(container);
+      mountedRoots.set(container, root);
     }
+    // Store props for HMR updates
+    (container as any).__lovpenProps = props;
     root.render(
       <React.StrictMode>
         <JotaiProvider>
           <LovpenReact {...props} />
         </JotaiProvider>
       </React.StrictMode>
-    )
+    );
   },
 
   update: async (container: HTMLElement, props: any) => {
-    console.log('[HMR] Updating React component', { container })
-    let root = mountedRoots.get(container)
+    console.log('[HMR] Updating React component', { container });
+    let root = mountedRoots.get(container);
     if (!root) {
-      root = ReactDOM.createRoot(container)
-      mountedRoots.set(container, root)
+      root = ReactDOM.createRoot(container);
+      mountedRoots.set(container, root);
     }
+    // Store props for HMR updates
+    (container as any).__lovpenProps = props;
     root.render(
       <React.StrictMode>
         <JotaiProvider>
           <LovpenReact {...props} />
         </JotaiProvider>
       </React.StrictMode>
-    )
+    );
   },
 
   unmount: (container: HTMLElement) => {
@@ -136,7 +140,26 @@ if (rootElement) {
 // Enable HMR
 if ((import.meta as any).hot) {
   (import.meta as any).hot.accept(() => {
-    console.log('[HMR] Module updated')
-    // React Fast Refresh will handle component updates automatically
-  })
+    console.log('[HMR] Module updated, re-rendering components');
+    
+    // Force re-render all mounted components
+    mountedRoots.forEach((root, container) => {
+      const props = (container as any).__lovpenProps;
+      if (props) {
+        console.log('[HMR] Re-rendering component in container', container);
+        root.render(
+          <React.StrictMode>
+            <JotaiProvider>
+              <LovpenReact {...props} />
+            </JotaiProvider>
+          </React.StrictMode>
+        );
+      }
+    });
+    
+    // Notify Obsidian plugin if available
+    if ((window as any).__lovpenRefresh) {
+      (window as any).__lovpenRefresh();
+    }
+  });
 }

@@ -8,17 +8,17 @@ export default defineConfig(({ mode }) => {
 	const isDev = mode === 'development';
 	
 	return {
+		define: {
+			'process.env.NODE_ENV': JSON.stringify(mode)
+		},
 		plugins: [
 			react({
-				// Force classic JSX runtime in dev to avoid preamble issues
-				jsxRuntime: 'classic',
-				// Explicit JSX pragma
-				jsxPragma: 'React.createElement',
-				jsxPragmaFragment: 'React.Fragment',
-				// Fast refresh for HMR
-				fastRefresh: isDev,
-				// Don't use Babel transforms that might conflict
-				babel: false
+				// Use automatic runtime for better HMR
+				jsxRuntime: 'automatic',
+				// Fast refresh enabled
+				fastRefresh: true,
+				// Include all JSX/TSX files
+				include: '**/*.{jsx,tsx,js,ts}'
 			}), 
 			tailwindcss()
 		],
@@ -34,33 +34,27 @@ export default defineConfig(({ mode }) => {
 			host: 'localhost',
 			cors: {
 				origin: '*',
-				credentials: true
+				credentials: true,
+				methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD']
 			},
 			headers: {
 				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-				'Access-Control-Allow-Headers': 'Content-Type'
+				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
+				'Access-Control-Allow-Headers': '*',
+				'Access-Control-Expose-Headers': '*'
 			},
-			// Important: enable HMR
-			hmr: true
-		},
-		
-		// Ensure esbuild handles JSX correctly
-		esbuild: {
-			jsx: 'transform',
-			jsxFactory: 'React.createElement',
-			jsxFragment: 'React.Fragment'
+			// HMR configuration
+			hmr: {
+				protocol: 'ws',
+				host: 'localhost',
+				port: 5173
+			}
 		},
 		
 		// Optimizations for better HMR
 		optimizeDeps: {
-			include: ['react', 'react-dom'],
-			exclude: ['@lovpen/obsidian'],
-			esbuildOptions: {
-				jsx: 'transform',
-				jsxFactory: 'React.createElement',
-				jsxFragment: 'React.Fragment'
-			}
+			include: ['react', 'react-dom', 'react/jsx-runtime'],
+			exclude: ['@lovpen/obsidian']
 		},
 
 		build: {

@@ -475,53 +475,82 @@ ${customCSS}`;
 
 	private async loadExternalReactApp() {
 		try {
-			// Check if we should use HMR mode (development)
-			const isDevMode = process.env.NODE_ENV !== 'production' || (window as any).__LOVPEN_DEV_MODE__;
+			// Always try HMR first in development
 			const viteDevServerUrl = 'http://localhost:5173';
 			
-			if (isDevMode) {
-				// Try to load from Vite dev server first
-				try {
-					logger.debug("[HMR] 尝试从 Vite Dev Server 加载:", viteDevServerUrl);
+			// Try to load from Vite dev server first
+			try {
+				logger.debug("[HMR] Checking Vite Dev Server:", viteDevServerUrl);
+				
+				// Check if dev server is running with a simple ping
+				const response = await fetch(`${viteDevServerUrl}/@vite/client`, { 
+					method: 'HEAD',
+					mode: 'cors'
+				});
+				
+				if (response.ok || response.status === 200) {
+					logger.info("[HMR] Vite Dev Server detected, loading with HMR support");
 					
-					// Check if dev server is running
-					const response = await fetch(`${viteDevServerUrl}/src/dev.tsx`);
-					if (response.ok) {
-						// Load Vite client for HMR
-						const viteClientScript = document.createElement('script');
-						viteClientScript.type = 'module';
-						viteClientScript.src = `${viteDevServerUrl}/@vite/client`;
-						document.head.appendChild(viteClientScript);
+					// Clear any previous scripts to ensure fresh load
+					const existingScripts = document.querySelectorAll('script[data-lovpen-hmr]');
+					existingScripts.forEach(s => s.remove());
+					
+					// Load Vite client for HMR
+					const viteClientScript = document.createElement('script');
+					viteClientScript.type = 'module';
+					viteClientScript.src = `${viteDevServerUrl}/@vite/client`;
+					viteClientScript.setAttribute('data-lovpen-hmr', 'true');
+					document.head.appendChild(viteClientScript);
+					
+					// Load React refresh runtime
+					const reactRefreshScript = document.createElement('script');
+					reactRefreshScript.type = 'module';
+					reactRefreshScript.innerHTML = `
+						import RefreshRuntime from '${viteDevServerUrl}/@react-refresh';
+						RefreshRuntime.injectIntoGlobalHook(window);
+						window.$RefreshReg$ = () => {};
+						window.$RefreshSig$ = () => (type) => type;
+						window.__vite_plugin_react_preamble_installed__ = true;
+					`;
+					reactRefreshScript.setAttribute('data-lovpen-hmr', 'true');
+					document.head.appendChild(reactRefreshScript);
+					
+					// Load the dev module with timestamp to bypass cache
+					const moduleScript = document.createElement('script');
+					moduleScript.type = 'module';
+					moduleScript.src = `${viteDevServerUrl}/src/dev.tsx?t=${Date.now()}`;
+					moduleScript.setAttribute('data-lovpen-hmr', 'true');
+					document.head.appendChild(moduleScript);
+					
+					// Mark HMR mode
+					(window as any).__LOVPEN_HMR_MODE__ = true;
+					(window as any).__LOVPEN_HMR_URL__ = viteDevServerUrl;
+					
+					// Wait for the library to be available
+					await new Promise<void>((resolve) => {
+						let attempts = 0;
+						const checkInterval = setInterval(() => {
+							if ((window as any).LovpenReactLib || attempts > 50) {
+								clearInterval(checkInterval);
+								resolve();
+							}
+							attempts++;
+						}, 100);
+					});
+					
+					this.externalReactLib = (window as any).LovpenReactLib;
+					
+					if (this.externalReactLib) {
+						logger.info("[HMR] ✅ Successfully loaded React app with HMR support");
+						this.setupGlobalAPI();
 						
-						// Load the dev module
-						const moduleScript = document.createElement('script');
-						moduleScript.type = 'module';
-						moduleScript.src = `${viteDevServerUrl}/src/dev.tsx`;
-						document.head.appendChild(moduleScript);
-						
-						// Wait for the library to be available
-						await new Promise<void>((resolve) => {
-							let attempts = 0;
-							const checkInterval = setInterval(() => {
-								if ((window as any).LovpenReactLib || attempts > 50) {
-									clearInterval(checkInterval);
-									resolve();
-								}
-								attempts++;
-							}, 100);
-						});
-						
-						this.externalReactLib = (window as any).LovpenReactLib;
-						
-						if (this.externalReactLib) {
-							logger.info("[HMR] 成功加载 Vite Dev Server 的 React 应用（支持 HMR）");
-							this.setupGlobalAPI();
-							return;
-						}
+						// Setup HMR update listener
+						this.setupHMRListener();
+						return;
 					}
-				} catch (devError) {
-					logger.warn("[HMR] Vite Dev Server 未运行或无法连接，回退到打包版本", devError.message);
 				}
+			} catch (devError) {
+				logger.debug("[HMR] Vite Dev Server not available, using bundled version");
 			}
 			
 			// Fall back to bundled version (production mode or dev server not available)
@@ -608,6 +637,29 @@ ${customCSS}`;
 		logger.debug("使用回退方案：原始React组件");
 		// 这里可以导入原始的React组件作为备用
 		// 暂时不实现，仅记录日志
+	}
+	
+	/**
+	 * Setup HMR listener for hot updates
+	 */
+	private setupHMRListener() {
+		if (!(window as any).__LOVPEN_HMR_MODE__) return;
+		
+		logger.debug("[HMR] Setting up HMR update listener");
+		
+		// Listen for HMR updates
+		if ((window as any).import && (window as any).import.meta) {
+			// Module updates will be handled by Vite automatically
+			logger.debug("[HMR] Vite HMR is active");
+		}
+		
+		// Listen for manual refresh events
+		(window as any).__lovpenRefresh = async () => {
+			logger.debug("[HMR] Manual refresh triggered");
+			if (this.externalReactLib && this.reactContainer) {
+				await this.updateExternalReactComponent();
+			}
+		};
 	}
 
 	/**

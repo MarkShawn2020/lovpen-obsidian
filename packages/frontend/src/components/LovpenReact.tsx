@@ -4,6 +4,7 @@ import {Toolbar} from "./toolbar/Toolbar";
 import {MessageModal} from "./preview/MessageModal";
 import {useSetAtom} from "jotai";
 import {initializeSettingsAtom} from "../store/atoms";
+import {HMRTest} from "./HMRTest";
 
 import {logger} from "../../../shared/src/logger";
 
@@ -33,9 +34,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
 
 	// 调试：检查传入的设置数据
-	console.log('[LovpenReact] Component props received:');
-	console.log('[LovpenReact] settings:', settings);
-	console.log('[LovpenReact] settings.personalInfo:', settings?.personalInfo);
+	if ((window as any).__LOVPEN_HMR_MODE__) {
+		console.log('[LovpenReact] HMR Mode Active');
+	}
 	logger.debug("[LovpenReact] Component render started", {
 		articleHTMLLength: articleHTML?.length || 0,
 		cssContentLength: cssContent?.length || 0,
@@ -323,6 +324,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 				showOkButton={showOkButton}
 				onClose={closeMessage}
 			/>
+			
+			{/* HMR 测试指示器 - 仅在开发模式显示 */}
+			{(window as any).__LOVPEN_HMR_MODE__ && <HMRTest />}
 		</div>
 	);
 };
