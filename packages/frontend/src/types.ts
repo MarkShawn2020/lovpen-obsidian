@@ -79,6 +79,10 @@ export interface ViteReactSettings {
 	personalInfo: PersonalInfo;
 	aiPromptTemplate?: string;
 	aiModel?: string; // 用户选择的AI模型ID
+	// AI Provider settings
+	aiProvider?: 'claude' | 'openrouter'; // AI提供商选择
+	openRouterApiKey?: string; // OpenRouter API密钥
+	openRouterModel?: string; // OpenRouter模型选择
 }
 
 // Configuration option types

@@ -27,6 +27,8 @@ export const AI_STYLES: AIStyle[] = [
 		icon: '🤖',
 		prompt: `请分析以下文章内容，为其生成合适的元数据信息。请返回JSON格式的结果：
 
+今天的日期是：{{today}}
+
 文章内容：
 {{content}}
 
@@ -54,9 +56,8 @@ export const AI_STYLES: AIStyle[] = [
 4. seriesName: 如果是系列文章，推测系列名称
 5. tags: 3-5个相关标签数组
 6. author: 基于内容推测的作者名（如果无法推测留空）
-7. publishDate: 建议的发布日期（YYYY-MM-DD格式，通常是今天）
-8. summary: 文章摘要，简要概括主要内容（100-200字）
-9. recommendation: 推荐语，吸引读者阅读的亮点或价值（50-100字）
+7. publishDate: 建议的发布日期（YYYY-MM-DD格式，就是今天 {{today}}）
+8. recommendation: 推荐语，吸引读者阅读的亮点或价值（50-100字）
 
 请确保返回格式为纯JSON，不要包含其他文字：
 {
@@ -66,8 +67,7 @@ export const AI_STYLES: AIStyle[] = [
   "seriesName": "...",
   "tags": ["标签1", "标签2", "标签3"],
   "author": "...",
-  "publishDate": "...",
-  "summary": "文章摘要内容...",
+  "publishDate": "{{today}}",
   "recommendation": "推荐语内容..."
 }`
 	},
@@ -77,6 +77,8 @@ export const AI_STYLES: AIStyle[] = [
 		description: '适合技术文章，重点分析技术要点和关键词',
 		icon: '💻',
 		prompt: `作为技术文档分析专家，请分析以下技术文章并生成元数据：
+
+今天的日期是：{{today}}
 
 文章内容：
 {{content}}
@@ -104,7 +106,6 @@ export const AI_STYLES: AIStyle[] = [
   "tags": ["主要技术栈", "编程语言", "核心概念", "难度级别"],
   "author": "{{personalInfo.name}}",
   "publishDate": "{{today}}",
-  "summary": "技术文章摘要，概括主要技术内容和实现方法",
   "recommendation": "技术推荐语，突出技术价值和学习收获"
 }`
 	},
@@ -114,6 +115,8 @@ export const AI_STYLES: AIStyle[] = [
 		description: '适合营销和商业内容，重点关注用户价值和吸引力',
 		icon: '📈',
 		prompt: `作为营销内容分析师，请分析以下营销/商业文章：
+
+今天的日期是：{{today}}
 
 文章内容：
 {{content}}
@@ -141,7 +144,6 @@ export const AI_STYLES: AIStyle[] = [
   "tags": ["目标受众", "核心价值", "内容类型", "行业关键词"],
   "author": "{{personalInfo.name}}",
   "publishDate": "{{today}}",
-  "summary": "营销内容摘要，概括核心价值主张和目标受众",
   "recommendation": "营销推荐语，强调实际价值和行动驱动"
 }`
 	},
@@ -151,6 +153,8 @@ export const AI_STYLES: AIStyle[] = [
 		description: '适合学术论文和研究内容，注重严谨性和专业性',
 		icon: '🎓',
 		prompt: `作为学术研究分析专家，请分析以下学术内容：
+
+今天的日期是：{{today}}
 
 文章内容：
 {{content}}
@@ -178,7 +182,7 @@ export const AI_STYLES: AIStyle[] = [
   "tags": ["研究领域", "方法论", "理论框架", "学科分类"],
   "author": "{{personalInfo.name}}",
   "publishDate": "{{today}}",
-  "summary": "学术研究摘要，概括研究问题、方法和主要发现",
+  "summary": "学术研究摘要，概括研究问题、方法和主要发现（100-200字）",
   "recommendation": "学术推荐语，强调研究价值和理论贡献"
 }`
 	},
@@ -188,6 +192,8 @@ export const AI_STYLES: AIStyle[] = [
 		description: '适合生活类内容，重点关注实用性和情感共鸣',
 		icon: '🌟',
 		prompt: `作为生活内容分析师，请分析以下生活类文章：
+
+今天的日期是：{{today}}
 
 文章内容：
 {{content}}
@@ -215,7 +221,6 @@ export const AI_STYLES: AIStyle[] = [
   "tags": ["生活场景", "实用技巧", "情感标签", "价值观念"],
   "author": "{{personalInfo.name}}",
   "publishDate": "{{today}}",
-  "summary": "生活内容摘要，概括实用技巧和生活感悟",
   "recommendation": "生活推荐语，强调实用价值和情感共鸣"
 }`
 	}

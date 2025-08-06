@@ -3,9 +3,9 @@ import {Button} from '../ui/button';
 import {ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
 import {persistentStorageService} from '../../services/persistentStorage';
-import Handlebars from 'handlebars';
 import {AIAnalysisSplitButton, AIStyle} from '../ui/ai-analysis-split-button';
 import {CustomPromptModal} from '../ui/custom-prompt-modal';
+import { analyzeContentWithAI } from '../../services/aiService';
 
 interface ArticleInfoProps {
 	settings: ViteReactSettings;
@@ -144,9 +144,14 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 	};
 
 	const handleAIAnalyze = async (style: AIStyle) => {
-		// 检查是否配置了Claude API密钥
-		if (!settings.authKey || settings.authKey.trim() === '') {
+		// 检查是否配置了API密钥
+		const provider = settings.aiProvider || 'claude';
+		if (provider === 'claude' && (!settings.authKey || settings.authKey.trim() === '')) {
 			alert('请先在设置页面配置Claude API密钥才能使用AI分析功能');
+			return;
+		}
+		if (provider === 'openrouter' && (!settings.openRouterApiKey || settings.openRouterApiKey.trim() === '')) {
+			alert('请先在设置页面配置OpenRouter API密钥才能使用AI分析功能');
 			return;
 		}
 
@@ -177,8 +182,18 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 				return;
 			}
 
-			// 调用Claude AI分析，使用指定的风格
-			const aiSuggestion = await analyzeContentWithClaude(cleanContent, activeFile.basename, style);
+			// 获取frontmatter
+			const metadata = app.metadataCache.getFileCache(activeFile);
+			const frontmatter = metadata?.frontmatter || {};
+
+			// 调用AI分析
+			const aiSuggestion = await analyzeContentWithAI(
+				cleanContent,
+				activeFile.basename,
+				style.prompt,
+				settings,
+				frontmatter
+			);
 
 			// 合并现有信息和AI建议
 			const finalSuggestion = {
@@ -189,7 +204,8 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 				episodeNum: aiSuggestion.episodeNum || '',
 				seriesName: aiSuggestion.seriesName || '',
 				tags: aiSuggestion.tags || [],
-				summary: aiSuggestion.summary || '',
+				// 仅学术风格会返回summary，其他风格不返回该字段
+				summary: aiSuggestion.summary !== undefined ? aiSuggestion.summary : '',
 				recommendation: aiSuggestion.recommendation || ''
 			};
 
@@ -204,90 +220,6 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		}
 	};
 
-	// Claude AI分析函数
-	const analyzeContentWithClaude = async (content: string, filename: string, style: AIStyle) => {
-		// 获取当前文档的frontmatter
-		const app = (window as any).app;
-		const activeFile = app.workspace.getActiveFile();
-		let frontmatter = {};
-
-		if (activeFile) {
-			const metadata = app.metadataCache.getFileCache(activeFile);
-			frontmatter = metadata?.frontmatter || {};
-		}
-
-		// 使用指定风格的模板
-		let promptTemplate = style.prompt;
-
-		// 准备模板数据
-		const templateData = {
-			content: content,
-			filename: filename,
-			personalInfo: settings.personalInfo || {},
-			frontmatter: frontmatter,
-			today: new Date().toISOString().split('T')[0]
-		};
-
-		// 使用Handlebars渲染模板
-		const template = Handlebars.compile(promptTemplate);
-		const prompt = template(templateData);
-
-		logger.info(`Generated AI prompt for ${style.name}:`, prompt);
-
-		try {
-			// 使用Obsidian的requestUrl API来避免CORS问题
-			// 通过全局API获取requestUrl
-			if (!window.lovpenReactAPI || typeof window.lovpenReactAPI.requestUrl === 'undefined') {
-				throw new Error('此功能仅在Obsidian环境中可用');
-			}
-			const requestUrl = window.lovpenReactAPI.requestUrl;
-
-			const response = await requestUrl({
-				url: 'https://api.anthropic.com/v1/messages',
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'x-api-key': settings.authKey || '', // 使用现有的authKey
-					'anthropic-version': '2023-06-01'
-				},
-				body: JSON.stringify({
-					model: settings.aiModel || 'claude-3-5-haiku-latest',
-					max_tokens: 1000,
-					messages: [
-						{
-							role: 'user',
-							content: prompt
-						}
-					]
-				})
-			});
-
-			if (response.status !== 200) {
-				throw new Error(`Claude API调用失败: ${response.status}`);
-			}
-
-			const result = response.json;
-			const aiResponse = result.content[0].text;
-
-			// 解析JSON响应
-			try {
-				const parsedResult = JSON.parse(aiResponse);
-				return parsedResult;
-			} catch (parseError) {
-				logger.warn('解析Claude响应失败，尝试提取JSON:', aiResponse);
-				// 尝试从响应中提取JSON
-				const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-				if (jsonMatch) {
-					return JSON.parse(jsonMatch[0]);
-				}
-				throw new Error('无法解析Claude的响应格式');
-			}
-
-		} catch (error) {
-			logger.error('Claude API调用失败:', error);
-			throw error;
-		}
-	};
 
 	const getCurrentFileName = () => {
 		try {
