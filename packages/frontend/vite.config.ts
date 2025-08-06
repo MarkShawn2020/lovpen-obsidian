@@ -3,18 +3,24 @@ import react from '@vitejs/plugin-react'
 import path from "path"
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite"
-import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig(({ mode }) => {
 	const isDev = mode === 'development';
 	
 	return {
 		plugins: [
-			react(), 
-			tailwindcss(),
-			codeInspectorPlugin({
-				bundler: 'vite',
-			})
+			react({
+				// Force classic JSX runtime in dev to avoid preamble issues
+				jsxRuntime: 'classic',
+				// Explicit JSX pragma
+				jsxPragma: 'React.createElement',
+				jsxPragmaFragment: 'React.Fragment',
+				// Fast refresh for HMR
+				fastRefresh: isDev,
+				// Don't use Babel transforms that might conflict
+				babel: false
+			}), 
+			tailwindcss()
 		],
 		resolve: {
 			alias: {
@@ -34,6 +40,27 @@ export default defineConfig(({ mode }) => {
 				'Access-Control-Allow-Origin': '*',
 				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 				'Access-Control-Allow-Headers': 'Content-Type'
+			},
+			// Important: enable HMR
+			hmr: true
+		},
+		
+		// Ensure esbuild handles JSX correctly
+		esbuild: {
+			jsx: 'transform',
+			jsxFactory: 'React.createElement',
+			jsxFragment: 'React.Fragment',
+			jsxInject: `import React from 'react'`
+		},
+		
+		// Optimizations for better HMR
+		optimizeDeps: {
+			include: ['react', 'react-dom'],
+			exclude: ['@lovpen/obsidian'],
+			esbuildOptions: {
+				jsx: 'transform',
+				jsxFactory: 'React.createElement',
+				jsxFragment: 'React.Fragment'
 			}
 		},
 

@@ -1,3 +1,4 @@
+import React from "react";
 import {createRoot, Root} from "react-dom/client";
 import {LovpenReact} from "./components/LovpenReact";
 import {type LovpenReactLib, LovpenReactProps} from "./types";
