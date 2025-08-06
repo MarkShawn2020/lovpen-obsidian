@@ -191,11 +191,62 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 			// 后处理：清理微信不兼容的CSS属性
 			// html = this.cleanIncompatibleStyles(processedHtml);
+			
+			// 修复标题内加粗文字颜色问题
+			const cleanedHtml = this.fixHeadingStrongColors(processedHtml);
 
 			logger.debug("微信CSS内联化完成");
-			return processedHtml;
+			return cleanedHtml;
 		} catch (error) {
 			logger.error("CSS内联化处理出错:", error);
+			return html;
+		}
+	}
+
+	/**
+	 * 修复标题内加粗文字的颜色问题
+	 * 当H1或H2标题有背景色时，确保内部的strong/b标签文字颜色与标题保持一致
+	 */
+	private fixHeadingStrongColors(html: string): string {
+		try {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+			const container = doc.body.firstChild as HTMLElement;
+
+			// 查找所有H1和H2标题
+			const headings = container.querySelectorAll("h1, h2");
+			
+			headings.forEach((heading) => {
+				const headingElement = heading as HTMLElement;
+				const headingStyle = headingElement.getAttribute("style") || "";
+				
+				// 检查标题是否有背景色
+				if (headingStyle.includes("background")) {
+					// 获取标题的文字颜色
+					const colorMatch = headingStyle.match(/(?<!background-)color:\s*([^;]+)/);
+					const headingColor = colorMatch ? colorMatch[1].trim() : "";
+					
+					// 查找标题内的所有strong和b标签
+					const strongElements = headingElement.querySelectorAll("strong, b");
+					
+					strongElements.forEach((elem) => {
+						const strongElement = elem as HTMLElement;
+						const currentStyle = strongElement.getAttribute("style") || "";
+						
+						// 移除原有的color样式，并添加与标题一致的颜色
+						const styleWithoutColor = currentStyle.replace(/color:\s*[^;]+;?/g, "").trim();
+						const newStyle = styleWithoutColor 
+							? `${styleWithoutColor}; color: ${headingColor}`
+							: `color: ${headingColor}`;
+						
+						strongElement.setAttribute("style", newStyle);
+					});
+				}
+			});
+
+			return container.innerHTML;
+		} catch (error) {
+			logger.error("修复标题加粗文字颜色时出错:", error);
 			return html;
 		}
 	}
