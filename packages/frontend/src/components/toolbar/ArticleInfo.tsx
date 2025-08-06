@@ -306,7 +306,7 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		// 完全清空，所有字段都变成空值，显示为placeholder
 		setArticleInfo({
 			author: '',
-			publishDate: new Date().toISOString().split('T')[0], // 日期保持当前日期
+			publishDate: '', // 日期也清空
 			articleTitle: '',
 			articleSubtitle: '',
 			episodeNum: '',

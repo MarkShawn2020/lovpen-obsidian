@@ -27,38 +27,37 @@ export class Tables extends UnifiedHtmlPlugin {
 			const tables = container.querySelectorAll("table");
 
 			tables.forEach((table) => {
-				// 确保表格有正确的微信样式
-				table.style.borderCollapse = "collapse";
-				table.style.width = "100%";
-				table.style.marginBottom = "20px";
-
-				// 处理表头
-				const thead = table.querySelector("thead");
-				if (thead) {
-					const headerCells = thead.querySelectorAll("th");
-					headerCells.forEach((cell) => {
-						cell.style.backgroundColor = "#f2f2f2";
-						cell.style.padding = "8px";
-						cell.style.borderBottom = "2px solid #ddd";
-						cell.style.textAlign = "left";
-						cell.style.fontWeight = "bold";
-					});
+				// 为每个表格创建一个wrapper div，用于移动端横向滚动
+				const wrapper = doc.createElement("div");
+				wrapper.className = "table-wrapper";
+				
+				// 将表格包裹在wrapper中
+				const parent = table.parentNode;
+				if (parent) {
+					parent.insertBefore(wrapper, table);
+					wrapper.appendChild(table);
 				}
 
-				// 处理表格单元格
-				const cells = table.querySelectorAll("td");
-				cells.forEach((cell, index) => {
-					cell.style.padding = "8px";
-					cell.style.border = "1px solid #ddd";
-					cell.style.textAlign = "left";
+				// 移除旧的内联样式，让CSS来控制样式
+				// 只保留必要的属性
+				table.removeAttribute("style");
+				
+				// 清理表头单元格的内联样式
+				const headerCells = table.querySelectorAll("th");
+				headerCells.forEach((cell) => {
+					cell.removeAttribute("style");
+				});
 
-					// 隔行变色
-					if (index % 2 === 0) {
-						const row = cell.parentElement;
-						if (row) {
-							row.style.backgroundColor = "#f9f9f9";
-						}
-					}
+				// 清理表格单元格的内联样式
+				const cells = table.querySelectorAll("td");
+				cells.forEach((cell) => {
+					cell.removeAttribute("style");
+				});
+
+				// 清理行的内联样式
+				const rows = table.querySelectorAll("tr");
+				rows.forEach((row) => {
+					row.removeAttribute("style");
 				});
 			});
 

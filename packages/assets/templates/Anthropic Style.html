@@ -436,6 +436,74 @@
 		background: rgb(255, 255, 255);
 	}
 
+	/* 移动端表格优化（公众号专用） */
+	@media (max-width: 768px) {
+		/* 表格容器优化 */
+		.claude-main-content .table-wrapper {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			margin: 1em 0;
+		}
+		
+		.claude-main-content table {
+			font-size: 12px; /* 最小字号 */
+			margin: 0;
+			min-width: 100%;
+			border-radius: 6px;
+			box-shadow: none;
+			border: 1px solid rgb(229, 229, 229);
+		}
+		
+		/* 紧凑的单元格 */
+		.claude-main-content th,
+		.claude-main-content td {
+			padding: 6px 8px; /* 大幅减少内边距 */
+			font-size: 12px;
+			line-height: 1.4;
+			white-space: nowrap; /* 防止换行 */
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		
+		/* 简化表头样式 */
+		.claude-main-content th {
+			background: rgb(200, 100, 66);
+			font-size: 11px;
+			letter-spacing: 0;
+			font-weight: 600;
+		}
+		
+		/* 移除移动端的悬停效果 */
+		.claude-main-content tbody tr:hover td {
+			background: inherit;
+		}
+		
+		/* 简化行背景色 */
+		.claude-main-content tr:nth-child(even) td {
+			background: rgba(200, 100, 66, 0.02);
+		}
+		
+		/* 表格内链接优化 */
+		.claude-main-content table a {
+			font-size: 12px;
+			font-weight: normal;
+			text-decoration: underline;
+		}
+		
+		/* 表格内代码优化 */
+		.claude-main-content table code {
+			padding: 1px 3px;
+			font-size: 11px;
+			background: rgba(200, 100, 66, 0.05);
+		}
+		
+		/* 允许特定列换行 */
+		.claude-main-content td:last-child {
+			white-space: normal;
+			word-break: break-word;
+		}
+	}
+
 	.claude-main-content a {
 		color: rgb(200, 100, 66);
 		text-decoration: none;

@@ -230,47 +230,37 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					meta.articleTitle = finalTitle;
 				}
 
-				// 设置作者的优先级：基本信息 > frontmatter > 个人信息设置
+				// 设置作者的优先级：基本信息 > frontmatter
+				// 如果用户在基本信息中清空了作者，则不应该回退到storage
 				let finalAuthor = '';
-				if (this.toolbarArticleInfo?.author && this.toolbarArticleInfo.author.trim() !== '') {
-					// 优先级1: 基本信息中的作者
-					finalAuthor = this.toolbarArticleInfo.author.trim();
-					logger.debug('[wrapArticleContent] 使用基本信息中的作者:', finalAuthor);
+				if (this.toolbarArticleInfo && 'author' in this.toolbarArticleInfo) {
+					// 如果基本信息存在author字段（即使为空），则使用它
+					finalAuthor = this.toolbarArticleInfo.author?.trim() || '';
+					logger.debug('[wrapArticleContent] 使用基本信息中的作者:', finalAuthor || '(空)');
 				} else if (meta.author && String(meta.author).trim() !== '') {
-					// 优先级2: frontmatter中的作者
+					// 只有在基本信息没有author字段时，才使用frontmatter
 					finalAuthor = String(meta.author).trim();
 					logger.debug('[wrapArticleContent] 使用frontmatter中的作者:', finalAuthor);
-				} else if (this.settings.personalInfo?.name && this.settings.personalInfo.name.trim() !== '') {
-					// 优先级3: 个人信息设置中的姓名
-					finalAuthor = this.settings.personalInfo.name.trim();
-					logger.debug('[wrapArticleContent] 使用个人信息设置中的作者:', finalAuthor);
 				}
 
-				// 设置最终的作者
-				if (finalAuthor) {
-					meta.author = finalAuthor;
-				}
+				// 设置最终的作者（可能为空）
+				meta.author = finalAuthor;
 
-				// 设置发布日期的优先级：基本信息 > frontmatter > 当前日期
+				// 设置发布日期的优先级：基本信息 > frontmatter
+				// 如果用户在基本信息中清空了日期，则不应该回退到当前日期
 				let finalPublishDate = '';
-				if (this.toolbarArticleInfo?.publishDate && this.toolbarArticleInfo.publishDate.trim() !== '') {
-					// 优先级1: 基本信息中的发布日期
-					finalPublishDate = this.toolbarArticleInfo.publishDate.trim();
-					logger.debug('[wrapArticleContent] 使用基本信息中的发布日期:', finalPublishDate);
+				if (this.toolbarArticleInfo && 'publishDate' in this.toolbarArticleInfo) {
+					// 如果基本信息存在publishDate字段（即使为空），则使用它
+					finalPublishDate = this.toolbarArticleInfo.publishDate?.trim() || '';
+					logger.debug('[wrapArticleContent] 使用基本信息中的发布日期:', finalPublishDate || '(空)');
 				} else if (meta.publishDate && String(meta.publishDate).trim() !== '') {
-					// 优先级2: frontmatter中的发布日期
+					// 只有在基本信息没有publishDate字段时，才使用frontmatter
 					finalPublishDate = String(meta.publishDate).trim();
 					logger.debug('[wrapArticleContent] 使用frontmatter中的发布日期:', finalPublishDate);
-				} else {
-					// 优先级3: 当前日期
-					finalPublishDate = new Date().toISOString().split('T')[0];
-					logger.debug('[wrapArticleContent] 使用当前日期作为发布日期:', finalPublishDate);
 				}
 
-				// 设置最终的发布日期
-				if (finalPublishDate) {
-					meta.publishDate = finalPublishDate;
-				}
+				// 设置最终的发布日期（可能为空）
+				meta.publishDate = finalPublishDate;
 
 				// 然后用工具栏的基本信息覆盖frontmatter（除了articleTitle、author、publishDate已经特殊处理）
 				logger.debug('[wrapArticleContent] 检查toolbarArticleInfo:', this.toolbarArticleInfo);

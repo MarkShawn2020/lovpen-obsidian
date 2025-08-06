@@ -236,32 +236,178 @@
 /* === 表格样式 === */
 #render-container  table {
 	width: 100%;
-	border-collapse: collapse;
+	border-collapse: separate;
+	border-spacing: 0;
 	margin: var(--spacing-lg) var(--spacing-md);
-	border-radius: var(--border-radius-md);
+	border-radius: var(--border-radius-lg);
 	overflow: hidden;
-	box-shadow: var(--shadow-sm);
+	box-shadow: var(--shadow-md);
+	background: var(--background-secondary);
+	border: 1px solid var(--border-color-light);
 }
 
 #render-container  th,
 #render-container  td {
-	padding: var(--spacing-sm) var(--spacing-md);
+	padding: var(--spacing-md) var(--spacing-lg);
 	text-align: left;
-	border-bottom: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color-light);
+	transition: all 0.2s ease;
 }
 
 #render-container  th {
-	background: var(--primary-color);
+	background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-hover) 100%);
 	color: var(--text-on-primary);
 	font-weight: bold;
+	font-size: 0.95em;
+	letter-spacing: var(--letter-spacing-tight);
+	text-transform: uppercase;
+	position: relative;
 }
 
-#render-container  tr:nth-child(even) {
+#render-container  th:not(:last-child)::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	top: 20%;
+	height: 60%;
+	width: 1px;
+	background: rgba(255, 255, 255, 0.2);
+}
+
+#render-container  tr:nth-child(even) td {
+	background: rgba(200, 100, 66, 0.03);
+}
+
+#render-container  tr:nth-child(odd) td {
 	background: var(--background-secondary);
 }
 
-#render-container  tr:hover {
+#render-container  tbody tr {
+	transition: all 0.2s ease;
+}
+
+#render-container  tbody tr:hover td {
 	background: var(--primary-color-light);
+	transform: scale(1.01);
+	box-shadow: 0 2px 8px rgba(200, 100, 66, 0.1);
+}
+
+#render-container  tbody tr:last-child td {
+	border-bottom: none;
+}
+
+#render-container  td:first-child,
+#render-container  th:first-child {
+	padding-left: var(--spacing-xl);
+}
+
+#render-container  td:last-child,
+#render-container  th:last-child {
+	padding-right: var(--spacing-xl);
+}
+
+/* 表格内的链接样式 */
+#render-container  table a {
+	color: var(--primary-color);
+	font-weight: 500;
+}
+
+#render-container  table a:hover {
+	color: var(--primary-color-hover);
+}
+
+/* 表格内的代码样式 */
+#render-container  table code {
+	padding: 2px 6px;
+	font-size: 0.85em;
+	background: rgba(200, 100, 66, 0.08);
+}
+
+/* === 移动端表格优化（公众号专用） === */
+@media (max-width: 768px) {
+	/* 表格容器优化 */
+	#render-container  .table-wrapper {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		margin: var(--spacing-md) 0;
+	}
+	
+	#render-container  table {
+		font-size: 12px; /* 最小字号 */
+		margin: 0;
+		min-width: 100%;
+		border-radius: 6px;
+		box-shadow: none;
+		border: 1px solid var(--border-color);
+	}
+	
+	/* 紧凑的单元格 */
+	#render-container  th,
+	#render-container  td {
+		padding: 6px 8px; /* 大幅减少内边距 */
+		font-size: 12px;
+		line-height: 1.4;
+		white-space: nowrap; /* 防止换行 */
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	
+	/* 简化表头样式 */
+	#render-container  th {
+		background: var(--primary-color);
+		font-size: 11px;
+		letter-spacing: 0;
+		text-transform: none; /* 移除大写转换 */
+		font-weight: 600;
+	}
+	
+	/* 移除表头分隔线 */
+	#render-container  th:not(:last-child)::after {
+		display: none;
+	}
+	
+	/* 减少首尾列内边距 */
+	#render-container  td:first-child,
+	#render-container  th:first-child {
+		padding-left: 8px;
+	}
+	
+	#render-container  td:last-child,
+	#render-container  th:last-child {
+		padding-right: 8px;
+	}
+	
+	/* 移除移动端的悬停效果 */
+	#render-container  tbody tr:hover td {
+		background: inherit;
+		transform: none;
+		box-shadow: none;
+	}
+	
+	/* 简化行背景色 */
+	#render-container  tr:nth-child(even) td {
+		background: rgba(200, 100, 66, 0.02);
+	}
+	
+	/* 表格内链接优化 */
+	#render-container  table a {
+		font-size: 12px;
+		font-weight: normal;
+		text-decoration: underline;
+	}
+	
+	/* 表格内代码优化 */
+	#render-container  table code {
+		padding: 1px 3px;
+		font-size: 11px;
+		background: rgba(200, 100, 66, 0.05);
+	}
+	
+	/* 允许特定列换行 */
+	#render-container  td:last-child {
+		white-space: normal;
+		word-break: break-word;
+	}
 }
 
 /* === 链接样式 === */
