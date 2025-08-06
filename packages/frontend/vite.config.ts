@@ -3,9 +3,16 @@ import react from '@vitejs/plugin-react'
 import path from "path"
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite"
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig({
-	plugins: [react(), tailwindcss()],
+	plugins: [
+		react(), 
+		tailwindcss(),
+		codeInspectorPlugin({
+			bundler: 'vite',
+		})
+	],
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
