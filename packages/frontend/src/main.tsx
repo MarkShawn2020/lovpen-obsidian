@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {createRoot, Root} from "react-dom/client";
 import {LovpenReact} from "./components/LovpenReact";
 import {type LovpenReactLib, LovpenReactProps} from "./types";
@@ -7,6 +7,20 @@ import "./index.css";
 
 // Store for managing React roots
 const rootStore = new Map<HTMLElement, Root>();
+
+// Wrapper component to manage props updates without remounting JotaiProvider
+const LovpenReactWrapper: React.FC<{ initialProps: LovpenReactProps; container?: HTMLElement }> = ({ initialProps, container }) => {
+	const [props, setProps] = useState(initialProps);
+	
+	// Expose update function to parent
+	useEffect(() => {
+		if (container) {
+			(container as any).__updateProps = setProps;
+		}
+	}, [container]);
+	
+	return <LovpenReact {...props} />;
+};
 
 // Library implementation
 const LovpenReactLib: LovpenReactLib = {
@@ -19,10 +33,13 @@ const LovpenReactLib: LovpenReactLib = {
 		// Create new root and render component
 		const root = createRoot(container);
 		rootStore.set(container, root);
+		
+		// Store props for updates
+		(container as any).__lovpenProps = props;
 
 		root.render(
 			<JotaiProvider>
-				<LovpenReact {...props} />
+				<LovpenReactWrapper initialProps={props} container={container} />
 			</JotaiProvider>
 		);
 	},
@@ -38,12 +55,13 @@ const LovpenReactLib: LovpenReactLib = {
 	update: (container: HTMLElement, props: LovpenReactProps) => {
 		return new Promise<void>((resolve) => {
 			const root = rootStore.get(container);
-			if (root) {
-				root.render(
-					<JotaiProvider>
-						<LovpenReact {...props} />
-					</JotaiProvider>
-				);
+			
+			// Store new props
+			(container as any).__lovpenProps = props;
+			
+			if (root && (container as any).__updateProps) {
+				// Update props without remounting JotaiProvider
+				(container as any).__updateProps(props);
 				// 使用多个requestAnimationFrame确保React的useEffect完全执行完毕
 				requestAnimationFrame(() => {
 					requestAnimationFrame(() => {
@@ -53,7 +71,7 @@ const LovpenReactLib: LovpenReactLib = {
 					});
 				});
 			} else {
-				// If no root exists, create one
+				// If no root exists or update function not available, remount
 				LovpenReactLib.mount(container, props);
 				resolve();
 			}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { LovpenReact } from './components/LovpenReact'
 import { JotaiProvider } from './providers/JotaiProvider'
@@ -14,6 +14,20 @@ interface ExternalReactLib {
 // Track mounted roots for HMR
 const mountedRoots = new Map<HTMLElement, ReactDOM.Root>()
 
+// Wrapper component to manage props updates without remounting JotaiProvider
+const LovpenReactWrapper: React.FC<{ initialProps: any; container?: HTMLElement }> = ({ initialProps, container }) => {
+  const [props, setProps] = useState(initialProps);
+  
+  // Expose update function to parent
+  useEffect(() => {
+    if (container) {
+      (container as any).__updateProps = setProps;
+    }
+  }, [container]);
+  
+  return <LovpenReact {...props} />;
+}
+
 // Create the external library interface for Obsidian plugin
 const LovpenReactLib: ExternalReactLib = {
   mount: async (container: HTMLElement, props: any) => {
@@ -26,30 +40,26 @@ const LovpenReactLib: ExternalReactLib = {
     // Store props for HMR updates
     (container as any).__lovpenProps = props;
     root.render(
-      <React.StrictMode>
-        <JotaiProvider>
-          <LovpenReact {...props} />
-        </JotaiProvider>
-      </React.StrictMode>
+      <JotaiProvider>
+        <LovpenReactWrapper initialProps={props} container={container} />
+      </JotaiProvider>
     );
   },
 
   update: async (container: HTMLElement, props: any) => {
     console.log('[HMR] Updating React component', { container });
-    let root = mountedRoots.get(container);
-    if (!root) {
-      root = ReactDOM.createRoot(container);
-      mountedRoots.set(container, root);
-    }
-    // Store props for HMR updates
+    
+    // Store new props
     (container as any).__lovpenProps = props;
-    root.render(
-      <React.StrictMode>
-        <JotaiProvider>
-          <LovpenReact {...props} />
-        </JotaiProvider>
-      </React.StrictMode>
-    );
+    
+    const root = mountedRoots.get(container);
+    if (root && (container as any).__updateProps) {
+      // Update props without remounting JotaiProvider
+      (container as any).__updateProps(props);
+    } else if (!root) {
+      // If no root exists, mount it
+      await LovpenReactLib.mount(container, props);
+    }
   },
 
   unmount: (container: HTMLElement) => {
@@ -129,11 +139,9 @@ if (rootElement) {
   }
   
   root && root.render(
-    <React.StrictMode>
-      <JotaiProvider>
-        <LovpenReact {...mockProps} />
-      </JotaiProvider>
-    </React.StrictMode>
+    <JotaiProvider>
+      <LovpenReact {...mockProps} />
+    </JotaiProvider>
   )
 }
 
@@ -145,15 +153,10 @@ if ((import.meta as any).hot) {
     // Force re-render all mounted components
     mountedRoots.forEach((root, container) => {
       const props = (container as any).__lovpenProps;
-      if (props) {
+      if (props && (container as any).__updateProps) {
         console.log('[HMR] Re-rendering component in container', container);
-        root.render(
-          <React.StrictMode>
-            <JotaiProvider>
-              <LovpenReact {...props} />
-            </JotaiProvider>
-          </React.StrictMode>
-        );
+        // Just update props, don't remount
+        (container as any).__updateProps({...props});
       }
     });
     

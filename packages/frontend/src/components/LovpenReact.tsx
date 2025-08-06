@@ -32,6 +32,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 															onSettingsChange
 														}) => {
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
+	const isInitializedRef = useRef(false);
+	const lastCssContentRef = useRef<string>("");
+	const lastArticleHTMLRef = useRef<string>("");
 
 	// 调试：检查传入的设置数据
 	if ((window as any).__LOVPEN_HMR_MODE__) {
@@ -60,10 +63,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		}
 	});
 
-	// 强制触发标记，确保 useEffect 能被调用
-	const [cssUpdateTrigger, setCssUpdateTrigger] = useState(0);
-	const [articleUpdateTrigger, setArticleUpdateTrigger] = useState(0);
-
 	// 组件挂载检查
 	useEffect(() => {
 		logger.debug("[mount-useEffect] Component mounted");
@@ -73,10 +72,10 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		};
 	}, []);
 
-	// 初始化Jotai状态
+	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
-		console.log("[jotai-init] useEffect called, settings:", settings);
-		if (settings) {
+		if (!isInitializedRef.current && settings) {
+			console.log("[jotai-init] First initialization, settings:", settings);
 			const personalInfo = settings.personalInfo || {
 				name: '',
 				avatar: { type: 'default' },
@@ -95,58 +94,37 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 
 			logger.debug("[jotai-init] Jotai state initialized with settings:", settings);
 			logger.debug("[jotai-init] Personal info:", personalInfo);
+			
+			isInitializedRef.current = true;
 		}
-	}, [settings, initializeSettings]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); // 只在组件挂载时执行
 
-	// 检测 CSS 内容变化并触发更新
+	// 更新CSS样式和文章内容 - 只在内容真正改变时更新
 	useEffect(() => {
-		logger.debug("[css-detect] CSS content changed, triggering update", {
-			cssContentLength: cssContent?.length || 0
-		});
-		setCssUpdateTrigger(prev => prev + 1);
-	}, [cssContent]);
-
-	// 更新CSS样式
-	useEffect(() => {
-		logger.debug("[css-useEffect] CSS update triggered", {
-			cssContentLength: cssContent?.length || 0,
-			hasStyleRef: !!styleElRef.current,
-			trigger: cssUpdateTrigger
-		});
-		if (styleElRef.current) {
-			styleElRef.current.textContent = cssContent;
+		const cssChanged = cssContent !== lastCssContentRef.current;
+		const articleChanged = articleHTML !== lastArticleHTMLRef.current;
+		
+		if (cssChanged || articleChanged) {
+			logger.debug("[content-update] Updating CSS and article content", {
+				cssChanged,
+				articleChanged,
+				cssContentLength: cssContent?.length || 0,
+				articleHTMLLength: articleHTML?.length || 0,
+				hasStyleRef: !!styleElRef.current,
+				hasArticleRef: !!articleDivRef.current
+			});
+			
+			if (cssChanged && styleElRef.current) {
+				styleElRef.current.textContent = cssContent;
+				lastCssContentRef.current = cssContent;
+			}
+			if (articleChanged && articleDivRef.current) {
+				articleDivRef.current.innerHTML = articleHTML;
+				lastArticleHTMLRef.current = articleHTML;
+			}
 		}
-	}, [cssUpdateTrigger]);
-
-	// 检测文章内容变化并触发更新
-	useEffect(() => {
-		logger.debug("[article-detect] Article HTML changed, triggering update", {
-			articleHTMLLength: articleHTML?.length || 0
-		});
-		setArticleUpdateTrigger(prev => prev + 1);
-	}, [articleHTML]);
-
-	// 更新文章内容
-	useEffect(() => {
-		logger.debug("[article-useEffect] Article update triggered", {
-			articleHTMLLength: articleHTML?.length || 0,
-			hasArticleRef: !!articleDivRef.current,
-			trigger: articleUpdateTrigger
-		});
-		if (articleDivRef.current) {
-			articleDivRef.current.innerHTML = articleHTML;
-		}
-	}, [articleUpdateTrigger]);
-
-	// 直接在渲染时更新DOM（作为备用方案）
-	useEffect(() => {
-		if (styleElRef.current) {
-			styleElRef.current.textContent = cssContent;
-		}
-		if (articleDivRef.current) {
-			articleDivRef.current.innerHTML = articleHTML;
-		}
-	});
+	}, [cssContent, articleHTML]);
 
 	// 暂时移除MathJax自动加载，避免与现有数学公式渲染冲突
 	// 等原有渲染恢复正常后再考虑如何集成

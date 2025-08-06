@@ -41,6 +41,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	toolbarArticleInfo: ArticleInfo | null = null; // 存储工具栏的基本信息
 	isUpdatingFromToolbar: boolean = false; // 标志位，避免无限循环
 	private reactAPIService: ReactAPIService;
+	private cachedProps: ReactComponentPropsWithCallbacks | null = null; // 缓存props避免重复创建
+	private lastArticleHTML: string = ''; // 缓存上次的文章HTML
+	private lastCSSContent: string = ''; // 缓存上次的CSS内容
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -209,7 +212,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					Object.assign(meta, metadata?.frontmatter);
 				}
 
-				// 设置文章标题的优先级：基本信息 > frontmatter > 文件名
+				// 设置文章标题的优先级：基本信息 > frontmatter
 				let finalTitle = '';
 				if (this.toolbarArticleInfo?.articleTitle && this.toolbarArticleInfo.articleTitle.trim() !== '') {
 					// 优先级1: 基本信息中的标题
@@ -219,10 +222,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					// 优先级2: frontmatter中的标题
 					finalTitle = String(meta.articleTitle).trim();
 					logger.debug('[wrapArticleContent] 使用frontmatter中的标题:', finalTitle);
-				} else if (file?.basename) {
-					// 优先级3: 文件名
-					finalTitle = file.basename;
-					logger.debug('[wrapArticleContent] 使用文件名作为标题:', finalTitle);
 				}
 
 				// 设置最终的标题
@@ -719,6 +718,17 @@ ${customCSS}`;
 		}
 
 		try {
+			// 检查是否需要重新构建props
+			const currentCSS = this.getCSS();
+			const needsUpdate = !this.cachedProps || 
+				this.articleHTML !== this.lastArticleHTML || 
+				currentCSS !== this.lastCSSContent;
+			
+			if (!needsUpdate) {
+				logger.debug("Props未变化，跳过更新");
+				return;
+			}
+
 			logger.debug("更新外部React组件", {
 				articleHTMLLength: this.articleHTML?.length || 0,
 				hasCSS: !!this.getCSS(),
@@ -730,6 +740,9 @@ ${customCSS}`;
 
 			// 使用新的构建方法获取props
 			const props = this.buildReactComponentProps();
+			this.cachedProps = props;
+			this.lastArticleHTML = this.articleHTML;
+			this.lastCSSContent = currentCSS;
 
 			// 使用外部React应用进行渲染，等待渲染完成
 			await this.externalReactLib.update(this.reactContainer, props);
