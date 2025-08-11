@@ -29,12 +29,15 @@ import {
 	XCircle,
 	Zap,
 	Brain,
-	Target
+	Target,
+	ChevronRight,
+	Settings,
+	Shield,
+	Wand2
 } from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 import { OPENROUTER_MODELS, testAIConnection } from '../../services/aiService';
-
-// import {requestUrl} from "obsidian"; // 移除直接导入，改为动态require
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '../ui/accordion';
 
 // 可用的AI模型定义
 const AVAILABLE_MODELS: AIModel[] = [
@@ -83,16 +86,17 @@ interface AISettingsProps {
 }
 
 export const AISettings: React.FC<AISettingsProps> = ({
-														  onClose,
-														  onSettingsChange,
-														  onSaveSettings
-													  }) => {
+	onClose,
+	onSettingsChange,
+	onSaveSettings
+}) => {
 	const {
 		settings,
 		saveStatus,
 		updateSettings,
 		saveSettings
 	} = useSettings(onSaveSettings, undefined, onSettingsChange);
+	
 	const [aiProvider, setAiProvider] = useState<'claude' | 'openrouter'>(settings.aiProvider || 'claude');
 	const [claudeApiKey, setClaudeApiKey] = useState<string>(settings.authKey || '');
 	const [openRouterApiKey, setOpenRouterApiKey] = useState<string>(settings.openRouterApiKey || '');
@@ -102,6 +106,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 	const [isTestingConnection, setIsTestingConnection] = useState(false);
 	const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 	const [errorMessage, setErrorMessage] = useState<string>('');
+	const [expandedItem, setExpandedItem] = useState<string | undefined>(aiProvider);
 
 	useEffect(() => {
 		setAiProvider(settings.aiProvider || 'claude');
@@ -116,13 +121,11 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setClaudeApiKey(value);
 		setConnectionStatus('idle');
 		setErrorMessage('');
-		// 实时更新 Jotai 状态
 		updateSettings({authKey: value.trim()});
 	};
 
 	const handlePromptTemplateChange = (value: string) => {
 		setAiPromptTemplate(value);
-		// 实时更新 Jotai 状态
 		updateSettings({aiPromptTemplate: value.trim()});
 	};
 
@@ -130,7 +133,6 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setSelectedModel(modelId);
 		setConnectionStatus('idle');
 		setErrorMessage('');
-		// 实时更新 Jotai 状态
 		updateSettings({aiModel: modelId});
 	};
 
@@ -160,7 +162,6 @@ export const AISettings: React.FC<AISettingsProps> = ({
 	};
 
 	const handleSave = () => {
-		// 使用jotai更新设置
 		updateSettings({
 			aiProvider,
 			authKey: claudeApiKey.trim(),
@@ -190,6 +191,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 	const getDefaultPromptTemplate = () => {
 		return `请分析以下文章内容，为其生成合适的元数据信息。请返回JSON格式的结果：
 
+今天的日期是：{{today}}
+
 文章内容：
 {{content}}
 
@@ -217,7 +220,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 4. seriesName: 如果是系列文章，推测系列名称
 5. tags: 3-5个相关标签数组
 6. author: 基于内容推测的作者名（如果无法推测留空）
-7. publishDate: 建议的发布日期（YYYY-MM-DD格式，通常是今天）
+7. publishDate: 建议的发布日期（YYYY-MM-DD格式，就是今天 {{today}}）
+8. recommendation: 推荐语，吸引读者阅读的亮点或价值（50-100字）
 
 请确保返回格式为纯JSON，不要包含其他文字：
 {
@@ -227,7 +231,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
   "seriesName": "...",
   "tags": ["标签1", "标签2", "标签3"],
   "author": "...",
-  "publishDate": "..."
+  "publishDate": "{{today}}",
+  "recommendation": "推荐语内容..."
 }`;
 	};
 
@@ -235,75 +240,450 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setAiPromptTemplate(getDefaultPromptTemplate());
 	};
 
+	// Claude配置组件
+	const ClaudeConfiguration = () => (
+		<div className="space-y-4">
+			<FormInput
+				label="Claude API 密钥"
+				value={claudeApiKey}
+				onChange={handleApiKeyChange}
+				placeholder="sk-ant-api03-..."
+				type="password"
+				required={true}
+				icon={Key}
+				className="font-mono text-sm"
+			/>
+
+			<div className="space-y-2">
+				<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+					<Brain className="w-4 h-4 text-indigo-600"/>
+					AI 模型选择
+				</label>
+				<Select value={selectedModel} onValueChange={handleModelChange}>
+					<SelectTrigger className="w-full">
+						<SelectValue placeholder="选择 AI 模型" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel className="flex items-center gap-2">
+								<Zap className="w-3 h-3"/>
+								快速响应
+							</SelectLabel>
+							{AVAILABLE_MODELS.filter(m => m.category === 'fast').map(model => (
+								<SelectItem key={model.id} value={model.id}>
+									<div className="flex items-center justify-between w-full">
+										<div>
+											<span className="font-medium">{model.name}</span>
+											{model.recommended && (
+												<span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">推荐</span>
+											)}
+											<div className="text-xs text-gray-500">{model.description}</div>
+										</div>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+						
+						<SelectGroup>
+							<SelectLabel className="flex items-center gap-2">
+								<Target className="w-3 h-3"/>
+								平衡性能
+							</SelectLabel>
+							{AVAILABLE_MODELS.filter(m => m.category === 'balanced').map(model => (
+								<SelectItem key={model.id} value={model.id}>
+									<div className="flex items-center justify-between w-full">
+										<div>
+											<span className="font-medium">{model.name}</span>
+											<div className="text-xs text-gray-500">{model.description}</div>
+										</div>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+						
+						<SelectGroup>
+							<SelectLabel className="flex items-center gap-2">
+								<Brain className="w-3 h-3"/>
+								强大推理
+							</SelectLabel>
+							{AVAILABLE_MODELS.filter(m => m.category === 'powerful').map(model => (
+								<SelectItem key={model.id} value={model.id}>
+									<div className="flex items-center justify-between w-full">
+										<div>
+											<span className="font-medium">{model.name}</span>
+											<div className="text-xs text-gray-500">{model.description}</div>
+										</div>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+				
+				{/* 显示当前选择模型的详细信息 */}
+				{(() => {
+					const currentModel = AVAILABLE_MODELS.find(m => m.id === selectedModel);
+					if (currentModel) {
+						const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
+							currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
+						const priceText = currentModel.pricing === 'low' ? '低成本' :
+							currentModel.pricing === 'medium' ? '中等成本' : '高成本';
+						
+						return (
+							<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+								<div className="flex items-center justify-between">
+									<div className="text-sm text-gray-700">
+										<span className="font-medium">当前选择：</span> {currentModel.name}
+									</div>
+									<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
+										{priceText}
+									</div>
+								</div>
+								<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
+							</div>
+						);
+					}
+					return null;
+				})()}
+			</div>
+
+			<div className="flex items-center justify-between">
+				<Button
+					onClick={testConnection}
+					disabled={isTestingConnection || !claudeApiKey.trim()}
+					size="sm"
+					className="bg-blue-600 hover:bg-blue-700 text-white"
+				>
+					{isTestingConnection ? (
+						<>
+							<RefreshCw className="w-4 h-4 mr-2 animate-spin"/>
+							测试连接中...
+						</>
+					) : (
+						<>
+							<Zap className="w-4 h-4 mr-2"/>
+							测试连接
+						</>
+					)}
+				</Button>
+
+				{connectionStatus === 'success' && (
+					<div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+						<CheckCircle className="w-4 h-4"/>
+						<span className="text-sm font-medium">连接成功</span>
+					</div>
+				)}
+
+				{connectionStatus === 'error' && (
+					<div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+						<XCircle className="w-4 h-4"/>
+						<span className="text-sm font-medium">连接失败</span>
+					</div>
+				)}
+			</div>
+
+			{errorMessage && (
+				<div className="bg-red-50 border border-red-200 rounded-lg p-3">
+					<p className="text-red-600 text-sm flex items-center gap-2">
+						<XCircle className="w-4 h-4"/>
+						{errorMessage}
+					</p>
+				</div>
+			)}
+
+			{/* API密钥安全说明 */}
+			<div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+				<div className="flex items-start gap-2">
+					<Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-amber-800">
+						<p className="font-medium">安全提醒</p>
+						<p className="mt-1">API密钥仅在本地存储，不会上传到任何服务器。</p>
+					</div>
+				</div>
+			</div>
+
+			{/* 获取密钥指南 */}
+			<div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+				<div className="flex items-start gap-2">
+					<Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-blue-800">
+						<p className="font-medium mb-1">如何获取Claude API密钥？</p>
+						<a
+							href="https://console.anthropic.com/"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-blue-600 hover:text-blue-800 underline"
+						>
+							访问Anthropic Console
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+
+	// OpenRouter配置组件
+	const OpenRouterConfiguration = () => (
+		<div className="space-y-4">
+			<FormInput
+				label="OpenRouter API 密钥"
+				value={openRouterApiKey}
+				onChange={(value) => {
+					setOpenRouterApiKey(value);
+					setConnectionStatus('idle');
+					setErrorMessage('');
+					updateSettings({openRouterApiKey: value.trim()});
+				}}
+				placeholder="sk-or-v1-..."
+				type="password"
+				required={true}
+				icon={Key}
+				className="font-mono text-sm"
+			/>
+
+			<div className="space-y-2">
+				<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+					<Brain className="w-4 h-4 text-indigo-600"/>
+					模型选择
+				</label>
+				<Select value={openRouterModel} onValueChange={(value) => {
+					setOpenRouterModel(value);
+					setConnectionStatus('idle');
+					setErrorMessage('');
+					updateSettings({openRouterModel: value});
+				}}>
+					<SelectTrigger className="w-full">
+						<SelectValue placeholder="选择模型" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel className="flex items-center gap-2">
+								<Zap className="w-3 h-3"/>
+								快速响应
+							</SelectLabel>
+							{OPENROUTER_MODELS.filter(m => m.category === 'fast').map(model => (
+								<SelectItem key={model.id} value={model.id}>
+									<div className="flex items-center justify-between w-full">
+										<div>
+											<span className="font-medium">{model.name}</span>
+											<div className="text-xs text-gray-500">{model.description}</div>
+										</div>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+						
+						<SelectGroup>
+							<SelectLabel className="flex items-center gap-2">
+								<Target className="w-3 h-3"/>
+								平衡性能
+							</SelectLabel>
+							{OPENROUTER_MODELS.filter(m => m.category === 'balanced').map(model => (
+								<SelectItem key={model.id} value={model.id}>
+									<div className="flex items-center justify-between w-full">
+										<div>
+											<span className="font-medium">{model.name}</span>
+											<div className="text-xs text-gray-500">{model.description}</div>
+										</div>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+						
+						<SelectGroup>
+							<SelectLabel className="flex items-center gap-2">
+								<Brain className="w-3 h-3"/>
+								强大推理
+							</SelectLabel>
+							{OPENROUTER_MODELS.filter(m => m.category === 'powerful').map(model => (
+								<SelectItem key={model.id} value={model.id}>
+									<div className="flex items-center justify-between w-full">
+										<div>
+											<span className="font-medium">{model.name}</span>
+											<div className="text-xs text-gray-500">{model.description}</div>
+										</div>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+				
+				{/* 显示当前选择模型的详细信息 */}
+				{(() => {
+					const currentModel = OPENROUTER_MODELS.find(m => m.id === openRouterModel);
+					if (currentModel) {
+						const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
+							currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
+						const priceText = currentModel.pricing === 'low' ? '低成本' :
+							currentModel.pricing === 'medium' ? '中等成本' : '高成本';
+						
+						return (
+							<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+								<div className="flex items-center justify-between">
+									<div className="text-sm text-gray-700">
+										<span className="font-medium">当前选择：</span> {currentModel.name}
+									</div>
+									<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
+										{priceText}
+									</div>
+								</div>
+								<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
+							</div>
+						);
+					}
+					return null;
+				})()}
+			</div>
+
+			<div className="flex items-center justify-between">
+				<Button
+					onClick={testConnection}
+					disabled={isTestingConnection || !openRouterApiKey.trim()}
+					size="sm"
+					className="bg-purple-600 hover:bg-purple-700 text-white"
+				>
+					{isTestingConnection ? (
+						<>
+							<RefreshCw className="w-4 h-4 mr-2 animate-spin"/>
+							测试连接中...
+						</>
+					) : (
+						<>
+							<Zap className="w-4 h-4 mr-2"/>
+							测试连接
+						</>
+					)}
+				</Button>
+
+				{connectionStatus === 'success' && (
+					<div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+						<CheckCircle className="w-4 h-4"/>
+						<span className="text-sm font-medium">连接成功</span>
+					</div>
+				)}
+
+				{connectionStatus === 'error' && (
+					<div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+						<XCircle className="w-4 h-4"/>
+						<span className="text-sm font-medium">连接失败</span>
+					</div>
+				)}
+			</div>
+
+			{errorMessage && (
+				<div className="bg-red-50 border border-red-200 rounded-lg p-3">
+					<p className="text-red-600 text-sm flex items-center gap-2">
+						<XCircle className="w-4 h-4"/>
+						{errorMessage}
+					</p>
+				</div>
+			)}
+
+			{/* OpenRouter优势说明 */}
+			<div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+				<div className="flex items-start gap-2">
+					<Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-purple-800">
+						<p className="font-medium">OpenRouter优势</p>
+						<ul className="mt-1 space-y-1 text-xs">
+							<li>• 支持多种AI模型（GPT、Claude、Gemini等）</li>
+							<li>• 结构化输出确保返回格式正确</li>
+							<li>• 统一的API接口，切换模型更方便</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+			{/* 获取密钥指南 */}
+			<div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+				<div className="flex items-start gap-2">
+					<Info className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-purple-800">
+						<p className="font-medium mb-1">如何获取OpenRouter API密钥？</p>
+						<a
+							href="https://openrouter.ai/keys"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-purple-600 hover:text-purple-800 underline"
+						>
+							访问OpenRouter Keys
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+
+	// 公共提示词模板配置组件
+	const CommonPromptConfiguration = () => (
+		<div className="space-y-4">
+			<div className="flex items-center justify-between">
+				<div className="flex items-center gap-3">
+					<div className="p-2 bg-purple-100 rounded-lg">
+						<Code className="h-5 w-5 text-purple-600"/>
+					</div>
+					<div>
+						<h4 className="font-semibold text-gray-900">提示词模板</h4>
+						<p className="text-sm text-gray-600">自定义AI分析的指令模板（支持Handlebars语法）</p>
+					</div>
+				</div>
+				<Button
+					onClick={handleUseDefaultTemplate}
+					size="sm"
+					variant="outline"
+					className="text-purple-600 border-purple-300 hover:bg-purple-50"
+				>
+					<RefreshCw className="w-4 h-4 mr-2"/>
+					恢复默认
+				</Button>
+			</div>
+
+			<textarea
+				value={aiPromptTemplate}
+				onChange={(e) => handlePromptTemplateChange(e.target.value)}
+				placeholder="输入自定义的AI提示词模板..."
+				className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-0 h-40 resize-y font-mono text-sm transition-colors"
+			/>
+
+			{/* 模板变量说明 */}
+			<div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
+				<div className="flex items-center gap-2 mb-3">
+					<Code className="h-4 w-4 text-yellow-600"/>
+					<h5 className="text-sm font-medium text-yellow-800">可用的模板变量</h5>
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+					{[
+						{var: '{{content}}', desc: '文章正文内容（已移除frontmatter）'},
+						{var: '{{filename}}', desc: '当前文件名（不含扩展名）'},
+						{var: '{{personalInfo.name}}', desc: '个人信息中的姓名'},
+						{var: '{{personalInfo.bio}}', desc: '个人信息中的简介'},
+						{var: '{{frontmatter}}', desc: '当前文档的frontmatter对象'},
+						{var: '{{today}}', desc: '当前日期（YYYY-MM-DD格式）'}
+					].map((item, index) => (
+						<div key={index} className="bg-white/60 border border-yellow-200 rounded-lg p-2">
+							<code className="text-yellow-700 font-medium">{item.var}</code>
+							<p className="text-yellow-600 mt-1">{item.desc}</p>
+						</div>
+					))}
+				</div>
+			</div>
+		</div>
+	);
+
 	return (
 		<div className="space-y-6">
 			{/* 头部说明 */}
 			<div className="text-center">
-				<h3 className="text-lg font-semibold text-gray-900 mb-2">AI 智能设置</h3>
-				<p className="text-gray-600">配置 Claude AI 集成，解锁智能内容分析功能</p>
+				<div className="flex items-center justify-center gap-2 mb-2">
+					<Bot className="h-6 w-6 text-blue-600"/>
+					<h3 className="text-lg font-semibold text-gray-900">AI 智能设置</h3>
+				</div>
+				<p className="text-gray-600">配置AI服务，解锁智能内容分析功能</p>
 			</div>
 
-			{/* AI提供商选择 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-				<div className="flex items-center gap-3 mb-4">
-					<div className="p-2 bg-purple-100 rounded-lg">
-						<Bot className="h-5 w-5 text-purple-600"/>
-					</div>
-					<div>
-						<h4 className="font-semibold text-gray-900">AI 提供商选择</h4>
-						<p className="text-sm text-gray-600">选择您喜欢的AI服务提供商</p>
-					</div>
-				</div>
-				
-				<div className="grid grid-cols-2 gap-4">
-					<button
-						onClick={() => setAiProvider('claude')}
-						className={`p-4 border-2 rounded-xl transition-all ${
-							aiProvider === 'claude'
-								? 'border-blue-500 bg-blue-50'
-								: 'border-gray-200 hover:border-gray-300'
-						}`}
-					>
-						<div className="flex items-center gap-3">
-							<Bot className="h-6 w-6 text-blue-600"/>
-							<div className="text-left">
-								<h5 className="font-semibold text-gray-900">Claude</h5>
-								<p className="text-xs text-gray-600">Anthropic原生API</p>
-							</div>
-						</div>
-					</button>
-					
-					<button
-						onClick={() => setAiProvider('openrouter')}
-						className={`p-4 border-2 rounded-xl transition-all ${
-							aiProvider === 'openrouter'
-								? 'border-purple-500 bg-purple-50'
-								: 'border-gray-200 hover:border-gray-300'
-						}`}
-					>
-						<div className="flex items-center gap-3">
-							<Zap className="h-6 w-6 text-purple-600"/>
-							<div className="text-left">
-								<h5 className="font-semibold text-gray-900">OpenRouter</h5>
-								<p className="text-xs text-gray-600">多模型统一接口</p>
-							</div>
-						</div>
-					</button>
-				</div>
-			</div>
-
-			{/* AI功能介绍卡片 */}
-			<div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
-				<div className="flex items-center gap-3 mb-4">
-					<div className="p-2 bg-blue-100 rounded-lg">
-						<Bot className="h-6 w-6 text-blue-600"/>
-					</div>
-					<div>
-						<h4 className="font-semibold text-gray-900">Claude AI 智能助手</h4>
-						<p className="text-sm text-gray-600">强大的AI助手，为您的内容创作提供智能支持</p>
-					</div>
-				</div>
-
+			{/* AI功能介绍 */}
+			<div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4">
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 					<div className="bg-white/60 backdrop-blur-sm border border-blue-200 rounded-lg p-3">
 						<div className="flex items-center gap-2 mb-2">
@@ -329,469 +709,92 @@ export const AISettings: React.FC<AISettingsProps> = ({
 				</div>
 			</div>
 
-			{/* API密钥配置卡片 */}
+			{/* AI配置主体 - 使用Accordion */}
+			<Accordion 
+				type="single" 
+				collapsible 
+				className="w-full" 
+				value={expandedItem}
+				onValueChange={(value) => {
+					setExpandedItem(value);
+					// 当展开某个项时，自动设置为当前选中的provider
+					if (value) {
+						setAiProvider(value as 'claude' | 'openrouter');
+					}
+				}}
+			>
+				{/* Claude 配置 */}
+				<AccordionItem value="claude" className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+					<AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50 w-full">
+						<div className="flex items-center gap-4 flex-1">
+							<div className={`p-2.5 rounded-lg transition-colors ${
+								aiProvider === 'claude' ? 'bg-blue-100' : 'bg-gray-100'
+							}`}>
+								<Bot className={`h-5 w-5 ${
+									aiProvider === 'claude' ? 'text-blue-600' : 'text-gray-500'
+								}`}/>
+							</div>
+							<div className="flex-1 text-left">
+								<div className="flex items-center gap-2">
+									<h4 className="font-semibold text-gray-900">Claude</h4>
+									{claudeApiKey && (
+										<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+											已配置
+										</span>
+									)}
+									{aiProvider === 'claude' && (
+										<span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+											当前选中
+										</span>
+									)}
+								</div>
+								<p className="text-sm text-gray-600 mt-1">Anthropic原生API，高质量响应</p>
+							</div>
+						</div>
+					</AccordionTrigger>
+					<AccordionContent className="px-6 pb-6">
+						<ClaudeConfiguration />
+					</AccordionContent>
+				</AccordionItem>
+
+				{/* OpenRouter 配置 */}
+				<AccordionItem value="openrouter" className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+					<AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50 w-full">
+						<div className="flex items-center gap-4 flex-1">
+							<div className={`p-2.5 rounded-lg transition-colors ${
+								aiProvider === 'openrouter' ? 'bg-purple-100' : 'bg-gray-100'
+							}`}>
+								<Zap className={`h-5 w-5 ${
+									aiProvider === 'openrouter' ? 'text-purple-600' : 'text-gray-500'
+								}`}/>
+							</div>
+							<div className="flex-1 text-left">
+								<div className="flex items-center gap-2">
+									<h4 className="font-semibold text-gray-900">OpenRouter</h4>
+									{openRouterApiKey && (
+										<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+											已配置
+										</span>
+									)}
+									{aiProvider === 'openrouter' && (
+										<span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+											当前选中
+										</span>
+									)}
+								</div>
+								<p className="text-sm text-gray-600 mt-1">多模型统一接口，结构化输出</p>
+							</div>
+						</div>
+					</AccordionTrigger>
+					<AccordionContent className="px-6 pb-6">
+						<OpenRouterConfiguration />
+					</AccordionContent>
+				</AccordionItem>
+			</Accordion>
+
+			{/* 公共配置部分 - 提示词模板 */}
 			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-				<div className="flex items-center gap-3 mb-4">
-					<div className="p-2 bg-green-100 rounded-lg">
-						<Key className="h-5 w-5 text-green-600"/>
-					</div>
-					<div>
-						<h4 className="font-semibold text-gray-900">API 密钥配置</h4>
-						<p className="text-sm text-gray-600">安全配置您的 {aiProvider === 'openrouter' ? 'OpenRouter' : 'Claude'} API 访问凭证</p>
-					</div>
-				</div>
-
-				<div className="space-y-4">
-					{aiProvider === 'claude' ? (
-						<>
-							<FormInput
-								label="Claude API 密钥"
-								value={claudeApiKey}
-								onChange={handleApiKeyChange}
-								placeholder="sk-ant-api03-..."
-								type="password"
-								required={true}
-								icon={Key}
-								className="font-mono text-sm"
-							/>
-
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-									<Brain className="w-4 h-4 text-indigo-600"/>
-									AI 模型选择
-								</label>
-								<Select value={selectedModel} onValueChange={handleModelChange}>
-									<SelectTrigger className="w-full">
-										<SelectValue placeholder="选择 AI 模型" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											<SelectLabel className="flex items-center gap-2">
-												<Zap className="w-3 h-3"/>
-												快速响应
-											</SelectLabel>
-											{AVAILABLE_MODELS.filter(m => m.category === 'fast').map(model => (
-												<SelectItem key={model.id} value={model.id}>
-													<div className="flex items-center justify-between w-full">
-														<div>
-															<span className="font-medium">{model.name}</span>
-															{model.recommended && (
-																<span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">推荐</span>
-															)}
-															<div className="text-xs text-gray-500">{model.description}</div>
-														</div>
-													</div>
-												</SelectItem>
-											))}
-										</SelectGroup>
-										
-										<SelectGroup>
-											<SelectLabel className="flex items-center gap-2">
-												<Target className="w-3 h-3"/>
-												平衡性能
-											</SelectLabel>
-											{AVAILABLE_MODELS.filter(m => m.category === 'balanced').map(model => (
-												<SelectItem key={model.id} value={model.id}>
-													<div className="flex items-center justify-between w-full">
-														<div>
-															<span className="font-medium">{model.name}</span>
-															<div className="text-xs text-gray-500">{model.description}</div>
-														</div>
-													</div>
-												</SelectItem>
-											))}
-										</SelectGroup>
-										
-										<SelectGroup>
-											<SelectLabel className="flex items-center gap-2">
-												<Brain className="w-3 h-3"/>
-												强大推理
-											</SelectLabel>
-											{AVAILABLE_MODELS.filter(m => m.category === 'powerful').map(model => (
-												<SelectItem key={model.id} value={model.id}>
-													<div className="flex items-center justify-between w-full">
-														<div>
-															<span className="font-medium">{model.name}</span>
-															<div className="text-xs text-gray-500">{model.description}</div>
-														</div>
-													</div>
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								
-								{/* 显示当前选择模型的详细信息 */}
-								{(() => {
-									const currentModel = AVAILABLE_MODELS.find(m => m.id === selectedModel);
-									if (currentModel) {
-										const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
-											currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
-										const priceText = currentModel.pricing === 'low' ? '低成本' :
-											currentModel.pricing === 'medium' ? '中等成本' : '高成本';
-										
-										return (
-											<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-												<div className="flex items-center justify-between">
-													<div className="text-sm text-gray-700">
-														<span className="font-medium">当前选择：</span> {currentModel.name}
-													</div>
-													<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
-														{priceText}
-													</div>
-												</div>
-												<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
-											</div>
-										);
-									}
-									return null;
-								})()}
-							</div>
-						</>
-					) : (
-						<>
-							<FormInput
-								label="OpenRouter API 密钥"
-								value={openRouterApiKey}
-								onChange={(value) => {
-									setOpenRouterApiKey(value);
-									setConnectionStatus('idle');
-									setErrorMessage('');
-									updateSettings({openRouterApiKey: value.trim()});
-								}}
-								placeholder="sk-or-v1-..."
-								type="password"
-								required={true}
-								icon={Key}
-								className="font-mono text-sm"
-							/>
-
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-									<Brain className="w-4 h-4 text-indigo-600"/>
-									模型选择
-								</label>
-								<Select value={openRouterModel} onValueChange={(value) => {
-									setOpenRouterModel(value);
-									setConnectionStatus('idle');
-									setErrorMessage('');
-									updateSettings({openRouterModel: value});
-								}}>
-									<SelectTrigger className="w-full">
-										<SelectValue placeholder="选择模型" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											<SelectLabel className="flex items-center gap-2">
-												<Zap className="w-3 h-3"/>
-												快速响应
-											</SelectLabel>
-											{OPENROUTER_MODELS.filter(m => m.category === 'fast').map(model => (
-												<SelectItem key={model.id} value={model.id}>
-													<div className="flex items-center justify-between w-full">
-														<div>
-															<span className="font-medium">{model.name}</span>
-															<div className="text-xs text-gray-500">{model.description}</div>
-														</div>
-													</div>
-												</SelectItem>
-											))}
-										</SelectGroup>
-										
-										<SelectGroup>
-											<SelectLabel className="flex items-center gap-2">
-												<Target className="w-3 h-3"/>
-												平衡性能
-											</SelectLabel>
-											{OPENROUTER_MODELS.filter(m => m.category === 'balanced').map(model => (
-												<SelectItem key={model.id} value={model.id}>
-													<div className="flex items-center justify-between w-full">
-														<div>
-															<span className="font-medium">{model.name}</span>
-															<div className="text-xs text-gray-500">{model.description}</div>
-														</div>
-													</div>
-												</SelectItem>
-											))}
-										</SelectGroup>
-										
-										<SelectGroup>
-											<SelectLabel className="flex items-center gap-2">
-												<Brain className="w-3 h-3"/>
-												强大推理
-											</SelectLabel>
-											{OPENROUTER_MODELS.filter(m => m.category === 'powerful').map(model => (
-												<SelectItem key={model.id} value={model.id}>
-													<div className="flex items-center justify-between w-full">
-														<div>
-															<span className="font-medium">{model.name}</span>
-															<div className="text-xs text-gray-500">{model.description}</div>
-														</div>
-													</div>
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								
-								{/* 显示当前选择模型的详细信息 */}
-								{(() => {
-									const currentModel = OPENROUTER_MODELS.find(m => m.id === openRouterModel);
-									if (currentModel) {
-										const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
-											currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
-										const priceText = currentModel.pricing === 'low' ? '低成本' :
-											currentModel.pricing === 'medium' ? '中等成本' : '高成本';
-										
-										return (
-											<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-												<div className="flex items-center justify-between">
-													<div className="text-sm text-gray-700">
-														<span className="font-medium">当前选择：</span> {currentModel.name}
-													</div>
-													<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
-														{priceText}
-													</div>
-												</div>
-												<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
-											</div>
-										);
-									}
-									return null;
-								})()}
-							</div>
-						</>
-					)}
-
-					<div className="flex items-center justify-between">
-						<Button
-							onClick={testConnection}
-							disabled={isTestingConnection || (aiProvider === 'claude' ? !claudeApiKey.trim() : !openRouterApiKey.trim())}
-							size="sm"
-							className="bg-blue-600 hover:bg-blue-700 text-white"
-						>
-							{isTestingConnection ? (
-								<>
-									<RefreshCw className="w-4 h-4 mr-2 animate-spin"/>
-									测试连接中...
-								</>
-							) : (
-								<>
-									<Zap className="w-4 h-4 mr-2"/>
-									测试连接
-								</>
-							)}
-						</Button>
-
-						{connectionStatus === 'success' && (
-							<div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-								<CheckCircle className="w-4 h-4"/>
-								<span className="text-sm font-medium">连接成功</span>
-							</div>
-						)}
-
-						{connectionStatus === 'error' && (
-							<div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-								<XCircle className="w-4 h-4"/>
-								<span className="text-sm font-medium">连接失败</span>
-							</div>
-						)}
-					</div>
-
-					{errorMessage && (
-						<div className="bg-red-50 border border-red-200 rounded-lg p-3">
-							<p className="text-red-600 text-sm flex items-center gap-2">
-								<XCircle className="w-4 h-4"/>
-								{errorMessage}
-							</p>
-						</div>
-					)}
-
-					{/* API密钥安全说明 */}
-					<div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-						<div className="flex items-start gap-2">
-							<Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
-							<div className="text-sm text-amber-800">
-								<p className="font-medium">安全提醒</p>
-								<p className="mt-1">API密钥仅在本地存储，不会上传到任何服务器。请妥善保管您的密钥。</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			{/* 提示词模板配置卡片 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-				<div className="flex items-center justify-between mb-4">
-					<div className="flex items-center gap-3">
-						<div className="p-2 bg-purple-100 rounded-lg">
-							<Code className="h-5 w-5 text-purple-600"/>
-						</div>
-						<div>
-							<h4 className="font-semibold text-gray-900">提示词模板</h4>
-							<p className="text-sm text-gray-600">自定义AI分析的指令模板（支持Handlebars语法）</p>
-						</div>
-					</div>
-					<Button
-						onClick={handleUseDefaultTemplate}
-						size="sm"
-						variant="outline"
-						className="text-purple-600 border-purple-300 hover:bg-purple-50"
-					>
-						<RefreshCw className="w-4 h-4 mr-2"/>
-						恢复默认
-					</Button>
-				</div>
-
-				<div className="space-y-4">
-					<textarea
-						value={aiPromptTemplate}
-						onChange={(e) => handlePromptTemplateChange(e.target.value)}
-						placeholder="输入自定义的AI提示词模板..."
-						className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-0 h-40 resize-y font-mono text-sm transition-colors"
-					/>
-
-					{/* 模板变量说明 */}
-					<div
-						className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
-						<div className="flex items-center gap-2 mb-3">
-							<Code className="h-4 w-4 text-yellow-600"/>
-							<h5 className="text-sm font-medium text-yellow-800">可用的模板变量</h5>
-						</div>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-							{[
-								{var: '{{content}}', desc: '文章正文内容（已移除frontmatter）'},
-								{var: '{{filename}}', desc: '当前文件名（不含扩展名）'},
-								{var: '{{personalInfo.name}}', desc: '个人信息中的姓名'},
-								{var: '{{personalInfo.bio}}', desc: '个人信息中的简介'},
-								{var: '{{personalInfo.email}}', desc: '个人信息中的邮箱'},
-								{var: '{{personalInfo.website}}', desc: '个人信息中的网站'},
-								{var: '{{frontmatter}}', desc: '当前文档的frontmatter对象'},
-								{var: '{{today}}', desc: '当前日期（YYYY-MM-DD格式）'}
-							].map((item, index) => (
-								<div key={index} className="bg-white/60 border border-yellow-200 rounded-lg p-2">
-									<code className="text-yellow-700 font-medium">{item.var}</code>
-									<p className="text-yellow-600 mt-1">{item.desc}</p>
-								</div>
-							))}
-						</div>
-						<div className="mt-3 pt-3 border-t border-yellow-300">
-							<p className="text-xs text-yellow-700 flex items-center gap-2">
-								<Info className="w-3 h-3"/>
-								支持Handlebars语法：条件判断 <code>{'{{#if variable}}'}</code>，循环遍历 <code>{'{{#each array}}'}</code>
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			{/* API密钥获取指南 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-				<div className="flex items-center gap-3 mb-4">
-					<div className="p-2 bg-blue-100 rounded-lg">
-						<ExternalLink className="h-5 w-5 text-blue-600"/>
-					</div>
-					<div>
-						<h4 className="font-semibold text-gray-900">获取API密钥</h4>
-						<p className="text-sm text-gray-600">简单几步，获取您的{aiProvider === 'openrouter' ? 'OpenRouter' : 'Claude AI'}访问密钥</p>
-					</div>
-				</div>
-
-				{aiProvider === 'claude' ? (
-					<>
-						<div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-							{[
-								{step: '1', icon: ExternalLink, title: '访问控制台', desc: '前往Anthropic官网'},
-								{step: '2', icon: User, title: '注册登录', desc: '创建或登录账户'},
-								{step: '3', icon: Key, title: '创建密钥', desc: '生成新的API密钥'},
-								{step: '4', icon: Save, title: '复制密钥', desc: '保存到剪贴板'},
-								{step: '5', icon: CheckCircle, title: '配置完成', desc: '粘贴到上方输入框'}
-							].map((step, index) => (
-								<div key={index}
-									 className="group bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all">
-									<div className="flex items-center gap-2 mb-2">
-										<div
-											className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-											{step.step}
-										</div>
-										<step.icon className="w-4 h-4 text-blue-600"/>
-									</div>
-									<h5 className="text-sm font-medium text-gray-800">{step.title}</h5>
-									<p className="text-xs text-gray-600 mt-1">{step.desc}</p>
-								</div>
-							))}
-						</div>
-
-						<div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-							<p className="text-sm text-blue-800 flex items-center gap-2">
-								<Info className="w-4 h-4"/>
-								立即访问：
-								<a
-									href="https://console.anthropic.com/"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-blue-600 hover:text-blue-800 underline font-medium"
-								>
-									https://console.anthropic.com/
-								</a>
-							</p>
-						</div>
-					</>
-				) : (
-					<>
-						<div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-							{[
-								{step: '1', icon: ExternalLink, title: '访问官网', desc: '前往OpenRouter'},
-								{step: '2', icon: User, title: '注册登录', desc: '创建或登录账户'},
-								{step: '3', icon: Key, title: '获取密钥', desc: '在Keys页面生成'},
-								{step: '4', icon: Save, title: '复制密钥', desc: '保存到剪贴板'},
-								{step: '5', icon: CheckCircle, title: '配置完成', desc: '粘贴到上方输入框'}
-							].map((step, index) => (
-								<div key={index}
-									 className="group bg-gradient-to-br from-gray-50 to-purple-50 border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all">
-									<div className="flex items-center gap-2 mb-2">
-										<div
-											className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-											{step.step}
-										</div>
-										<step.icon className="w-4 h-4 text-purple-600"/>
-									</div>
-									<h5 className="text-sm font-medium text-gray-800">{step.title}</h5>
-									<p className="text-xs text-gray-600 mt-1">{step.desc}</p>
-								</div>
-							))}
-						</div>
-
-						<div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-							<p className="text-sm text-purple-800 flex items-center gap-2">
-								<Info className="w-4 h-4"/>
-								立即访问：
-								<a
-									href="https://openrouter.ai/keys"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-purple-600 hover:text-purple-800 underline font-medium"
-								>
-									https://openrouter.ai/keys
-								</a>
-							</p>
-						</div>
-						
-						<div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-							<div className="flex items-start gap-2">
-								<Sparkles className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
-								<div className="text-sm text-amber-800">
-									<p className="font-medium">OpenRouter优势</p>
-									<ul className="mt-1 space-y-1 text-xs">
-										<li>• 支持多种AI模型（GPT、Claude、Gemini等）</li>
-										<li>• 结构化输出确保返回格式正确</li>
-										<li>• 统一的API接口，切换模型更方便</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</>
-				)}
+				<CommonPromptConfiguration />
 			</div>
 
 			{/* 操作按钮 */}
