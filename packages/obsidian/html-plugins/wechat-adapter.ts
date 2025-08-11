@@ -35,13 +35,13 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			logger.debug("开始微信公众号适配处理");
 
 			// 依次执行各个适配步骤
+			// 注意：必须先处理链接，再处理样式内联化
+			// 因为juice可能会改变HTML结构，影响链接文本的获取
 			console.log("📎 [微信插件] Step 1: 处理链接");
-			// html = this.processLinks(html, settings);
+			html = this.processLinks(html, settings);
 
 			console.log("🎨 [微信插件] Step 2: 内联样式");
 			html = this.inlineStyles(html, settings);
-
-			html = this.processLinks(html, settings);
 			//
 			// console.log("🏗️ [微信插件] Step 3: 保持结构");
 			// html = this.preserveStructure(html, settings);
@@ -63,16 +63,28 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 	 */
 	private processLinks(html: string, settings: NMPSettings): string {
 		try {
+			logger.debug("=== processLinks 开始 ===");
+			logger.debug("settings.linkDescriptionMode:", settings.linkDescriptionMode);
+			
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
 			const container = doc.body.firstChild as HTMLElement;
 
 			// 查找所有链接
 			const links = container.querySelectorAll("a");
+			logger.debug("找到链接数量:", links.length);
+			
 			const footnotes: string[] = [];
 
-			links.forEach((link) => {
+			links.forEach((link, index) => {
 				const href = link.getAttribute("href");
+				const linkText = link.textContent || "";
+				logger.debug(`处理链接 ${index + 1}:`, {
+					href: href,
+					text: linkText,
+					parentTag: link.parentElement?.tagName
+				});
+				
 				if (!href) return;
 
 				// 检查是否已经是脚注格式的链接
@@ -131,13 +143,24 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					let footnoteContent = "";
 					const linkText = link.textContent || "";
 					
+					// 调试：打印链接信息
+					logger.debug("处理链接脚注:", {
+						href: href,
+						linkText: linkText,
+						linkDescriptionMode: settings.linkDescriptionMode,
+						hasText: !!linkText,
+						trimmedText: linkText.trim()
+					});
+					
 					// 检查设置，如果设置为 "raw" 并且有链接文本，则显示链接文本
 					if (settings.linkDescriptionMode === "raw" && linkText && linkText.trim()) {
 						// 有链接文本时：[序号] 链接文本, URL
 						footnoteContent = `[${footnotes.length + 1}] ${linkText.trim()}, ${href}`;
+						logger.debug("使用链接文本格式:", footnoteContent);
 					} else {
 						// 无链接文本或设置为 "empty" 时：[序号] URL
 						footnoteContent = `[${footnotes.length + 1}] ${href}`;
+						logger.debug("仅显示URL格式:", footnoteContent);
 					}
 
 					footnotes.push(footnoteContent);
@@ -150,6 +173,10 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 			// 如果有脚注，添加到文档末尾
 			if (footnotes.length > 0) {
+				logger.debug("=== 添加脚注到文档 ===");
+				logger.debug("脚注数量:", footnotes.length);
+				logger.debug("脚注内容:", footnotes);
+				
 				const hr = container.ownerDocument.createElement("hr");
 				hr.style.borderTop = "1px solid #e5e5e5";
 				hr.style.margin = "30px 0 20px 0";
@@ -173,9 +200,13 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 
 				container.appendChild(hr);
 				container.appendChild(footnoteSection);
+			} else {
+				logger.debug("=== 没有脚注需要添加 ===");
 			}
 
-			return container.innerHTML;
+			const result = container.innerHTML;
+			logger.debug("=== processLinks 结束 ===");
+			return result;
 		} catch (error) {
 			logger.error("处理链接时出错:", error);
 			return html;
