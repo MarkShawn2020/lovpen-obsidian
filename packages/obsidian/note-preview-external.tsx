@@ -755,7 +755,7 @@ ${customCSS}`;
 		}
 	}
 
-	private handleUnifiedPluginToggle(pluginName: string, enabled: boolean) {
+	private async handleUnifiedPluginToggle(pluginName: string, enabled: boolean) {
 		try {
 			const pluginManager = UnifiedPluginManager.getInstance();
 			if (pluginManager) {
@@ -771,6 +771,11 @@ ${customCSS}`;
 					
 					this.saveSettingsToPlugin();
 					this.renderMarkdown();
+					
+					// 强制更新React组件以反映插件状态变化
+					this.cachedProps = null; // 清除缓存的props，强制重新构建
+					await this.updateExternalReactComponent();
+					
 					logger.debug(`已${enabled ? '启用' : '禁用'}插件: ${pluginName}`);
 				}
 			}
@@ -779,7 +784,7 @@ ${customCSS}`;
 		}
 	}
 
-	private handleUnifiedPluginConfigChange(pluginName: string, key: string, value: string | boolean) {
+	private async handleUnifiedPluginConfigChange(pluginName: string, key: string, value: string | boolean) {
 		try {
 			const pluginManager = UnifiedPluginManager.getInstance();
 			if (pluginManager) {
@@ -790,6 +795,11 @@ ${customCSS}`;
 					plugin.updateConfig({[key]: value});
 					this.saveSettingsToPlugin();
 					this.renderMarkdown();
+					
+					// 强制更新React组件以反映配置变化
+					this.cachedProps = null; // 清除缓存的props，强制重新构建
+					await this.updateExternalReactComponent();
+					
 					logger.debug(`已更新插件 ${pluginName} 的配置: ${key} = ${value}`);
 				}
 			}
