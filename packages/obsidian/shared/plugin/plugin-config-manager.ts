@@ -88,7 +88,8 @@ export class PluginConfigManager {
 	 */
 	private loadConfigFromSettings(): void {
 		try {
-			const settings = NMPSettings.getInstance();
+			// 优先使用主插件的设置实例
+			const settings = this.getSettingsInstance();
 
 			// 如果设置中有该插件的配置，使用它
 			if (settings.pluginsConfig && settings.pluginsConfig[this.pluginName]) {
@@ -105,7 +106,8 @@ export class PluginConfigManager {
 	 */
 	private saveConfigToSettings(): void {
 		try {
-			const settings = NMPSettings.getInstance();
+			// 优先使用主插件的设置实例
+			const settings = this.getSettingsInstance();
 
 			// 确保pluginsConfig对象存在
 			if (!settings.pluginsConfig) {
@@ -121,6 +123,27 @@ export class PluginConfigManager {
 		} catch (error) {
 			logger.error(`保存插件配置失败:`, error);
 		}
+	}
+
+	/**
+	 * 获取设置实例（优先使用主插件的设置）
+	 */
+	private getSettingsInstance(): NMPSettings {
+		try {
+			const app = (window as any).app;
+			if (app && app.plugins && app.plugins.plugins) {
+				const plugin = app.plugins.plugins["lovpen"];
+				if (plugin && plugin.settings) {
+					logger.debug(`使用主插件的设置实例`);
+					return plugin.settings;
+				}
+			}
+		} catch (e) {
+			logger.debug(`无法获取主插件设置，使用单例模式`);
+		}
+		
+		// 如果主插件不可用，使用单例
+		return NMPSettings.getInstance();
 	}
 
 	/**

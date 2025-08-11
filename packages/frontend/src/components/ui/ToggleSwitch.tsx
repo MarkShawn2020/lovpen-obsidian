@@ -16,9 +16,14 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
 															  onClick,
 														  }) => {
 	const handleClick = (e: React.MouseEvent) => {
+		// 阻止事件冒泡到父级
+		e.stopPropagation();
+		
+		// 调用外部的onClick回调（如果有）
 		if (onClick) {
 			onClick(e);
 		}
+		// 不在这里改变状态，让input的onChange处理
 	};
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

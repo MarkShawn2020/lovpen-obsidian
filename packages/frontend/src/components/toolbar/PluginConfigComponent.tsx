@@ -168,7 +168,10 @@ export const ConfigComponent = <T extends PluginData>({
 			>
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-						<div onClick={(e) => e.stopPropagation()}>
+						<div onClick={(e) => {
+							e.stopPropagation();
+							e.preventDefault();
+						}}>
 							<ToggleSwitch
 								checked={item.enabled}
 								onChange={handleEnabledChange}
@@ -220,7 +223,7 @@ export const ConfigComponent = <T extends PluginData>({
 									<Bug className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
 									<span className="text-xs sm:text-sm font-medium text-gray-700">{meta.title}</span>
 								</div>
-								<div onClick={(e) => e.stopPropagation()} className="w-full sm:w-auto">
+								<div className="w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
 									{meta.type === "switch" ? (
 										<ToggleSwitch
 											checked={!!localConfig[key]}
