@@ -104,7 +104,7 @@ export class NMPSettings implements SettingsData {
 	defaultStyle: string = 'wabi-sabi';
 	defaultHighlight: string = '默认';
 	showStyleUI: boolean = true;
-	linkDescriptionMode: LinkDescriptionMode = LinkDescriptionMode.Empty;
+	linkDescriptionMode: LinkDescriptionMode = LinkDescriptionMode.Raw;
 	embedStyle: string = 'quote';
 	lineNumber: boolean = true;
 	enableWeixinCodeFormat: boolean = false;

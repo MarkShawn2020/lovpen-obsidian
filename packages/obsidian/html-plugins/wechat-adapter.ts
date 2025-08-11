@@ -104,7 +104,18 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				}
 
 				// 判断是否需要转换此链接
-				const shouldConvert = !href.includes("weixin.qq.com");
+				// 只有直接的微信链接不转换成脚注
+				// 被重定向包装的链接（如Google重定向）都应该转换成脚注
+				const shouldConvert = !href.startsWith("https://mp.weixin.qq.com") && 
+				                      !href.startsWith("https://weixin.qq.com") &&
+				                      !href.startsWith("http://mp.weixin.qq.com") &&
+				                      !href.startsWith("http://weixin.qq.com");
+
+				// 调试日志
+				logger.debug("链接处理判断:", {
+					URL: href,
+					是否转换为脚注: shouldConvert
+				});
 
 				if (shouldConvert) {
 					// 创建脚注标记
@@ -116,33 +127,46 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					link.after(footnoteRef);
 
 					// 根据设置决定脚注内容格式
+					// 格式：[序号] 脚注内容, 脚注链接
 					let footnoteContent = "";
-					if (settings.linkDescriptionMode === "raw") {
-						footnoteContent = `[${footnotes.length + 1}] ${
-							link.textContent
-						}: ${href}`;
+					const linkText = link.textContent || "";
+					
+					// 检查设置，如果设置为 "raw" 并且有链接文本，则显示链接文本
+					if (settings.linkDescriptionMode === "raw" && linkText && linkText.trim()) {
+						// 有链接文本时：[序号] 链接文本, URL
+						footnoteContent = `[${footnotes.length + 1}] ${linkText.trim()}, ${href}`;
 					} else {
+						// 无链接文本或设置为 "empty" 时：[序号] URL
 						footnoteContent = `[${footnotes.length + 1}] ${href}`;
 					}
 
 					footnotes.push(footnoteContent);
 
 					// 移除链接标签，保留内部文本
-					const linkText = link.textContent;
-					link.replaceWith(linkText || "");
+					const preservedText = link.textContent;
+					link.replaceWith(preservedText || "");
 				}
 			});
 
 			// 如果有脚注，添加到文档末尾
 			if (footnotes.length > 0) {
 				const hr = container.ownerDocument.createElement("hr");
+				hr.style.borderTop = "1px solid #e5e5e5";
+				hr.style.margin = "30px 0 20px 0";
+				
 				const footnoteSection = container.ownerDocument.createElement("section");
 				footnoteSection.style.fontSize = "14px";
-				footnoteSection.style.color = "#888";
-				footnoteSection.style.marginTop = "30px";
+				footnoteSection.style.color = "#666";
+				footnoteSection.style.lineHeight = "1.6";
+				footnoteSection.style.textAlign = "left";  // 左对齐
+				footnoteSection.style.wordBreak = "break-word";  // 词切割换行
+				footnoteSection.style.wordWrap = "break-word";   // 兼容性
+				footnoteSection.style.overflowWrap = "break-word"; // 标准属性
 
 				footnotes.forEach((note) => {
 					const p = container.ownerDocument.createElement("p");
+					p.style.margin = "8px 0";
+					p.style.textAlign = "left";  // 确保段落也是左对齐
 					p.innerHTML = note;
 					footnoteSection.appendChild(p);
 				});

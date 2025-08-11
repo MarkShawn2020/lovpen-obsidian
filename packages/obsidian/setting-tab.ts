@@ -90,8 +90,8 @@ export class LovpenSettingTab extends PluginSettingTab {
 			.setName("脚注链接描述模式")
 			.setDesc("控制脚注中链接的展示形式")
 			.addDropdown((dropdown) => {
-				dropdown.addOption("empty", "不显示描述");
-				dropdown.addOption("description", "显示链接描述");
+				dropdown.addOption("empty", "仅显示链接");
+				dropdown.addOption("raw", "显示链接文本和链接");
 				dropdown.setValue(this.settings.linkDescriptionMode);
 				dropdown.onChange(async (value) => {
 					this.settings.linkDescriptionMode =
