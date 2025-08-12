@@ -1,4 +1,4 @@
-import {NMPSettings} from "../settings";
+import {NMPSettings, LinkDescriptionMode} from "../settings";
 import {logger} from "../../shared/src/logger";
 import juice from 'juice'
 
@@ -75,17 +75,45 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			logger.debug("找到链接数量:", links.length);
 			
 			const footnotes: string[] = [];
+			// 用于记录URL到脚注索引的映射，实现去重
+			const urlToFootnoteIndex = new Map<string, number>();
+			// 用于记录每个脚注的所有链接文本
+			const footnoteTexts = new Map<number, Set<string>>();
 
 			links.forEach((link, index) => {
 				const href = link.getAttribute("href");
-				const linkText = link.textContent || "";
+				// 获取链接文本 - 使用innerHTML去除可能的HTML标签，再获取纯文本
+				const linkTextContent = link.textContent || "";
+				const linkInnerHTML = link.innerHTML || "";
+				
+				// 检查链接是否在脚注区域内（由footnote.ts生成的）
+				let parentElement = link.parentElement;
+				let isInFootnoteSection = false;
+				while (parentElement) {
+					if (parentElement.classList?.contains('footnotes') || 
+					    parentElement.tagName === 'SECTION' && parentElement.className === 'footnotes') {
+						isInFootnoteSection = true;
+						break;
+					}
+					parentElement = parentElement.parentElement;
+				}
+				
 				logger.debug(`处理链接 ${index + 1}:`, {
 					href: href,
-					text: linkText,
-					parentTag: link.parentElement?.tagName
+					textContent: linkTextContent,
+					innerHTML: linkInnerHTML,
+					parentTag: link.parentElement?.tagName,
+					hasChildNodes: link.childNodes.length > 0,
+					isInFootnoteSection: isInFootnoteSection
 				});
 				
 				if (!href) return;
+				
+				// 如果链接在脚注区域内，不再处理（已经是脚注内容了）
+				if (isInFootnoteSection) {
+					logger.debug("链接在脚注区域内，跳过处理");
+					return;
+				}
 
 				// 检查是否已经是脚注格式的链接
 				const isFootnoteRef = href.startsWith('#fn-');
@@ -99,12 +127,12 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					if (parentIsSup) {
 						// 如果父元素是sup，保留sup但去除a标签
 						const supElement = link.parentElement;
-						const linkText = link.textContent;
-						link.replaceWith(linkText || '');
+						const supText = link.textContent;
+						link.replaceWith(supText || '');
 
 						// 确保还是sup样式
-						if (supElement && linkText) {
-							supElement.textContent = linkText;
+						if (supElement && supText) {
+							supElement.textContent = supText;
 						}
 					} else {
 						// 直接将自身转为上标
@@ -126,56 +154,85 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				// 调试日志
 				logger.debug("链接处理判断:", {
 					URL: href,
-					是否转换为脚注: shouldConvert
+					是否转换为脚注: shouldConvert,
+					链接文本: linkTextContent
 				});
 
 				if (shouldConvert) {
+					let footnoteIndex: number;
+					
+					// 检查这个URL是否已经有脚注了
+					if (urlToFootnoteIndex.has(href)) {
+						// 复用现有脚注编号
+						footnoteIndex = urlToFootnoteIndex.get(href)!;
+						logger.debug("复用现有脚注:", { href, footnoteIndex });
+						
+						// 如果有新的链接文本，添加到该脚注的文本集合中
+						if (linkTextContent && linkTextContent.trim()) {
+							const texts = footnoteTexts.get(footnoteIndex) || new Set();
+							texts.add(linkTextContent.trim());
+							footnoteTexts.set(footnoteIndex, texts);
+						}
+					} else {
+						// 创建新脚注
+						footnoteIndex = footnotes.length + 1;
+						urlToFootnoteIndex.set(href, footnoteIndex);
+						
+						// 记录链接文本
+						if (linkTextContent && linkTextContent.trim()) {
+							const texts = new Set<string>();
+							texts.add(linkTextContent.trim());
+							footnoteTexts.set(footnoteIndex, texts);
+						}
+						
+						// 添加到脚注列表（占位，后面会更新内容）
+						footnotes.push("");
+						logger.debug("创建新脚注:", { href, footnoteIndex, linkText: linkTextContent });
+					}
+					
 					// 创建脚注标记
 					const footnoteRef = container.ownerDocument.createElement("sup");
-					footnoteRef.textContent = `[${footnotes.length + 1}]`;
+					footnoteRef.textContent = `[${footnoteIndex}]`;
 					footnoteRef.style.color = "#3370ff";
 
 					// 替换链接为脚注引用
 					link.after(footnoteRef);
 
-					// 根据设置决定脚注内容格式
-					// 格式：[序号] 脚注内容, 脚注链接
-					let footnoteContent = "";
-					const linkText = link.textContent || "";
-					
-					// 调试：打印链接信息
-					logger.debug("处理链接脚注:", {
-						href: href,
-						linkText: linkText,
-						linkDescriptionMode: settings.linkDescriptionMode,
-						hasText: !!linkText,
-						trimmedText: linkText.trim()
-					});
-					
-					// 检查设置，如果设置为 "raw" 并且有链接文本，则显示链接文本
-					if (settings.linkDescriptionMode === "raw" && linkText && linkText.trim()) {
-						// 有链接文本时：[序号] 链接文本, URL
-						footnoteContent = `[${footnotes.length + 1}] ${linkText.trim()}, ${href}`;
-						logger.debug("使用链接文本格式:", footnoteContent);
-					} else {
-						// 无链接文本或设置为 "empty" 时：[序号] URL
-						footnoteContent = `[${footnotes.length + 1}] ${href}`;
-						logger.debug("仅显示URL格式:", footnoteContent);
-					}
-
-					footnotes.push(footnoteContent);
-
 					// 移除链接标签，保留内部文本
-					const preservedText = link.textContent;
-					link.replaceWith(preservedText || "");
+					link.replaceWith(linkTextContent || "");
 				}
 			});
 
 			// 如果有脚注，添加到文档末尾
 			if (footnotes.length > 0) {
+				// 生成最终的脚注内容
+				const finalFootnotes: string[] = [];
+				urlToFootnoteIndex.forEach((footnoteIndex, url) => {
+					const texts = footnoteTexts.get(footnoteIndex);
+					let footnoteContent = `[${footnoteIndex}] `;
+					
+					if (texts && texts.size > 0) {
+						// 如果有多个不同的链接文本，用斜线分隔
+						const textArray = Array.from(texts);
+						if (textArray.length > 1) {
+							// 多个文本：[1] 文本A / 文本B / 文本C, URL
+							footnoteContent += textArray.join(" / ") + ", " + url;
+						} else {
+							// 单个文本：[1] 文本, URL
+							footnoteContent += textArray[0] + ", " + url;
+						}
+					} else {
+						// 没有文本：[1] URL
+						footnoteContent += url;
+					}
+					
+					// 按索引顺序存储
+					finalFootnotes[footnoteIndex - 1] = footnoteContent;
+				});
+				
 				logger.debug("=== 添加脚注到文档 ===");
-				logger.debug("脚注数量:", footnotes.length);
-				logger.debug("脚注内容:", footnotes);
+				logger.debug("脚注数量:", finalFootnotes.length);
+				logger.debug("脚注内容:", finalFootnotes);
 				
 				const hr = container.ownerDocument.createElement("hr");
 				hr.style.borderTop = "1px solid #e5e5e5";
@@ -190,12 +247,15 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				footnoteSection.style.wordWrap = "break-word";   // 兼容性
 				footnoteSection.style.overflowWrap = "break-word"; // 标准属性
 
-				footnotes.forEach((note) => {
-					const p = container.ownerDocument.createElement("p");
-					p.style.margin = "8px 0";
-					p.style.textAlign = "left";  // 确保段落也是左对齐
-					p.innerHTML = note;
-					footnoteSection.appendChild(p);
+				finalFootnotes.forEach((note) => {
+					if (note) {  // 确保脚注内容存在
+						const p = container.ownerDocument.createElement("p");
+						p.style.margin = "8px 0";
+						p.style.textAlign = "left";  // 确保段落也是左对齐
+						// 使用textContent而不是innerHTML，避免HTML注入问题
+						p.textContent = note;
+						footnoteSection.appendChild(p);
+					}
 				});
 
 				container.appendChild(hr);

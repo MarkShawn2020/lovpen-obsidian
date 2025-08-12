@@ -1,4 +1,4 @@
-import {MarkedExtension, Tokens} from "marked";
+import {MarkedExtension, Tokens, marked} from "marked";
 
 import {MarkdownPlugin as UnifiedMarkdownPlugin} from "../shared/plugin/markdown-plugin";
 
@@ -69,12 +69,20 @@ export class FootnoteRenderer extends UnifiedMarkdownPlugin {
 		}
 
 		// 生成脚注列表HTML
-		const footnoteItems = this.footnoteRefs.map(id => {
+		const footnoteItems = await Promise.all(this.footnoteRefs.map(async id => {
 			// 这里不再需要空字符串作为默认值，因为前面已经确保所有ID都有内容
-			const content = this.footnotes.get(id) as string;
+			let content = this.footnotes.get(id) as string;
+			
+			// 检查内容是否包含Markdown链接格式 [text](url)
+			// 如果包含，使用marked渲染成HTML
+			if (content.includes('](') && content.includes('[')) {
+				// 渲染Markdown内容为HTML（仅渲染行内元素）
+				content = await marked.parseInline(content);
+			}
+			
 			// 移除返回符号和链接，微信平台不支持页内跳转
 			return `<li id="fn-${id}">${content}</li>`;
-		});
+		}));
 
 		// 添加脚注部分
 		return `${html}
