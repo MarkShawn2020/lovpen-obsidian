@@ -53,6 +53,18 @@ export default `
   display: block;
 }
 
+/* Anthropic Style 主题 - 低调图标样式 */
+#render-container [data-element="admonition-icon"] svg {
+  opacity: 0.6;
+  stroke-width: 1.5;
+  transform: scale(0.9);
+  transition: opacity 0.2s ease;
+}
+
+#render-container [data-component="admonition"]:hover [data-element="admonition-icon"] svg {
+  opacity: 0.8;
+}
+
 /* 标题文本 */
 [data-element="admonition-title"] {
   flex: 1;

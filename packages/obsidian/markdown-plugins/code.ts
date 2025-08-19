@@ -2,7 +2,7 @@ import {toPng} from "html-to-image";
 import {Tokens} from "marked";
 import {MarkdownView} from "obsidian";
 import {WeixinCodeFormatter} from "./weixin-code-formatter";
-import {GetCallout} from "./callouts";
+import {GetCallout, getAdmonitionInlineStyles} from "./callouts";
 import {MathRendererQueue} from "./math";
 import {CardDataManager} from "../html-plugins/code-blocks";
 
@@ -245,14 +245,19 @@ export class CodeRenderer extends UnifiedMarkdownPlugin {
 				return this.codeRenderer(token.text, token.lang);
 			}
 
-			// 生成语义化的 callout HTML
-			// 使用 data 属性而非 class，实现样式与结构的解耦
-			return `<section data-component="admonition" data-type="${calloutType}" data-variant="${info.style}">
-				<header data-element="admonition-header">
-					<span data-element="admonition-icon" data-icon-type="${calloutType}">${info.icon}</span>
-					<span data-element="admonition-title">${title}</span>
+			// 获取内联样式
+			const styles = getAdmonitionInlineStyles(calloutType);
+
+			// 处理SVG图标，添加内联样式
+			const styledIcon = info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.9;"');
+
+			// 生成带内联样式的 HTML（兼容微信公众号）
+			return `<section data-component="admonition" data-type="${calloutType}" data-variant="${info.style}" style="${styles.container}">
+				<header data-element="admonition-header" style="${styles.header}">
+					<span data-element="admonition-icon" data-icon-type="${calloutType}" style="${styles.icon}">${styledIcon}</span>
+					<span data-element="admonition-title" style="${styles.title}">${title}</span>
 				</header>
-				<div data-element="admonition-content">${body}</div>
+				<div data-element="admonition-content" style="${styles.content}">${body}</div>
 			</section>`;
 		} catch (error) {
 			logger.error('Error rendering ad callout:', error);
