@@ -308,7 +308,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// html = this.cleanIncompatibleStyles(processedHtml);
 			
 			// 修复标题内加粗文字颜色问题
-			const cleanedHtml = this.fixHeadingStrongColors(processedHtml);
+			let cleanedHtml = this.fixHeadingStrongColors(processedHtml);
 
 			logger.debug("微信CSS内联化完成");
 			return cleanedHtml;
@@ -365,5 +365,4 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			return html;
 		}
 	}
-
 }
