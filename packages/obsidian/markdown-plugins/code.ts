@@ -142,11 +142,53 @@ export class CodeRenderer extends UnifiedMarkdownPlugin {
 				return this.codeRenderer(token.text, token.lang);
 			}
 
+			// 解析 token.lang，分离 callout 类型和标题
+			// token.lang 可能的格式：
+			// - "ad-tip"
+			// - "ad-tip TITLE 1"
+			// - "ad-tip {TITLE: TITLE 2}"
+			const langParts = token.lang.trim().split(/\s+(.+)/);
+			const calloutTypeWithPrefix = langParts[0]; // "ad-tip"
+			const langTitle = langParts[1] || ''; // 剩余部分作为标题
+
+			// 检查是否是 ad-xxx 格式
+			if (!calloutTypeWithPrefix.startsWith('ad-')) {
+				return this.codeRenderer(token.text, token.lang);
+			}
+
 			// 提取 callout 类型（去掉 'ad-' 前缀）
-			const calloutType = token.lang.substring(3).toLowerCase();
+			const calloutType = calloutTypeWithPrefix.substring(3).toLowerCase();
 
 			// 提取标题 - 默认使用 callout 类型作为标题
 			let title = calloutType.charAt(0).toUpperCase() + calloutType.slice(1).toLowerCase();
+
+			// 如果 langTitle 存在，解析它
+			if (langTitle) {
+				// 检查是否是 JSON 格式 {TITLE: xxx} 或 {"TITLE": "xxx"}
+				const jsonMatch = langTitle.match(/^\{.*\}$/);
+				if (jsonMatch) {
+					// 尝试解析 JSON 格式
+					try {
+						// 处理简单的 {TITLE: xxx} 格式（不是严格的 JSON）
+						const simpleMatch = langTitle.match(/\{\s*(?:TITLE|title)\s*:\s*(.+?)\s*\}/);
+						if (simpleMatch) {
+							title = simpleMatch[1].replace(/^["']|["']$/g, '').trim();
+						} else {
+							// 尝试作为标准 JSON 解析
+							const parsed = JSON.parse(langTitle);
+							if (parsed.TITLE || parsed.title) {
+								title = parsed.TITLE || parsed.title;
+							}
+						}
+					} catch (e) {
+						// JSON 解析失败，使用原始文本
+						title = langTitle;
+					}
+				} else {
+					// 纯文本标题
+					title = langTitle.trim();
+				}
+			}
 
 			// 解析内容，支持 title: xxx 语法
 			const lines = token.text.split('\n');
@@ -176,18 +218,44 @@ export class CodeRenderer extends UnifiedMarkdownPlugin {
 				}
 				content = lines.slice(contentStartIndex).join('\n').trim();
 			}
-			const body = this.marked.parser(this.marked.lexer(content));
+			
+			// 解析内容为 HTML
+			let body = '';
+			if (content) {
+				if (this.marked) {
+					// 如果 marked 实例存在，使用它解析
+					try {
+						body = this.marked.parser(this.marked.lexer(content));
+					} catch (parseError) {
+						logger.error('Failed to parse content with marked:', parseError);
+						// 回退到简单的段落包装
+						body = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+					}
+				} else {
+					// 如果 marked 实例不存在，使用简单的段落包装
+					logger.debug('Marked instance not available, using simple HTML wrapping');
+					body = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+				}
+			}
 
 			// 获取 callout 样式信息
 			const info = GetCallout(calloutType);
 			if (!info) {
+				logger.warn(`Unknown admonition type: ${calloutType}`);
 				return this.codeRenderer(token.text, token.lang);
 			}
 
-			// 生成 callout HTML
-			return `<section class="ad ${info.style}"><section class="ad-title-wrap"><span class="ad-icon">${info.icon}</span><span class="ad-title">${title}<span></section><section class="ad-content">${body}</section></section>`;
+			// 生成语义化的 callout HTML
+			// 使用 data 属性而非 class，实现样式与结构的解耦
+			return `<section data-component="admonition" data-type="${calloutType}" data-variant="${info.style}">
+				<header data-element="admonition-header">
+					<span data-element="admonition-icon" data-icon-type="${calloutType}">${info.icon}</span>
+					<span data-element="admonition-title">${title}</span>
+				</header>
+				<div data-element="admonition-content">${body}</div>
+			</section>`;
 		} catch (error) {
-			console.error('Error rendering ad callout:', error);
+			logger.error('Error rendering ad callout:', error);
 			return this.codeRenderer(token.text, token.lang);
 		}
 	}

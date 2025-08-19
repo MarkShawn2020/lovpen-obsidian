@@ -1,0 +1,164 @@
+/* ========================================
+   Admonition Component - Base Styles
+   语义化的组件样式，与具体主题无关
+   ======================================== */
+
+/* 基础容器样式 */
+[data-component="admonition"] {
+  border: none;
+  padding: 1em 1em 1em 1.5em;
+  display: flex;
+  flex-direction: column;
+  margin: 1em 0;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+/* 头部容器 */
+[data-element="admonition-header"] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 1em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+/* 图标容器 */
+[data-element="admonition-icon"] {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5em;
+  flex-shrink: 0;
+}
+
+[data-element="admonition-icon"] svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 标题文本 */
+[data-element="admonition-title"] {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* 内容区域 */
+[data-element="admonition-content"] {
+  color: rgb(34, 34, 34);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+[data-element="admonition-content"] > *:first-child {
+  margin-top: 0;
+}
+
+[data-element="admonition-content"] > *:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
+   默认主题变体样式
+   ======================================== */
+
+/* Note/Info 类型 */
+[data-component="admonition"][data-type="note"],
+[data-component="admonition"][data-type="info"],
+[data-component="admonition"][data-type="todo"] {
+  color: rgb(8, 109, 221);
+  background-color: rgba(8, 109, 221, 0.1);
+  border-left: 3px solid rgb(8, 109, 221);
+}
+
+/* Tip/Abstract 类型 */
+[data-component="admonition"][data-type="tip"],
+[data-component="admonition"][data-type="abstract"],
+[data-component="admonition"][data-type="summary"],
+[data-component="admonition"][data-type="tldr"],
+[data-component="admonition"][data-type="hint"],
+[data-component="admonition"][data-type="important"] {
+  color: rgb(0, 191, 188);
+  background-color: rgba(0, 191, 188, 0.1);
+  border-left: 3px solid rgb(0, 191, 188);
+}
+
+/* Success 类型 */
+[data-component="admonition"][data-type="success"],
+[data-component="admonition"][data-type="check"],
+[data-component="admonition"][data-type="done"] {
+  color: rgb(8, 185, 78);
+  background-color: rgba(8, 185, 78, 0.1);
+  border-left: 3px solid rgb(8, 185, 78);
+}
+
+/* Question/Warning 类型 */
+[data-component="admonition"][data-type="question"],
+[data-component="admonition"][data-type="help"],
+[data-component="admonition"][data-type="faq"],
+[data-component="admonition"][data-type="warning"],
+[data-component="admonition"][data-type="caution"],
+[data-component="admonition"][data-type="attention"] {
+  color: rgb(236, 117, 0);
+  background-color: rgba(236, 117, 0, 0.1);
+  border-left: 3px solid rgb(236, 117, 0);
+}
+
+/* Failure/Danger 类型 */
+[data-component="admonition"][data-type="failure"],
+[data-component="admonition"][data-type="fail"],
+[data-component="admonition"][data-type="missing"],
+[data-component="admonition"][data-type="danger"],
+[data-component="admonition"][data-type="error"],
+[data-component="admonition"][data-type="bug"] {
+  color: rgb(233, 49, 71);
+  background-color: rgba(233, 49, 71, 0.1);
+  border-left: 3px solid rgb(233, 49, 71);
+}
+
+/* Example 类型 */
+[data-component="admonition"][data-type="example"] {
+  color: rgb(120, 82, 238);
+  background-color: rgba(120, 82, 238, 0.1);
+  border-left: 3px solid rgb(120, 82, 238);
+}
+
+/* Quote 类型 */
+[data-component="admonition"][data-type="quote"],
+[data-component="admonition"][data-type="cite"] {
+  color: rgb(158, 158, 158);
+  background-color: rgba(158, 158, 158, 0.1);
+  border-left: 3px solid rgb(158, 158, 158);
+}
+
+/* ========================================
+   响应式调整
+   ======================================== */
+
+@media (max-width: 768px) {
+  [data-component="admonition"] {
+    padding: 0.8em 0.8em 0.8em 1.2em;
+  }
+  
+  [data-element="admonition-icon"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  [data-element="admonition-content"] {
+    font-size: 0.9em;
+  }
+}
+
+/* ========================================
+   打印样式
+   ======================================== */
+
+@media print {
+  [data-component="admonition"] {
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+}

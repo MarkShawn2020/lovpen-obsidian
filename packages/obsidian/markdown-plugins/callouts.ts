@@ -219,7 +219,15 @@ export class CalloutRenderer extends UnifiedMarkdownPlugin {
 			}
 		}
 
-		return `<section class="ad ${info?.style}"><section class="ad-title-wrap"><span class="ad-icon">${info?.icon}</span><span class="ad-title">${title}<span></section><section class="ad-content">${body}</section></section>`;
+		// 生成语义化的 callout HTML
+		// 使用 data 属性实现与样式的解耦
+		return `<section data-component="admonition" data-type="${callout.toLowerCase()}" data-variant="${info?.style}">
+			<header data-element="admonition-header">
+				<span data-element="admonition-icon" data-icon-type="${callout.toLowerCase()}">${info?.icon}</span>
+				<span data-element="admonition-title">${title}</span>
+			</header>
+			<div data-element="admonition-content">${body}</div>
+		</section>`;
 	}
 
 	markedExtension(): MarkedExtension {

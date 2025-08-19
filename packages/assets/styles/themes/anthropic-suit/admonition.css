@@ -1,0 +1,261 @@
+/* ========================================
+   Anthropic Suit Theme - Admonition Styles
+   清晰、简洁、专业的设计语言
+   ======================================== */
+
+/* 主题变量定义 */
+[data-theme="anthropic-suit"] {
+  --as-admonition-radius: 8px;
+  --as-admonition-padding: 16px 20px;
+  --as-admonition-icon-size: 20px;
+  --as-admonition-gap: 12px;
+  --as-admonition-border-width: 0;
+  --as-admonition-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --as-admonition-transition: all 0.15s ease;
+  
+  /* 颜色系统 */
+  --as-color-note: #2563EB;
+  --as-color-note-bg: #EFF6FF;
+  --as-color-note-border: #DBEAFE;
+  
+  --as-color-tip: #0891B2;
+  --as-color-tip-bg: #F0FDFA;
+  --as-color-tip-border: #CCFBF1;
+  
+  --as-color-success: #059669;
+  --as-color-success-bg: #F0FDF4;
+  --as-color-success-border: #D1FAE5;
+  
+  --as-color-warning: #D97706;
+  --as-color-warning-bg: #FFFBEB;
+  --as-color-warning-border: #FEF3C7;
+  
+  --as-color-danger: #DC2626;
+  --as-color-danger-bg: #FEF2F2;
+  --as-color-danger-border: #FEE2E2;
+  
+  --as-color-example: #7C3AED;
+  --as-color-example-bg: #FAF5FF;
+  --as-color-example-border: #EDE9FE;
+  
+  --as-color-quote: #6B7280;
+  --as-color-quote-bg: #F9FAFB;
+  --as-color-quote-border: #F3F4F6;
+}
+
+/* 基础容器覆盖 */
+[data-theme="anthropic-suit"] [data-component="admonition"] {
+  padding: var(--as-admonition-padding);
+  border-radius: var(--as-admonition-radius);
+  border: 1px solid;
+  border-left-width: 4px;
+  box-shadow: var(--as-admonition-shadow);
+  transition: var(--as-admonition-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="anthropic-suit"] [data-component="admonition"]:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 头部样式 */
+[data-theme="anthropic-suit"] [data-element="admonition-header"] {
+  gap: var(--as-admonition-gap);
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.95em;
+  letter-spacing: -0.01em;
+}
+
+/* 图标样式 */
+[data-theme="anthropic-suit"] [data-element="admonition-icon"] {
+  width: var(--as-admonition-icon-size);
+  height: var(--as-admonition-icon-size);
+  opacity: 0.9;
+}
+
+/* 标题样式 */
+[data-theme="anthropic-suit"] [data-element="admonition-title"] {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+}
+
+/* 内容样式 */
+[data-theme="anthropic-suit"] [data-element="admonition-content"] {
+  color: #374151;
+  font-size: 0.94em;
+  line-height: 1.65;
+  opacity: 0.95;
+}
+
+[data-theme="anthropic-suit"] [data-element="admonition-content"] p {
+  margin: 0.5em 0;
+}
+
+[data-theme="anthropic-suit"] [data-element="admonition-content"] code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
+}
+
+/* ========================================
+   Anthropic Suit 主题变体
+   ======================================== */
+
+/* Note/Info 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="note"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="info"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="todo"] {
+  color: var(--as-color-note);
+  background-color: var(--as-color-note-bg);
+  border-color: var(--as-color-note-border);
+  border-left-color: var(--as-color-note);
+}
+
+/* Tip/Abstract 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="tip"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="abstract"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="summary"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="tldr"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="hint"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="important"] {
+  color: var(--as-color-tip);
+  background-color: var(--as-color-tip-bg);
+  border-color: var(--as-color-tip-border);
+  border-left-color: var(--as-color-tip);
+}
+
+/* Success 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="success"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="check"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="done"] {
+  color: var(--as-color-success);
+  background-color: var(--as-color-success-bg);
+  border-color: var(--as-color-success-border);
+  border-left-color: var(--as-color-success);
+}
+
+/* Question/Warning 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="question"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="help"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="faq"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="warning"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="caution"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="attention"] {
+  color: var(--as-color-warning);
+  background-color: var(--as-color-warning-bg);
+  border-color: var(--as-color-warning-border);
+  border-left-color: var(--as-color-warning);
+}
+
+/* Failure/Danger 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="failure"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="fail"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="missing"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="danger"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="error"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="bug"] {
+  color: var(--as-color-danger);
+  background-color: var(--as-color-danger-bg);
+  border-color: var(--as-color-danger-border);
+  border-left-color: var(--as-color-danger);
+}
+
+/* Example 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="example"] {
+  color: var(--as-color-example);
+  background-color: var(--as-color-example-bg);
+  border-color: var(--as-color-example-border);
+  border-left-color: var(--as-color-example);
+}
+
+/* Quote 类型 */
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="quote"],
+[data-theme="anthropic-suit"] [data-component="admonition"][data-type="cite"] {
+  color: var(--as-color-quote);
+  background-color: var(--as-color-quote-bg);
+  border-color: var(--as-color-quote-border);
+  border-left-color: var(--as-color-quote);
+}
+
+/* ========================================
+   暗色模式支持
+   ======================================== */
+
+[data-theme="anthropic-suit"][data-mode="dark"] {
+  --as-color-note: #60A5FA;
+  --as-color-note-bg: #1E3A8A;
+  --as-color-note-border: #2563EB;
+  
+  --as-color-tip: #22D3EE;
+  --as-color-tip-bg: #164E63;
+  --as-color-tip-border: #0891B2;
+  
+  --as-color-success: #34D399;
+  --as-color-success-bg: #064E3B;
+  --as-color-success-border: #059669;
+  
+  --as-color-warning: #FBBF24;
+  --as-color-warning-bg: #78350F;
+  --as-color-warning-border: #D97706;
+  
+  --as-color-danger: #F87171;
+  --as-color-danger-bg: #7F1D1D;
+  --as-color-danger-border: #DC2626;
+  
+  --as-color-example: #A78BFA;
+  --as-color-example-bg: #4C1D95;
+  --as-color-example-border: #7C3AED;
+  
+  --as-color-quote: #9CA3AF;
+  --as-color-quote-bg: #1F2937;
+  --as-color-quote-border: #374151;
+}
+
+[data-theme="anthropic-suit"][data-mode="dark"] [data-element="admonition-content"] {
+  color: #E5E7EB;
+}
+
+/* ========================================
+   动画效果
+   ======================================== */
+
+@keyframes anthropic-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-theme="anthropic-suit"] [data-component="admonition"] {
+  animation: anthropic-slide-in 0.2s ease-out;
+}
+
+/* ========================================
+   响应式调整
+   ======================================== */
+
+@media (max-width: 768px) {
+  [data-theme="anthropic-suit"] {
+    --as-admonition-padding: 12px 16px;
+    --as-admonition-icon-size: 18px;
+    --as-admonition-gap: 8px;
+  }
+  
+  [data-theme="anthropic-suit"] [data-element="admonition-title"] {
+    font-size: 0.8em;
+  }
+  
+  [data-theme="anthropic-suit"] [data-element="admonition-content"] {
+    font-size: 0.9em;
+  }
+}
