@@ -35,22 +35,31 @@ export class Blockquotes extends UnifiedHtmlPlugin {
 
 			// 逻辑处理每个引用块
 			blockquotes.forEach((blockquote) => {
-				// 重新设置引用块的样式，强制覆盖微信默认样式
+				// 检查是否是 admonition 组件（由 callouts.ts 处理）
+				if (blockquote.parentElement?.hasAttribute('data-component') && 
+					blockquote.parentElement?.getAttribute('data-component') === 'admonition') {
+					return; // 跳过 admonition 组件，它们由 callouts.ts 处理
+				}
+
+				// 重新设置引用块的样式，使用固定颜色确保一致性
 				blockquote.setAttribute("style", `
                     padding-left: 10px !important; 
                     border-left: 3px solid ${themeColor} !important; 
-                    color: rgba(0, 0, 0, 0.6) !important; 
+                    color: rgb(102, 102, 102) !important; 
                     font-size: 15px !important; 
                     padding-top: 4px !important; 
                     margin: 1em 0 !important; 
                     text-indent: 0 !important;
+                    background: rgba(200, 100, 66, 0.03) !important;
+                    border-radius: 4px !important;
+                    padding: 8px 10px !important;
                 `);
 
-				// 处理引用块内的段落
+				// 处理引用块内的段落 - 使用固定的深灰色
 				const paragraphs = blockquote.querySelectorAll("p");
 				paragraphs.forEach((p) => {
-					// 确保段落的文本颜色与引用块一致
-					p.style.color = "rgba(0, 0, 0, 0.6)";
+					// 使用固定的深灰色，确保在浅色背景上可读
+					p.style.color = "rgb(102, 102, 102)";
 					p.style.margin = "0";
 				});
 			});

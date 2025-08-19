@@ -5,7 +5,8 @@
 
 /* 基础容器样式 */
 [data-component="admonition"] {
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left-width: 3px;
   padding: 1em 1em 1em 1.5em;
   display: flex;
   flex-direction: column;
@@ -47,7 +48,7 @@
 
 /* 内容区域 */
 [data-element="admonition-content"] {
-  color: rgb(34, 34, 34);
+  color: rgb(51, 51, 51) !important;
   font-size: 0.95em;
   line-height: 1.6;
 }
@@ -70,7 +71,8 @@
 [data-component="admonition"][data-type="todo"] {
   color: rgb(8, 109, 221);
   background-color: rgba(8, 109, 221, 0.1);
-  border-left: 3px solid rgb(8, 109, 221);
+  border-color: rgba(8, 109, 221, 0.2);
+  border-left-color: rgb(8, 109, 221);
 }
 
 /* Tip/Abstract 类型 */
@@ -82,7 +84,8 @@
 [data-component="admonition"][data-type="important"] {
   color: rgb(0, 191, 188);
   background-color: rgba(0, 191, 188, 0.1);
-  border-left: 3px solid rgb(0, 191, 188);
+  border-color: rgba(0, 191, 188, 0.2);
+  border-left-color: rgb(0, 191, 188);
 }
 
 /* Success 类型 */
@@ -91,7 +94,8 @@
 [data-component="admonition"][data-type="done"] {
   color: rgb(8, 185, 78);
   background-color: rgba(8, 185, 78, 0.1);
-  border-left: 3px solid rgb(8, 185, 78);
+  border-color: rgba(8, 185, 78, 0.2);
+  border-left-color: rgb(8, 185, 78);
 }
 
 /* Question/Warning 类型 */
@@ -103,7 +107,8 @@
 [data-component="admonition"][data-type="attention"] {
   color: rgb(236, 117, 0);
   background-color: rgba(236, 117, 0, 0.1);
-  border-left: 3px solid rgb(236, 117, 0);
+  border-color: rgba(236, 117, 0, 0.2);
+  border-left-color: rgb(236, 117, 0);
 }
 
 /* Failure/Danger 类型 */
@@ -115,14 +120,16 @@
 [data-component="admonition"][data-type="bug"] {
   color: rgb(233, 49, 71);
   background-color: rgba(233, 49, 71, 0.1);
-  border-left: 3px solid rgb(233, 49, 71);
+  border-color: rgba(233, 49, 71, 0.2);
+  border-left-color: rgb(233, 49, 71);
 }
 
 /* Example 类型 */
 [data-component="admonition"][data-type="example"] {
   color: rgb(120, 82, 238);
   background-color: rgba(120, 82, 238, 0.1);
-  border-left: 3px solid rgb(120, 82, 238);
+  border-color: rgba(120, 82, 238, 0.2);
+  border-left-color: rgb(120, 82, 238);
 }
 
 /* Quote 类型 */
@@ -130,7 +137,8 @@
 [data-component="admonition"][data-type="cite"] {
   color: rgb(158, 158, 158);
   background-color: rgba(158, 158, 158, 0.1);
-  border-left: 3px solid rgb(158, 158, 158);
+  border-color: rgba(158, 158, 158, 0.2);
+  border-left-color: rgb(158, 158, 158);
 }
 
 /* ========================================

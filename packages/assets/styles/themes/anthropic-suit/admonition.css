@@ -85,7 +85,7 @@
 
 /* 内容样式 */
 [data-theme="anthropic-suit"] [data-element="admonition-content"] {
-  color: #374151;
+  color: #333333 !important;
   font-size: 0.94em;
   line-height: 1.65;
   opacity: 0.95;
@@ -218,7 +218,7 @@
 }
 
 [data-theme="anthropic-suit"][data-mode="dark"] [data-element="admonition-content"] {
-  color: #E5E7EB;
+  color: #333333 !important;
 }
 
 /* ========================================

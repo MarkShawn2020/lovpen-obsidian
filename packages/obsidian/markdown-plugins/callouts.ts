@@ -155,11 +155,11 @@ export function GetCallout(type: string) {
 export function getAdmonitionInlineStyles(type: string): { container: string; header: string; icon: string; title: string; content: string } {
 	// 基础样式
 	const baseStyles = {
-		container: 'border: none; padding: 1.25em 1.5em; display: flex; flex-direction: column; margin: 1.5em 0; border-radius: 8px; border-left: 4px solid; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); background: white; position: relative;',
+		container: 'border: 1px solid rgba(0, 0, 0, 0.08); padding: 1.25em 1.5em; display: flex; flex-direction: column; margin: 1.5em 0; border-radius: 8px; border-left-width: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); background: white; position: relative;',
 		header: 'display: flex; flex-direction: row; align-items: center; font-size: 1.05em; font-weight: 600; margin-bottom: 0.75em;',
 		icon: 'display: inline-block; width: 24px; height: 24px; margin-right: 0.75em; flex-shrink: 0; opacity: 0.6;',
 		title: 'flex: 1; line-height: 1.4;',
-		content: 'color: rgb(55, 65, 81); font-size: 0.95em; line-height: 1.7; padding-left: calc(24px + 0.75em);'
+		content: 'color: rgb(51, 51, 51) !important; font-size: 0.95em; line-height: 1.7; padding-left: calc(24px + 0.75em);'
 	};
 
 	// 根据类型获取颜色
@@ -218,8 +218,11 @@ export function getAdmonitionInlineStyles(type: string): { container: string; he
 			break;
 	}
 
+	// 为边框创建淡化的颜色（用于上右下边框）
+	const borderColor = color.replace('rgb', 'rgba').replace(')', ', 0.2)');
+
 	return {
-		container: `${baseStyles.container} border-left-color: ${color}; background: ${bgColor};`,
+		container: `${baseStyles.container} border-color: ${borderColor}; border-left-color: ${color}; background: ${bgColor};`,
 		header: `${baseStyles.header} color: ${color};`,
 		icon: baseStyles.icon,
 		title: baseStyles.title,
