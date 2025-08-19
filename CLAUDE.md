@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 这是一个 Obsidian 插件项目（LovPen），用于将 Obsidian 笔记格式化并分发到多个平台（微信公众号、知乎、小红书、Twitter）。
 
 ### 工作区结构
-项目使用 pnpm workspace，包含三个主要包：
+项目使用 pnpm workspace + Turbo monorepo，包含三个主要包：
 
 - `packages/obsidian/` - Obsidian 插件核心
 - `packages/frontend/` - React 前端组件（使用 Vite + React + TailwindCSS）
@@ -61,9 +61,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 根目录命令
 ```bash
-pnpm dev          # 启动所有包的开发模式
-pnpm build        # 构建所有包
-pnpm check        # 类型检查所有包
+pnpm dev          # 启动所有包的开发模式 (Turbo)
+pnpm build        # 构建所有包 (Turbo)
+pnpm check        # 类型检查所有包 (Turbo)
+pnpm download-highlights  # 下载代码高亮样式
+pnpm version      # 同步版本号到所有包
+pnpm release      # 执行发布流程
 ```
 
 ### 包级别命令
@@ -82,20 +85,15 @@ pnpm build        # TypeScript + Vite 构建
 pnpm check        # TypeScript 类型检查
 ```
 
-### 特殊脚本
-```bash
-pnpm download-highlights  # 下载代码高亮样式
-pnpm version             # 同步版本号
-```
-
 ## 关键技术栈
 
-- **构建工具**: ESBuild (Obsidian), Vite (Frontend)
+- **构建工具**: ESBuild (Obsidian), Vite (Frontend), Turbo (Monorepo)
 - **前端框架**: React 19 + TypeScript
 - **样式**: TailwindCSS 4.x + Radix UI
 - **状态管理**: Jotai
 - **内容处理**: Marked + highlight.js + Handlebars
 - **插件架构**: 统一插件系统支持 Markdown 和 HTML 处理
+- **样式内联**: juice (CSS inline 处理)
 
 ## 插件开发说明
 
@@ -108,6 +106,12 @@ pnpm version             # 同步版本号
 ### 主题开发
 1. 在 `packages/assets/themes/` 添加 CSS 文件
 2. 在 `packages/assets/themes.json` 中注册主题元数据
+
+## 环境变量
+
+开发时可设置以下环境变量：
+- `OBSIDIAN_VAULT_PATH` - Obsidian 仓库路径
+- `OBSIDIAN_PLUGIN_PATH` - 插件目录路径（用于自动复制构建结果）
 
 ## SuperCompact 记录
 
