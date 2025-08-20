@@ -40,6 +40,19 @@ export class FootnoteRenderer extends UnifiedMarkdownPlugin {
 			const id = match[1];
 			const content = match[2].trim();
 
+			// 检查是否为纯URL（非markdown链接格式）
+			// 匹配常见的URL格式
+			const isPlainUrl = /^https?:\/\/[^\s]+$/i.test(content);
+			// 检查是否包含markdown链接格式 [text](url)
+			const hasMarkdownLink = /\[.+?\]\(.+?\)/.test(content);
+			
+			// 如果是纯URL且不包含markdown链接格式，则忽略
+			if (isPlainUrl && !hasMarkdownLink) {
+				// 仍然需要从原文中移除这个脚注定义
+				modifiedText = modifiedText.replace(match[0], '');
+				continue;
+			}
+
 			// 存储脚注定义
 			this.footnotes.set(id, content);
 			this.footnoteDefs.push({id, content});
