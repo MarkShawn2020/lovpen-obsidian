@@ -246,13 +246,13 @@ export const ConfigComponent = <T extends PluginData>({
 												))}
 											</SelectContent>
 										</Select>
-									) : meta.type === "input" ? (
+									) : meta.type === "text" ? (
 										<input
 											type="text"
 											value={String(localConfig[key] || "")}
 											onChange={(e) => handleConfigChange(key, e.target.value)}
 											className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-40"
-											placeholder="输入值..."
+											placeholder={meta.title || "输入值..."}
 										/>
 									) : null}
 								</div>

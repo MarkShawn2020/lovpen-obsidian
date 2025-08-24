@@ -93,7 +93,7 @@ export interface ConfigOption {
 
 export interface ConfigMeta {
 	title: string;
-	type: 'switch' | 'select' | 'input';
+	type: 'switch' | 'select' | 'text' | 'number';
 	options?: ConfigOption[];
 	description?: string;
 }

@@ -12,6 +12,27 @@ import {HtmlPlugin as UnifiedHtmlPlugin} from "../shared/plugin/html-plugin";
  * 2. 分隔符换行: 当启用时，遇到逗号等分隔符自动换行
  */
 export class Headings extends UnifiedHtmlPlugin {
+	constructor() {
+		super();
+		// 获取当前配置
+		const currentConfig = this.getConfigManager().getConfig();
+		// 只为未定义的配置项设置默认值
+		const defaultConfig: any = {};
+		if (currentConfig.enableHeadingNumber === undefined) {
+			defaultConfig.enableHeadingNumber = false;
+		}
+		if (currentConfig.headingNumberTemplate === undefined) {
+			defaultConfig.headingNumberTemplate = "{number}";
+		}
+		if (currentConfig.enableHeadingDelimiterBreak === undefined) {
+			defaultConfig.enableHeadingDelimiterBreak = false;
+		}
+		// 如果有需要设置的默认值，更新配置
+		if (Object.keys(defaultConfig).length > 0) {
+			this.getConfigManager().updateConfig(defaultConfig);
+		}
+	}
+
 	getPluginName(): string {
 		return "标题处理插件";
 	}
@@ -29,6 +50,10 @@ export class Headings extends UnifiedHtmlPlugin {
 			enableHeadingNumber: {
 				type: "switch",
 				title: "启用编号"
+			},
+			headingNumberTemplate: {
+				type: "text",
+				title: "编号模板 (如: 第{number}章, Part {index}, {roman})"
 			},
 			enableHeadingDelimiterBreak: {
 				type: "switch",
@@ -80,8 +105,22 @@ export class Headings extends UnifiedHtmlPlugin {
 	}
 
 	private processHeadingNumber(contentSpan: Element, index: number) {
-		// 格式化编号为两位数 01, 02, 03...
+		// 获取配置的模板，默认为 "{number}"
+		const config = this.getConfig();
+		const template = String(config.headingNumberTemplate || "{number}");
+		
+		// 准备各种格式的值
 		const number = (index + 1).toString().padStart(2, "0");
+		const indexValue = (index + 1).toString();
+		const roman = this.toRoman(index + 1);
+		const letter = this.toLetter(index + 1);
+		
+		// 替换模板中的占位符
+		let formattedText = template
+			.replace("{number}", number)
+			.replace("{index}", indexValue)
+			.replace("{roman}", roman)
+			.replace("{letter}", letter);
 
 		// 创建序号元素
 		const numberSpan = contentSpan.ownerDocument.createElement("span");
@@ -89,7 +128,7 @@ export class Headings extends UnifiedHtmlPlugin {
 
 		// 设置样式
 		numberSpan.setAttribute("style", "font-size: 48px; ");
-		numberSpan.textContent = number;
+		numberSpan.textContent = formattedText;
 
 		// 将序号添加到标题内容开头
 		const wrapper = contentSpan.ownerDocument.createElement("span");
@@ -177,5 +216,38 @@ export class Headings extends UnifiedHtmlPlugin {
 		} catch (error) {
 			logger.error("处理标题分隔符时出错:", error);
 		}
+	}
+	
+	/**
+	 * 将数字转换为罗马数字
+	 */
+	private toRoman(num: number): string {
+		const romanNumerals: [number, string][] = [
+			[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+			[100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+			[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']
+		];
+		
+		let result = '';
+		for (const [value, symbol] of romanNumerals) {
+			while (num >= value) {
+				result += symbol;
+				num -= value;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 将数字转换为字母（A, B, C...AA, AB...）
+	 */
+	private toLetter(num: number): string {
+		let result = '';
+		while (num > 0) {
+			num--; // 调整为0索引
+			result = String.fromCharCode(65 + (num % 26)) + result;
+			num = Math.floor(num / 26);
+		}
+		return result;
 	}
 }
