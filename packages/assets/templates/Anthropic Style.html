@@ -392,10 +392,10 @@
 		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 		font-size: 0.9em;
 		color: rgb(200, 100, 66);
-		/* 行内代码保持不换行 */
-		white-space: nowrap;
-		overflow-wrap: normal;
-		word-break: keep-all;
+		/* 允许行内代码在必要时换行 */
+		white-space: normal;
+		word-break: break-all;
+		overflow-wrap: break-word;
 	}
 
 	.claude-main-content pre {
