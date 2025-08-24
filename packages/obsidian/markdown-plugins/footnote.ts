@@ -19,11 +19,14 @@ export class FootnoteRenderer extends UnifiedMarkdownPlugin {
 	footnoteRefs: string[] = [];
 	// 存储预处理中找到的脚注定义
 	private footnoteDefs: FootnoteDefinition[] = [];
+	// 存储被忽略的纯URL脚注ID
+	private ignoredFootnoteIds: Set<string> = new Set();
 
 	async prepare() {
 		this.footnotes = new Map();
 		this.footnoteRefs = [];
 		this.footnoteDefs = [];
+		this.ignoredFootnoteIds = new Set();
 	}
 
 	// 预处理Markdown文本，提取脚注定义
@@ -48,6 +51,8 @@ export class FootnoteRenderer extends UnifiedMarkdownPlugin {
 			
 			// 如果是纯URL且不包含markdown链接格式，则忽略
 			if (isPlainUrl && !hasMarkdownLink) {
+				// 记录被忽略的脚注ID
+				this.ignoredFootnoteIds.add(id);
 				// 仍然需要从原文中移除这个脚注定义
 				modifiedText = modifiedText.replace(match[0], '');
 				continue;
@@ -133,6 +138,11 @@ export class FootnoteRenderer extends UnifiedMarkdownPlugin {
 				},
 				renderer: (token: FootnoteRefToken) => {
 					const id = token.id;
+
+					// 如果这个脚注ID被忽略了，则不渲染脚注引用
+					if (this.ignoredFootnoteIds.has(id)) {
+						return '';
+					}
 
 					// 确保脚注ID只记录一次
 					if (!this.footnoteRefs.includes(id)) {
