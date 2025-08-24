@@ -25,7 +25,7 @@ export class Headings extends UnifiedHtmlPlugin {
 			defaultConfig.headingNumberTemplate = "{number}";
 		}
 		if (currentConfig.enableHeadingDelimiterBreak === undefined) {
-			defaultConfig.enableHeadingDelimiterBreak = false;
+			defaultConfig.enableHeadingDelimiterBreak = true;  // 默认启用分隔符换行功能
 		}
 		if (currentConfig.headingDelimiters === undefined) {
 			defaultConfig.headingDelimiters = ",，、；：;:| ";
@@ -82,9 +82,17 @@ export class Headings extends UnifiedHtmlPlugin {
 			const config = this.getConfig();
 			const needProcessNumber = config.enableHeadingNumber;
 			const needProcessDelimiter = config.enableHeadingDelimiterBreak;
-			logger.debug({needProcessNumber, needProcessDelimiter})
+			
+			logger.info(`[标题处理插件] 配置状态:`, {
+				pluginEnabled: config.enabled,
+				enableHeadingNumber: needProcessNumber,
+				enableHeadingDelimiterBreak: needProcessDelimiter,
+				headingDelimiters: config.headingDelimiters || ",，、；：;:| ",
+				keepDelimiterInOutput: config.keepDelimiterInOutput
+			});
 
 			if (needProcessDelimiter || needProcessNumber) {
+				logger.info(`[标题处理插件] 开始处理标题 (分隔符处理=${needProcessDelimiter}, 编号处理=${needProcessNumber})`);
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
 				const container = doc.body.firstChild as HTMLElement;
@@ -113,6 +121,8 @@ export class Headings extends UnifiedHtmlPlugin {
 					}
 				});
 				return container.innerHTML;
+			} else {
+				logger.info(`[标题处理插件] 所有功能均未启用，跳过处理`);
 			}
 
 			return html;
@@ -181,8 +191,8 @@ export class Headings extends UnifiedHtmlPlugin {
 			
 			// 转义特殊正则字符并构建正则表达式
 			const escapedDelimiters = delimiters.split('').map(char => {
-				// 转义正则特殊字符
-				return char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				// 转义正则特殊字符 (包括在字符类中有特殊含义的字符)
+				return char.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
 			}).join('');
 			
 			const delimiterRegex = new RegExp(`[${escapedDelimiters}]`, 'g');
@@ -195,69 +205,72 @@ export class Headings extends UnifiedHtmlPlugin {
 				null
 			);
 
-			const nodesToProcess: { node: Node; matches: RegExpMatchArray[] }[] = [];
-
-			// 收集所有包含分隔符的文本节点
+			const textNodes: Text[] = [];
 			let textNode = walker.nextNode() as Text;
-			let nodeCount = 0;
 			while (textNode) {
-				const content = textNode.nodeValue || '';
-				nodeCount++;
-				logger.debug(`Text node ${nodeCount}: "${content}"`);
-				
-				const matches = Array.from(content.matchAll(delimiterRegex));
-				logger.debug(`Found ${matches.length} delimiter matches in node ${nodeCount}`);
-
-				if (matches.length > 0) {
-					nodesToProcess.push({node: textNode, matches});
-					logger.debug(`Matches in node ${nodeCount}:`, matches.map(m => ({char: m[0], index: m.index})));
-				}
-
+				textNodes.push(textNode);
 				textNode = walker.nextNode() as Text;
 			}
-			logger.debug(`Total text nodes found: ${nodeCount}, nodes to process: ${nodesToProcess.length}`);
+			
+			logger.debug(`Found ${textNodes.length} text nodes to process`);
 
-			// 从后向前处理节点，这样不会影响尚未处理的节点位置
-			for (let i = nodesToProcess.length - 1; i >= 0; i--) {
-				const {node, matches} = nodesToProcess[i];
-				const text = node.nodeValue || '';
-
-				// 从后向前处理每个匹配，避免影响偏移量
-				for (let j = matches.length - 1; j >= 0; j--) {
-					const match = matches[j];
-					if (!match.index && match.index !== 0) continue;
-
-					// 根据配置决定是否保留分隔符
-					let beforeDelimiter, afterDelimiter;
-					if (keepDelimiter) {
-						// 保留分隔符：分隔符包含在前半部分
-						beforeDelimiter = text.slice(0, match.index + 1);
-						afterDelimiter = text.slice(match.index + 1);
-					} else {
-						// 不保留分隔符：分隔符被移除
-						beforeDelimiter = text.slice(0, match.index);
-						afterDelimiter = text.slice(match.index + 1);
-					}
-
-					// 创建分隔符之前的文本节点（可能包含或不包含分隔符）
-					const beforeNode = element.ownerDocument.createTextNode(beforeDelimiter);
-					// 创建换行元素
-					const brElement = element.ownerDocument.createElement('br');
-					// 创建分隔符之后的文本节点
-					const afterNode = element.ownerDocument.createTextNode(afterDelimiter);
-
-					// 替换原来的节点
-					const parent = node.parentNode;
-					if (parent) {
-						parent.insertBefore(beforeNode, node);
-						parent.insertBefore(brElement, node);
-						parent.insertBefore(afterNode, node);
-						parent.removeChild(node);
-
-						// 更新节点值，为后续处理做准备
-						node.nodeValue = afterDelimiter;
-					}
+			// 处理每个文本节点
+			for (const node of textNodes) {
+				const originalText = node.nodeValue || '';
+				logger.debug(`Processing text node: "${originalText}"`);
+				
+				// 查找所有分隔符
+				const matches = Array.from(originalText.matchAll(delimiterRegex));
+				if (matches.length === 0) {
+					continue;
 				}
+				
+				logger.debug(`Found ${matches.length} delimiters in text`);
+				
+				// 构建新的节点片段
+				const parent = node.parentNode;
+				if (!parent) continue;
+				
+				const doc = element.ownerDocument;
+				let lastIndex = 0;
+				const fragment = doc.createDocumentFragment();
+				
+				// 处理每个分隔符
+				for (const match of matches) {
+					const matchIndex = match.index!;
+					const delimiter = match[0];
+					
+					// 添加分隔符前的文本
+					if (keepDelimiter) {
+						// 保留分隔符：分隔符跟在前面的文本后
+						const beforeText = originalText.slice(lastIndex, matchIndex + 1);
+						if (beforeText) {
+							fragment.appendChild(doc.createTextNode(beforeText));
+						}
+					} else {
+						// 不保留分隔符：只添加分隔符前的文本
+						const beforeText = originalText.slice(lastIndex, matchIndex);
+						if (beforeText) {
+							fragment.appendChild(doc.createTextNode(beforeText));
+						}
+					}
+					
+					// 添加换行
+					fragment.appendChild(doc.createElement('br'));
+					
+					// 更新位置到分隔符后
+					lastIndex = matchIndex + 1;
+				}
+				
+				// 添加最后剩余的文本
+				const remainingText = originalText.slice(lastIndex);
+				if (remainingText) {
+					fragment.appendChild(doc.createTextNode(remainingText));
+				}
+				
+				// 替换原节点
+				parent.replaceChild(fragment, node);
+				logger.debug(`Replaced text node with ${matches.length} line breaks`);
 			}
 		} catch (error) {
 			logger.error("处理标题分隔符时出错:", error);
