@@ -255,6 +255,11 @@
 		margin: 1em 8px;
 		padding-left: 2em;
 		color: rgb(34, 34, 34);
+		/* 确保列表容器正确处理溢出 */
+		max-width: 100%;
+		box-sizing: border-box;
+		word-break: break-all;
+		overflow-wrap: break-word;
 	}
 
 	/* 设置列表标记颜色与主题色一致 */

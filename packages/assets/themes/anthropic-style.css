@@ -201,6 +201,11 @@
 	margin: var(--spacing-lg) var(--spacing-md);
 	padding-left: var(--spacing-xl);
 	color: var(--text-primary);
+	/* 确保列表容器正确处理溢出 */
+	max-width: 100%;
+	box-sizing: border-box;
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 
 #render-container  li {
