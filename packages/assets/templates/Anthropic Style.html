@@ -226,6 +226,12 @@
 		color: rgb(200, 100, 66);
 	}
 
+	/* 列表中的加粗文本也使用主题色 */
+	.claude-main-content li strong,
+	.claude-main-content li b {
+		color: rgb(200, 100, 66);
+	}
+
 	.claude-main-content em, .claude-main-content i {
 		font-style: italic;
 		color: rgb(200, 100, 66);
@@ -283,7 +289,7 @@
 	.claude-main-content li {
 		margin: 0.25em 0;
 		line-height: 1.75;
-		color: rgb(34, 34, 34);
+		/* 不设置固定颜色，让列表项继承父元素颜色 */
 		/* 列表项也允许任意位置断词 */
 		word-break: break-all;
 		overflow-wrap: break-word;

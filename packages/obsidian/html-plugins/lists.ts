@@ -151,20 +151,28 @@ export class Lists extends UnifiedHtmlPlugin {
 				childList.remove();
 			}
 
-			// 为列表项符号设置颜色
-			// 无论是否启用了自定义主题色，都需要设置颜色
-			// 否则微信公众号中的列表标记将始终为默认黑色
-			newItem.style.color = themeAccentColor; // 这会影响列表符号的颜色
+			// 不再为列表项符号设置主题色，保持默认颜色
+			// newItem.style.color = themeAccentColor; // 注释掉，不使用主题色强调
 
 			// 创建微信格式的内容容器
 			const section = document.createElement("section");
 
-			// 对于列表内容，我们需要明确指定颜色还原到文本颜色
-			// 使用CSS变量来自动调整文本颜色，而非硬编码
-			section.style.color = "var(--text-secondary, currentColor)";
-
 			// 获取列表项的文本内容
 			section.innerHTML = item.innerHTML;
+			
+			// 移除 strong 和 b 标签的内联 color 样式，让它们使用 CSS 定义的样式
+			const strongElements = section.querySelectorAll("strong, b");
+			strongElements.forEach((elem) => {
+				const strongElement = elem as HTMLElement;
+				const currentStyle = strongElement.getAttribute("style") || "";
+				// 移除 color 相关的内联样式
+				const newStyle = currentStyle.replace(/color:\s*[^;]+;?/g, "").trim();
+				if (newStyle) {
+					strongElement.setAttribute("style", newStyle);
+				} else {
+					strongElement.removeAttribute("style");
+				}
+			});
 
 			// 添加到新列表项
 			newItem.appendChild(section);
