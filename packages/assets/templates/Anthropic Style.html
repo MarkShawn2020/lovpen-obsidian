@@ -145,14 +145,15 @@
 	}
 
 	.claude-main-content p {
-		margin: 1.5em 8px;
+		margin: 1em 8px;
 		text-align: justify;
 		line-height: 1.75;
 		font-size: 15px;
 		letter-spacing: 0.1em;
 		color: rgb(34, 34, 34);
-		word-break: break-word; /* 改为break-word，支持连接符 */
-		hyphens: auto; /* 添加连接符支持 */
+		/* 允许单词在任意位置断开，适合手机端窄屏 */
+		word-break: break-all;
+		overflow-wrap: break-word;
 		box-sizing: border-box;
 	}
 
@@ -251,7 +252,7 @@
 	}
 
 	.claude-main-content ul, .claude-main-content ol {
-		margin: 1.5em 8px;
+		margin: 1em 8px;
 		padding-left: 2em;
 		color: rgb(34, 34, 34);
 	}
@@ -278,6 +279,9 @@
 		margin: 0.25em 0;
 		line-height: 1.75;
 		color: rgb(34, 34, 34);
+		/* 列表项也允许任意位置断词 */
+		word-break: break-all;
+		overflow-wrap: break-word;
 	}
 
 	/* 修复多层嵌套列表样式 */
@@ -316,13 +320,16 @@
 	}
 
 	.claude-main-content blockquote {
-		margin: 1.5em 8px;
+		margin: 1em 8px;
 		padding: 1em;
 		background: rgba(200, 100, 66, 0.1);
 		border-left: 4px solid rgb(200, 100, 66);
 		border-radius: 6px;
 		color: rgb(34, 34, 34);
 		font-style: italic;
+		/* 引用内容也允许任意位置断词 */
+		word-break: break-all;
+		overflow-wrap: break-word;
 	}
 
 	/* 修复多层嵌套引用 - 支持更深层级 */
@@ -380,6 +387,10 @@
 		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 		font-size: 0.9em;
 		color: rgb(200, 100, 66);
+		/* 行内代码保持不换行 */
+		white-space: nowrap;
+		overflow-wrap: normal;
+		word-break: keep-all;
 	}
 
 	.claude-main-content pre {
@@ -387,7 +398,11 @@
 		padding: 1em;
 		border-radius: 8px;
 		overflow-x: auto;
-		margin: 1.5em 8px;
+		margin: 1em 8px;
+		/* 代码块内保持原始格式 */
+		white-space: pre;
+		word-break: normal;
+		overflow-wrap: normal;
 	}
 
 	.claude-main-content pre code {
@@ -399,7 +414,7 @@
 	.claude-main-content table {
 		width: 100%;
 		border-collapse: collapse;
-		margin: 1.5em 8px;
+		margin: 1em 8px;
 		border-radius: 8px;
 		overflow: hidden;
 		box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px;
@@ -508,6 +523,9 @@
 		color: rgb(200, 100, 66);
 		text-decoration: none;
 		border-bottom: 1px solid transparent;
+		/* 允许链接在任意位置断开，避免手机端出现横向滚动 */
+		word-break: break-all;
+		overflow-wrap: break-word;
 	}
 
 	.claude-main-content a:hover {

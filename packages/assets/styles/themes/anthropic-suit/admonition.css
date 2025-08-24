@@ -81,6 +81,9 @@
   text-transform: uppercase;
   font-size: 0.85em;
   letter-spacing: 0.05em;
+  /* 标题也允许任意位置断词 */
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 /* 内容样式 */
@@ -89,10 +92,16 @@
   font-size: 0.94em;
   line-height: 1.65;
   opacity: 0.95;
+  /* 允许单词在任意位置断开，适合手机端窄屏 */
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 [data-theme="anthropic-suit"] [data-element="admonition-content"] p {
   margin: 0.5em 0;
+  /* 段落也允许任意位置断词 */
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 [data-theme="anthropic-suit"] [data-element="admonition-content"] code {

@@ -44,6 +44,9 @@
 [data-element="admonition-title"] {
   flex: 1;
   line-height: 1.4;
+  /* 标题也允许任意位置断词 */
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 /* 内容区域 */
@@ -51,6 +54,9 @@
   color: rgb(51, 51, 51) !important;
   font-size: 0.95em;
   line-height: 1.6;
+  /* 允许单词在任意位置断开，适合手机端窄屏 */
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 [data-element="admonition-content"] > *:first-child {

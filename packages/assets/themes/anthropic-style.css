@@ -76,13 +76,15 @@
 
 /* === 段落样式 === */
 #render-container  p {
-	margin: var(--spacing-lg) var(--spacing-md);
+	margin: var(--spacing-md) var(--spacing-md);
 	text-align: justify;
 	line-height: var(--line-height-base);
 	font-size: var(--font-size-base);
 	letter-spacing: var(--letter-spacing-base);
 	color: var(--text-primary);
+	/* 允许单词在任意位置断开，适合手机端窄屏 */
 	word-break: break-all;
+	overflow-wrap: break-word;
 	box-sizing: border-box;
 	border: none;
 }
@@ -204,6 +206,9 @@
 #render-container  li {
 	margin: var(--spacing-sm) 0;
 	line-height: var(--line-height-base);
+	/* 列表项也允许任意位置断词 */
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 
 /* === 引用样式 === */
@@ -215,6 +220,9 @@
 	border-radius: var(--border-radius-sm);
 	color: var(--text-primary);
 	font-style: italic;
+	/* 引用内容也允许任意位置断词 */
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 
 /* === 代码样式 === */
@@ -225,6 +233,10 @@
 	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 	font-size: 0.9em;
 	color: var(--primary-color);
+	/* 行内代码保持不换行 */
+	white-space: nowrap;
+	overflow-wrap: normal;
+	word-break: keep-all;
 }
 
 #render-container  pre {
@@ -232,7 +244,11 @@
 	padding: var(--spacing-md);
 	border-radius: var(--border-radius-md);
 	overflow-x: auto;
-	margin: var(--spacing-lg) var(--spacing-md);
+	margin: var(--spacing-md) var(--spacing-md);
+	/* 代码块内保持原始格式 */
+	white-space: pre;
+	word-break: normal;
+	overflow-wrap: normal;
 }
 
 #render-container  pre code {
@@ -424,6 +440,9 @@
 	text-decoration: none;
 	border-bottom: 1px solid transparent;
 	transition: all 0.2s ease;
+	/* 允许链接在任意位置断开，避免手机端出现横向滚动 */
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 
 #render-container  a:hover {
@@ -446,6 +465,9 @@
 	border-radius: var(--border-radius-md);
 	padding: var(--spacing-md);
 	margin: var(--spacing-lg) var(--spacing-md);
+	/* 允许内容在任意位置断词 */
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 
 #render-container  .info-box {
@@ -454,6 +476,9 @@
 	padding: var(--spacing-md);
 	margin: var(--spacing-lg) var(--spacing-md);
 	border-radius: var(--border-radius-sm);
+	/* 允许内容在任意位置断词 */
+	word-break: break-all;
+	overflow-wrap: break-word;
 }
 
 /* === 响应式设计 === */
