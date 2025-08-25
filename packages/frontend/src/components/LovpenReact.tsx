@@ -130,9 +130,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		const startWidth = toolbarContainer.getBoundingClientRect().width;
 
 		const handleMouseMove = (e: MouseEvent) => {
-			// 在row-reverse布局中，向右拖拽增加工具栏宽度，向左拖拽减少工具栏宽度
-			// 这样拖拽方向就和视觉上的预期一致了
-			const newWidth = startWidth + (e.clientX - startX);
+			// 在正常布局中，向左拖拽增加工具栏宽度，向右拖拽减少工具栏宽度
+			const newWidth = startWidth - (e.clientX - startX);
 			const minWidth = 320; // 工具栏最小宽度
 			const maxWidth = 800; // 工具栏最大宽度
 
@@ -162,7 +161,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 			className="note-preview"
 			style={{
 				display: "flex",
-				flexDirection: "row-reverse", // 反向布局，工具栏在右边
+				flexDirection: "row", // 正常布局，工具栏在右边
 				height: "100%",
 				width: "100%",
 				overflow: "hidden",
@@ -181,9 +180,31 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 					flex: "1", // 占用剩余空间
 					overflow: "auto",
 					borderRight: "1px solid var(--background-modifier-border)",
-					minWidth: "300px" // 最小宽度保护
+					minWidth: "300px", // 最小宽度保护
+					position: "relative" // 为绝对定位的复制按钮提供定位上下文
 				}}
 			>
+				{/* 复制按钮容器 - 固定在右上角 */}
+				<div style={{
+					position: 'sticky',
+					top: 0,
+					float: 'right',
+					zIndex: 40,
+					marginTop: '-10px',
+					marginRight: '-10px',
+					padding: '16px'
+				}}>
+					<button
+						onClick={onCopy}
+						className="inline-flex items-center justify-center w-9 h-9 bg-white/60 backdrop-blur-sm border border-[#E8E6DC]/50 text-[#87867F]/70 rounded-xl shadow-sm transition-all hover:bg-[#D97757] hover:text-white hover:scale-105 hover:shadow-md hover:border-[#D97757] focus:outline-none focus:ring-2 focus:ring-[#D97757]/50 focus:ring-offset-2"
+						title="复制内容"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+							<rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+							<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+						</svg>
+					</button>
+				</div>
 				<style ref={styleElRef} title="lovpen-style">
 					{cssContent}
 				</style>

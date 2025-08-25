@@ -105,14 +105,6 @@ export const BrandSection: React.FC<BrandSectionProps> = ({
 				</div>
 			</div>
 
-			{/* 悬浮复制按钮 - 更低调和更多边距 */}
-			<button
-				onClick={onCopy}
-				className="fixed top-6 right-6 z-40 inline-flex items-center justify-center w-9 h-9 bg-white/60 backdrop-blur-sm border border-[#E8E6DC]/50 text-[#87867F]/70 rounded-xl shadow-sm transition-all hover:bg-[#D97757] hover:text-white hover:scale-105 hover:shadow-md hover:border-[#D97757] focus:outline-none focus:ring-2 focus:ring-[#D97757]/50 focus:ring-offset-2"
-				title="复制内容"
-			>
-				<Copy className="h-3.5 w-3.5"/>
-			</button>
 		</>
 	);
 };
