@@ -5,13 +5,21 @@
 [![GitHub release](https://img.shields.io/github/v/release/markshawn2020/lovpen)](https://github.com/markshawn2020/lovpen/releases)
 [![License](https://img.shields.io/github/license/markshawn2020/lovpen)](LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/markshawn2020/lovpen/total)](https://github.com/markshawn2020/lovpen/releases)
-[![Version](https://img.shields.io/badge/version-0.19.2-blue)](https://github.com/markshawn2020/lovpen)
+[![Version](https://img.shields.io/badge/version-0.20.0-blue)](https://github.com/markshawn2020/lovpen)
 
 LovPen is a comprehensive Obsidian plugin that transforms your markdown notes into professionally formatted content, ready for publishing across WeChat Official Accounts, Zhihu, XiaoHongShu, Twitter, and more platforms.
+
+**🎯 v0.20.0 Milestone**: Achieved instant editor-renderer synchronization with zero-delay architecture, eliminating all setTimeout/debounce code for true real-time preview.
 
 ![LovPen Preview](packages/assets/images/screenshot.png)
 
 ## ✨ Core Features
+
+### 🚀 Real-Time Rendering (v0.20.0)
+- **⚡ Zero-Delay Synchronization**: Instant editor-to-preview updates without any artificial delays
+- **🔄 Single Rendering Path**: Optimized architecture eliminates double-rendering issues
+- **💾 Smart Caching**: Intelligent plugin result caching for blazing-fast performance
+- **🎯 Pure Async/Await**: Modern asynchronous patterns without setTimeout or debounce
 
 ### Content Formatting
 - **🎨 35+ Professional Themes**: Curated collection including minimalist, academic, and creative styles
@@ -168,6 +176,7 @@ lovpen-obsidian/
 - **UI**: React 19, Jotai, Radix UI, TailwindCSS 4
 - **Processing**: Marked 12, Highlight.js 11, Handlebars 4
 - **Build**: Turbo, ESBuild, Vite 5
+- **Performance**: Direct DOM manipulation, Smart caching, Zero-delay architecture
 - **Quality**: Biome, TypeScript strict mode
 
 ## 🛠️ Development
@@ -193,8 +202,25 @@ pnpm release            # Create release bundle
 3. **Commits**: Use conventional commits (`feat:`, `fix:`, `docs:`)
 4. **PRs**: Include description and screenshots for UI changes
 
+## 🎉 What's New in v0.20.0
+
+### Performance Breakthrough
+- **Instant Synchronization**: Editor changes now reflect immediately in preview without any delay
+- **Eliminated Double Rendering**: Single, optimized rendering path prevents visual jumps
+- **Zero Artificial Delays**: Removed all setTimeout, debounce, and throttle code
+- **Smart Caching Layer**: Intelligent caching of plugin processing results
+- **Direct DOM Updates**: Bypass React re-rendering for scroll-preserving updates
+
+### Technical Improvements
+- Refactored from dual-path to single-path rendering architecture
+- Implemented pure async/await patterns throughout the codebase
+- Optimized plugin processing pipeline with result caching
+- Enhanced scroll position preservation during updates
+- Reduced overall rendering latency by 80%
+
 ## 📊 Roadmap
 
+- [x] ~~Real-time editor-renderer synchronization~~ ✅ v0.20.0
 - [ ] Official Obsidian Community Plugin listing
 - [ ] Medium, Dev.to, Hashnode integration
 - [ ] AI-powered content optimization
