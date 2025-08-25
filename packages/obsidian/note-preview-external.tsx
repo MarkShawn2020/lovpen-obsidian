@@ -1,4 +1,4 @@
-import {EventRef, ItemView, Notice, requestUrl, WorkspaceLeaf} from "obsidian";
+import {EventRef, ItemView, MarkdownView, Notice, requestUrl, WorkspaceLeaf} from "obsidian";
 import {FRONT_MATTER_REGEX, VIEW_TYPE_NOTE_PREVIEW} from "./constants";
 
 import AssetsManager from "./assets";
@@ -44,6 +44,11 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	private cachedProps: ReactComponentPropsWithCallbacks | null = null; // 缓存props避免重复创建
 	private lastArticleHTML: string = ''; // 缓存上次的文章HTML
 	private lastCSSContent: string = ''; // 缓存上次的CSS内容
+	private lastMarkdown: string = ''; // 缓存上次的Markdown内容
+	private isProcessing: boolean = false; // 避免重复处理
+	private lastProcessedMd: string = ''; // 上次完整处理的Markdown
+	private cachedFullCSS: string = ''; // 缓存完整的CSS用于快速更新
+	private pluginCache: Map<string, string> = new Map(); // 缓存插件处理结果
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -89,23 +94,28 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 		await this.buildUI();
 		
-		// 添加多个事件监听器
+		// 先渲染初始内容和加载CSS
+		await this.renderMarkdown();
+		
+		// CSS加载完成后，再添加事件监听器
+		// 这样可以确保快速更新时CSS已经就绪
 		this.listeners = [
 			this.workspace.on("active-leaf-change", () => this.update()),
 			// 监听编辑器内容变化 - 立即更新
-			this.workspace.on("editor-change", async (editor) => {
-				await this.handleEditorChange();
+			this.workspace.on("editor-change", (editor) => {
+				// 不使用await，让它立即执行
+				this.handleEditorChange();
 			}),
 			// 监听文件修改事件 - 立即更新
-			this.app.vault.on("modify", async (file) => {
+			this.app.vault.on("modify", (file) => {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeFile && activeFile.path === file.path) {
-					await this.handleEditorChange();
+					// 不使用await，让它立即执行
+					this.handleEditorChange();
 				}
 			})
 		];
 
-		this.renderMarkdown();
 		uevent("open");
 	}
 
@@ -124,35 +134,119 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	/**
-	 * 处理编辑器内容变化 - 立即更新
+	 * 处理编辑器内容变化 - 单次完整渲染
 	 */
 	private async handleEditorChange() {
-		// 获取新的文章内容
-		this.articleHTML = await this.getArticleContent();
+		// 避免重复处理
+		if (this.isProcessing) {
+			return;
+		}
 		
-		// 使用domUpdater直接更新DOM，完全绕过React
-		const domUpdater = (window as any).__lovpenDOMUpdater;
-		if (domUpdater) {
-			// 直接更新DOM内容，不触发React重新渲染
-			domUpdater.updateArticleHTML(this.articleHTML);
-			// 如果CSS也变了，更新CSS
-			const newCSS = this.getCSS();
-			if (newCSS !== this.lastCSSContent) {
-				domUpdater.updateCSS(newCSS);
-				this.lastCSSContent = newCSS;
+		this.isProcessing = true;
+		
+		try {
+			// 尝试从编辑器直接获取内容（更快）
+			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (!activeView || !activeView.editor) {
+				this.isProcessing = false;
+				return;
 			}
-		} else {
-			// 回退方案：如果domUpdater不可用，使用原来的方式
-			if (this.externalReactLib && this.reactContainer) {
-				const props = this.buildReactComponentProps();
-				await this.externalReactLib.update(this.reactContainer, props);
+			
+			// 直接从编辑器获取内容（同步，非常快）
+			const md = activeView.editor.getValue();
+			
+			// 如果内容没有变化，直接返回
+			if (md === this.lastMarkdown) {
+				this.isProcessing = false;
+				return;
 			}
+			this.lastMarkdown = md;
+			
+			// 单次完整处理（包括插件）
+			await this.processWithPluginsAsync(md);
+		} catch (error) {
+			logger.error("处理编辑器变化失败:", error);
+		} finally {
+			this.isProcessing = false;
+		}
+	}
+	
+	/**
+	 * 异步处理插件和模板 - 优化版本
+	 */
+	private async processWithPluginsAsync(md: string): Promise<void> {
+		// 如果这个Markdown已经完整处理过，跳过
+		if (md === this.lastProcessedMd) {
+			return;
+		}
+		
+		try {
+			const startTime = performance.now();
+			
+			// 生成缓存键（基于内容的哈希）
+			// 注意：当插件设置改变时，缓存会被清除，所以这里只需要基于内容
+			const cacheKey = md;
+			
+			// 检查缓存
+			const cached = this.pluginCache.get(cacheKey);
+			if (cached) {
+				this.articleHTML = cached;
+				this.lastProcessedMd = md;
+				
+				// 使用缓存结果更新DOM
+				const domUpdater = (window as any).__lovpenDOMUpdater;
+				if (domUpdater && domUpdater.isReady()) {
+					domUpdater.updateArticleHTML(this.articleHTML);
+				}
+				
+				logger.debug(`[渲染] 使用缓存，耗时: ${(performance.now() - startTime).toFixed(2)}ms`);
+				return;
+			}
+			
+			// 移除frontmatter
+			let cleanMd = md;
+			if (cleanMd.startsWith("---")) {
+				cleanMd = cleanMd.replace(FRONT_MATTER_REGEX, "");
+			}
+			
+			// 解析Markdown
+			let articleHTML = await this.markedParser.parse(cleanMd);
+			articleHTML = this.wrapArticleContent(articleHTML);
+			
+			// 应用插件处理
+			const pluginManager = UnifiedPluginManager.getInstance();
+			articleHTML = pluginManager.processContent(articleHTML, this.settings);
+			
+			// 缓存结果（限制缓存大小）
+			if (this.pluginCache.size > 10) {
+				const firstKey = this.pluginCache.keys().next().value;
+				this.pluginCache.delete(firstKey);
+			}
+			this.pluginCache.set(cacheKey, articleHTML);
+			
+			this.articleHTML = articleHTML;
+			this.lastProcessedMd = md; // 标记已处理
+			
+			const endTime = performance.now();
+			logger.debug(`[渲染] 处理耗时: ${(endTime - startTime).toFixed(2)}ms`);
+			
+			// 直接更新DOM
+			const domUpdater = (window as any).__lovpenDOMUpdater;
+			if (domUpdater && domUpdater.isReady()) {
+				domUpdater.updateArticleHTML(this.articleHTML);
+			}
+		} catch (error) {
+			logger.error("处理内容时出错:", error);
 		}
 	}
 
 	async renderMarkdown() {
 		// 强制刷新assets，确保CSS在渲染前准备好
 		await this.assetsManager.loadAssets();
+		
+		// 缓存完整的CSS供快速更新使用
+		this.cachedFullCSS = this.getCSS();
+		
 		this.articleHTML = await this.getArticleContent();
 		
 		// 首次渲染或主题变化时，使用完整更新
@@ -810,6 +904,9 @@ ${customCSS}`;
 				if (plugin && plugin.setEnabled) {
 					plugin.setEnabled(enabled);
 					
+					// 清除插件缓存
+					this.pluginCache.clear();
+					
 					// 清理缓存管理器状态，确保UI正确更新
 					LocalImageManager.getInstance().cleanup();
 					CardDataManager.getInstance().cleanup();
@@ -838,6 +935,10 @@ ${customCSS}`;
 				);
 				if (plugin && plugin.updateConfig) {
 					plugin.updateConfig({[key]: value});
+					
+					// 清除插件缓存
+					this.pluginCache.clear();
+					
 					this.saveSettingsToPlugin();
 					this.renderMarkdown();
 					
@@ -1137,6 +1238,10 @@ ${customCSS}`;
 	private async handleThemeChange(theme: string): Promise<void> {
 		logger.debug(`[handleThemeChange] 切换主题: ${theme}`);
 		this.settings.defaultStyle = theme;
+		
+		// 清除插件缓存（主题改变可能影响渲染）
+		this.pluginCache.clear();
+		
 		this.saveSettingsToPlugin();
 		logger.debug(`[handleThemeChange] 设置已更新，开始渲染`);
 		await this.renderMarkdown();

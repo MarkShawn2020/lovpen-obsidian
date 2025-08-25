@@ -30,13 +30,24 @@ class DOMUpdater {
   }
   
   /**
+   * 检查是否已准备好（容器已注册）
+   */
+  isReady(): boolean {
+    return this.articleContainer !== null;
+  }
+  
+  /**
    * 直接更新文章HTML内容
    * 不触发React重新渲染
    */
   updateArticleHTML(html: string) {
     if (this.articleContainer) {
-      // 直接更新DOM，保持滚动位置
+      // 保存滚动位置
+      const scrollTop = this.articleContainer.scrollTop;
+      // 直接更新DOM
       this.articleContainer.innerHTML = html;
+      // 恢复滚动位置
+      this.articleContainer.scrollTop = scrollTop;
     }
   }
   
