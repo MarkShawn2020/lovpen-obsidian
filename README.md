@@ -1,257 +1,155 @@
 # LovPen
 
-这是一个强大的 Obsidian 全媒体内容分发平台，集成了多平台内容分发和格式化发布功能。它不仅可以将你的 Obsidian 笔记完美格式化到微信公众号，还支持将内容一键分发到知乎、小红书和 Twitter 等平台。
+> Professional content distribution platform for Obsidian - Format once, publish everywhere
 
-## 致谢
+[![GitHub release](https://img.shields.io/github/v/release/markshawn2020/lovpen)](https://github.com/markshawn2020/lovpen/releases)
+[![License](https://img.shields.io/github/license/markshawn2020/lovpen)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/markshawn2020/lovpen/total)](https://github.com/markshawn2020/lovpen/releases)
 
-本项目基于 [sunbooshi/note-to-mp](https://github.com/sunbooshi/note-to-mp) 项目进行开发和扩展，感谢原作者的贡献。
+LovPen is a powerful Obsidian plugin that transforms your notes into beautifully formatted content ready for publishing across multiple platforms including WeChat Official Accounts, Zhihu, XiaoHongShu, and Twitter.
 
-## 主要功能
+![LovPen Preview](packages/assets/images/screenshot.png)
 
-- **完美的格式转换**：保持 Markdown 格式的完整性，支持代码高亮、行号显示、多种主题等
-- **智能链接处理**：针对微信不能直接网页跳转的问题，提供链接内容展示和文末脚注两种方式
-- **多平台内容分发**：新增功能！一键将内容发布到微信公众号、知乎、小红书、Twitter等多个平台
-- **多种主题选择**：聚合 30+ 个精美主题，带给你多种风格选择
-- **新增模板系统**：支持通过模板定制内容渲染效果
+## ✨ Key Features
 
-既适合个人内容创作者，也适合需要向多平台发布内容的企业或媒体机构。
+- **🎨 30+ Beautiful Themes**: Choose from a curated collection of professional themes
+- **📱 Multi-Platform Publishing**: One-click distribution to WeChat, Zhihu, XiaoHongShu, Twitter
+- **🔗 Smart Link Handling**: Intelligent footnotes for non-clickable platforms like WeChat
+- **💻 Syntax Highlighting**: Beautiful code blocks with line numbers and multiple highlight styles
+- **📐 Template System**: Customize content rendering with Handlebars templates
+- **🔢 Auto-Numbering**: Automatic H2 heading numbering for better structure
 
-![](packages/assets/images/screenshot.png)
+## 🚀 Quick Start
 
-# 安装
+### Installation
 
-## 1、手动安装（推荐）
+#### Option 1: Manual Installation (Recommended)
+1. Download the latest `lovpen-plugin.zip` from [Releases](https://github.com/markshawn2020/lovpen/releases)
+2. Extract to `.obsidian/plugins/` in your vault
+3. Enable "LovPen" in Obsidian Settings → Community plugins
 
-到[Release](https://github.com/markshawn2020/lovpen/releases)页面下载最新版本的 `lovpen-plugin.zip` 文件，解压到Obsidian仓库的`.obsidian/plugins/`目录下。
+#### Option 2: BRAT Plugin
+1. Install [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+2. Add beta plugin with URL: `https://github.com/markshawn2020/lovpen`
 
-打开Obsidian的**设置**界面，点击**第三方插件**，在**已安装插件**中刷新一下，然后启用本插件 **LovPen**。
+### Basic Usage
 
-## 2、使用BRAT插件安装
+1. Open any note in Obsidian
+2. Click the LovPen icon ![](packages/assets/images/clipboard-paste.png) in the sidebar or use `Ctrl+P` → "Copy to WeChat"
+3. Preview your formatted content
+4. Click **Copy** to copy formatted content, or **Distribute** to publish to multiple platforms
 
-如果您已经安装了[BRAT插件](https://github.com/TfTHacker/obsidian42-brat)，可以使用这种方式安装。
+## 📤 Content Distribution
 
-在BRAT的设置中，打开Obsidian的**设置**界面，在底部的**第三方插件**——在**BRAT**中点击**Add Beta plugin**，然后输入本插件地址`https://github.com/markshawn2020/lovpen`，点击**Add Plugin**就可以安装 LovPen 插件了。
+### Supported Platforms
 
-## 3、主题、代码高亮下载
+| Platform | Authentication Required | Features |
+|----------|------------------------|----------|
+| WeChat Official Account | AppID, AppSecret, Token | Direct publishing, draft support |
+| Zhihu | Cookie | Article publishing, draft support |
+| XiaoHongShu | Cookie | Note publishing with images |
+| Twitter | API Keys & Tokens | Tweet with thread support |
 
-### 3.1 通过设置下载
-为了尽可能保证插件符合官方规范，从`1.0.4`版本开始，主题和代码高亮需要在插件的设置——**获取更多主题**手动下载。
+### Platform Configuration
 
-### 3.2 目录结构
-完整安装后的目录结构如下：
+1. Open Obsidian Settings → LovPen
+2. Navigate to "Content Distribution Settings"
+3. Configure authentication for desired platforms:
+   - **WeChat**: Enter AppID, AppSecret, and Token
+   - **Zhihu/XiaoHongShu**: Paste login cookie from browser
+   - **Twitter**: Add API credentials from Twitter Developer Portal
+
+### Publishing Workflow
+
+1. Format your content in the preview panel
+2. Click **Distribute** button in toolbar
+3. Select target platforms
+4. Choose **Publish** or **Save as Draft**
+5. Monitor real-time publishing status
+
+## ⚙️ Configuration
+
+### Essential Settings
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Code Line Numbers** | Show line numbers in code blocks | Enabled |
+| **H2 Auto-Numbering** | Add numbers to H2 headings (01., 02., etc.) | Enabled |
+| **Link Conversion** | Convert links to footnotes | Non-WeChat links only |
+| **Template System** | Use templates for content wrapping | Disabled |
+
+### Advanced Features
+
+#### Custom Themes
+1. Add theme definition to `themes.json`
+2. Create corresponding CSS file in `themes/` directory
+3. All styles should be scoped under `.note-to-mp` class
+
+#### Template Customization
+- Location: `.obsidian/plugins/lovpen/templates/`
+- Engine: Handlebars
+- Variables: `{{content}}`, `{{title}}`, custom metadata
+
+## 🏗️ Project Structure
 
 ```
-.obsidian/plugins/lovpen/
-├── assets
-│   ├── themes.json
-│   ├── highlights.json
-│   ├── themes
-│   │   ├── maple.css
-│   │   ├── mweb-ayu.css
-│   │   └── ...
-│   └── highlights
-│       ├── a11y-dark.css
-│       ├── a11y-light.css
-│       └── ...
-├── main.js
-├── manifest.json
-└── styles.css
-  
+lovpen-obsidian/
+├── packages/
+│   ├── obsidian/          # Core plugin logic
+│   ├── frontend/          # React UI components
+│   └── shared/            # Shared utilities
+├── assets/
+│   ├── themes/            # Theme CSS files
+│   └── highlights/        # Code highlighting styles
+└── scripts/               # Build and release scripts
 ```
 
-# 使用指南
+## 🛠️ Development
 
-## 内容格式化与复制
+```bash
+# Install dependencies
+pnpm install
 
-1. 点击 Obsidian 左侧工具栏中的图标 ![](packages/assets/images/clipboard-paste.png) 或者按 `Ctrl+P` 打开命令，搜索**复制到公众号**
-2. 预览界面会渲染当前笔记，并应用选中的样式
-3. 检查格式无误后，点击**复制**按钮，然后到公众号粘贴即可
+# Development mode
+pnpm dev
 
-## 内容分发功能
+# Type checking
+pnpm check
 
-新版本引入了内容分发功能，可以一键将内容发布到多个平台：
+# Build for production
+pnpm build
 
-1. 在预览界面的工具栏中点击**分发**按钮
-2. 在弹出的分发对话框中选择要发布的目标平台
-3. 点击**发布**按钮将内容发布到选中的平台，或点击**保存草稿**保存为草稿
-4. 分发过程中会显示各平台的实时状态和结果
-
-> 注意：使用分发功能前，需要先在插件设置中配置各平台的认证信息。详见[分发平台配置](#分发平台配置)部分。
-
-## 插件配置
-
-插件提供了多种配置选项，可以在 Obsidian 的**设置**中的**第三方插件** > **LovPen** 进行设置。
-
-### 行号显示
-
-默认情况下，代码块显示行号。如果需要关闭显示行号，可以到设置界面切换**显示代码行号**选项。
-
-### 二级标题序号
-
-插件新增了二级标题序号功能，可以自动为文章中的二级标题（H2，即 ## 开头的标题）添加序号，使排版更加规范美观：
-
-- 默认启用，为所有二级标题添加形如 "01."、"02." 格式的序号
-- 可在预览界面工具栏中通过开关随时切换是否启用
-- 该功能会同时作用于 Markdown 处理和 HTML 渲染两个环节，确保微信公众号显示效果一致
-
-### 链接处理
-
-由于微信公众号的限制，文章中的链接是无法点击的，插件提供了智能的链接处理方式。
-
-#### 链接转换脚注模式
-
-可以选择哪些链接应该转换为脚注格式：
-
-- **都不转换**：所有链接保持原始格式
-- **所有链接转换**：将所有链接都转换为脚注格式
-- **仅非微信链接转换**（默认）：只将非微信生态的链接转换为脚注
-
-#### 脚注链接描述模式
-
-可以选择脚注中链接的展示形式：
-
-- **不显示描述**（默认）：脚注中只显示链接地址
-- **显示链接描述**：脚注中同时显示链接地址和链接文本描述
-
-### 模板系统
-
-插件支持使用模板来打包渲染的内容，提供更高级的自定义选项：
-
-- **使用模板**：开启/关闭模板功能
-- **默认模板**：选择要使用的模板
-- **管理模板**：打开模板文件夹或重新加载模板
-
-<a id="分发平台配置"></a>
-### 分发平台配置
-
-新增功能！插件现在支持将内容一键分发到多个平台。在分发设置部分，可以配置支持的各个平台：
-
-#### 微信公众号
-
-使用插件顶部配置的公众号认证信息，无需重复输入。只需启用微信公众号分发即可。
-
-#### 知乎
-
-需要提供知乎的 Cookie 信息，可以从浏览器中获取。步骤如下：
-
-1. 登录知乎网站
-2. 打开浏览器开发者工具（F12）
-3. 在 Network 标签中勾选 Preserve log
-4. 复制 Cookie 头信息
-5. 将 Cookie 信息粘贴到插件设置中
-
-#### 小红书
-
-与知乎类似，需要提供小红书的 Cookie 信息。请注意，提供的 Cookie 需要包含所有必要的认证信息。
-
-#### Twitter
-
-需要配置以下信息：
-
-- **Twitter API Key**：Twitter 开发者账户的 API 密钥
-- **Twitter API Secret**：Twitter 开发者账户的 API 密钥秘钥
-- **Twitter Access Token**：访问令牌
-- **Twitter Access Token Secret**：访问令牌秘钥
-
-> 这些信息可以从 Twitter 开发者平台获取。请注意安全保存这些敏感信息。
-
-### 获取更多主题
-下载更多主要和代码高亮。
-
-### 清空主题
-清空已下载的主题及代码高亮。
-
-# 内容分发
-
-从 v1.x 版本开始，插件提供了内容分发功能，允许你将文章一键分发到多个平台，目前支持以下平台：
-
-- 微信公众号
-- 知乎
-- 小红书
-- Twitter
-
-## 配置分发平台
-
-在使用分发功能之前，需要先在插件设置中配置各平台的认证信息：
-
-1. 打开 Obsidian 设置
-2. 进入「第三方插件」>「LovPen」设置
-3. 滚动到「内容分发设置」部分
-4. 配置需要的平台：
-   - **微信公众号**：利用上方已配置的公众号信息，无需额外设置
-   - **知乎**：输入知乎登录态 Cookie
-   - **小红书**：输入小红书登录态 Cookie
-   - **Twitter**：配置 Twitter API 密钥和访问令牌
-
-## 使用分发功能
-
-配置完成后，可以通过以下步骤使用分发功能：
-
-1. 打开需要分发的文章
-2. 点击左侧工具栏中的图标打开预览，或按 `Ctrl+P` 搜索「复制到公众号」
-3. 在预览界面的工具栏中点击「分发」按钮
-4. 在弹出的分发对话框中选择要发布的平台
-5. 点击「发布」按钮将内容发布到选中的平台，或点击「保存草稿」保存为草稿
-
-## 分发状态
-
-发布过程中会显示各平台的发布状态，包括：
-
-- 准备中
-- 发布中
-- 发布成功/失败
-
-如果发布成功且平台提供了查看链接，可以直接点击「查看」按钮访问已发布的内容。
-
-# 主题
-
-通过移植[imageslr/mweb-themes](https://github.com/imageslr/mweb-themes)，总共支持30多款主题，总有一款适合你。
-
-## 自定义主题
-
-在插件目录下的`themes.json`文件中新增一条样式配置，如下所示
-
-```JSON
-[
-    {  
-        已有样式定义 ...
-    },
-    
-    {
-        "name": "NewStyle", 
-        "className": "new-style",
-        "desc": "关于样式的描述",
-        "author": "sunbooshi"
-    }
-]
-
-```
-其中各字段含义如下：
-
-- name 是样式的名称，在预览页面用于展示。
-- className 是CSS类名，不能包含空格。
-- desc 样式的介绍
-- author 样式作者
-
-
-在themes目录下新增样式文件，文件名必须与className一致，例如上面新增的样式，则应该在`themes`目录下新增`new-style.css`文件。
-
-在`new-style.css`追加定义样式，所有样式都应该写在`themes.json`中`className`定义的选择器下，以上面新增的样式举例，CSS应按如下所示编写：
-
-```CSS
-.note-to-mp strong {
-  font-weight: 700
-}
-.note-to-mp a {
-  color: #428bca;
-  text-decoration: none;
-  background: 0 0
-}
-.note-to-mp p {
-  margin: 10px 0;
-  line-height: 1.7
-}
+# Download theme assets
+pnpm download-highlights
 ```
 
+### Tech Stack
+- **Framework**: Obsidian Plugin API
+- **UI**: React 19 + TypeScript
+- **Styling**: TailwindCSS 4.x
+- **Build**: Turbo + ESBuild + Vite
+- **Markdown**: Marked + Highlight.js
 
-$0
+## 📝 License
+
+MIT © [Mark Shawn](https://github.com/markshawn2020)
+
+## 🙏 Acknowledgments
+
+Based on [sunbooshi/note-to-mp](https://github.com/sunbooshi/note-to-mp) - Thanks to the original author for the foundation.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📮 Support
+
+- [Report Issues](https://github.com/markshawn2020/lovpen/issues)
+- [Feature Requests](https://github.com/markshawn2020/lovpen/issues/new)
+- [Discussions](https://github.com/markshawn2020/lovpen/discussions)
+
+---
+
+<p align="center">
+  Made with ❤️ for the Obsidian community
+</p>
