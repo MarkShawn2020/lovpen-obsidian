@@ -2,36 +2,49 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {LovpenReactProps} from "../types";
 import {Toolbar} from "./toolbar/Toolbar";
 import {MessageModal} from "./preview/MessageModal";
-import {useSetAtom} from "jotai";
+import {useSetAtom, useAtomValue} from "jotai";
 import {initializeSettingsAtom} from "../store/atoms";
+import {articleHTMLAtom, cssContentAtom, staticCallbacksAtom} from "../store/contentAtoms";
 import {HMRTest} from "./HMRTest";
 import {ArticleRenderer} from "./ArticleRenderer";
+import {ScrollContainer} from "./ScrollContainer";
+import {domUpdater} from "../utils/domUpdater";
 
 import {logger} from "../../../shared/src/logger";
 
-export const LovpenReact: React.FC<LovpenReactProps> = ({
-															settings,
-															articleHTML,
-															cssContent,
-															plugins,
-															onRefresh,
-															onCopy,
-															onDistribute,
-															onTemplateChange,
-															onThemeChange,
-															onHighlightChange,
-															onThemeColorToggle,
-															onThemeColorChange,
-															onRenderArticle,
-															onSaveSettings,
-															onUpdateCSSVariables,
-															onPluginToggle,
-															onPluginConfigChange,
-															onExpandedSectionsChange,
-															onArticleInfoChange,
-															onPersonalInfoChange,
-															onSettingsChange
-														}) => {
+export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
+	const {
+		settings,
+		plugins,
+		articleHTML: propsArticleHTML,
+		cssContent: propsCssContent,
+		onRefresh,
+		onCopy,
+		onDistribute,
+		onTemplateChange,
+		onThemeChange,
+		onHighlightChange,
+		onThemeColorToggle,
+		onThemeColorChange,
+		onRenderArticle,
+		onSaveSettings,
+		onUpdateCSSVariables,
+		onPluginToggle,
+		onPluginConfigChange,
+		onExpandedSectionsChange,
+		onArticleInfoChange,
+		onPersonalInfoChange,
+		onSettingsChange
+	} = props;
+	
+	// 从atom读取频繁变化的数据，如果atom为空则使用props的值
+	const atomArticleHTML = useAtomValue(articleHTMLAtom);
+	const atomCssContent = useAtomValue(cssContentAtom);
+	
+	// 使用atom值或props值作为fallback
+	const articleHTML = atomArticleHTML || propsArticleHTML;
+	const cssContent = atomCssContent || propsCssContent;
+	
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
 	const isInitializedRef = useRef(false);
 
@@ -40,7 +53,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	const [isMessageVisible, setIsMessageVisible] = useState(false);
 	const [messageTitle, setMessageTitle] = useState("");
 	const [showOkButton, setShowOkButton] = useState(false);
-	const renderDivRef = useRef<HTMLDivElement>(null);
 
 	// 工具栏宽度状态 - 从localStorage恢复或使用默认宽度
 	const [toolbarWidth, setToolbarWidth] = useState<string>(() => {
@@ -151,8 +163,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 			}}
 		>
 			{/* 左侧渲染区域 - 占用剩余空间 */}
-			<div
-				ref={renderDivRef}
+			<ScrollContainer
 				className="lovpen-renderer"
 				style={{
 					WebkitUserSelect: "text",
@@ -187,12 +198,19 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 							</svg>
 						</button>
 					</div>
-					<style title="lovpen-style">
+					<style 
+						title="lovpen-style"
+						ref={(el) => {
+							if (el) {
+								domUpdater.setStyleElement(el);
+							}
+						}}
+					>
 						{cssContent}
 					</style>
 					<ArticleRenderer html={articleHTML} />
 				</div>
-			</div>
+			</ScrollContainer>
 
 			{/* 可拖动的分隔条 */}
 			<div

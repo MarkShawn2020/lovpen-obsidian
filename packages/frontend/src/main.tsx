@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {createRoot, Root} from "react-dom/client";
-import {LovpenReact} from "./components/LovpenReact";
+import {LovpenReactBridge} from "./components/LovpenReactBridge";
 import {type LovpenReactLib, LovpenReactProps} from "./types";
 import {JotaiProvider} from "./providers/JotaiProvider";
 import "./index.css";
@@ -19,7 +19,7 @@ const LovpenReactWrapper: React.FC<{ initialProps: LovpenReactProps; container?:
 		}
 	}, [container]);
 	
-	return <LovpenReact {...props} />;
+	return <LovpenReactBridge {...props} />;
 };
 
 // Library implementation
@@ -85,5 +85,5 @@ if (typeof window !== 'undefined') {
 }
 
 // Export for ES modules
-export {LovpenReactLib as default, LovpenReact};
+export {LovpenReactLib as default, LovpenReactBridge};
 export type {LovpenReactProps, LovpenReactLib};

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { LovpenReact } from './components/LovpenReact'
+import { LovpenReactBridge } from './components/LovpenReactBridge'
 import { JotaiProvider } from './providers/JotaiProvider'
 import { logger } from '../../shared/src/logger'
 import './index.css'
@@ -26,7 +26,7 @@ const LovpenReactWrapper: React.FC<{ initialProps: any; container?: HTMLElement 
     }
   }, [container]);
   
-  return <LovpenReact {...props} />;
+  return <LovpenReactBridge {...props} />;
 }
 
 // Create the external library interface for Obsidian plugin
@@ -141,7 +141,7 @@ if (rootElement) {
   
   root && root.render(
     <JotaiProvider>
-      <LovpenReact {...mockProps} />
+      <LovpenReactBridge {...mockProps} />
     </JotaiProvider>
   )
 }

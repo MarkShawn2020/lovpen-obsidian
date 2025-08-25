@@ -127,13 +127,26 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	 * 处理编辑器内容变化 - 立即更新
 	 */
 	private async handleEditorChange() {
-		// 直接更新，让React处理增量渲染
+		// 获取新的文章内容
 		this.articleHTML = await this.getArticleContent();
-		// 只更新props，不重新mount组件
-		if (this.externalReactLib && this.reactContainer) {
-			const props = this.buildReactComponentProps();
-			// 使用update而不是重新mount
-			await this.externalReactLib.update(this.reactContainer, props);
+		
+		// 使用domUpdater直接更新DOM，完全绕过React
+		const domUpdater = (window as any).__lovpenDOMUpdater;
+		if (domUpdater) {
+			// 直接更新DOM内容，不触发React重新渲染
+			domUpdater.updateArticleHTML(this.articleHTML);
+			// 如果CSS也变了，更新CSS
+			const newCSS = this.getCSS();
+			if (newCSS !== this.lastCSSContent) {
+				domUpdater.updateCSS(newCSS);
+				this.lastCSSContent = newCSS;
+			}
+		} else {
+			// 回退方案：如果domUpdater不可用，使用原来的方式
+			if (this.externalReactLib && this.reactContainer) {
+				const props = this.buildReactComponentProps();
+				await this.externalReactLib.update(this.reactContainer, props);
+			}
 		}
 	}
 
@@ -141,6 +154,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		// 强制刷新assets，确保CSS在渲染前准备好
 		await this.assetsManager.loadAssets();
 		this.articleHTML = await this.getArticleContent();
+		
+		// 首次渲染或主题变化时，使用完整更新
+		// 编辑器变化时，使用domUpdater直接更新
 		await this.updateExternalReactComponent();
 	}
 

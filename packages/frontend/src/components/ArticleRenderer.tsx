@@ -1,4 +1,5 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
+import { domUpdater } from '../utils/domUpdater';
 
 interface ArticleRendererProps {
   html: string;
@@ -6,28 +7,34 @@ interface ArticleRendererProps {
 
 /**
  * 文章渲染组件
- * 直接操作DOM，绕过React的虚拟DOM机制
- * 这样可以避免滚动位置重置
+ * 初始渲染后，通过domUpdater直接更新DOM
  */
-export const ArticleRenderer = React.memo<ArticleRendererProps>(({ html }) => {
+export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ html }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isFirstRender = useRef(true);
-
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-    
-    // 首次渲染使用React的方式
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+  const isInitialized = useRef(false);
+  
+  useEffect(() => {
+    if (containerRef.current) {
+      // 注册容器到domUpdater
+      domUpdater.setArticleContainer(containerRef.current);
+      
+      // 如果不是首次渲染，不更新（让domUpdater处理）
+      if (isInitialized.current) {
+        return;
+      }
+      
+      // 标记为已初始化
+      isInitialized.current = true;
     }
     
-    // 后续更新直接操作DOM，避免React重新渲染导致的滚动重置
-    containerRef.current.innerHTML = html;
-  }, [html]);
-
-  // 初始渲染
+    // 清理函数
+    return () => {
+      domUpdater.setArticleContainer(null);
+    };
+  }, []);
+  
+  // 初始渲染使用props中的HTML
   return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
-});
+};
 
 ArticleRenderer.displayName = 'ArticleRenderer';
