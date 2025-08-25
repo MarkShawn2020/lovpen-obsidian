@@ -20,7 +20,7 @@ export default `
 }
 
 /* Anthropic Style 主题特定样式 */
-#render-container [data-component="admonition"] {
+.lovpen-renderer [data-component="admonition"] {
   border-radius: 12px;
   padding: 1.5em;
   box-shadow: 0 2px 8px rgba(200, 100, 66, 0.08);
@@ -54,14 +54,14 @@ export default `
 }
 
 /* Anthropic Style 主题 - 低调图标样式 */
-#render-container [data-element="admonition-icon"] svg {
+.lovpen-renderer [data-element="admonition-icon"] svg {
   opacity: 0.6;
   stroke-width: 1.5;
   transform: scale(0.9);
   transition: opacity 0.2s ease;
 }
 
-#render-container [data-component="admonition"]:hover [data-element="admonition-icon"] svg {
+.lovpen-renderer [data-component="admonition"]:hover [data-element="admonition-icon"] svg {
   opacity: 0.8;
 }
 
@@ -101,9 +101,9 @@ export default `
 }
 
 /* Anthropic Style 主题 - Note 类型 */
-#render-container [data-component="admonition"][data-type="note"],
-#render-container [data-component="admonition"][data-type="info"],
-#render-container [data-component="admonition"][data-type="todo"] {
+.lovpen-renderer [data-component="admonition"][data-type="note"],
+.lovpen-renderer [data-component="admonition"][data-type="info"],
+.lovpen-renderer [data-component="admonition"][data-type="todo"] {
   color: rgb(200, 100, 66);
   background: linear-gradient(135deg, rgba(200, 100, 66, 0.05) 0%, rgba(250, 249, 245, 0.9) 100%);
   border-left-color: rgb(200, 100, 66);
@@ -122,12 +122,12 @@ export default `
 }
 
 /* Anthropic Style 主题 - Tip 类型 */
-#render-container [data-component="admonition"][data-type="tip"],
-#render-container [data-component="admonition"][data-type="abstract"],
-#render-container [data-component="admonition"][data-type="summary"],
-#render-container [data-component="admonition"][data-type="tldr"],
-#render-container [data-component="admonition"][data-type="hint"],
-#render-container [data-component="admonition"][data-type="important"] {
+.lovpen-renderer [data-component="admonition"][data-type="tip"],
+.lovpen-renderer [data-component="admonition"][data-type="abstract"],
+.lovpen-renderer [data-component="admonition"][data-type="summary"],
+.lovpen-renderer [data-component="admonition"][data-type="tldr"],
+.lovpen-renderer [data-component="admonition"][data-type="hint"],
+.lovpen-renderer [data-component="admonition"][data-type="important"] {
   color: rgb(180, 85, 50);
   background: linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(250, 249, 245, 0.95) 100%);
   border-left-color: rgb(180, 85, 50);
@@ -197,7 +197,7 @@ h2 {
 }
 
 /* Anthropic Style 主题 - H2 特定样式 */
-#render-container h2 {
+.lovpen-renderer h2 {
   font-size: 1.3em !important;
   text-align: center !important;
   margin: 3em auto 2em !important;
@@ -209,7 +209,7 @@ h2 {
   box-shadow: 0 4px 8px rgba(200, 100, 66, 0.15) !important;
 }
 
-#render-container h2 .content {
+.lovpen-renderer h2 .content {
   color: rgb(255, 255, 255) !important;
   background: transparent !important;
 }
@@ -243,7 +243,7 @@ blockquote:not([data-component="admonition"]) {
 }
 
 /* Anthropic Style 主题 - Blockquote */
-#render-container blockquote:not([data-component="admonition"]) {
+.lovpen-renderer blockquote:not([data-component="admonition"]) {
   border-left: 4px solid rgb(200, 100, 66);
   background: rgba(200, 100, 66, 0.05);
   padding: 1em;

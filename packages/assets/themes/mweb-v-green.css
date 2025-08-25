@@ -1,4 +1,4 @@
-#render-container  {
+.lovpen-renderer  {
 	min-width: 200px;
 	max-width: 760px;
 	padding: 3rem 1em 1em;
@@ -11,84 +11,84 @@
 	color: #333;
 }
 
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	line-height: 1.5;
 	margin-top: 35px;
 	margin-bottom: 10px;
 	padding-bottom: 5px;
 }
 
-#render-container  h1:first-child,
-#render-container  h2:first-child,
-#render-container  h3:first-child,
-#render-container  h4:first-child,
-#render-container  h5:first-child,
-#render-container  h6:first-child {
+.lovpen-renderer  h1:first-child,
+.lovpen-renderer  h2:first-child,
+.lovpen-renderer  h3:first-child,
+.lovpen-renderer  h4:first-child,
+.lovpen-renderer  h5:first-child,
+.lovpen-renderer  h6:first-child {
 	margin-top: -1.5rem;
 	margin-bottom: 1rem;
 }
 
-#render-container  h1::before,
-#render-container  h2::before,
-#render-container  h3::before,
-#render-container  h4::before,
-#render-container  h5::before,
-#render-container  h6::before {
+.lovpen-renderer  h1::before,
+.lovpen-renderer  h2::before,
+.lovpen-renderer  h3::before,
+.lovpen-renderer  h4::before,
+.lovpen-renderer  h5::before,
+.lovpen-renderer  h6::before {
 	content: "#";
 	display: inline-block;
 	color: #3eaf7c;
 	padding-right: 0.23em;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	position: relative;
 	font-size: 2.5rem;
 	margin-bottom: 5px;
 }
 
-#render-container  h1::before {
+.lovpen-renderer  h1::before {
 	font-size: 2.5rem;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	padding-bottom: 0.5rem;
 	font-size: 2.2rem;
 	border-bottom: 1px solid #ececec;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 1.5rem;
 	padding-bottom: 0;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: 1.25rem;
 }
 
-#render-container  h5 {
+.lovpen-renderer  h5 {
 	font-size: 1rem;
 }
 
-#render-container  h6 {
+.lovpen-renderer  h6 {
 	margin-top: 5px;
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	line-height: inherit;
 	margin-top: 22px;
 	margin-bottom: 22px;
 }
 
-#render-container  strong {
+.lovpen-renderer  strong {
 	color: #3eaf7c;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 	border-radius: 2px;
 	display: block;
@@ -96,7 +96,7 @@
 	border: 3px solid rgba(62, 175, 124, 0.2);
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-top: 1px solid #3eaf7c;
 	border-bottom: none;
 	border-left: none;
@@ -105,22 +105,22 @@
 	margin-bottom: 32px;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	font-weight: 500;
 	text-decoration: none;
 	color: #3eaf7c;
 }
 
-#render-container  a:hover,
-#render-container  a:active {
+.lovpen-renderer  a:hover,
+.lovpen-renderer  a:active {
 	border-bottom: 1.5px solid #3eaf7c;
 }
 
-#render-container  a:before {
+.lovpen-renderer  a:before {
 	content: "⇲";
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	display: inline-block !important;
 	font-size: 12px;
 	width: auto;
@@ -129,27 +129,27 @@
 	border: solid 1px #3eaf7c;
 }
 
-#render-container  thead {
+.lovpen-renderer  thead {
 	background: #3eaf7c;
 	color: #fff;
 	text-align: left;
 }
 
-#render-container  tr:nth-child(2n) {
+.lovpen-renderer  tr:nth-child(2n) {
 	background-color: rgba(62, 175, 124, 0.2);
 }
 
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	padding: 12px 7px;
 	line-height: 24px;
 }
 
-#render-container  td {
+.lovpen-renderer  td {
 	min-width: 120px;
 }
 
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	color: #666;
 	padding: 1px 23px;
 	margin: 22px 0;
@@ -158,16 +158,16 @@
 	background-color: #f8f8f8;
 }
 
-#render-container  blockquote::after {
+.lovpen-renderer  blockquote::after {
 	display: block;
 	content: "";
 }
 
-#render-container  blockquote > p {
+.lovpen-renderer  blockquote > p {
 	margin: 10px 0;
 }
 
-#render-container  details {
+.lovpen-renderer  details {
 	border: none;
 	outline: none;
 	border-left: 4px solid #3eaf7c;
@@ -175,7 +175,7 @@
 	margin-left: 4px;
 }
 
-#render-container  details summary {
+.lovpen-renderer  details summary {
 	cursor: pointer;
 	border: none;
 	outline: none;
@@ -183,72 +183,72 @@
 	margin: 0px -17px;
 }
 
-#render-container  details summary::-webkit-details-marker {
+.lovpen-renderer  details summary::-webkit-details-marker {
 	color: #3eaf7c;
 }
 
-#render-container  ol,
-#render-container  ul {
+.lovpen-renderer  ol,
+.lovpen-renderer  ul {
 	padding-left: 28px;
 }
 
-#render-container  ol li,
-#render-container  ul li {
+.lovpen-renderer  ol li,
+.lovpen-renderer  ul li {
 	margin-bottom: 0;
 	list-style: inherit;
 }
 
-#render-container  ol li .task-list-item,
-#render-container  ul li .task-list-item {
+.lovpen-renderer  ol li .task-list-item,
+.lovpen-renderer  ul li .task-list-item {
 	list-style: none;
 }
 
-#render-container  ol li .task-list-item ul,
-#render-container  ul li .task-list-item ul,
-#render-container  ol li .task-list-item ol,
-#render-container  ul li .task-list-item ol {
+.lovpen-renderer  ol li .task-list-item ul,
+.lovpen-renderer  ul li .task-list-item ul,
+.lovpen-renderer  ol li .task-list-item ol,
+.lovpen-renderer  ul li .task-list-item ol {
 	margin-top: 0;
 }
 
-#render-container  ol ul,
-#render-container  ul ul,
-#render-container  ol ol,
-#render-container  ul ol {
+.lovpen-renderer  ol ul,
+.lovpen-renderer  ul ul,
+.lovpen-renderer  ol ol,
+.lovpen-renderer  ul ol {
 	margin-top: 3px;
 }
 
-#render-container  ol li {
+.lovpen-renderer  ol li {
 	padding-left: 6px;
 }
 
-#render-container  ol li::marker {
+.lovpen-renderer  ol li::marker {
 	color: #3eaf7c;
 }
 
-#render-container  ul li::marker {
+.lovpen-renderer  ul li::marker {
 	color: #3eaf7c;
 }
 
 @media (max-width: 720px) {
-	#render-container  h1 {
+	.lovpen-renderer  h1 {
 		font-size: 24px;
 	}
 
-	#render-container  h2 {
+	.lovpen-renderer  h2 {
 		font-size: 20px;
 	}
 
-	#render-container  h3 {
+	.lovpen-renderer  h3 {
 		font-size: 18px;
 	}
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	word-break: break-word;
 	overflow-x: auto;
@@ -260,14 +260,14 @@
 	border-radius: 3px;
 }
 
-#render-container  pre {
+.lovpen-renderer  pre {
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	overflow: auto;
 	position: relative;
 	line-height: 1.75;
 }
 
-#render-container  pre > code {
+.lovpen-renderer  pre > code {
 	font-size: 12px;
 	padding: 15px 12px;
 	margin: 0;
@@ -278,21 +278,21 @@
 	background: #f8f8f8;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	background: #f8f8f8;
 	border-radius: 6px;
 	border: 2px solid #3eaf7c;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	display: block;
 	padding: 1em;
 	overflow-x: auto;
 }
 
-#render-container  .code-section pre code {
+.lovpen-renderer  .code-section pre code {
 	border: none;
 	background: #f8f8f8;
 	font-size: 1em;
@@ -302,7 +302,7 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -311,7 +311,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -325,6 +325,6 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }

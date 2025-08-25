@@ -13,10 +13,10 @@
  * 各个属性的默认值为 chrome 的默认样式，见 variables/default.scss。
  */
 /**
- * MWeb 包裹 markdown 的容器是 #render-container
+ * MWeb 包裹 markdown 的容器是 .lovpen-renderer
  * Typora 中是 #write
  */
-#render-container  {
+.lovpen-renderer  {
 	line-height: 1.6em;
 	-webkit-text-size-adjust: 100%;
 	margin: 0px 0px;
@@ -33,26 +33,26 @@
 	/* svg */
 }
 
-#render-container  * {
+.lovpen-renderer  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
-#render-container  > *:first-child {
+.lovpen-renderer  > *:first-child {
 	margin-top: 0 !important;
 }
 
-#render-container  > *:last-child {
+.lovpen-renderer  > *:last-child {
 	margin-top: 0 !important;
 }
 
-#render-container  p, #render-container  details, #render-container  dl, #render-container  ol, #render-container  ul, #render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing, #render-container  blockquote, #render-container  table, #render-container  figure, #render-container  hr {
+.lovpen-renderer  p, .lovpen-renderer  details, .lovpen-renderer  dl, .lovpen-renderer  ol, .lovpen-renderer  ul, .lovpen-renderer  pre, .lovpen-renderer  xmp, .lovpen-renderer  plaintext, .lovpen-renderer  listing, .lovpen-renderer  blockquote, .lovpen-renderer  table, .lovpen-renderer  figure, .lovpen-renderer  hr {
 	margin-top: 0.75em;
 	margin-bottom: 0.75em;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 2em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -61,7 +61,7 @@
 	margin-right: 0;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: 1.5em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -70,7 +70,7 @@
 	margin-right: 0;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 1.17em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -79,7 +79,7 @@
 	margin-right: 0;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: 1em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -88,7 +88,7 @@
 	margin-right: 0;
 }
 
-#render-container  h5 {
+.lovpen-renderer  h5 {
 	font-size: 0.83em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -97,7 +97,7 @@
 	margin-right: 0;
 }
 
-#render-container  h6 {
+.lovpen-renderer  h6 {
 	font-size: 0.67em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -106,81 +106,81 @@
 	margin-right: 0;
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
-#render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing {
+.lovpen-renderer  pre, .lovpen-renderer  xmp, .lovpen-renderer  plaintext, .lovpen-renderer  listing {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-#render-container  blockquote > :first-child {
+.lovpen-renderer  blockquote > :first-child {
 	margin-top: 0;
 }
 
-#render-container  blockquote > :last-child {
+.lovpen-renderer  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-style: inset;
 	border-width: 1px;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 	height: auto;
 }
 
-#render-container  li {
+.lovpen-renderer  li {
 	word-wrap: break-all;
 }
 
-#render-container  li + li {
+.lovpen-renderer  li + li {
 	margin-top: 0.25em;
 }
 
-#render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol {
+.lovpen-renderer  ul ul, .lovpen-renderer  ol ul, .lovpen-renderer  ul ol, .lovpen-renderer  ol ol {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-#render-container  .task-list-item {
+.lovpen-renderer  .task-list-item {
 	list-style-type: none;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	color: -webkit-link;
 	text-decoration: underline;
 }
 
-#render-container  a img {
+.lovpen-renderer  a img {
 	border: none;
 }
 
-#render-container  b, #render-container  strong {
+.lovpen-renderer  b, .lovpen-renderer  strong {
 	font-weight: bold;
 }
 
-#render-container  i, #render-container  cite, #render-container  em, #render-container  var, #render-container  address, #render-container  dfn {
+.lovpen-renderer  i, .lovpen-renderer  cite, .lovpen-renderer  em, .lovpen-renderer  var, .lovpen-renderer  address, .lovpen-renderer  dfn {
 	font-style: italic;
 }
 
-#render-container  code, #render-container  kbd, #render-container  tt, #render-container  samp {
+.lovpen-renderer  code, .lovpen-renderer  kbd, .lovpen-renderer  tt, .lovpen-renderer  samp {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-#render-container  mark {
+.lovpen-renderer  mark {
 	padding: 0.2em 0;
 	background-color: yellow;
 }
 
-#render-container  del, #render-container  s {
+.lovpen-renderer  del, .lovpen-renderer  s {
 	color: inherit;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	color: black;
 	border-collapse: collapse;
 	background-color: white;
@@ -188,29 +188,29 @@
 	font-size: 1em;
 }
 
-#render-container  th, #render-container  td {
+.lovpen-renderer  th, .lovpen-renderer  td {
 	border-color: gray;
 	border-width: 1px;
 	border-style: solid;
 }
 
-#render-container  th {
+.lovpen-renderer  th {
 	padding: 4px 8px;
 	font-size: 1em;
 	font-weight: bold;
 }
 
-#render-container  td {
+.lovpen-renderer  td {
 	padding: 4px 8px;
 	font-size: 1em;
 	font-weight: normal;
 }
 
-#render-container  div[id^=mweb-chart-ele] svg {
+.lovpen-renderer  div[id^=mweb-chart-ele] svg {
 	background-color: white;
 }
 
-#render-container  {
+.lovpen-renderer  {
 	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
 	padding: 2em;
 	word-break: break-word;
@@ -227,12 +227,12 @@
 	/* 代码块特殊处理 */
 }
 
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	line-height: 1.5;
 	margin-top: 35px;
 	margin-bottom: 10px;
@@ -240,23 +240,23 @@
 	font-weight: 600;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 30px;
 	margin-bottom: 5px;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	padding-bottom: 12px;
 	font-size: 24px;
 	border-bottom: 1px solid #ececec;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 18px;
 	padding-bottom: 0;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: 1.2em;
 	border-bottom: 2px solid rgb(239, 112, 96);
 	word-spacing: 0px !important;
@@ -273,25 +273,25 @@
 	margin-right: 3px;
 }
 
-#render-container  h5 {
+.lovpen-renderer  h5 {
 	font-size: 15px;
 }
 
-#render-container  h6 {
+.lovpen-renderer  h6 {
 	margin-top: 5px;
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	line-height: inherit;
 	margin-top: 22px;
 	margin-bottom: 22px;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-top: 1px solid #ddd;
 	border-bottom: none;
 	border-left: none;
@@ -300,18 +300,18 @@
 	margin-bottom: 32px;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	text-decoration: none;
 	color: #0269c8;
 	border-bottom: 1px solid #d1e9ff;
 }
 
-#render-container  a:hover,
-#render-container  a:active {
+.lovpen-renderer  a:hover,
+.lovpen-renderer  a:active {
 	color: #275b8c;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	display: inline-block !important;
 	font-size: 12px;
 	width: auto;
@@ -320,27 +320,27 @@
 	border: solid 1px #f6f6f6;
 }
 
-#render-container  thead {
+.lovpen-renderer  thead {
 	background: #f6f6f6;
 	color: #000;
 	text-align: left;
 }
 
-#render-container  tr:nth-child(2n) {
+.lovpen-renderer  tr:nth-child(2n) {
 	background-color: #fcfcfc;
 }
 
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	padding: 12px 7px;
 	line-height: 24px;
 }
 
-#render-container  td {
+.lovpen-renderer  td {
 	min-width: 120px;
 }
 
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	color: #666;
 	padding: 1px 23px;
 	margin: 22px 0;
@@ -348,67 +348,67 @@
 	background-color: #f8f8f8;
 }
 
-#render-container  blockquote::after {
+.lovpen-renderer  blockquote::after {
 	display: block;
 	content: "";
 }
 
-#render-container  blockquote > p {
+.lovpen-renderer  blockquote > p {
 	margin: 10px 0;
 }
 
-#render-container  ol,
-#render-container  ul {
+.lovpen-renderer  ol,
+.lovpen-renderer  ul {
 	padding-left: 28px;
 }
 
-#render-container  ol li,
-#render-container  ul li {
+.lovpen-renderer  ol li,
+.lovpen-renderer  ul li {
 	margin-bottom: 0;
 	list-style: inherit;
 }
 
-#render-container  ol li .task-list-item,
-#render-container  ul li .task-list-item {
+.lovpen-renderer  ol li .task-list-item,
+.lovpen-renderer  ul li .task-list-item {
 	list-style: none;
 }
 
-#render-container  .task-list-item ul,
-#render-container  .task-list-item ol {
+.lovpen-renderer  .task-list-item ul,
+.lovpen-renderer  .task-list-item ol {
 	margin-top: 0;
 }
 
-#render-container  ol ul,
-#render-container  ol ol,
-#render-container  ul ul,
-#render-container  ul ol {
+.lovpen-renderer  ol ul,
+.lovpen-renderer  ol ol,
+.lovpen-renderer  ul ul,
+.lovpen-renderer  ul ol {
 	margin-top: 3px;
 }
 
-#render-container  ol li {
+.lovpen-renderer  ol li {
 	padding-left: 6px;
 }
 
 @media (max-width: 720px) {
-	#render-container  h1 {
+	.lovpen-renderer  h1 {
 		font-size: 24px;
 	}
 
-	#render-container  h2 {
+	.lovpen-renderer  h2 {
 		font-size: 20px;
 	}
 
-	#render-container  h3 {
+	.lovpen-renderer  h3 {
 		font-size: 18px;
 	}
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	word-break: break-word;
 	border-radius: 2px;
@@ -419,13 +419,13 @@
 	padding: 0.065em 0.4em;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	overflow: auto;
 	background-color: #fff5f5;
 }
 
-#render-container  .code-section code {
+.lovpen-renderer  .code-section code {
 	font-size: 1em;
 	line-height: 1.75em;
 	color: #ff502c;
@@ -436,14 +436,14 @@
 	display: block;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	display: block;
 	overflow: auto;
 	padding: 1em;
 	margin: 0;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -452,7 +452,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -467,6 +467,6 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }

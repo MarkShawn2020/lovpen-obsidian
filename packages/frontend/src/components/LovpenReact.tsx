@@ -171,8 +171,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 			{/* 左侧渲染区域 - 占用剩余空间 */}
 			<div
 				ref={renderDivRef}
-				className="render-container"
-				id="render-container"
+				className="lovpen-renderer"
 				style={{
 					WebkitUserSelect: "text",
 					userSelect: "text",

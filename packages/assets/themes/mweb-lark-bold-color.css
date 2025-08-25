@@ -19,10 +19,10 @@
  * 各个属性的默认值为 chrome 的默认样式，见 variables/default.scss。
  */
 /**
- * MWeb 包裹 markdown 的容器是 #render-container
+ * MWeb 包裹 markdown 的容器是 .lovpen-renderer
  * Typora 中是 #write
  */
-#render-container  {
+.lovpen-renderer  {
 	line-height: 1.68;
 	-webkit-text-size-adjust: 100%;
 	margin: 0px 0px;
@@ -39,26 +39,26 @@
 	/* svg */
 }
 
-#render-container  * {
+.lovpen-renderer  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
-#render-container  > *:first-child {
+.lovpen-renderer  > *:first-child {
 	margin-top: 0 !important;
 }
 
-#render-container  > *:last-child {
+.lovpen-renderer  > *:last-child {
 	margin-top: 0 !important;
 }
 
-#render-container  p, #render-container  details, #render-container  dl, #render-container  ol, #render-container  ul, #render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing, #render-container  blockquote, #render-container  table, #render-container  figure, #render-container  hr {
+.lovpen-renderer  p, .lovpen-renderer  details, .lovpen-renderer  dl, .lovpen-renderer  ol, .lovpen-renderer  ul, .lovpen-renderer  pre, .lovpen-renderer  xmp, .lovpen-renderer  plaintext, .lovpen-renderer  listing, .lovpen-renderer  blockquote, .lovpen-renderer  table, .lovpen-renderer  figure, .lovpen-renderer  hr {
 	margin-top: 8px;
 	margin-bottom: 8px;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 26px;
 	font-weight: bold;
 	margin-top: 26px;
@@ -67,7 +67,7 @@
 	margin-right: 0;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: 22px;
 	font-weight: bold;
 	margin-top: 22px;
@@ -76,7 +76,7 @@
 	margin-right: 0;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 20px;
 	font-weight: bold;
 	margin-top: 20px;
@@ -85,7 +85,7 @@
 	margin-right: 0;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: 18px;
 	font-weight: bold;
 	margin-top: 18px;
@@ -94,7 +94,7 @@
 	margin-right: 0;
 }
 
-#render-container  h5 {
+.lovpen-renderer  h5 {
 	font-size: 16px;
 	font-weight: bold;
 	margin-top: 16px;
@@ -103,7 +103,7 @@
 	margin-right: 0;
 }
 
-#render-container  h6 {
+.lovpen-renderer  h6 {
 	font-size: 16px;
 	font-weight: bold;
 	margin-top: 16px;
@@ -112,81 +112,81 @@
 	margin-right: 0;
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
-#render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing {
+.lovpen-renderer  pre, .lovpen-renderer  xmp, .lovpen-renderer  plaintext, .lovpen-renderer  listing {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-#render-container  blockquote > :first-child {
+.lovpen-renderer  blockquote > :first-child {
 	margin-top: 0;
 }
 
-#render-container  blockquote > :last-child {
+.lovpen-renderer  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-style: inset;
 	border-width: 1px;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 	height: auto;
 }
 
-#render-container  li {
+.lovpen-renderer  li {
 	word-wrap: break-all;
 }
 
-#render-container  li + li {
+.lovpen-renderer  li + li {
 	margin-top: 4px;
 }
 
-#render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol {
+.lovpen-renderer  ul ul, .lovpen-renderer  ol ul, .lovpen-renderer  ul ol, .lovpen-renderer  ol ol {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-#render-container  .task-list-item {
+.lovpen-renderer  .task-list-item {
 	list-style-type: none;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	color: #3370ff;
 	text-decoration: underline;
 }
 
-#render-container  a img {
+.lovpen-renderer  a img {
 	border: none;
 }
 
-#render-container  b, #render-container  strong {
+.lovpen-renderer  b, .lovpen-renderer  strong {
 	font-weight: bold;
 }
 
-#render-container  i, #render-container  cite, #render-container  em, #render-container  var, #render-container  address, #render-container  dfn {
+.lovpen-renderer  i, .lovpen-renderer  cite, .lovpen-renderer  em, .lovpen-renderer  var, .lovpen-renderer  address, .lovpen-renderer  dfn {
 	font-style: italic;
 }
 
-#render-container  code, #render-container  kbd, #render-container  tt, #render-container  samp {
+.lovpen-renderer  code, .lovpen-renderer  kbd, .lovpen-renderer  tt, .lovpen-renderer  samp {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-#render-container  mark {
+.lovpen-renderer  mark {
 	padding: 0.2em 0;
 	background-color: rgba(255, 246, 122, 0.8);
 }
 
-#render-container  del, #render-container  s {
+.lovpen-renderer  del, .lovpen-renderer  s {
 	color: inherit;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	color: black;
 	border-collapse: collapse;
 	background-color: white;
@@ -194,41 +194,41 @@
 	font-size: 1em;
 }
 
-#render-container  th, #render-container  td {
+.lovpen-renderer  th, .lovpen-renderer  td {
 	border-color: #dee0e3;
 	border-width: 1px;
 	border-style: solid;
 }
 
-#render-container  th {
+.lovpen-renderer  th {
 	padding: 8px 8px;
 	font-size: 1em;
 	font-weight: 600;
 }
 
-#render-container  td {
+.lovpen-renderer  td {
 	padding: 8px 8px;
 	font-size: 1em;
 	font-weight: normal;
 }
 
-#render-container  div[id^=mweb-chart-ele] svg {
+.lovpen-renderer  div[id^=mweb-chart-ele] svg {
 	background-color: white;
 }
 
-#render-container  * {
+.lovpen-renderer  * {
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
 
-#render-container  h1, #render-container  h2, #render-container  h3, #render-container  h4, #render-container  h5, #render-container  h6 {
+.lovpen-renderer  h1, .lovpen-renderer  h2, .lovpen-renderer  h3, .lovpen-renderer  h4, .lovpen-renderer  h5, .lovpen-renderer  h6 {
 	line-height: 1.4;
 	font-weight: 600;
 	margin-top: 1em;
 	margin-bottom: 0.37em;
 }
 
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	display: block;
 	margin-left: 0;
 	padding-left: 14px;
@@ -236,7 +236,7 @@
 	color: rgba(31, 35, 41, 0.7);
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	white-space: pre-wrap;
@@ -246,11 +246,11 @@
 	text-decoration: none;
 }
 
-#render-container  a:hover {
+.lovpen-renderer  a:hover {
 	text-decoration: underline;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	margin: 13px 0 12px;
 	border: 0px;
 	height: 1px;
@@ -259,42 +259,42 @@
 	background-repeat: no-repeat;
 }
 
-#render-container  ul > li:not([class*=task-list-item]) {
+.lovpen-renderer  ul > li:not([class*=task-list-item]) {
 	word-wrap: break-all;
 	padding-left: 12px;
 }
 
-#render-container  ul > li:not([class*=task-list-item])::marker {
+.lovpen-renderer  ul > li:not([class*=task-list-item])::marker {
 	color: #3370ff;
 }
 
-#render-container  ol > li:not([class*=task-list-item]) {
+.lovpen-renderer  ol > li:not([class*=task-list-item]) {
 	word-wrap: break-all;
 	padding-left: 12px;
 }
 
-#render-container  ol > li:not([class*=task-list-item])::marker {
+.lovpen-renderer  ol > li:not([class*=task-list-item])::marker {
 	color: #3370ff;
 }
 
-#render-container  li + li, #render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol, #render-container  li ul, #render-container  li ol {
+.lovpen-renderer  li + li, .lovpen-renderer  ul ul, .lovpen-renderer  ol ul, .lovpen-renderer  ul ol, .lovpen-renderer  ol ol, .lovpen-renderer  li ul, .lovpen-renderer  li ol {
 	margin-top: 4px;
 }
 
-#render-container  .task-list-item {
+.lovpen-renderer  .task-list-item {
 	padding-left: 28px;
 	margin-left: -6px;
 	list-style: none;
 	word-wrap: break-all;
 }
 
-#render-container  .task-list-item input {
+.lovpen-renderer  .task-list-item input {
 	margin: 0 !important;
 	appearance: none;
 	-webkit-appearance: none;
 }
 
-#render-container  .task-list-item input:before {
+.lovpen-renderer  .task-list-item input:before {
 	content: " ";
 	display: inline-block;
 	position: relative;
@@ -311,17 +311,17 @@
 	margin-right: 6px;
 }
 
-#render-container  .task-list-item input:checked:before {
+.lovpen-renderer  .task-list-item input:checked:before {
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEwLjU4OSAzLjkwM2wuODA4LjgwOGEuMzUuMzUgMCAwIDEgMCAuNDk1TDYuMTggMTAuNDI1YS4zNS4zNSAwIDAgMS0uNDk1IDBMMi43MDMgNy40NDRhLjM1LjM1IDAgMCAxIDAtLjQ5NWwuODA4LS44MDhhLjM1LjM1IDAgMCAxIC40OTUgMGwxLjkyNSAxLjkyNCA0LjE2My00LjE2M2EuMzUuMzUgMCAwIDEgLjQ5NSAweiIgZmlsbD0iIzMzNzBGRiIvPjwvc3ZnPg==);
 	background-size: contain;
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	border-radius: 4px;
 	margin-left: 2px;
 	margin-right: 2px;
@@ -332,20 +332,20 @@
 	padding: 0 2px;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	border: 1px solid #dee0e3;
 	background-color: #f5f6f7;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	display: block;
 	padding: 1em;
 	overflow-x: auto;
 }
 
-#render-container  .code-section pre code {
+.lovpen-renderer  .code-section pre code {
 	border: none;
 	background-color: #f5f6f7;
 	font-size: 1em;
@@ -355,7 +355,7 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -364,7 +364,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -379,10 +379,10 @@
 	color: #ff502c;
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }
 
-#render-container  strong {
+.lovpen-renderer  strong {
 	color: rgb(36, 91, 219);
 }

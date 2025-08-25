@@ -5,7 +5,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/markshawn2020/lovpen)](https://github.com/markshawn2020/lovpen/releases)
 [![License](https://img.shields.io/github/license/markshawn2020/lovpen)](LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/markshawn2020/lovpen/total)](https://github.com/markshawn2020/lovpen/releases)
-[![Version](https://img.shields.io/badge/version-0.19.1-blue)](https://github.com/markshawn2020/lovpen)
+[![Version](https://img.shields.io/badge/version-0.19.2-blue)](https://github.com/markshawn2020/lovpen)
 
 LovPen is a comprehensive Obsidian plugin that transforms your markdown notes into professionally formatted content, ready for publishing across WeChat Official Accounts, Zhihu, XiaoHongShu, Twitter, and more platforms.
 
@@ -123,15 +123,17 @@ pnpm build
 
 Create custom themes by adding to `.obsidian/plugins/lovpen/themes/`:
 
+> **Note:** All theme styles must be scoped under `.lovpen-renderer` selector
+
 ```css
 /* my-theme.css */
-.note-to-mp {
+.lovpen-renderer {
   --primary-color: #2c3e50;
   --font-body: 'Inter', sans-serif;
   --font-code: 'Fira Code', monospace;
 }
 
-.note-to-mp h2 {
+.lovpen-renderer h2 {
   color: var(--primary-color);
   border-bottom: 2px solid currentColor;
 }
@@ -212,4 +214,6 @@ MIT © [Mark Shawn](https://github.com/markshawn2020)
 
 ---
 
-<sub>LovPen has evolved significantly from its initial inspiration [note-to-mp](https://github.com/sunbooshi/note-to-mp), now featuring a complete React-based UI, multi-platform distribution, and extensive customization capabilities.</sub>
+<p align="center">
+  <sub>Built with modern web technologies and a focus on user experience</sub>
+</p>

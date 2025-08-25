@@ -6,7 +6,7 @@
  */
 
 /* 亮色模式变量 */
-#render-container {
+.lovpen-renderer {
 	--primary-color: #E31937;
 	--text-primary: #333333;
 	--text-secondary: #666666;
@@ -23,7 +23,7 @@
 
 /* 深色模式变量 */
 @media (prefers-color-scheme: dark) {
-	#render-container {
+	.lovpen-renderer {
 		--primary-color: #E31937;
 		--text-primary: #ffffff;
 		--text-secondary: #d1d5db;
@@ -40,7 +40,7 @@
 }
 
 /* 基础容器样式 */
-#render-container  {
+.lovpen-renderer  {
 	font-family: AvenirNext-Regular, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
 	font-size: 16px;
 	color: var(--text-secondary);
@@ -53,7 +53,7 @@
 }
 
 /* 基础元素样式 */
-#render-container  * {
+.lovpen-renderer  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
@@ -61,30 +61,30 @@
 	text-rendering: optimizeLegibility;
 }
 
-#render-container  > *:first-child {
+.lovpen-renderer  > *:first-child {
 	margin-top: 0 !important;
 }
 
-#render-container  > *:last-child {
+.lovpen-renderer  > *:last-child {
 	margin-top: 0 !important;
 }
 
 /* 段落和块元素间距 */
-#render-container  p,
-#render-container  pre,
-#render-container  dl,
-#render-container  form,
-#render-container  details,
-#render-container  blockquote,
-#render-container  table,
-#render-container  xmp,
-#render-container  plaintext,
-#render-container  listing,
-#render-container  figure {
+.lovpen-renderer  p,
+.lovpen-renderer  pre,
+.lovpen-renderer  dl,
+.lovpen-renderer  form,
+.lovpen-renderer  details,
+.lovpen-renderer  blockquote,
+.lovpen-renderer  table,
+.lovpen-renderer  xmp,
+.lovpen-renderer  plaintext,
+.lovpen-renderer  listing,
+.lovpen-renderer  figure {
 	margin: 0.75em 0 0.45em;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	margin: 0.75em auto;
 	height: 1px;
 	border: 0;
@@ -95,12 +95,12 @@
 }
 
 /* 标题样式 */
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	margin-top: 1.5em;
 	margin-bottom: 0.75em;
 	margin-left: 0;
@@ -112,32 +112,32 @@
 	transition: color 0.3s ease;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 1.5em;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: 1.3em;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 1.1em;
 }
 
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	font-size: 1em;
 }
 
 /* 段落样式 */
-#render-container  p {
+.lovpen-renderer  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
 /* 引用块样式 */
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	display: block;
 	padding-left: 0.8em;
 	border-left: 0.2em solid var(--blockquote-border);
@@ -145,82 +145,82 @@
 	transition: border-color 0.3s ease, color 0.3s ease;
 }
 
-#render-container  blockquote > :first-child {
+.lovpen-renderer  blockquote > :first-child {
 	margin-top: 0;
 }
 
-#render-container  blockquote > :last-child {
+.lovpen-renderer  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
 /* 列表样式 */
-#render-container  ul {
+.lovpen-renderer  ul {
 	padding-left: 1.0em;
 }
 
-#render-container  li::marker {
+.lovpen-renderer  li::marker {
 	color: var(--primary-color);
 	transition: color 0.3s ease;
 }
 
-#render-container  li > p {
+.lovpen-renderer  li > p {
 	margin: 0;
 }
 
-#render-container  ol {
+.lovpen-renderer  ol {
 	padding-left: 1.0em;
 	list-style-type: decimal;
 }
 
 /* 链接样式 */
-#render-container  a {
+.lovpen-renderer  a {
 	color: var(--link-color);
 	text-decoration: none;
 	transition: color 0.3s ease;
 }
 
-#render-container  a:hover,
-#render-container  a:focus,
-#render-container  a:active {
+.lovpen-renderer  a:hover,
+.lovpen-renderer  a:focus,
+.lovpen-renderer  a:active {
 	text-decoration: underline;
 }
 
 /* 文本样式 */
-#render-container  b,
-#render-container  strong {
+.lovpen-renderer  b,
+.lovpen-renderer  strong {
 	font-weight: bold;
 	color: var(--strong-color);
 	transition: color 0.3s ease;
 }
 
-#render-container  i,
-#render-container  cite,
-#render-container  em,
-#render-container  var,
-#render-container  address,
-#render-container  dfn {
+.lovpen-renderer  i,
+.lovpen-renderer  cite,
+.lovpen-renderer  em,
+.lovpen-renderer  var,
+.lovpen-renderer  address,
+.lovpen-renderer  dfn {
 	font-style: italic;
 }
 
-#render-container  del,
-#render-container  s {
+.lovpen-renderer  del,
+.lovpen-renderer  s {
 	color: var(--text-tertiary);
 	transition: color 0.3s ease;
 }
 
 /* 代码样式 */
-#render-container  pre,
-#render-container  xmp,
-#render-container  plaintext,
-#render-container  listing,
-#render-container  code,
-#render-container  kbd,
-#render-container  tt,
-#render-container  samp {
+.lovpen-renderer  pre,
+.lovpen-renderer  xmp,
+.lovpen-renderer  plaintext,
+.lovpen-renderer  listing,
+.lovpen-renderer  code,
+.lovpen-renderer  kbd,
+.lovpen-renderer  tt,
+.lovpen-renderer  samp {
 	font-family: Menlo-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	display: inline;
 	color: var(--text-primary);
 	background-color: var(--code-bg);
@@ -229,7 +229,7 @@
 	transition: all 0.3s ease;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	border: solid 1px var(--border-color);
 	background-color: var(--code-bg);
@@ -238,12 +238,12 @@
 	transition: all 0.3s ease;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	overflow-x: auto;
 }
 
-#render-container  .code-section code {
+.lovpen-renderer  .code-section code {
 	display: block;
 	padding: 0.9em;
 	font-size: 0.9em;
@@ -253,7 +253,7 @@
 }
 
 /* 高亮样式 */
-#render-container  mark {
+.lovpen-renderer  mark {
 	color: var(--text-primary);
 	display: inline;
 	padding: 0.2em 0.5em;
@@ -263,7 +263,7 @@
 }
 
 /* 表格样式 */
-#render-container  table {
+.lovpen-renderer  table {
 	color: var(--text-secondary);
 	border-collapse: collapse;
 	background-color: var(--background-secondary);
@@ -275,22 +275,22 @@
 	transition: all 0.3s ease;
 }
 
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	padding: 0.7em 1em;
 	font-size: 0.9em;
 	border: 1px solid var(--border-color);
 	transition: border-color 0.3s ease;
 }
 
-#render-container  th {
+.lovpen-renderer  th {
 	background-color: var(--mark-bg);
 	color: var(--text-primary);
 	font-weight: bold;
 }
 
 /* 下划线样式 */
-#render-container  u {
+.lovpen-renderer  u {
 	text-decoration: none;
 	background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, var(--primary-color) 50%);
 	background-repeat: repeat-x;
@@ -299,19 +299,19 @@
 }
 
 /* 特定于手工川主题的扩展样式 */
-#render-container  .highlight {
+.lovpen-renderer  .highlight {
 	color: var(--primary-color);
 	transition: color 0.3s ease;
 }
 
-#render-container  .important {
+.lovpen-renderer  .important {
 	border-left: 3px solid var(--primary-color);
 	padding-left: 1em;
 	margin: 1em 0;
 	transition: border-color 0.3s ease;
 }
 
-#render-container  .note {
+.lovpen-renderer  .note {
 	background-color: var(--mark-bg);
 	border: 1px solid var(--primary-color);
 	border-radius: 8px;
@@ -320,7 +320,7 @@
 	transition: all 0.3s ease;
 }
 
-#render-container  .tip {
+.lovpen-renderer  .tip {
 	border-left: 4px solid var(--primary-color);
 	padding-left: 16px;
 	margin: 1em 0;

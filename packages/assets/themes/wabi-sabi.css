@@ -3,11 +3,11 @@
  * 追求不完美之美、朴素自然、时间沉淀的韵味
  * 体现物哀、寂、佗的日式美学概念
  * 
- * 注意：所有样式只作用于 #render-container 内部，不影响工具栏
+ * 注意：所有样式只作用于 .lovpen-renderer 内部，不影响工具栏
  */
 
 /* 根色彩变量 - 取自日式传统色谱 */
-#render-container {
+.lovpen-renderer {
 	/* 主色调：墨染(sumizome) - 温润的深灰 */
 	--primary-color: #333f48;
 	
@@ -70,7 +70,7 @@
 
 /* 深色模式：夜晚的静谧与沉思 */
 @media (prefers-color-scheme: dark) {
-	#render-container {
+	.lovpen-renderer {
 		--primary-color: #4a5a6a;
 		
 		--text-primary: #e8e6e3;      /* 月白色(geppaku) */
@@ -103,7 +103,7 @@
 }
 
 /* 基础容器：营造沉浸式的阅读氛围 - 只作用于渲染容器 */
-#render-container  {
+.lovpen-renderer  {
 	font-family: var(--font-family-main);
 	font-size: var(--font-size-base);
 	color: var(--text-secondary);
@@ -124,36 +124,36 @@
 }
 
 /* 基础元素优化：确保每个元素都有呼吸感 */
-#render-container  * {
+.lovpen-renderer  * {
 	box-sizing: border-box;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
 
-#render-container  > *:first-child {
+.lovpen-renderer  > *:first-child {
 	margin-top: 0 !important;
 }
 
-#render-container  > *:last-child {
+.lovpen-renderer  > *:last-child {
 	margin-bottom: 0 !important;
 }
 
 /* 段落：自然的不均匀间距，模拟手工排版 */
-#render-container  p,
-#render-container  pre,
-#render-container  dl,
-#render-container  form,
-#render-container  details,
-#render-container  blockquote,
-#render-container  table,
-#render-container  figure {
+.lovpen-renderer  p,
+.lovpen-renderer  pre,
+.lovpen-renderer  dl,
+.lovpen-renderer  form,
+.lovpen-renderer  details,
+.lovpen-renderer  blockquote,
+.lovpen-renderer  table,
+.lovpen-renderer  figure {
 	margin: 1.2em 0 0.8em;
 	text-align: justify;
 	text-justify: inter-ideograph;
 }
 
 /* 分割线：如水墨画中的留白 */
-#render-container  hr {
+.lovpen-renderer  hr {
 	margin: 2.5em auto;
 	height: 1px;
 	border: 0;
@@ -166,12 +166,12 @@
 }
 
 /* 标题：层次分明而不张扬 */
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	font-family: var(--font-family-sans);
 	font-weight: 500;
 	line-height: var(--line-height-tight);
@@ -186,32 +186,32 @@
 	position: relative;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 1.8em;
 	margin-top: 1.5em;
 	padding-left: 0.1em; /* 微妙的缩进变化 */
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: 1.5em;
 	padding-left: 0.05em;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 1.25em;
 	padding-left: 0.15em;
 }
 
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	font-size: 1.1em;
 	color: var(--accent-warm);
 	padding-left: 0.2em;
 }
 
 /* 为h2添加传统的装饰线 */
-#render-container  h2::before {
+.lovpen-renderer  h2::before {
 	content: '';
 	position: absolute;
 	left: -0.5em;
@@ -224,25 +224,25 @@
 }
 
 /* 段落：自然的文字流动 */
-#render-container  p {
+.lovpen-renderer  p {
 	text-indent: 2em; /* 传统的段落首行缩进 */
 	margin-left: 0;
 	margin-right: 0;
 }
 
 /* 首段不缩进 */
-#render-container  h1 + p,
-#render-container  h2 + p,
-#render-container  h3 + p,
-#render-container  h4 + p,
-#render-container  h5 + p,
-#render-container  h6 + p,
-#render-container  > p:first-child {
+.lovpen-renderer  h1 + p,
+.lovpen-renderer  h2 + p,
+.lovpen-renderer  h3 + p,
+.lovpen-renderer  h4 + p,
+.lovpen-renderer  h5 + p,
+.lovpen-renderer  h6 + p,
+.lovpen-renderer  > p:first-child {
 	text-indent: 0;
 }
 
 /* 引用块：如古籍中的注释 */
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	position: relative;
 	padding: 1.2em 1.5em 1.2em 2em;
 	margin: 1.5em 0;
@@ -255,7 +255,7 @@
 	transition: var(--transition-smooth);
 }
 
-#render-container  blockquote::before {
+.lovpen-renderer  blockquote::before {
 	content: '"';
 	position: absolute;
 	left: 0.5em;
@@ -266,27 +266,27 @@
 	font-family: var(--font-family-sans);
 }
 
-#render-container  blockquote > :first-child {
+.lovpen-renderer  blockquote > :first-child {
 	margin-top: 0;
 }
 
-#render-container  blockquote > :last-child {
+.lovpen-renderer  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
 /* 列表：有机的排列方式 */
-#render-container  ul {
+.lovpen-renderer  ul {
 	padding-left: 1.8em;
 	list-style: none;
 }
 
-#render-container  ul li {
+.lovpen-renderer  ul li {
 	position: relative;
 	margin: 0.5em 0;
 	padding-left: 0.5em;
 }
 
-#render-container  ul li::before {
+.lovpen-renderer  ul li::before {
 	content: '◦'; /* 使用更柔和的圆点 */
 	position: absolute;
 	left: -1em;
@@ -296,19 +296,19 @@
 	top: 0.1em;
 }
 
-#render-container  ol {
+.lovpen-renderer  ol {
 	padding-left: 1.8em;
 	counter-reset: list-counter;
 }
 
-#render-container  ol li {
+.lovpen-renderer  ol li {
 	position: relative;
 	margin: 0.5em 0;
 	padding-left: 0.5em;
 	counter-increment: list-counter;
 }
 
-#render-container  ol li::before {
+.lovpen-renderer  ol li::before {
 	content: counter(list-counter) '.';
 	position: absolute;
 	left: -1.5em;
@@ -318,13 +318,13 @@
 	text-align: right;
 }
 
-#render-container  li > p {
+.lovpen-renderer  li > p {
 	margin: 0.3em 0;
 	text-indent: 0;
 }
 
 /* 链接：温润而内敛的交互 */
-#render-container  a {
+.lovpen-renderer  a {
 	color: var(--link-color);
 	text-decoration: none;
 	border-bottom: 1px solid transparent;
@@ -332,7 +332,7 @@
 	position: relative;
 }
 
-#render-container  a::after {
+.lovpen-renderer  a::after {
 	content: '';
 	position: absolute;
 	bottom: -1px;
@@ -343,52 +343,52 @@
 	transition: width 0.3s ease-out;
 }
 
-#render-container  a:hover::after,
-#render-container  a:focus::after {
+.lovpen-renderer  a:hover::after,
+.lovpen-renderer  a:focus::after {
 	width: 100%;
 }
 
-#render-container  a:hover,
-#render-container  a:focus {
+.lovpen-renderer  a:hover,
+.lovpen-renderer  a:focus {
 	color: var(--accent-warm);
 }
 
 /* 文本强调：自然的层次感 */
-#render-container  b,
-#render-container  strong {
+.lovpen-renderer  b,
+.lovpen-renderer  strong {
 	font-weight: 600;
 	color: var(--text-primary);
 	letter-spacing: var(--letter-spacing-base);
 }
 
-#render-container  i,
-#render-container  cite,
-#render-container  em,
-#render-container  var,
-#render-container  address,
-#render-container  dfn {
+.lovpen-renderer  i,
+.lovpen-renderer  cite,
+.lovpen-renderer  em,
+.lovpen-renderer  var,
+.lovpen-renderer  address,
+.lovpen-renderer  dfn {
 	font-style: italic;
 	color: var(--accent-earth);
 }
 
-#render-container  del,
-#render-container  s {
+.lovpen-renderer  del,
+.lovpen-renderer  s {
 	color: var(--text-quaternary);
 	text-decoration: line-through;
 	opacity: 0.7;
 }
 
 /* 代码：如墨香般的等宽字体 */
-#render-container  pre,
-#render-container  code,
-#render-container  kbd,
-#render-container  tt,
-#render-container  samp {
+.lovpen-renderer  pre,
+.lovpen-renderer  code,
+.lovpen-renderer  kbd,
+.lovpen-renderer  tt,
+.lovpen-renderer  samp {
 	font-family: var(--font-family-mono);
 	font-size: 0.9em;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	display: inline;
 	color: var(--text-primary);
 	background-color: var(--code-bg);
@@ -398,7 +398,7 @@
 	transition: var(--transition-smooth);
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: block;
 	background-color: var(--background-tertiary);
 	border: 1px solid var(--border-secondary);
@@ -409,18 +409,18 @@
 	transition: var(--transition-smooth);
 }
 
-#render-container  .code-section:hover {
+.lovpen-renderer  .code-section:hover {
 	box-shadow: var(--shadow-medium);
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	overflow-x: auto;
 	scrollbar-width: thin;
 	scrollbar-color: var(--border-accent) transparent;
 }
 
-#render-container  .code-section code {
+.lovpen-renderer  .code-section code {
 	display: block;
 	padding: 1.2em 1.5em;
 	font-size: 0.85em;
@@ -432,7 +432,7 @@
 }
 
 /* 高亮标记：如传统的朱批 */
-#render-container  mark {
+.lovpen-renderer  mark {
 	color: var(--text-primary);
 	background: linear-gradient(120deg, var(--mark-bg) 0%, var(--mark-bg) 100%);
 	background-repeat: no-repeat;
@@ -443,13 +443,13 @@
 	transition: var(--transition-smooth);
 }
 
-#render-container  mark:hover {
+.lovpen-renderer  mark:hover {
 	background-size: 100% 1.2em;
 	background-position: 0 0;
 }
 
 /* 表格：简洁而功能性的设计 */
-#render-container  table {
+.lovpen-renderer  table {
 	width: 100%;
 	border-collapse: separate;
 	border-spacing: 0;
@@ -462,15 +462,15 @@
 	transition: var(--transition-smooth);
 }
 
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	padding: 0.8em 1.2em;
 	text-align: left;
 	border-bottom: 1px solid var(--border-primary);
 	transition: var(--transition-smooth);
 }
 
-#render-container  th {
+.lovpen-renderer  th {
 	background-color: var(--background-accent);
 	color: var(--text-primary);
 	font-weight: 500;
@@ -478,21 +478,21 @@
 	position: relative;
 }
 
-#render-container  td {
+.lovpen-renderer  td {
 	color: var(--text-secondary);
 }
 
-#render-container  tr:last-child th,
-#render-container  tr:last-child td {
+.lovpen-renderer  tr:last-child th,
+.lovpen-renderer  tr:last-child td {
 	border-bottom: none;
 }
 
-#render-container  tr:hover td {
+.lovpen-renderer  tr:hover td {
 	background-color: var(--background-tertiary);
 }
 
 /* 下划线：传统书法的韵味 */
-#render-container  u {
+.lovpen-renderer  u {
 	text-decoration: none;
 	background-image: linear-gradient(to right, 
 		transparent 0%, 
@@ -506,7 +506,7 @@
 }
 
 /* 特殊元素：侘寂美学的体现 */
-#render-container  .wabi-sabi-accent {
+.lovpen-renderer  .wabi-sabi-accent {
 	position: relative;
 	padding: 1em 1.5em;
 	margin: 1.5em 0;
@@ -518,7 +518,7 @@
 	transition: var(--transition-smooth);
 }
 
-#render-container  .wabi-sabi-accent::before {
+.lovpen-renderer  .wabi-sabi-accent::before {
 	content: '';
 	position: absolute;
 	top: -2px;
@@ -533,49 +533,49 @@
 
 /* 响应式设计：保持在不同设备上的和谐 */
 @media (max-width: 768px) {
-	#render-container  {
+	.lovpen-renderer  {
 		padding: 1.5em 1em;
 		font-size: 15px;
 	}
 	
-	#render-container  h1 {
+	.lovpen-renderer  h1 {
 		font-size: 1.6em;
 	}
 	
-	#render-container  h2 {
+	.lovpen-renderer  h2 {
 		font-size: 1.4em;
 	}
 	
-	#render-container  .code-section code {
+	.lovpen-renderer  .code-section code {
 		padding: 1em;
 		font-size: 0.8em;
 	}
 	
-	#render-container  table {
+	.lovpen-renderer  table {
 		font-size: 0.9em;
 	}
 	
-	#render-container  th,
-	#render-container  td {
+	.lovpen-renderer  th,
+	.lovpen-renderer  td {
 		padding: 0.6em 0.8em;
 	}
 }
 
 /* 打印样式：保持纸质媒体的美感 */
 @media print {
-	#render-container  {
+	.lovpen-renderer  {
 		background: white;
 		color: black;
 		box-shadow: none;
 		padding: 0;
 	}
 	
-	#render-container  a {
+	.lovpen-renderer  a {
 		color: black;
 		text-decoration: underline;
 	}
 	
-	#render-container  .code-section {
+	.lovpen-renderer  .code-section {
 		border: 1px solid #ccc;
 		box-shadow: none;
 	}

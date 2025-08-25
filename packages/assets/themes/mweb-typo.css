@@ -1,5 +1,5 @@
 /* MWeb：增大字体，便于阅读 */
-#render-container  {
+.lovpen-renderer  {
 	font-size: 16px;
 	min-width: 200px;
 	max-width: 760px;
@@ -46,82 +46,82 @@
 	/* 代码片断 */
 }
 
-#render-container  dl,
-#render-container  dt,
-#render-container  dd,
-#render-container  ul,
-#render-container  ol,
-#render-container  li,
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6,
-#render-container  pre,
-#render-container  code,
-#render-container  form,
-#render-container  fieldset,
-#render-container  legend,
-#render-container  input,
-#render-container  textarea,
-#render-container  p,
-#render-container  blockquote,
-#render-container  th,
-#render-container  td,
-#render-container  hr,
-#render-container  button,
-#render-container  article,
-#render-container  aside,
-#render-container  details,
-#render-container  figcaption,
-#render-container  figure,
-#render-container  footer,
-#render-container  header,
-#render-container  menu,
-#render-container  nav,
-#render-container  section {
+.lovpen-renderer  dl,
+.lovpen-renderer  dt,
+.lovpen-renderer  dd,
+.lovpen-renderer  ul,
+.lovpen-renderer  ol,
+.lovpen-renderer  li,
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6,
+.lovpen-renderer  pre,
+.lovpen-renderer  code,
+.lovpen-renderer  form,
+.lovpen-renderer  fieldset,
+.lovpen-renderer  legend,
+.lovpen-renderer  input,
+.lovpen-renderer  textarea,
+.lovpen-renderer  p,
+.lovpen-renderer  blockquote,
+.lovpen-renderer  th,
+.lovpen-renderer  td,
+.lovpen-renderer  hr,
+.lovpen-renderer  button,
+.lovpen-renderer  article,
+.lovpen-renderer  aside,
+.lovpen-renderer  details,
+.lovpen-renderer  figcaption,
+.lovpen-renderer  figure,
+.lovpen-renderer  footer,
+.lovpen-renderer  header,
+.lovpen-renderer  menu,
+.lovpen-renderer  nav,
+.lovpen-renderer  section {
 	margin: 0;
 	padding: 0;
 }
 
-#render-container  article,
-#render-container  aside,
-#render-container  details,
-#render-container  figcaption,
-#render-container  figure,
-#render-container  footer,
-#render-container  header,
-#render-container  menu,
-#render-container  nav,
-#render-container  section {
+.lovpen-renderer  article,
+.lovpen-renderer  aside,
+.lovpen-renderer  details,
+.lovpen-renderer  figcaption,
+.lovpen-renderer  figure,
+.lovpen-renderer  footer,
+.lovpen-renderer  header,
+.lovpen-renderer  menu,
+.lovpen-renderer  nav,
+.lovpen-renderer  section {
 	display: block;
 }
 
-#render-container  audio,
-#render-container  canvas,
-#render-container  video {
+.lovpen-renderer  audio,
+.lovpen-renderer  canvas,
+.lovpen-renderer  video {
 	display: inline-block;
 }
 
-#render-container  button,
-#render-container  input,
-#render-container  select,
-#render-container  textarea {
+.lovpen-renderer  button,
+.lovpen-renderer  input,
+.lovpen-renderer  select,
+.lovpen-renderer  textarea {
 	font: 300 1em/1.8 PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
 
-#render-container  fieldset,
-#render-container  img {
+.lovpen-renderer  fieldset,
+.lovpen-renderer  img {
 	border: 0;
 }
 
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	position: relative;
 	color: #999;
 	font-weight: 400;
@@ -131,309 +131,309 @@
 }
 
 @media only screen and (max-width: 1080px) {
-	#render-container  blockquote {
+	.lovpen-renderer  blockquote {
 		margin: 1em 0;
 	}
 }
 
-#render-container  acronym,
-#render-container  abbr {
+.lovpen-renderer  acronym,
+.lovpen-renderer  abbr {
 	border-bottom: 1px dotted;
 	font-variant: normal;
 	text-decoration: none;
 }
 
-#render-container  abbr {
+.lovpen-renderer  abbr {
 	cursor: help;
 }
 
-#render-container  del {
+.lovpen-renderer  del {
 	text-decoration: line-through;
 }
 
-#render-container  address,
-#render-container  caption,
-#render-container  cite,
-#render-container  code,
-#render-container  dfn,
-#render-container  em,
-#render-container  th,
-#render-container  var {
+.lovpen-renderer  address,
+.lovpen-renderer  caption,
+.lovpen-renderer  cite,
+.lovpen-renderer  code,
+.lovpen-renderer  dfn,
+.lovpen-renderer  em,
+.lovpen-renderer  th,
+.lovpen-renderer  var {
 	font-style: normal;
 	font-weight: 400;
 }
 
-#render-container  ul,
-#render-container  ol {
+.lovpen-renderer  ul,
+.lovpen-renderer  ol {
 	list-style: none;
 }
 
-#render-container  caption,
-#render-container  th {
+.lovpen-renderer  caption,
+.lovpen-renderer  th {
 	text-align: left;
 }
 
-#render-container  q:before,
-#render-container  q:after {
+.lovpen-renderer  q:before,
+.lovpen-renderer  q:after {
 	content: "";
 }
 
-#render-container  sub,
-#render-container  sup {
+.lovpen-renderer  sub,
+.lovpen-renderer  sup {
 	font-size: 75%;
 	line-height: 0;
 	position: relative;
 }
 
-#render-container  sub,
-#render-container  sup {
+.lovpen-renderer  sub,
+.lovpen-renderer  sup {
 	vertical-align: baseline;
 	/* for ie9 and other modern browsers */
 }
 
-#render-container  sup {
+.lovpen-renderer  sup {
 	top: -0.5em;
 }
 
-#render-container  sub {
+.lovpen-renderer  sub {
 	bottom: -0.25em;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	color: #1abc9c;
 }
 
-#render-container  a:hover {
+.lovpen-renderer  a:hover {
 	text-decoration: underline;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	border-bottom: 1px solid #1abc9c;
 }
 
-#render-container  a:hover {
+.lovpen-renderer  a:hover {
 	border-bottom-color: #555;
 	color: #555;
 	text-decoration: none;
 }
 
-#render-container  ins,
-#render-container  a {
+.lovpen-renderer  ins,
+.lovpen-renderer  a {
 	text-decoration: none;
 }
 
-#render-container  u,
-#render-container  .typo-u {
+.lovpen-renderer  u,
+.lovpen-renderer  .typo-u {
 	text-decoration: underline;
 }
 
-#render-container  mark {
+.lovpen-renderer  mark {
 	background: #fffdd1;
 	border-bottom: 1px solid #ffedce;
 	padding: 2px;
 	/* margin: 0 5px; */
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border: none;
 	border-bottom: 1px solid #cfcfcf;
 	margin-bottom: 0.8em;
 	height: 10px;
 }
 
-#render-container  small,
-#render-container  .typo-small,
-#render-container  figcaption {
+.lovpen-renderer  small,
+.lovpen-renderer  .typo-small,
+.lovpen-renderer  figcaption {
 	font-size: 0.9em;
 	color: #888;
 }
 
-#render-container  strong,
-#render-container  b {
+.lovpen-renderer  strong,
+.lovpen-renderer  b {
 	font-weight: bold;
 	color: #000;
 }
 
-#render-container  [draggable] {
+.lovpen-renderer  [draggable] {
 	cursor: move;
 }
 
-#render-container  .clearfix:before,
-#render-container  .clearfix:after {
+.lovpen-renderer  .clearfix:before,
+.lovpen-renderer  .clearfix:after {
 	content: "";
 	display: table;
 }
 
-#render-container  .clearfix:after {
+.lovpen-renderer  .clearfix:after {
 	clear: both;
 }
 
-#render-container  .clearfix {
+.lovpen-renderer  .clearfix {
 	zoom: 1;
 }
 
-#render-container  .textwrap,
-#render-container  .textwrap td,
-#render-container  .textwrap th {
+.lovpen-renderer  .textwrap,
+.lovpen-renderer  .textwrap td,
+.lovpen-renderer  .textwrap th {
 	word-wrap: break-word;
 	word-break: break-all;
 }
 
-#render-container  .textwrap-table {
+.lovpen-renderer  .textwrap-table {
 	table-layout: fixed;
 }
 
-#render-container  .serif {
+.lovpen-renderer  .serif {
 	font-family: Palatino, Optima, Georgia, serif;
 }
 
-#render-container  p,
-#render-container  pre,
-#render-container  ul,
-#render-container  ol,
-#render-container  dl,
-#render-container  form,
-#render-container  hr,
-#render-container  table,
-#render-container  .typo-p,
-#render-container  .typo-pre,
-#render-container  .typo-ul,
-#render-container  .typo-ol,
-#render-container  .typo-dl,
-#render-container  .typo-form,
-#render-container  .typo-hr,
-#render-container  .typo-table,
-#render-container  blockquote {
+.lovpen-renderer  p,
+.lovpen-renderer  pre,
+.lovpen-renderer  ul,
+.lovpen-renderer  ol,
+.lovpen-renderer  dl,
+.lovpen-renderer  form,
+.lovpen-renderer  hr,
+.lovpen-renderer  table,
+.lovpen-renderer  .typo-p,
+.lovpen-renderer  .typo-pre,
+.lovpen-renderer  .typo-ul,
+.lovpen-renderer  .typo-ol,
+.lovpen-renderer  .typo-dl,
+.lovpen-renderer  .typo-form,
+.lovpen-renderer  .typo-hr,
+.lovpen-renderer  .typo-table,
+.lovpen-renderer  blockquote {
 	margin-bottom: 1.2em;
 }
 
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	font-family: PingFang SC, Verdana, Helvetica Neue, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif;
 	font-weight: lighter;
 	color: #000;
 	line-height: 1.35;
 }
 
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6,
-#render-container  .typo-h1,
-#render-container  .typo-h2,
-#render-container  .typo-h3,
-#render-container  .typo-h4,
-#render-container  .typo-h5,
-#render-container  .typo-h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6,
+.lovpen-renderer  .typo-h1,
+.lovpen-renderer  .typo-h2,
+.lovpen-renderer  .typo-h3,
+.lovpen-renderer  .typo-h4,
+.lovpen-renderer  .typo-h5,
+.lovpen-renderer  .typo-h6 {
 	margin-top: 1.2em;
 	margin-bottom: 0.6em;
 	line-height: 1.35;
 }
 
-#render-container  h1,
-#render-container  .typo-h1 {
+.lovpen-renderer  h1,
+.lovpen-renderer  .typo-h1 {
 	font-size: 2em;
 }
 
-#render-container  h2,
-#render-container  .typo-h2 {
+.lovpen-renderer  h2,
+.lovpen-renderer  .typo-h2 {
 	font-size: 1.8em;
 }
 
-#render-container  h3,
-#render-container  .typo-h3 {
+.lovpen-renderer  h3,
+.lovpen-renderer  .typo-h3 {
 	font-size: 1.6em;
 }
 
-#render-container  h4,
-#render-container  .typo-h4 {
+.lovpen-renderer  h4,
+.lovpen-renderer  .typo-h4 {
 	font-size: 1.4em;
 }
 
-#render-container  h5,
-#render-container  h6,
-#render-container  .typo-h5,
-#render-container  .typo-h6 {
+.lovpen-renderer  h5,
+.lovpen-renderer  h6,
+.lovpen-renderer  .typo-h5,
+.lovpen-renderer  .typo-h6 {
 	font-size: 1.2em;
 }
 
-#render-container  ul,
-#render-container  .typo-ul {
+.lovpen-renderer  ul,
+.lovpen-renderer  .typo-ul {
 	margin-left: 1.3em;
 	list-style: disc;
 }
 
-#render-container  ol,
-#render-container  .typo-ol {
+.lovpen-renderer  ol,
+.lovpen-renderer  .typo-ol {
 	list-style: decimal;
 	margin-left: 1.9em;
 }
 
-#render-container  li ul,
-#render-container  li ol,
-#render-container  .typo-ul ul,
-#render-container  .typo-ul ol,
-#render-container  .typo-ol ul,
-#render-container  .typo-ol ol {
+.lovpen-renderer  li ul,
+.lovpen-renderer  li ol,
+.lovpen-renderer  .typo-ul ul,
+.lovpen-renderer  .typo-ul ol,
+.lovpen-renderer  .typo-ol ul,
+.lovpen-renderer  .typo-ol ol {
 	margin-bottom: 0.8em;
 	margin-left: 2em;
 }
 
-#render-container  li ul,
-#render-container  .typo-ul ul,
-#render-container  .typo-ol ul {
+.lovpen-renderer  li ul,
+.lovpen-renderer  .typo-ul ul,
+.lovpen-renderer  .typo-ol ul {
 	list-style: circle;
 }
 
-#render-container  table th,
-#render-container  table td,
-#render-container  .typo-table th,
-#render-container  .typo-table td,
-#render-container  table caption {
+.lovpen-renderer  table th,
+.lovpen-renderer  table td,
+.lovpen-renderer  .typo-table th,
+.lovpen-renderer  .typo-table td,
+.lovpen-renderer  table caption {
 	border: 1px solid #ddd;
 	padding: 0.5em 1em;
 	color: #666;
 }
 
-#render-container  table th,
-#render-container  .typo-table th {
+.lovpen-renderer  table th,
+.lovpen-renderer  .typo-table th {
 	background: #fbfbfb;
 }
 
-#render-container  table thead th,
-#render-container  .typo-table thead th {
+.lovpen-renderer  table thead th,
+.lovpen-renderer  .typo-table thead th {
 	background: #f1f1f1;
 }
 
-#render-container  table caption {
+.lovpen-renderer  table caption {
 	border-bottom: none;
 }
 
-#render-container  .typo-input,
-#render-container  .typo-textarea {
+.lovpen-renderer  .typo-input,
+.lovpen-renderer  .typo-textarea {
 	-webkit-appearance: none;
 	border-radius: 0;
 }
 
-#render-container  .typo-em,
-#render-container  em,
-#render-container  legend,
-#render-container  caption {
+.lovpen-renderer  .typo-em,
+.lovpen-renderer  em,
+.lovpen-renderer  legend,
+.lovpen-renderer  caption {
 	color: #000;
 	font-weight: inherit;
 }
 
-#render-container  .typo-em {
+.lovpen-renderer  .typo-em {
 	position: relative;
 }
 
-#render-container  .typo-em:after {
+.lovpen-renderer  .typo-em:after {
 	position: absolute;
 	top: 0.65em;
 	left: 0;
@@ -443,41 +443,41 @@
 	content: "・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・";
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-#render-container  pre,
-#render-container  code,
-#render-container  pre tt {
+.lovpen-renderer  pre,
+.lovpen-renderer  code,
+.lovpen-renderer  pre tt {
 	font-family: Courier, "Courier New", monospace;
 }
 
-#render-container  pre {
+.lovpen-renderer  pre {
 	padding: 1em 1.5em;
 	display: block;
 	-webkit-overflow-scrolling: touch;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	background: #f8f8f8;
 	border: 1px solid #ddd;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	display: block;
 	padding: 1em;
 	overflow-x: auto;
 }
 
-#render-container  .code-section pre code {
+.lovpen-renderer  .code-section pre code {
 	border: none;
 	background: #f8f8f8;
 	font-size: 1em;
@@ -487,7 +487,7 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -496,7 +496,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -510,6 +510,6 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }

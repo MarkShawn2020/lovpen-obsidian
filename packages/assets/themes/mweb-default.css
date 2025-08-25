@@ -17,10 +17,10 @@
  * 各个属性的默认值为 chrome 的默认样式，见 variables/default.scss。
  */
 /**
- * MWeb 包裹 markdown 的容器是 #render-container
+ * MWeb 包裹 markdown 的容器是 .lovpen-renderer
  * Typora 中是 #write
  */
-#render-container  {
+.lovpen-renderer  {
 	line-height: 1.6em;
 	-webkit-text-size-adjust: 100%;
 	margin: 0px 0px;
@@ -37,26 +37,26 @@
 	/* svg */
 }
 
-#render-container  * {
+.lovpen-renderer  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
-#render-container  > *:first-child {
+.lovpen-renderer  > *:first-child {
 	margin-top: 0 !important;
 }
 
-#render-container  > *:last-child {
+.lovpen-renderer  > *:last-child {
 	margin-top: 0 !important;
 }
 
-#render-container  p, #render-container  details, #render-container  dl, #render-container  ol, #render-container  ul, #render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing, #render-container  blockquote, #render-container  table, #render-container  figure, #render-container  hr {
+.lovpen-renderer  p, .lovpen-renderer  details, .lovpen-renderer  dl, .lovpen-renderer  ol, .lovpen-renderer  ul, .lovpen-renderer  pre, .lovpen-renderer  xmp, .lovpen-renderer  plaintext, .lovpen-renderer  listing, .lovpen-renderer  blockquote, .lovpen-renderer  table, .lovpen-renderer  figure, .lovpen-renderer  hr {
 	margin-top: 0.75em;
 	margin-bottom: 0.75em;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 2em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -65,7 +65,7 @@
 	margin-right: 0;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: 1.5em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -74,7 +74,7 @@
 	margin-right: 0;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 1.17em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -83,7 +83,7 @@
 	margin-right: 0;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: 1em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -92,7 +92,7 @@
 	margin-right: 0;
 }
 
-#render-container  h5 {
+.lovpen-renderer  h5 {
 	font-size: 0.83em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -101,7 +101,7 @@
 	margin-right: 0;
 }
 
-#render-container  h6 {
+.lovpen-renderer  h6 {
 	font-size: 0.67em;
 	font-weight: bold;
 	margin-top: 1.5em;
@@ -110,81 +110,81 @@
 	margin-right: 0;
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
-#render-container  pre, #render-container  xmp, #render-container  plaintext, #render-container  listing {
+.lovpen-renderer  pre, .lovpen-renderer  xmp, .lovpen-renderer  plaintext, .lovpen-renderer  listing {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-#render-container  blockquote > :first-child {
+.lovpen-renderer  blockquote > :first-child {
 	margin-top: 0;
 }
 
-#render-container  blockquote > :last-child {
+.lovpen-renderer  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-style: inset;
 	border-width: 1px;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 	height: auto;
 }
 
-#render-container  li {
+.lovpen-renderer  li {
 	word-wrap: break-all;
 }
 
-#render-container  li + li {
+.lovpen-renderer  li + li {
 	margin-top: 0.25em;
 }
 
-#render-container  ul ul, #render-container  ol ul, #render-container  ul ol, #render-container  ol ol {
+.lovpen-renderer  ul ul, .lovpen-renderer  ol ul, .lovpen-renderer  ul ol, .lovpen-renderer  ol ol {
 	margin-top: 0;
 	margin-bottom: 0;
 }
 
-#render-container  .task-list-item {
+.lovpen-renderer  .task-list-item {
 	list-style-type: none;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	color: -webkit-link;
 	text-decoration: underline;
 }
 
-#render-container  a img {
+.lovpen-renderer  a img {
 	border: none;
 }
 
-#render-container  b, #render-container  strong {
+.lovpen-renderer  b, .lovpen-renderer  strong {
 	font-weight: bold;
 }
 
-#render-container  i, #render-container  cite, #render-container  em, #render-container  var, #render-container  address, #render-container  dfn {
+.lovpen-renderer  i, .lovpen-renderer  cite, .lovpen-renderer  em, .lovpen-renderer  var, .lovpen-renderer  address, .lovpen-renderer  dfn {
 	font-style: italic;
 }
 
-#render-container  code, #render-container  kbd, #render-container  tt, #render-container  samp {
+.lovpen-renderer  code, .lovpen-renderer  kbd, .lovpen-renderer  tt, .lovpen-renderer  samp {
 	font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
 }
 
-#render-container  mark {
+.lovpen-renderer  mark {
 	padding: 0.2em 0;
 	background-color: yellow;
 }
 
-#render-container  del, #render-container  s {
+.lovpen-renderer  del, .lovpen-renderer  s {
 	color: inherit;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	color: black;
 	border-collapse: collapse;
 	background-color: white;
@@ -192,48 +192,48 @@
 	font-size: 1em;
 }
 
-#render-container  th, #render-container  td {
+.lovpen-renderer  th, .lovpen-renderer  td {
 	border-color: gray;
 	border-width: 1px;
 	border-style: solid;
 }
 
-#render-container  th {
+.lovpen-renderer  th {
 	padding: 4px 8px;
 	font-size: 1em;
 	font-weight: bold;
 }
 
-#render-container  td {
+.lovpen-renderer  td {
 	padding: 4px 8px;
 	font-size: 1em;
 	font-weight: normal;
 }
 
-#render-container  div[id^=mweb-chart-ele] svg {
+.lovpen-renderer  div[id^=mweb-chart-ele] svg {
 	background-color: white;
 }
 
-#render-container  .task-list-item + .task-list-item {
+.lovpen-renderer  .task-list-item + .task-list-item {
 	margin-top: 3px;
 }
 
-#render-container  .task-list-item input {
+.lovpen-renderer  .task-list-item input {
 	margin: 0.3em 0 0.25em -1.6em;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	border: 1px solid gray;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	padding: 0;
 	overflow-x: auto;
 }
 
-#render-container  .code-section pre code {
+.lovpen-renderer  .code-section pre code {
 	font-family: Consolas, ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
 	border: none;
 	font-size: 1em;
@@ -243,7 +243,7 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -252,7 +252,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -267,6 +267,6 @@
 	color: #ff502c;
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }

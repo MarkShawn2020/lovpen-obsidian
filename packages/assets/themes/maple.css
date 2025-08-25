@@ -1,7 +1,7 @@
 /* =========================================================== */
 /* 笔记样式 https://github.com/xbmlz/hexo-theme-maple            */
 /* =========================================================== */
-#render-container  {
+.lovpen-renderer  {
 	padding: 20px 20px;
 	user-select: text;
 	-webkit-user-select: text;
@@ -9,15 +9,15 @@
 	font-family: "Inter", Inter var, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
 
-#render-container :last-child {
+.lovpen-renderer :last-child {
 	margin-bottom: 0;
 }
 
-#render-container  .fancybox-img {
+.lovpen-renderer  .fancybox-img {
 	border: none;
 }
 
-#render-container  .fancybox-img:hover {
+.lovpen-renderer  .fancybox-img:hover {
 	opacity: none;
 	border: none;
 }
@@ -27,7 +27,7 @@
    Heading 
   ==================================
   */
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	color: #222;
 	font-weight: 800;
 	font-size: 2.25em;
@@ -36,7 +36,7 @@
 	line-height: 1.1111111;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	color: inherit;
 	font-weight: 700;
 	font-size: 1.5em;
@@ -45,7 +45,7 @@
 	line-height: 1.3333333;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	color: inherit;
 	font-weight: 600;
 	font-size: 1.25em;
@@ -54,7 +54,7 @@
 	line-height: 1.6;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	color: inherit;
 	font-weight: 600;
 	margin-top: 1.5em;
@@ -67,7 +67,7 @@
   Horizontal Rules
   ==================================
   */
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-color: rgba(125, 125, 125, 0.3);
 	margin-top: 3em;
 	margin-bottom: 3em;
@@ -78,7 +78,7 @@
   Paragraphs
   ==================================
   */
-#render-container  p {
+.lovpen-renderer  p {
 	margin: 1em 0;
 }
 
@@ -87,16 +87,16 @@
   Emphasis
   ==================================
   */
-#render-container  strong {
+.lovpen-renderer  strong {
 	color: #222;
 	font-weight: 600;
 }
 
-#render-container  em {
+.lovpen-renderer  em {
 	color: inherit;
 }
 
-#render-container  s {
+.lovpen-renderer  s {
 	color: inherit;
 }
 
@@ -105,7 +105,7 @@
   Blockquotes
   ==================================
   */
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	font-size: 1rem;
 	display: block;
 	margin: 1em 0;
@@ -115,11 +115,11 @@
 	border-left: 0.25rem solid rgba(125, 125, 125, 0.302);
 }
 
-#render-container  blockquote p {
+.lovpen-renderer  blockquote p {
 	margin: 0;
 }
 
-#render-container  blockquote footer strong {
+.lovpen-renderer  blockquote footer strong {
 	margin-right: 0.5em;
 }
 
@@ -128,26 +128,26 @@
   List
   ==================================
   */
-#render-container  ul {
+.lovpen-renderer  ul {
 	margin: 0;
 	/* padding: 0; */
 	margin-top: 1.25em;
 	margin-bottom: 1.25em;
 }
 
-#render-container  ul > li {
+.lovpen-renderer  ul > li {
 	position: relative;
 	/* padding-left: 1.75rem; */
 	margin-top: 0.5em;
 	margin-bottom: 0.5em;
 }
 
-#render-container  ul > li::marker {
+.lovpen-renderer  ul > li::marker {
 	color: #555;
 	/* font-size: 1.5em; */
 }
 
-#render-container  ol {
+.lovpen-renderer  ol {
 	margin: 0;
 	padding: 0;
 	margin-top: 1.25em;
@@ -155,7 +155,7 @@
 	list-style-type: decimal;
 }
 
-#render-container  ol > li {
+.lovpen-renderer  ol > li {
 	position: relative;
 	padding-left: 0.8em;
 	margin-left: 2em;
@@ -168,7 +168,7 @@
   Link
   ==================================
   */
-#render-container  a {
+.lovpen-renderer  a {
 	color: #000;
 	text-decoration: none;
 	font-weight: 500;
@@ -177,7 +177,7 @@
 	transition: border 0.3s ease-in-out;
 }
 
-#render-container  a:hover {
+.lovpen-renderer  a:hover {
 	border-bottom: 1px solid #555;
 }
 
@@ -186,7 +186,7 @@
   Table
   ==================================
   */
-#render-container  table {
+.lovpen-renderer  table {
 	width: 100%;
 	table-layout: auto;
 	text-align: left;
@@ -199,38 +199,38 @@
 	text-indent: 0;
 }
 
-#render-container  table thead {
+.lovpen-renderer  table thead {
 	color: #000;
 	font-weight: 600;
 	border-bottom-width: 1px;
 	border-bottom-color: #d1d5db;
 }
 
-#render-container  table thead th {
+.lovpen-renderer  table thead th {
 	vertical-align: bottom;
 	padding-right: 0.5714286em;
 	padding-bottom: 0.5714286em;
 	padding-left: 0.5714286em;
 }
 
-#render-container  table thead th:first-child {
+.lovpen-renderer  table thead th:first-child {
 	padding-left: 0;
 }
 
-#render-container  table thead th:last-child {
+.lovpen-renderer  table thead th:last-child {
 	padding-right: 0;
 }
 
-#render-container  table tbody tr {
+.lovpen-renderer  table tbody tr {
 	border-bottom-width: 1px;
 	border-bottom-color: #e5e7eb;
 }
 
-#render-container  table tbody tr:last-child {
+.lovpen-renderer  table tbody tr:last-child {
 	border-bottom-width: 0;
 }
 
-#render-container  table tbody td {
+.lovpen-renderer  table tbody td {
 	vertical-align: top;
 	padding-top: 0.5714286em;
 	padding-right: 0.5714286em;
@@ -238,11 +238,11 @@
 	padding-left: 0.5714286em;
 }
 
-#render-container  table tbody td:first-child {
+.lovpen-renderer  table tbody td:first-child {
 	padding-left: 0;
 }
 
-#render-container  table tbody td:last-child {
+.lovpen-renderer  table tbody td:last-child {
 	padding-right: 0;
 }
 
@@ -251,12 +251,12 @@
   Images
   ==================================
   */
-#render-container  img {
+.lovpen-renderer  img {
 	margin-top: 2em;
 	margin-bottom: 2em;
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
@@ -266,13 +266,13 @@
   Code
   ==================================
   */
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	background-color: rgb(250, 250, 250);
 	border: rgb(240, 240, 240) 1px solid;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -281,7 +281,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	font-family: Consolas, ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
 	position: relative;
 	margin: 0;
@@ -295,12 +295,12 @@
 	color: rgba(0, 0, 0, 0.25);
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	padding: 0;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	line-height: 1.75em;
 	font-family: Consolas, ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
 	color: #333;
@@ -310,6 +310,6 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section pre code {
+.lovpen-renderer  .code-section pre code {
 	display: block;
 }

@@ -1,4 +1,4 @@
-#render-container  {
+.lovpen-renderer  {
 	color: #595959;
 	font-size: 15px;
 	font-family: -apple-system, system-ui, BlinkMacSystemFont, Helvetica Neue, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
@@ -25,37 +25,37 @@
 	/* 代码 */
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	color: #595959;
 	font-size: 15px;
 	line-height: 2;
 	font-weight: 400;
 }
 
-#render-container  p + p {
+.lovpen-renderer  p + p {
 	margin-top: 16px;
 }
 
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	padding: 30px 0;
 	margin: 0;
 	color: #135ce0;
 	font-weight: 600;
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	position: relative;
 	text-align: center;
 	font-size: 22px;
 	margin: 50px 0;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	position: relative;
 	font-size: 20px;
 	border-left: 4px solid;
@@ -63,100 +63,100 @@
 	margin: 30px 0;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 16px;
 }
 
-#render-container  ul {
+.lovpen-renderer  ul {
 	list-style: disc outside;
 	padding-left: 2em;
 	margin-top: 1em;
 }
 
-#render-container  li {
+.lovpen-renderer  li {
 	line-height: 2;
 	color: #595959;
 	margin-bottom: 0;
 	list-style: inherit;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 }
 
-#render-container  img.loaded {
+.lovpen-renderer  img.loaded {
 	margin: 0 auto;
 	display: block;
 }
 
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	background: #fff9f9;
 	margin: 2em 0;
 	padding: 2px 20px;
 	border-left: 4px solid #b2aec5;
 }
 
-#render-container  blockquote p {
+.lovpen-renderer  blockquote p {
 	color: #666;
 	line-height: 2;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	color: #036aca;
 	border-bottom: 1px solid rgba(3, 106, 202, 0.8);
 	font-weight: 400;
 	text-decoration: none;
 }
 
-#render-container  strong {
+.lovpen-renderer  strong {
 	color: #036aca;
 }
 
-#render-container  em strong {
+.lovpen-renderer  em strong {
 	color: #036aca;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	border-top: 1px solid #135ce0;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	border-collapse: collapse;
 	margin: 1rem 0;
 	overflow-x: auto;
 }
 
-#render-container  table th,
-#render-container  table td {
+.lovpen-renderer  table th,
+.lovpen-renderer  table td {
 	border: 1px solid #dfe2e5;
 	padding: 0.6em 1em;
 }
 
-#render-container  table tr {
+.lovpen-renderer  table tr {
 	border-top: 1px solid #dfe2e5;
 }
 
-#render-container  table tr:nth-child(2n) {
+.lovpen-renderer  table tr:nth-child(2n) {
 	background-color: #f6f8fa;
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-bottom: 0.5em;
 }
 
-#render-container  pre {
+.lovpen-renderer  pre {
 	overflow: auto;
 }
 
-#render-container  pre,
-#render-container  code {
+.lovpen-renderer  pre,
+.lovpen-renderer  code {
 	overflow: auto;
 	position: relative;
 	line-height: 1.75;
 	font-family: Menlo, Monaco, Consolas, Courier New, monospace;
 }
 
-#render-container  pre > code {
+.lovpen-renderer  pre > code {
 	/* font-size: 12px; */
 	padding: 15px 12px;
 	margin: 0;
@@ -167,7 +167,7 @@
 	background: #f8f8f8;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	word-break: break-word;
 	border-radius: 2px;
 	overflow-x: auto;
@@ -177,19 +177,19 @@
 	padding: 0.065em 0.4em;
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	background: #f8f8f8;
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	display: block;
 	padding: 1em;
 	overflow-x: auto;
 }
 
-#render-container  .code-section pre code {
+.lovpen-renderer  .code-section pre code {
 	border: none;
 	background: #f8f8f8;
 	font-size: 1em;
@@ -199,7 +199,7 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -208,7 +208,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -223,6 +223,6 @@
 	text-wrap: nowrap;
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }

@@ -2,10 +2,10 @@
  * Anthropic Style Theme
  * 基于微信公众号Claude风格的主题样式
  * 特点：温暖的橙红色主题，圆角设计，优雅的排版
- * 注意：所有样式都限制在 #render-container  容器内，避免影响工具栏
+ * 注意：所有样式都限制在 .lovpen-renderer  容器内，避免影响工具栏
  */
 
-#render-container  {
+.lovpen-renderer  {
 	/* === 主要颜色变量 === */
 	--primary-color: rgb(200, 100, 66); /* 主题色：温暖的橙红色 */
 	--primary-color-hover: rgb(180, 85, 50); /* 主题色悬停态 */
@@ -75,7 +75,7 @@
 }
 
 /* === 段落样式 === */
-#render-container  p {
+.lovpen-renderer  p {
 	margin: var(--spacing-md) var(--spacing-md);
 	text-align: justify;
 	line-height: var(--line-height-base);
@@ -90,12 +90,12 @@
 }
 
 /* === 标题样式 === */
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	font-family: var(--font-family);
 	font-weight: bold;
 	color: var(--text-primary);
@@ -105,7 +105,7 @@
 }
 
 /* H1 样式 */
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: var(--font-size-h1);
 	text-align: center;
 	margin: var(--spacing-xxl) auto var(--spacing-xl);
@@ -118,7 +118,7 @@
 }
 
 /* H2 样式 - 居中带背景 */
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: var(--font-size-h2);
 	text-align: center;
 	margin: var(--spacing-xxl) auto var(--spacing-xl);
@@ -131,7 +131,7 @@
 }
 
 /* H3 样式 - 左侧竖线边框 */
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: var(--font-size-h3);
 	border-left: 4px solid var(--primary-color);
 	border-bottom: 1px dashed var(--primary-color);
@@ -141,42 +141,42 @@
 }
 
 /* H4 样式 */
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: var(--font-size-h4);
 	color: var(--primary-color);
 	margin: var(--spacing-xl) var(--spacing-md) -var(--spacing-md);
 }
 
 /* H5, H6 样式 */
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	font-size: var(--font-size-base);
 	color: var(--primary-color);
 }
 
 /* === 强调文本样式 === */
-#render-container  strong,
-#render-container  b {
+.lovpen-renderer  strong,
+.lovpen-renderer  b {
 	font-weight: bold;
 	color: var(--primary-color);
 }
 
-#render-container  em,
-#render-container  i {
+.lovpen-renderer  em,
+.lovpen-renderer  i {
 	font-style: italic;
 	color: var(--primary-color);
 }
 
 /* 修复标题内加粗文字颜色冲突 */
-#render-container  h1 strong,
-#render-container  h1 b,
-#render-container  h2 strong,
-#render-container  h2 b {
+.lovpen-renderer  h1 strong,
+.lovpen-renderer  h1 b,
+.lovpen-renderer  h2 strong,
+.lovpen-renderer  h2 b {
 	color: var(--text-on-primary) !important;
 }
 
 /* === 图片样式 === */
-#render-container  img {
+.lovpen-renderer  img {
 	display: block;
 	max-width: 100%;
 	height: auto;
@@ -187,7 +187,7 @@
 }
 
 /* === 图片说明样式 === */
-#render-container  figcaption {
+.lovpen-renderer  figcaption {
 	text-align: center;
 	font-size: var(--font-size-small);
 	color: var(--text-tertiary);
@@ -196,8 +196,8 @@
 }
 
 /* === 列表样式 === */
-#render-container  ul,
-#render-container  ol {
+.lovpen-renderer  ul,
+.lovpen-renderer  ol {
 	margin: var(--spacing-lg) var(--spacing-md);
 	padding-left: var(--spacing-xl);
 	color: var(--text-primary);
@@ -208,7 +208,7 @@
 	overflow-wrap: break-word;
 }
 
-#render-container  li {
+.lovpen-renderer  li {
 	margin: var(--spacing-sm) 0;
 	line-height: var(--line-height-base);
 	/* 列表项也允许任意位置断词 */
@@ -217,7 +217,7 @@
 }
 
 /* === 引用样式 === */
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	margin: var(--spacing-lg) var(--spacing-md);
 	padding: var(--spacing-md);
 	background: var(--primary-color-light);
@@ -231,7 +231,7 @@
 }
 
 /* === 代码样式 === */
-#render-container  code {
+.lovpen-renderer  code {
 	background: var(--background-tertiary);
 	padding: var(--spacing-xs) var(--spacing-sm);
 	border-radius: var(--border-radius-sm);
@@ -244,7 +244,7 @@
 	overflow-wrap: break-word;
 }
 
-#render-container  pre {
+.lovpen-renderer  pre {
 	background: var(--background-tertiary);
 	padding: var(--spacing-md);
 	border-radius: var(--border-radius-md);
@@ -256,14 +256,14 @@
 	overflow-wrap: normal;
 }
 
-#render-container  pre code {
+.lovpen-renderer  pre code {
 	background: none;
 	padding: 0;
 	color: var(--text-primary);
 }
 
 /* === 表格样式 === */
-#render-container  table {
+.lovpen-renderer  table {
 	width: 100%;
 	border-collapse: separate;
 	border-spacing: 0;
@@ -275,15 +275,15 @@
 	border: 1px solid var(--border-color-light);
 }
 
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	padding: var(--spacing-md) var(--spacing-lg);
 	text-align: left;
 	border-bottom: 1px solid var(--border-color-light);
 	transition: all 0.2s ease;
 }
 
-#render-container  th {
+.lovpen-renderer  th {
 	background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-hover) 100%);
 	color: var(--text-on-primary);
 	font-weight: bold;
@@ -293,7 +293,7 @@
 	position: relative;
 }
 
-#render-container  th:not(:last-child)::after {
+.lovpen-renderer  th:not(:last-child)::after {
 	content: "";
 	position: absolute;
 	right: 0;
@@ -303,50 +303,50 @@
 	background: rgba(255, 255, 255, 0.2);
 }
 
-#render-container  tr:nth-child(even) td {
+.lovpen-renderer  tr:nth-child(even) td {
 	background: rgba(200, 100, 66, 0.03);
 }
 
-#render-container  tr:nth-child(odd) td {
+.lovpen-renderer  tr:nth-child(odd) td {
 	background: var(--background-secondary);
 }
 
-#render-container  tbody tr {
+.lovpen-renderer  tbody tr {
 	transition: all 0.2s ease;
 }
 
-#render-container  tbody tr:hover td {
+.lovpen-renderer  tbody tr:hover td {
 	background: var(--primary-color-light);
 	transform: scale(1.01);
 	box-shadow: 0 2px 8px rgba(200, 100, 66, 0.1);
 }
 
-#render-container  tbody tr:last-child td {
+.lovpen-renderer  tbody tr:last-child td {
 	border-bottom: none;
 }
 
-#render-container  td:first-child,
-#render-container  th:first-child {
+.lovpen-renderer  td:first-child,
+.lovpen-renderer  th:first-child {
 	padding-left: var(--spacing-xl);
 }
 
-#render-container  td:last-child,
-#render-container  th:last-child {
+.lovpen-renderer  td:last-child,
+.lovpen-renderer  th:last-child {
 	padding-right: var(--spacing-xl);
 }
 
 /* 表格内的链接样式 */
-#render-container  table a {
+.lovpen-renderer  table a {
 	color: var(--primary-color);
 	font-weight: 500;
 }
 
-#render-container  table a:hover {
+.lovpen-renderer  table a:hover {
 	color: var(--primary-color-hover);
 }
 
 /* 表格内的代码样式 */
-#render-container  table code {
+.lovpen-renderer  table code {
 	padding: 2px 6px;
 	font-size: 0.85em;
 	background: rgba(200, 100, 66, 0.08);
@@ -355,13 +355,13 @@
 /* === 移动端表格优化（公众号专用） === */
 @media (max-width: 768px) {
 	/* 表格容器优化 */
-	#render-container  .table-wrapper {
+	.lovpen-renderer  .table-wrapper {
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
 		margin: var(--spacing-md) 0;
 	}
 	
-	#render-container  table {
+	.lovpen-renderer  table {
 		font-size: 12px; /* 最小字号 */
 		margin: 0;
 		min-width: 100%;
@@ -371,8 +371,8 @@
 	}
 	
 	/* 紧凑的单元格 */
-	#render-container  th,
-	#render-container  td {
+	.lovpen-renderer  th,
+	.lovpen-renderer  td {
 		padding: 6px 8px; /* 大幅减少内边距 */
 		font-size: 12px;
 		line-height: 1.4;
@@ -382,7 +382,7 @@
 	}
 	
 	/* 简化表头样式 */
-	#render-container  th {
+	.lovpen-renderer  th {
 		background: var(--primary-color);
 		font-size: 11px;
 		letter-spacing: 0;
@@ -391,56 +391,56 @@
 	}
 	
 	/* 移除表头分隔线 */
-	#render-container  th:not(:last-child)::after {
+	.lovpen-renderer  th:not(:last-child)::after {
 		display: none;
 	}
 	
 	/* 减少首尾列内边距 */
-	#render-container  td:first-child,
-	#render-container  th:first-child {
+	.lovpen-renderer  td:first-child,
+	.lovpen-renderer  th:first-child {
 		padding-left: 8px;
 	}
 	
-	#render-container  td:last-child,
-	#render-container  th:last-child {
+	.lovpen-renderer  td:last-child,
+	.lovpen-renderer  th:last-child {
 		padding-right: 8px;
 	}
 	
 	/* 移除移动端的悬停效果 */
-	#render-container  tbody tr:hover td {
+	.lovpen-renderer  tbody tr:hover td {
 		background: inherit;
 		transform: none;
 		box-shadow: none;
 	}
 	
 	/* 简化行背景色 */
-	#render-container  tr:nth-child(even) td {
+	.lovpen-renderer  tr:nth-child(even) td {
 		background: rgba(200, 100, 66, 0.02);
 	}
 	
 	/* 表格内链接优化 */
-	#render-container  table a {
+	.lovpen-renderer  table a {
 		font-size: 12px;
 		font-weight: normal;
 		text-decoration: underline;
 	}
 	
 	/* 表格内代码优化 */
-	#render-container  table code {
+	.lovpen-renderer  table code {
 		padding: 1px 3px;
 		font-size: 11px;
 		background: rgba(200, 100, 66, 0.05);
 	}
 	
 	/* 允许特定列换行 */
-	#render-container  td:last-child {
+	.lovpen-renderer  td:last-child {
 		white-space: normal;
 		word-break: break-word;
 	}
 }
 
 /* === 链接样式 === */
-#render-container  a {
+.lovpen-renderer  a {
 	color: var(--primary-color);
 	text-decoration: none;
 	border-bottom: 1px solid transparent;
@@ -450,13 +450,13 @@
 	overflow-wrap: break-word;
 }
 
-#render-container  a:hover {
+.lovpen-renderer  a:hover {
 	color: var(--primary-color-hover);
 	border-bottom-color: var(--primary-color-hover);
 }
 
 /* === 分隔线样式 === */
-#render-container  hr {
+.lovpen-renderer  hr {
 	border: none;
 	height: 1px;
 	background: var(--border-color);
@@ -464,7 +464,7 @@
 }
 
 /* === 特殊容器样式 === */
-#render-container  .highlight-box {
+.lovpen-renderer  .highlight-box {
 	background: var(--primary-color-light);
 	border: 1px solid var(--primary-color);
 	border-radius: var(--border-radius-md);
@@ -475,7 +475,7 @@
 	overflow-wrap: break-word;
 }
 
-#render-container  .info-box {
+.lovpen-renderer  .info-box {
 	background: var(--background-secondary);
 	border-left: 4px solid var(--primary-color);
 	padding: var(--spacing-md);
@@ -488,29 +488,29 @@
 
 /* === 响应式设计 === */
 @media (max-width: 768px) {
-	#render-container  {
+	.lovpen-renderer  {
 		padding: var(--spacing-sm);
 	}
 
-	#render-container  p,
-	#render-container  ul,
-	#render-container  ol,
-	#render-container  blockquote {
+	.lovpen-renderer  p,
+	.lovpen-renderer  ul,
+	.lovpen-renderer  ol,
+	.lovpen-renderer  blockquote {
 		margin-left: var(--spacing-sm);
 		margin-right: var(--spacing-sm);
 	}
 
-	#render-container  h1,
-	#render-container  h2 {
+	.lovpen-renderer  h1,
+	.lovpen-renderer  h2 {
 		font-size: var(--font-size-large);
 		padding: var(--spacing-xs) var(--spacing-sm);
 	}
 
-	#render-container  h3 {
+	.lovpen-renderer  h3 {
 		margin-right: var(--spacing-sm);
 	}
 
-	#render-container  img {
+	.lovpen-renderer  img {
 		margin-left: var(--spacing-sm);
 		margin-right: var(--spacing-sm);
 	}
@@ -518,20 +518,20 @@
 
 /* === 打印样式 === */
 @media print {
-	#render-container  {
+	.lovpen-renderer  {
 		background: white !important;
 		box-shadow: none;
 	}
 
-	#render-container  h1,
-	#render-container  h2 {
+	.lovpen-renderer  h1,
+	.lovpen-renderer  h2 {
 		background: none !important;
 		color: var(--text-primary) !important;
 		box-shadow: none;
 		border: 2px solid var(--primary-color);
 	}
 
-	#render-container  img {
+	.lovpen-renderer  img {
 		box-shadow: none;
 		border: 1px solid var(--border-color);
 	}

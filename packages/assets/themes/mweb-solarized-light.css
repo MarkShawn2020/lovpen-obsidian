@@ -19,7 +19,7 @@
  * Bear 的默认样式表。通过调整各个颜色变量的取值，就可以得到不同的 bear 主题。
  * Bear 的配色方案位于 obsidian/themes/bear-palettes 目录下。
  */
-#render-container  {
+.lovpen-renderer  {
 	font-family: AvenirNext-Regular, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
 	font-size: 16px;
 	color: rgb(50, 62, 69);
@@ -31,7 +31,7 @@
 	/* 代码块 */
 }
 
-#render-container  * {
+.lovpen-renderer  * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
@@ -39,39 +39,39 @@
 	text-rendering: optimizeLegibility;
 }
 
-#render-container  > *:first-child {
+.lovpen-renderer  > *:first-child {
 	margin-top: 0 !important;
 }
 
-#render-container  > *:last-child {
+.lovpen-renderer  > *:last-child {
 	margin-top: 0 !important;
 }
 
-#render-container  p,
-#render-container  pre,
-#render-container  dl,
-#render-container  form,
-#render-container  details,
-#render-container  dl,
-#render-container  blockquote,
-#render-container  table,
-#render-container  xmp,
-#render-container  plaintext,
-#render-container  listing,
-#render-container  figure {
+.lovpen-renderer  p,
+.lovpen-renderer  pre,
+.lovpen-renderer  dl,
+.lovpen-renderer  form,
+.lovpen-renderer  details,
+.lovpen-renderer  dl,
+.lovpen-renderer  blockquote,
+.lovpen-renderer  table,
+.lovpen-renderer  xmp,
+.lovpen-renderer  plaintext,
+.lovpen-renderer  listing,
+.lovpen-renderer  figure {
 	margin: 0.75em 0 0.45em;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	margin: 0.75em auto;
 }
 
-#render-container  h1,
-#render-container  h2,
-#render-container  h3,
-#render-container  h4,
-#render-container  h5,
-#render-container  h6 {
+.lovpen-renderer  h1,
+.lovpen-renderer  h2,
+.lovpen-renderer  h3,
+.lovpen-renderer  h4,
+.lovpen-renderer  h5,
+.lovpen-renderer  h6 {
 	margin-top: 1.5em;
 	margin-bottom: 0.75em;
 	margin-left: 0;
@@ -82,31 +82,31 @@
 	color: rgb(59, 79, 84);
 }
 
-#render-container  h1 {
+.lovpen-renderer  h1 {
 	font-size: 1.5em;
 }
 
-#render-container  h2 {
+.lovpen-renderer  h2 {
 	font-size: 1.3em;
 }
 
-#render-container  h3 {
+.lovpen-renderer  h3 {
 	font-size: 1.1em;
 }
 
-#render-container  h4 {
+.lovpen-renderer  h4 {
 	font-size: 1em;
 }
 
-#render-container  h5 {
+.lovpen-renderer  h5 {
 	font-size: 1em;
 }
 
-#render-container  h6 {
+.lovpen-renderer  h6 {
 	font-size: 1em;
 }
 
-#render-container  hr {
+.lovpen-renderer  hr {
 	height: 1px;
 	border: 0;
 	background-color: rgba(147, 161, 161, 0.5);
@@ -114,74 +114,74 @@
 	border-width: 1px;
 }
 
-#render-container  p {
+.lovpen-renderer  p {
 	margin-left: 0;
 	margin-right: 0;
 }
 
-#render-container  pre,
-#render-container  pre[class*=language-] {
+.lovpen-renderer  pre,
+.lovpen-renderer  pre[class*=language-] {
 	padding: 0;
 	border: 0;
 }
 
-#render-container  blockquote {
+.lovpen-renderer  blockquote {
 	display: block;
 	padding-left: 0.8em;
 	border-left: 0.2em solid rgb(165, 104, 18);
 	color: rgb(50, 62, 69);
 }
 
-#render-container  blockquote > :first-child {
+.lovpen-renderer  blockquote > :first-child {
 	margin-top: 0;
 }
 
-#render-container  blockquote > :last-child {
+.lovpen-renderer  blockquote > :last-child {
 	margin-bottom: 0;
 }
 
-#render-container  li {
+.lovpen-renderer  li {
 	word-wrap: break-all;
 }
 
-#render-container  ul {
+.lovpen-renderer  ul {
 	padding-left: 1.3em;
 }
 
-#render-container  li::marker {
+.lovpen-renderer  li::marker {
 	color: rgb(165, 104, 18);
 }
 
-#render-container  li > p {
+.lovpen-renderer  li > p {
 	margin: 0;
 }
 
-#render-container  ol {
+.lovpen-renderer  ol {
 	padding-left: 1.3em;
 	list-style-type: decimal;
 }
 
-#render-container  .task-list-item {
+.lovpen-renderer  .task-list-item {
 	list-style-type: none;
 	text-indent: -1.5em;
 }
 
-#render-container  .task-list-item:before {
+.lovpen-renderer  .task-list-item:before {
 	content: "";
 	display: static;
 	margin-right: 0px;
 }
 
-#render-container  .task-list-item > input[type=checkbox] {
+.lovpen-renderer  .task-list-item > input[type=checkbox] {
 	text-indent: -1.7em;
 }
 
-#render-container  img {
+.lovpen-renderer  img {
 	max-width: 100%;
 	height: auto;
 }
 
-#render-container  u {
+.lovpen-renderer  u {
 	text-decoration: none;
 	background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgb(165, 104, 18) 50%);
 	background-repeat: repeat-x;
@@ -189,61 +189,61 @@
 	background-position: 0 1em;
 }
 
-#render-container  a {
+.lovpen-renderer  a {
 	color: rgb(172, 117, 20);
 	text-decoration: none;
 }
 
-#render-container  a:hover, #render-container  a:focus, #render-container  a:active {
+.lovpen-renderer  a:hover, .lovpen-renderer  a:focus, .lovpen-renderer  a:active {
 	text-decoration: underline;
 }
 
-#render-container  a img {
+.lovpen-renderer  a img {
 	border: none;
 }
 
-#render-container  b,
-#render-container  strong {
+.lovpen-renderer  b,
+.lovpen-renderer  strong {
 	font-weight: bold;
 }
 
-#render-container  i,
-#render-container  cite,
-#render-container  em,
-#render-container  var,
-#render-container  address,
-#render-container  dfn {
+.lovpen-renderer  i,
+.lovpen-renderer  cite,
+.lovpen-renderer  em,
+.lovpen-renderer  var,
+.lovpen-renderer  address,
+.lovpen-renderer  dfn {
 	font-style: italic;
 }
 
-#render-container  del,
-#render-container  s {
+.lovpen-renderer  del,
+.lovpen-renderer  s {
 	color: rgb(113, 127, 125);
 }
 
-#render-container  pre,
-#render-container  xmp,
-#render-container  plaintext,
-#render-container  listing,
-#render-container  code,
-#render-container  kbd,
-#render-container  tt,
-#render-container  samp {
+.lovpen-renderer  pre,
+.lovpen-renderer  xmp,
+.lovpen-renderer  plaintext,
+.lovpen-renderer  listing,
+.lovpen-renderer  code,
+.lovpen-renderer  kbd,
+.lovpen-renderer  tt,
+.lovpen-renderer  samp {
 	font-family: Menlo-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-#render-container  mark {
+.lovpen-renderer  mark {
 	color: inherit;
 	display: inline;
 	padding: 0.2em 0.5em;
 	background-color: rgb(202, 255, 147);
 }
 
-#render-container  figcaption {
+.lovpen-renderer  figcaption {
 	text-align: center;
 }
 
-#render-container  table {
+.lovpen-renderer  table {
 	color: rgb(101, 123, 131);
 	border-collapse: collapse;
 	background-color: rgb(252, 244, 220);
@@ -253,55 +253,55 @@
 	border-spacing: 0;
 }
 
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	padding: 0.7em 1em;
 	font-size: 0.9em;
 	border: 1px solid rgba(147, 161, 161, 0.5);
 }
 
-#render-container  caption,
-#render-container  th,
-#render-container  td {
+.lovpen-renderer  caption,
+.lovpen-renderer  th,
+.lovpen-renderer  td {
 	text-align: left;
 	font-weight: normal;
 	vertical-align: middle;
 }
 
-#render-container  div[id^=mweb-chart-ele] svg {
+.lovpen-renderer  div[id^=mweb-chart-ele] svg {
 	background-color: white;
 }
 
-#render-container  .footnotes > ol li {
+.lovpen-renderer  .footnotes > ol li {
 	text-indent: 0;
 }
 
-#render-container  .footnotes > ol li::before {
+.lovpen-renderer  .footnotes > ol li::before {
 	float: left;
 }
 
-#render-container  .footnotes hr {
+.lovpen-renderer  .footnotes hr {
 	margin-top: 4em;
 	margin-bottom: 0.5em;
 }
 
-#render-container  code {
+.lovpen-renderer  code {
 	display: inline;
 	color: rgb(101, 123, 131);
 }
 
-#render-container  .code-section {
+.lovpen-renderer  .code-section {
 	display: flex;
 	border: solid 1px rgba(147, 161, 161, 0.5);
 	background-color: rgb(252, 244, 220);
 }
 
-#render-container  .code-section pre {
+.lovpen-renderer  .code-section pre {
 	margin: 0;
 	overflow-x: auto;
 }
 
-#render-container  .code-section code {
+.lovpen-renderer  .code-section code {
 	display: block;
 	padding: 0.9em;
 	font-size: 0.9em;
@@ -310,7 +310,7 @@
 	background-color: rgb(252, 244, 220);
 }
 
-#render-container  .code-section ul {
+.lovpen-renderer  .code-section ul {
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
@@ -319,7 +319,7 @@
 	width: fit-content;
 }
 
-#render-container  .code-section ul > li {
+.lovpen-renderer  .code-section ul > li {
 	position: relative;
 	margin: 0;
 	padding: 0;
@@ -334,6 +334,6 @@
 	color: rgb(50, 62, 69);
 }
 
-#render-container  .code-section ul > li::marker {
+.lovpen-renderer  .code-section ul > li::marker {
 	content: none;
 }

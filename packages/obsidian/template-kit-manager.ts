@@ -144,7 +144,7 @@ export default class TemplateKitManager extends Component implements ITemplateKi
 			const styleConfig = kit.styleConfig;
 			setTimeout(() => {
 				// 清理所有可能的CSS变量和样式残留
-				const containers = document.querySelectorAll('.lovpen, #render-container, .wabi-sabi-container');
+				const containers = document.querySelectorAll('.lovpen, .lovpen-renderer, .wabi-sabi-container');
 				containers.forEach(container => {
 					if (container instanceof HTMLElement) {
 						// 清除所有可能的主题色变量

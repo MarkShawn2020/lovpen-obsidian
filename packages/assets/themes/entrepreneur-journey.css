@@ -4,7 +4,7 @@
  * 特点：单一模板中展现5个成长阶段的渐变过渡
  */
 
-#render-container {
+.lovpen-renderer {
 	/* === 基础变量设置 === */
 	--font-family: "SF Pro Display", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
 	--font-size-base: 16px;
@@ -316,42 +316,42 @@
 }
 
 /* === 通用元素样式 === */
-#render-container p {
+.lovpen-renderer p {
 	margin: var(--spacing-lg) 0;
 	text-align: justify;
 	opacity: 0.9;
 	transition: opacity 0.3s ease;
 }
 
-#render-container p:hover {
+.lovpen-renderer p:hover {
 	opacity: 1;
 }
 
-#render-container h1,
-#render-container h2,
-#render-container h3,
-#render-container h4,
-#render-container h5,
-#render-container h6 {
+.lovpen-renderer h1,
+.lovpen-renderer h2,
+.lovpen-renderer h3,
+.lovpen-renderer h4,
+.lovpen-renderer h5,
+.lovpen-renderer h6 {
 	font-weight: 600;
 	margin: var(--spacing-xl) 0 var(--spacing-md);
 	transition: all 0.3s ease;
 }
 
-#render-container h1 {
+.lovpen-renderer h1 {
 	font-size: 2.5em;
 	text-align: center;
 }
 
-#render-container h2 {
+.lovpen-renderer h2 {
 	font-size: 2em;
 }
 
-#render-container h3 {
+.lovpen-renderer h3 {
 	font-size: 1.5em;
 }
 
-#render-container blockquote {
+.lovpen-renderer blockquote {
 	margin: var(--spacing-xl) 0;
 	padding: var(--spacing-lg);
 	border-left: 4px solid;
@@ -360,7 +360,7 @@
 	position: relative;
 }
 
-#render-container code {
+.lovpen-renderer code {
 	font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
 	font-size: 0.9em;
 	padding: 2px 6px;
@@ -368,7 +368,7 @@
 	background: rgba(255, 255, 255, 0.1);
 }
 
-#render-container pre {
+.lovpen-renderer pre {
 	background: rgba(0, 0, 0, 0.5);
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	border-radius: var(--border-radius-md);
@@ -377,12 +377,12 @@
 	backdrop-filter: blur(10px);
 }
 
-#render-container pre code {
+.lovpen-renderer pre code {
 	background: none;
 	padding: 0;
 }
 
-#render-container img {
+.lovpen-renderer img {
 	max-width: 100%;
 	height: auto;
 	border-radius: var(--border-radius-lg);
@@ -390,12 +390,12 @@
 	transition: all 0.3s ease;
 }
 
-#render-container img:hover {
+.lovpen-renderer img:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
 }
 
-#render-container table {
+.lovpen-renderer table {
 	width: 100%;
 	border-collapse: collapse;
 	margin: var(--spacing-xl) 0;
@@ -404,21 +404,21 @@
 	overflow: hidden;
 }
 
-#render-container th,
-#render-container td {
+.lovpen-renderer th,
+.lovpen-renderer td {
 	padding: var(--spacing-md);
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-#render-container th {
+.lovpen-renderer th {
 	font-weight: 600;
 	text-transform: uppercase;
 	font-size: 0.85em;
 	letter-spacing: 0.1em;
 }
 
-#render-container hr {
+.lovpen-renderer hr {
 	border: none;
 	height: 1px;
 	background: linear-gradient(90deg, transparent, currentColor, transparent);
@@ -469,7 +469,7 @@
 
 /* === 响应式设计 === */
 @media (max-width: 768px) {
-	#render-container {
+	.lovpen-renderer {
 		font-size: 14px;
 	}
 	
@@ -481,18 +481,18 @@
 		display: none;
 	}
 	
-	#render-container h1 {
+	.lovpen-renderer h1 {
 		font-size: 2em;
 	}
 	
-	#render-container h2 {
+	.lovpen-renderer h2 {
 		font-size: 1.5em;
 	}
 }
 
 /* === 打印样式 === */
 @media print {
-	#render-container {
+	.lovpen-renderer {
 		background: white !important;
 		color: black !important;
 	}
