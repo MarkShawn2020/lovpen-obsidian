@@ -44,7 +44,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	private cachedProps: ReactComponentPropsWithCallbacks | null = null; // 缓存props避免重复创建
 	private lastArticleHTML: string = ''; // 缓存上次的文章HTML
 	private lastCSSContent: string = ''; // 缓存上次的CSS内容
-	private editorChangeTimer: NodeJS.Timeout | null = null; // 防抖定时器
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -93,15 +92,15 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		// 添加多个事件监听器
 		this.listeners = [
 			this.workspace.on("active-leaf-change", () => this.update()),
-			// 监听编辑器内容变化
-			this.workspace.on("editor-change", (editor) => {
-				this.handleEditorChange();
+			// 监听编辑器内容变化 - 立即更新
+			this.workspace.on("editor-change", async (editor) => {
+				await this.handleEditorChange();
 			}),
-			// 监听文件修改事件  
-			this.app.vault.on("modify", (file) => {
+			// 监听文件修改事件 - 立即更新
+			this.app.vault.on("modify", async (file) => {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeFile && activeFile.path === file.path) {
-					this.handleEditorChange();
+					await this.handleEditorChange();
 				}
 			})
 		];
@@ -112,10 +111,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	async onClose() {
 		this.listeners.forEach((listener) => this.workspace.offref(listener));
-		// 清理定时器
-		if (this.editorChangeTimer) {
-			clearTimeout(this.editorChangeTimer);
-		}
 		if (this.externalReactLib && this.reactContainer) {
 			this.externalReactLib.unmount(this.reactContainer);
 		}
@@ -129,19 +124,17 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	/**
-	 * 处理编辑器内容变化，使用防抖机制
+	 * 处理编辑器内容变化 - 立即更新
 	 */
-	private handleEditorChange() {
-		// 清除之前的定时器
-		if (this.editorChangeTimer) {
-			clearTimeout(this.editorChangeTimer);
+	private async handleEditorChange() {
+		// 直接更新，让React处理增量渲染
+		this.articleHTML = await this.getArticleContent();
+		// 只更新props，不重新mount组件
+		if (this.externalReactLib && this.reactContainer) {
+			const props = this.buildReactComponentProps();
+			// 使用update而不是重新mount
+			await this.externalReactLib.update(this.reactContainer, props);
 		}
-
-		// 设置新的定时器，延迟500ms执行更新
-		this.editorChangeTimer = setTimeout(async () => {
-			// 直接执行更新，React会自动处理增量更新
-			await this.renderMarkdown();
-		}, 500);
 	}
 
 	async renderMarkdown() {

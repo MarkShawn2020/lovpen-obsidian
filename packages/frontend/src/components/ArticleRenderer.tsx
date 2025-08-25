@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 
 interface ArticleRendererProps {
   html: string;
@@ -6,35 +6,28 @@ interface ArticleRendererProps {
 
 /**
  * 文章渲染组件
- * 使用React.memo和useMemo来优化渲染性能
- * 只有当HTML内容真正变化时才重新渲染
+ * 直接操作DOM，绕过React的虚拟DOM机制
+ * 这样可以避免滚动位置重置
  */
 export const ArticleRenderer = React.memo<ArticleRendererProps>(({ html }) => {
-  // 使用useMemo缓存渲染内容
-  // 只有当html变化时才重新计算
-  const content = useMemo(() => ({
-    __html: html
-  }), [html]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
-  // 生成一个稳定的key，基于内容的前100个字符
-  // 这确保只有内容真正变化时才会重新挂载组件
-  const contentKey = useMemo(() => {
-    // 使用内容的哈希或前缀作为key
-    // 这样可以避免微小的格式变化导致的重新渲染
-    return html.substring(0, 100);
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    
+    // 首次渲染使用React的方式
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
+    // 后续更新直接操作DOM，避免React重新渲染导致的滚动重置
+    containerRef.current.innerHTML = html;
   }, [html]);
 
-  return (
-    <div 
-      key={contentKey}
-      dangerouslySetInnerHTML={content}
-      suppressHydrationWarning
-    />
-  );
-}, (prevProps, nextProps) => {
-  // 自定义比较函数
-  // 只有当HTML内容真正不同时才重新渲染
-  return prevProps.html === nextProps.html;
+  // 初始渲染
+  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
 });
 
 ArticleRenderer.displayName = 'ArticleRenderer';
