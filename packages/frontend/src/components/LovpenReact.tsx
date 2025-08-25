@@ -5,6 +5,7 @@ import {MessageModal} from "./preview/MessageModal";
 import {useSetAtom} from "jotai";
 import {initializeSettingsAtom} from "../store/atoms";
 import {HMRTest} from "./HMRTest";
+import {ArticleRenderer} from "./ArticleRenderer";
 
 import {logger} from "../../../shared/src/logger";
 
@@ -33,8 +34,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 														}) => {
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
 	const isInitializedRef = useRef(false);
-	const lastCssContentRef = useRef<string>("");
-	const lastArticleHTMLRef = useRef<string>("");
 
 	// HMR模式检查
 
@@ -42,8 +41,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 	const [messageTitle, setMessageTitle] = useState("");
 	const [showOkButton, setShowOkButton] = useState(false);
 	const renderDivRef = useRef<HTMLDivElement>(null);
-	const styleElRef = useRef<HTMLStyleElement>(null);
-	const articleDivRef = useRef<HTMLDivElement>(null);
 
 	// 工具栏宽度状态 - 从localStorage恢复或使用默认宽度
 	const [toolbarWidth, setToolbarWidth] = useState<string>(() => {
@@ -77,22 +74,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // 只在组件挂载时执行
 
-	// 更新CSS样式和文章内容 - 只在内容真正改变时更新
-	useEffect(() => {
-		const cssChanged = cssContent !== lastCssContentRef.current;
-		const articleChanged = articleHTML !== lastArticleHTMLRef.current;
-		
-		if (cssChanged || articleChanged) {
-			if (cssChanged && styleElRef.current) {
-				styleElRef.current.textContent = cssContent;
-				lastCssContentRef.current = cssContent;
-			}
-			if (articleChanged && articleDivRef.current) {
-				articleDivRef.current.innerHTML = articleHTML;
-				lastArticleHTMLRef.current = articleHTML;
-			}
-		}
-	}, [cssContent, articleHTML]);
+	// React会自动处理增量更新，无需手动操作DOM
 
 	// 暂时移除MathJax自动加载，避免与现有数学公式渲染冲突
 	// 等原有渲染恢复正常后再考虑如何集成
@@ -204,10 +186,10 @@ export const LovpenReact: React.FC<LovpenReactProps> = ({
 						</svg>
 					</button>
 				</div>
-				<style ref={styleElRef} title="lovpen-style">
+				<style title="lovpen-style">
 					{cssContent}
 				</style>
-				<div ref={articleDivRef} dangerouslySetInnerHTML={{__html: articleHTML}}/>
+				<ArticleRenderer html={articleHTML} />
 			</div>
 
 			{/* 可拖动的分隔条 */}
