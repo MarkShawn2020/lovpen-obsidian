@@ -143,10 +143,26 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					return;
 				}
 
+				// 检查是否为纯URL链接（链接文本就是URL本身）
+				// 纯URL的特征：文本内容是URL格式，且与href相同或相似
+				const isPureUrl = (() => {
+					// 检查文本是否为URL格式
+					const urlPattern = /^https?:\/\/[^\s]+$/;
+					if (!urlPattern.test(linkTextContent.trim())) {
+						return false;
+					}
+					
+					// 比较href和文本内容（忽略尾部斜杠的差异）
+					const normalizeUrl = (url: string) => url.replace(/\/$/, '').toLowerCase();
+					return normalizeUrl(href) === normalizeUrl(linkTextContent.trim());
+				})();
+
 				// 判断是否需要转换此链接
+				// 纯URL不转换成脚注
 				// 只有直接的微信链接不转换成脚注
 				// 被重定向包装的链接（如Google重定向）都应该转换成脚注
-				const shouldConvert = !href.startsWith("https://mp.weixin.qq.com") && 
+				const shouldConvert = !isPureUrl &&
+				                      !href.startsWith("https://mp.weixin.qq.com") && 
 				                      !href.startsWith("https://weixin.qq.com") &&
 				                      !href.startsWith("http://mp.weixin.qq.com") &&
 				                      !href.startsWith("http://weixin.qq.com");
@@ -154,6 +170,7 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 				// 调试日志
 				logger.debug("链接处理判断:", {
 					URL: href,
+					是否为纯URL: isPureUrl,
 					是否转换为脚注: shouldConvert,
 					链接文本: linkTextContent
 				});
