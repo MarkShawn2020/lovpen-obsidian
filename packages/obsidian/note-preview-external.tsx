@@ -49,6 +49,8 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	private lastProcessedMd: string = ''; // 上次完整处理的Markdown
 	private cachedFullCSS: string = ''; // 缓存完整的CSS用于快速更新
 	private pluginCache: Map<string, string> = new Map(); // 缓存插件处理结果
+	private debounceTimer: NodeJS.Timeout | null = null; // 防抖定时器
+	private readonly DEBOUNCE_DELAY = 200; // 防抖延迟（毫秒）
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -101,25 +103,24 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		// 这样可以确保快速更新时CSS已经就绪
 		this.listeners = [
 			this.workspace.on("active-leaf-change", () => this.update()),
-			// 监听编辑器内容变化 - 立即更新
+			// 监听编辑器内容变化 - 使用防抖处理
 			this.workspace.on("editor-change", (editor) => {
-				// 不使用await，让它立即执行
 				this.handleEditorChange();
-			}),
-			// 监听文件修改事件 - 立即更新
-			this.app.vault.on("modify", (file) => {
-				const activeFile = this.app.workspace.getActiveFile();
-				if (activeFile && activeFile.path === file.path) {
-					// 不使用await，让它立即执行
-					this.handleEditorChange();
-				}
 			})
+			// 移除modify事件监听，避免重复触发
+			// editor-change已经能够捕获编辑器中的所有输入变化
 		];
 
 		uevent("open");
 	}
 
 	async onClose() {
+		// 清理防抖定时器
+		if (this.debounceTimer) {
+			clearTimeout(this.debounceTimer);
+			this.debounceTimer = null;
+		}
+		
 		this.listeners.forEach((listener) => this.workspace.offref(listener));
 		if (this.externalReactLib && this.reactContainer) {
 			this.externalReactLib.unmount(this.reactContainer);
@@ -134,9 +135,24 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	/**
-	 * 处理编辑器内容变化 - 单次完整渲染
+	 * 处理编辑器内容变化 - 使用防抖
 	 */
-	private async handleEditorChange() {
+	private handleEditorChange() {
+		// 清除之前的定时器
+		if (this.debounceTimer) {
+			clearTimeout(this.debounceTimer);
+		}
+		
+		// 设置新的定时器
+		this.debounceTimer = setTimeout(() => {
+			this.processEditorChange();
+		}, this.DEBOUNCE_DELAY);
+	}
+	
+	/**
+	 * 实际处理编辑器变化 - 单次完整渲染
+	 */
+	private async processEditorChange() {
 		// 避免重复处理
 		if (this.isProcessing) {
 			return;
@@ -217,8 +233,8 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			const pluginManager = UnifiedPluginManager.getInstance();
 			articleHTML = pluginManager.processContent(articleHTML, this.settings);
 			
-			// 缓存结果（限制缓存大小）
-			if (this.pluginCache.size > 10) {
+			// 缓存结果（限制缓存大小为100，使用FIFO策略）
+			if (this.pluginCache.size >= 100) {
 				const firstKey = this.pluginCache.keys().next().value;
 				this.pluginCache.delete(firstKey);
 			}

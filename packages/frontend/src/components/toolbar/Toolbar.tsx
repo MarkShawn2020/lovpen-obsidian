@@ -61,15 +61,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													onKitCreate,
 													onKitDelete,
 												}) => {
-	logger.info("[Toolbar] 完整工具栏开始渲染", {
-		pluginsCount: plugins?.length || 0,
-		settingsKeys: Object.keys(settings || {}),
-		showStyleUI: settings?.showStyleUI,
-		expandedSections: settings?.expandedAccordionSections,
-		personalInfo: settings?.personalInfo,
-		avatarConfig: settings?.personalInfo?.avatar,
-		userName: settings?.personalInfo?.name
-	});
 
 	// 使用本地状态管理当前选中的tab
 	const [activeTab, setActiveTab] = useState<string>(() => {
@@ -193,7 +184,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					const fileName = `lovpen-cover-${index + 1}-${aspectStr}.jpg`;
 					zip.file(fileName, arrayBuffer);
 					fileCount++;
-					console.log(`添加封面到zip: ${fileName}`);
 				} catch (error) {
 					console.error(`准备封面 ${index + 1} 失败:`, error);
 				}
@@ -207,7 +197,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					const fileName = 'lovpen-cover-combined-3_25_1.jpg';
 					zip.file(fileName, arrayBuffer);
 					fileCount++;
-					console.log(`添加拼接封面到zip: ${fileName}`);
 				} catch (error) {
 					console.error("准备拼接封面失败:", error);
 				}
@@ -219,7 +208,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 			}
 
 			// 生成zip文件
-			console.log('开始生成zip文件...');
 			const zipBlob = await zip.generateAsync({type: 'blob'});
 
 			// 创建下载链接
@@ -236,8 +224,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 			setTimeout(() => {
 				// document.body.removeChild(a);
 				// URL.revokeObjectURL(url);
-				// console.log(`zip文件下载完成，包含 ${fileCount} 个文件`);
-				// alert(`已下载包含 ${fileCount} 个封面的zip文件`);
 			}, 2000);
 
 

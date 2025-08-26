@@ -128,17 +128,9 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 	 * 处理HTML内容 - 应用所有启用的HTML插件
 	 */
 	public processContent(html: string, settings: NMPSettings): string {
-		console.log("🔌 [插件管理器] 开始处理内容", {
-			inputLength: html.length,
-			inputPreview: html.substring(0, 200) + '...',
-		});
 		logger.debug("[processContent]", settings);
 
 		const htmlPlugins = this.getHtmlPlugins();
-		console.log("🔌 [插件管理器] 获取HTML插件列表", {
-			totalCount: htmlPlugins.length,
-			pluginNames: htmlPlugins.map(p => p.getName())
-		});
 		logger.debug(`开始处理内容，共有 ${htmlPlugins.length} 个HTML插件`);
 
 		// CSS预处理: 在微信模式下，使用PostCSS处理CSS变量
@@ -153,57 +145,24 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 				plugin.getName() === "微信公众号适配插件" && plugin.isEnabled()
 			);
 
-		console.log("🔍 [插件管理器] 微信模式检测", {
-			enableWeixinCodeFormat: settings.enableWeixinCodeFormat,
-			hasWxInfo: settings.wxInfo && settings.wxInfo.length > 0,
-			platform: (settings as any).platform,
-			wechatModeEnabled: (settings as any).wechatModeEnabled,
-			hasWechatPlugin: this.getHtmlPlugins().some(plugin =>
-				plugin.getName() === "微信公众号适配插件" && plugin.isEnabled()
-			),
-			isWechatMode
-		});
-
 		if (isWechatMode) {
-			console.log("🎨 [插件管理器] 检测到微信模式，开始CSS预处理");
-
 			// 1. 注入代码高亮CSS（必须在CSS变量处理之前）
 			html = this.injectHighlightCSS(html, settings);
-			console.log("✅ [插件管理器] Highlight CSS注入完成", {
-				length: html.length
-			});
 
 			// 2. 处理CSS变量
 			html = this.resolveCSSVariables(html);
-			console.log("✅ [插件管理器] CSS预处理完成", {
-				length: html.length,
-				hasStyleTags: html.includes('<style')
-			});
 		}
 
 		let appliedPluginCount = 0;
 
 		let result = htmlPlugins.reduce((processedHtml, plugin, index) => {
 			if (plugin.isEnabled()) {
-				console.log(`🔧 [插件管理器] 应用插件 ${index + 1}/${htmlPlugins.length}: ${plugin.getName()}`, {
-					beforeLength: processedHtml.length,
-					beforeHasParagraphs: processedHtml.includes('<p')
-				});
-
 				logger.debug(`应用HTML插件: ${plugin.getName()}`);
 				appliedPluginCount++;
 
 				const pluginResult = plugin.process(processedHtml, settings);
-
-				console.log(`✅ [插件管理器] 插件 ${plugin.getName()} 处理完成`, {
-					afterLength: pluginResult.length,
-					changed: pluginResult !== processedHtml,
-					lengthDiff: pluginResult.length - processedHtml.length
-				});
-
 				return pluginResult;
 			} else {
-				console.log(`⏭️ [插件管理器] 跳过禁用插件: ${plugin.getName()}`);
 				logger.debug(`跳过禁用的HTML插件: ${plugin.getName()}`);
 				return processedHtml;
 			}
@@ -212,20 +171,8 @@ export class UnifiedPluginManager extends BasePluginManager<IUnifiedPlugin> {
 		// CSS后处理: 在微信模式下，处理插件生成的内联样式中的CSS变量
 		// 这必须在所有HTML插件处理之后执行，因为插件可能生成包含CSS变量的内联样式
 		if (isWechatMode) {
-			console.log("🎨 [插件管理器] 开始CSS后处理（内联样式）");
 			result = this.resolveInlineStyleVariables(result);
-			console.log("✅ [插件管理器] CSS后处理完成", {
-				length: result.length,
-				hasInlineVars: result.includes('var(')
-			});
 		}
-
-		console.log("✅ [插件管理器] 所有插件处理完成", {
-			appliedPluginCount,
-			finalLength: result.length,
-			totalChanged: result !== html,
-			finalPreview: result.substring(0, 300) + '...'
-		});
 
 		logger.debug(`内容处理完成，实际应用了 ${appliedPluginCount} 个HTML插件`);
 		return result;
