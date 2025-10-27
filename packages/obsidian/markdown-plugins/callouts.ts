@@ -151,28 +151,28 @@ export function GetCallout(type: string) {
 	return CalloutTypes.get(type);
 }
 
-// 获取 admonition 的内联样式
+// 获取 admonition 的内联样式 - 极致低调设计（注脚级别）
 export function getAdmonitionInlineStyles(type: string): { container: string; header: string; icon: string; title: string; content: string } {
-	// 基础样式
+	// 基础样式 - 极致低调设计（注脚级别，平衡视觉效果）
 	const baseStyles = {
-		container: 'border: 1px solid rgba(0, 0, 0, 0.08); padding: 1.25em 1.5em; display: flex; flex-direction: column; margin: 1.5em 0; border-radius: 8px; border-left-width: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); background: white; position: relative;',
-		header: 'display: flex; flex-direction: row; align-items: center; font-size: 1.05em; font-weight: 600; margin-bottom: 0.75em;',
-		icon: 'display: inline-block; width: 24px; height: 24px; margin-right: 0.75em; flex-shrink: 0; opacity: 0.6;',
-		title: 'flex: 1; line-height: 1.4;',
-		content: 'color: rgb(51, 51, 51) !important; font-size: 0.95em; line-height: 1.7; padding-left: calc(24px + 0.75em);'
+		container: 'border: 1px solid rgba(0, 0, 0, 0.04); padding: 0.6em 0.85em; display: flex; flex-direction: column; margin: 1em 0; border-radius: 4px; border-left-width: 1px; box-shadow: none; background: white; position: relative;',
+		header: 'display: flex; flex-direction: row; align-items: center; font-size: 0.75em; font-weight: 500; margin-bottom: 0.35em; opacity: 0.9;',
+		icon: 'display: inline-block; width: 14px; height: 14px; margin-right: 0.5em; flex-shrink: 0; opacity: 0.55;',
+		title: 'flex: 1; line-height: 1.3; font-weight: 500;',
+		content: 'color: rgb(102, 102, 102) !important; font-size: 0.75em !important; line-height: 1.5; padding-left: calc(14px + 0.5em); opacity: 0.85; font-weight: 300;'
 	};
 
-	// 根据类型获取颜色
-	let color = 'rgb(37, 99, 235)'; // 默认蓝色
-	let bgColor = 'linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%)';
+	// 根据类型获取颜色 - 极致低调配色（灰化处理）
+	let color = 'rgb(130, 130, 130)'; // 默认灰色
+	let bgColor = 'rgba(254, 254, 254, 0.4)';
 
-	// Anthropic Style 主题 - 使用橙红色系
+	// Anthropic Style 主题 - 极致低调色系（大幅降低饱和度）
 	switch(type.toLowerCase()) {
 		case 'note':
 		case 'info':
 		case 'todo':
-			color = 'rgb(200, 100, 66)';
-			bgColor = 'linear-gradient(135deg, rgba(200, 100, 66, 0.05) 0%, rgba(250, 249, 245, 0.9) 100%)';
+			color = 'rgb(140, 100, 85)';
+			bgColor = 'rgba(254, 253, 252, 0.35)';
 			break;
 		case 'tip':
 		case 'abstract':
@@ -180,14 +180,14 @@ export function getAdmonitionInlineStyles(type: string): { container: string; he
 		case 'tldr':
 		case 'hint':
 		case 'important':
-			color = 'rgb(180, 85, 50)';
-			bgColor = 'linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(250, 249, 245, 0.95) 100%)';
+			color = 'rgb(135, 95, 80)';
+			bgColor = 'rgba(254, 253, 252, 0.4)';
 			break;
 		case 'success':
 		case 'check':
 		case 'done':
-			color = 'rgb(139, 92, 59)';
-			bgColor = 'linear-gradient(135deg, rgba(139, 92, 59, 0.06) 0%, rgba(250, 249, 245, 0.95) 100%)';
+			color = 'rgb(110, 100, 85)';
+			bgColor = 'rgba(254, 253, 252, 0.35)';
 			break;
 		case 'question':
 		case 'help':
@@ -195,8 +195,8 @@ export function getAdmonitionInlineStyles(type: string): { container: string; he
 		case 'warning':
 		case 'caution':
 		case 'attention':
-			color = 'rgb(220, 120, 80)';
-			bgColor = 'linear-gradient(135deg, rgba(220, 120, 80, 0.07) 0%, rgba(250, 249, 245, 0.95) 100%)';
+			color = 'rgb(150, 105, 85)';
+			bgColor = 'rgba(254, 253, 252, 0.4)';
 			break;
 		case 'failure':
 		case 'fail':
@@ -204,22 +204,22 @@ export function getAdmonitionInlineStyles(type: string): { container: string; he
 		case 'danger':
 		case 'error':
 		case 'bug':
-			color = 'rgb(190, 70, 50)';
-			bgColor = 'linear-gradient(135deg, rgba(190, 70, 50, 0.06) 0%, rgba(250, 249, 245, 0.95) 100%)';
+			color = 'rgb(140, 90, 75)';
+			bgColor = 'rgba(254, 253, 252, 0.35)';
 			break;
 		case 'example':
-			color = 'rgb(160, 80, 60)';
-			bgColor = 'linear-gradient(135deg, rgba(160, 80, 60, 0.06) 0%, rgba(250, 249, 245, 0.95) 100%)';
+			color = 'rgb(125, 100, 85)';
+			bgColor = 'rgba(254, 253, 252, 0.35)';
 			break;
 		case 'quote':
 		case 'cite':
-			color = 'rgb(136, 136, 136)';
-			bgColor = 'linear-gradient(135deg, rgba(136, 136, 136, 0.05) 0%, rgba(250, 249, 245, 0.95) 100%)';
+			color = 'rgb(115, 115, 115)';
+			bgColor = 'rgba(253, 253, 253, 0.35)';
 			break;
 	}
 
-	// 为边框创建淡化的颜色（用于上右下边框）
-	const borderColor = color.replace('rgb', 'rgba').replace(')', ', 0.2)');
+	// 为边框创建淡化的颜色（用于上右下边框）- 极淡
+	const borderColor = color.replace('rgb', 'rgba').replace(')', ', 0.08)');
 
 	return {
 		container: `${baseStyles.container} border-color: ${borderColor}; border-left-color: ${color}; background: ${bgColor};`,
@@ -301,8 +301,8 @@ export class CalloutRenderer extends UnifiedMarkdownPlugin {
 		// 获取内联样式
 		const styles = getAdmonitionInlineStyles(callout.toLowerCase());
 
-		// 处理SVG图标，添加内联样式
-		const styledIcon = info?.icon ? info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.9;"') : '';
+		// 处理SVG图标，添加内联样式 - 极致低调设计（平衡视觉效果）
+		const styledIcon = info?.icon ? info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.55;"') : '';
 
 		// 生成带内联样式的 HTML（兼容微信公众号）
 		return `<section data-component="admonition" data-type="${callout.toLowerCase()}" data-variant="${info?.style}" style="${styles.container}">

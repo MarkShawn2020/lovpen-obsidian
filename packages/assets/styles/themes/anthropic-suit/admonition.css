@@ -3,14 +3,14 @@
    清晰、简洁、专业的设计语言
    ======================================== */
 
-/* 主题变量定义 */
+/* 主题变量定义 - 极致低调设计（注脚级别） */
 [data-theme="anthropic-suit"] {
-  --as-admonition-radius: 8px;
-  --as-admonition-padding: 16px 20px;
-  --as-admonition-icon-size: 20px;
-  --as-admonition-gap: 12px;
+  --as-admonition-radius: 4px;
+  --as-admonition-padding: 8px 12px;
+  --as-admonition-icon-size: 14px;
+  --as-admonition-gap: 6px;
   --as-admonition-border-width: 0;
-  --as-admonition-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --as-admonition-shadow: none;
   --as-admonition-transition: all 0.15s ease;
   
   /* 颜色系统 */
@@ -43,12 +43,12 @@
   --as-color-quote-border: #F3F4F6;
 }
 
-/* 基础容器覆盖 */
+/* 基础容器覆盖 - 极致低调设计（注脚级别） */
 [data-theme="anthropic-suit"] [data-component="admonition"] {
   padding: var(--as-admonition-padding);
   border-radius: var(--as-admonition-radius);
   border: 1px solid;
-  border-left-width: 4px;
+  border-left-width: 1px;
   box-shadow: var(--as-admonition-shadow);
   transition: var(--as-admonition-transition);
   position: relative;
@@ -56,59 +56,79 @@
 }
 
 [data-theme="anthropic-suit"] [data-component="admonition"]:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
-/* 头部样式 */
+/* 头部样式 - 极致低调设计（注脚级别） */
 [data-theme="anthropic-suit"] [data-element="admonition-header"] {
   gap: var(--as-admonition-gap);
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 0.95em;
-  letter-spacing: -0.01em;
-}
-
-/* 图标样式 */
-[data-theme="anthropic-suit"] [data-element="admonition-icon"] {
-  width: var(--as-admonition-icon-size);
-  height: var(--as-admonition-icon-size);
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.75em;
+  letter-spacing: 0;
   opacity: 0.9;
 }
 
-/* 标题样式 */
+/* 图标样式 - 极致低调设计（注脚级别） */
+[data-theme="anthropic-suit"] [data-element="admonition-icon"] {
+  width: var(--as-admonition-icon-size);
+  height: var(--as-admonition-icon-size);
+  opacity: 0.55;
+}
+
+/* 标题样式 - 极致低调设计（注脚级别） */
 [data-theme="anthropic-suit"] [data-element="admonition-title"] {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  text-transform: uppercase;
-  font-size: 0.85em;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  font-size: 0.75em;
+  letter-spacing: 0;
+  font-weight: 400;
   /* 标题也允许任意位置断词 */
   word-break: break-all;
   overflow-wrap: break-word;
 }
 
-/* 内容样式 */
+/* 内容样式 - 极致低调设计（注脚级别） */
 [data-theme="anthropic-suit"] [data-element="admonition-content"] {
-  color: #333333 !important;
-  font-size: 0.94em;
-  line-height: 1.65;
-  opacity: 0.95;
+  color: #666666 !important;
+  font-size: 0.75em !important;
+  line-height: 1.5;
+  opacity: 0.85;
+  font-weight: 300;
   /* 允许单词在任意位置断开，适合手机端窄屏 */
   word-break: break-all;
   overflow-wrap: break-word;
 }
 
 [data-theme="anthropic-suit"] [data-element="admonition-content"] p {
-  margin: 0.5em 0;
+  margin: 0.4em 0 !important;
+  font-size: 0.75em !important;
+  line-height: 1.5 !important;
+  color: #666666 !important;
+  letter-spacing: 0 !important;
+  text-align: left !important;
   /* 段落也允许任意位置断词 */
   word-break: break-all;
   overflow-wrap: break-word;
 }
 
+/* 更高优先级的选择器，强制覆盖内联样式 */
+/* 必须包含 .lovpen-renderer 以匹配实际的 HTML 结构 */
+.lovpen-renderer [data-theme="anthropic-suit"] [data-component="admonition"] [data-element="admonition-content"] p,
+.lovpen-renderer [data-component="admonition"] [data-element="admonition-content"] p {
+  font-size: 0.75em !important;
+  line-height: 1.5 !important;
+  color: #666666 !important;
+  letter-spacing: 0 !important;
+  text-align: left !important;
+  margin: 0.4em 0 !important;
+}
+
 [data-theme="anthropic-suit"] [data-element="admonition-content"] code {
   background-color: rgba(0, 0, 0, 0.05);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.9em;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 0.85em;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
 }
 
@@ -231,10 +251,10 @@
 }
 
 /* ========================================
-   动画效果
+   动画效果 - 禁用以降低视觉干扰
    ======================================== */
 
-@keyframes anthropic-slide-in {
+/* @keyframes anthropic-slide-in {
   from {
     opacity: 0;
     transform: translateY(-4px);
@@ -247,7 +267,7 @@
 
 [data-theme="anthropic-suit"] [data-component="admonition"] {
   animation: anthropic-slide-in 0.2s ease-out;
-}
+} */
 
 /* ========================================
    响应式调整
@@ -255,16 +275,36 @@
 
 @media (max-width: 768px) {
   [data-theme="anthropic-suit"] {
-    --as-admonition-padding: 12px 16px;
-    --as-admonition-icon-size: 18px;
-    --as-admonition-gap: 8px;
+    --as-admonition-padding: 6px 10px;
+    --as-admonition-icon-size: 12px;
+    --as-admonition-gap: 4px;
   }
-  
+
+  [data-theme="anthropic-suit"] [data-element="admonition-header"] {
+    font-size: 0.7em;
+  }
+
   [data-theme="anthropic-suit"] [data-element="admonition-title"] {
-    font-size: 0.8em;
+    font-size: 0.7em;
   }
-  
+
   [data-theme="anthropic-suit"] [data-element="admonition-content"] {
-    font-size: 0.9em;
+    font-size: 0.7em !important;
   }
+}
+
+/* ========================================
+   最终覆盖规则 - 确保在所有规则之后
+   用于覆盖全局主题的 p 标签样式
+   ======================================== */
+.lovpen-renderer [data-component="admonition"] [data-element="admonition-content"] p,
+.lovpen-renderer [data-theme="anthropic-suit"] [data-component="admonition"] [data-element="admonition-content"] p {
+  font-size: 0.75em !important;
+  line-height: 1.5 !important;
+  color: #666666 !important;
+  letter-spacing: 0 !important;
+  text-align: left !important;
+  margin: 0.4em 0 !important;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
 }

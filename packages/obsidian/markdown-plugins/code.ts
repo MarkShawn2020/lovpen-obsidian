@@ -248,8 +248,8 @@ export class CodeRenderer extends UnifiedMarkdownPlugin {
 			// 获取内联样式
 			const styles = getAdmonitionInlineStyles(calloutType);
 
-			// 处理SVG图标，添加内联样式
-			const styledIcon = info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.9;"');
+			// 处理SVG图标，添加内联样式 - 极致低调设计（平衡视觉效果）
+			const styledIcon = info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.55;"');
 
 			// 生成带内联样式的 HTML（兼容微信公众号）
 			return `<section data-component="admonition" data-type="${calloutType}" data-variant="${info.style}" style="${styles.container}">
