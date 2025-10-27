@@ -327,9 +327,6 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 			// 修复标题内加粗文字颜色问题
 			let cleanedHtml = this.fixHeadingStrongColors(processedHtml);
 
-			// 修复 admonition 内容的字体大小（覆盖 juice 内联化的全局 p 样式）
-			cleanedHtml = this.fixAdmonitionContentStyles(cleanedHtml);
-
 			logger.debug("微信CSS内联化完成");
 			return cleanedHtml;
 		} catch (error) {
@@ -386,66 +383,4 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 		}
 	}
 
-	/**
-	 * 修复 admonition 组件内容的字体大小问题
-	 * juice 内联化后，全局的 .lovpen-renderer p 样式会被内联到所有 p 标签
-	 * 导致 admonition 内的 p 标签继承了 15px 的 font-size
-	 * 本函数在 juice 处理后，强制覆盖 admonition 内 p 标签的内联样式
-	 */
-	private fixAdmonitionContentStyles(html: string): string {
-		try {
-			const parser = new DOMParser();
-			const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
-			const container = doc.body.firstChild as HTMLElement;
-
-			// 查找所有 admonition 组件
-			const admonitions = container.querySelectorAll('[data-component="admonition"]');
-
-			admonitions.forEach((admonition) => {
-				// 查找 admonition-content 容器
-				const contentElement = admonition.querySelector('[data-element="admonition-content"]');
-
-				if (contentElement) {
-					// 查找内部的所有 p 标签
-					const paragraphs = contentElement.querySelectorAll('p');
-
-					paragraphs.forEach((p) => {
-						const pElement = p as HTMLElement;
-						const currentStyle = pElement.getAttribute("style") || "";
-
-						// 解析现有的内联样式
-						const styleObj: Record<string, string> = {};
-						currentStyle.split(';').forEach(rule => {
-							const [key, value] = rule.split(':').map(s => s.trim());
-							if (key && value) {
-								styleObj[key] = value;
-							}
-						});
-
-						// 覆盖需要修改的样式属性（注脚级别的样式）
-						styleObj['font-size'] = '0.75em';
-						styleObj['line-height'] = '1.5';
-						styleObj['color'] = '#666666';
-						styleObj['letter-spacing'] = '0';
-						styleObj['text-align'] = 'left';
-						styleObj['margin'] = '0.4em 0';
-						styleObj['word-break'] = 'break-all';
-						styleObj['overflow-wrap'] = 'break-word';
-
-						// 重新组合为内联样式字符串
-						const newStyle = Object.entries(styleObj)
-							.map(([key, value]) => `${key}: ${value}`)
-							.join('; ');
-
-						pElement.setAttribute("style", newStyle);
-					});
-				}
-			});
-
-			return container.innerHTML;
-		} catch (error) {
-			logger.error("修复 admonition 内容样式时出错:", error);
-			return html;
-		}
-	}
 }

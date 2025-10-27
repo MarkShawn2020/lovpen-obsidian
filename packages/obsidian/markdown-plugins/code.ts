@@ -251,13 +251,19 @@ export class CodeRenderer extends UnifiedMarkdownPlugin {
 			// 处理SVG图标，添加内联样式 - 极致低调设计（平衡视觉效果）
 			const styledIcon = info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.55;"');
 
+			// 给 body 中的 <p> 标签添加内联样式（在 HTML 生成阶段，而非后处理）
+			const addInlineStylesToParagraphs = (html: string, paragraphStyle: string): string => {
+				return html.replace(/<p>/g, `<p style="${paragraphStyle}">`);
+			};
+			const styledBody = addInlineStylesToParagraphs(body, styles.paragraph);
+
 			// 生成带内联样式的 HTML（兼容微信公众号）
 			return `<section data-component="admonition" data-type="${calloutType}" data-variant="${info.style}" style="${styles.container}">
 				<header data-element="admonition-header" style="${styles.header}">
 					<span data-element="admonition-icon" data-icon-type="${calloutType}" style="${styles.icon}">${styledIcon}</span>
 					<span data-element="admonition-title" style="${styles.title}">${title}</span>
 				</header>
-				<div data-element="admonition-content" style="${styles.content}">${body}</div>
+				<div data-element="admonition-content" style="${styles.content}">${styledBody}</div>
 			</section>`;
 		} catch (error) {
 			logger.error('Error rendering ad callout:', error);

@@ -151,15 +151,23 @@ export function GetCallout(type: string) {
 	return CalloutTypes.get(type);
 }
 
+// 给 HTML 中的 <p> 标签添加内联样式
+function addInlineStylesToParagraphs(html: string, paragraphStyle: string): string {
+	// 使用正则表达式匹配所有 <p> 标签
+	// 注意：这个方法简单但有效，适合在 HTML 生成阶段使用
+	return html.replace(/<p>/g, `<p style="${paragraphStyle}">`);
+}
+
 // 获取 admonition 的内联样式 - 极致低调设计（注脚级别）
-export function getAdmonitionInlineStyles(type: string): { container: string; header: string; icon: string; title: string; content: string } {
+export function getAdmonitionInlineStyles(type: string): { container: string; header: string; icon: string; title: string; content: string; paragraph: string } {
 	// 基础样式 - 极致低调设计（注脚级别，平衡视觉效果）
 	const baseStyles = {
 		container: 'border: 1px solid rgba(0, 0, 0, 0.04); padding: 0.6em 0.85em; display: flex; flex-direction: column; margin: 1em 0; border-radius: 4px; border-left-width: 1px; box-shadow: none; background: white; position: relative;',
 		header: 'display: flex; flex-direction: row; align-items: center; font-size: 0.75em; font-weight: 500; margin-bottom: 0.35em; opacity: 0.9;',
 		icon: 'display: inline-block; width: 14px; height: 14px; margin-right: 0.5em; flex-shrink: 0; opacity: 0.55;',
 		title: 'flex: 1; line-height: 1.3; font-weight: 500;',
-		content: 'color: rgb(102, 102, 102) !important; font-size: 0.75em !important; line-height: 1.5; padding-left: calc(14px + 0.5em); opacity: 0.85; font-weight: 300;'
+		content: 'color: rgb(102, 102, 102) !important; font-size: 0.75em !important; line-height: 1.5; padding-left: calc(14px + 0.5em); opacity: 0.85; font-weight: 300;',
+		paragraph: 'font-size: 0.75em; line-height: 1.5; color: #666666; letter-spacing: 0; text-align: left; margin: 0.4em 0; word-break: break-all; overflow-wrap: break-word;'
 	};
 
 	// 根据类型获取颜色 - 极致低调配色（灰化处理）
@@ -226,7 +234,8 @@ export function getAdmonitionInlineStyles(type: string): { container: string; he
 		header: `${baseStyles.header} color: ${color};`,
 		icon: baseStyles.icon,
 		title: baseStyles.title,
-		content: baseStyles.content
+		content: baseStyles.content,
+		paragraph: baseStyles.paragraph
 	};
 }
 
@@ -304,13 +313,16 @@ export class CalloutRenderer extends UnifiedMarkdownPlugin {
 		// 处理SVG图标，添加内联样式 - 极致低调设计（平衡视觉效果）
 		const styledIcon = info?.icon ? info.icon.replace('<svg', '<svg style="width: 100%; height: 100%; display: block; opacity: 0.55;"') : '';
 
+		// 给 body 中的 <p> 标签添加内联样式（在 HTML 生成阶段，而非后处理）
+		const styledBody = addInlineStylesToParagraphs(body, styles.paragraph);
+
 		// 生成带内联样式的 HTML（兼容微信公众号）
 		return `<section data-component="admonition" data-type="${callout.toLowerCase()}" data-variant="${info?.style}" style="${styles.container}">
 			<header data-element="admonition-header" style="${styles.header}">
 				<span data-element="admonition-icon" data-icon-type="${callout.toLowerCase()}" style="${styles.icon}">${styledIcon}</span>
 				<span data-element="admonition-title" style="${styles.title}">${title}</span>
 			</header>
-			<div data-element="admonition-content" style="${styles.content}">${body}</div>
+			<div data-element="admonition-content" style="${styles.content}">${styledBody}</div>
 		</section>`;
 	}
 
