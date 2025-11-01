@@ -152,30 +152,40 @@ if (rootElement) {
             return;
           }
 
-          // 创建临时包裹元素来添加 padding
-          const wrapper = document.createElement('div');
-          wrapper.style.cssText = `
-            padding: 40px;
-            background-color: #ffffff;
-            display: inline-block;
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-          `;
-
-          // 克隆文章元素
-          const clonedElement = articleElement.cloneNode(true) as HTMLElement;
-          wrapper.appendChild(clonedElement);
-          document.body.appendChild(wrapper);
-
-          // 使用 modern-screenshot 生成 PNG
-          const dataUrl = await domToPng(wrapper, {
+          // 先对原始元素截图
+          const originalDataUrl = await domToPng(articleElement, {
             quality: 1,
             scale: 2, // 2倍分辨率，提高清晰度
           });
 
-          // 清理临时元素
-          document.body.removeChild(wrapper);
+          // 创建 Image 对象加载截图
+          const img = new Image();
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = reject;
+            img.src = originalDataUrl;
+          });
+
+          // 创建 Canvas 添加 padding
+          const padding = 40 * 2; // 2倍分辨率，所以 padding 也要 x2
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width + padding * 2;
+          canvas.height = img.height + padding * 2;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('无法创建 Canvas 上下文');
+          }
+
+          // 填充白色背景
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // 绘制截图，添加 padding
+          ctx.drawImage(img, padding, padding);
+
+          // 转换为 data URL
+          const dataUrl = canvas.toDataURL('image/png', 1.0);
 
           // 将 data URL 转换为 Blob
           const response = await fetch(dataUrl);
