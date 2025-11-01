@@ -3,15 +3,25 @@ import react from '@vitejs/plugin-react'
 import path from "path"
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite"
+import { codeInspectorPlugin } from '@markshawn/code-inspector-plugin'
 
 export default defineConfig(({ mode }) => {
 	const isDev = mode === 'development';
-	
+	const isStandalone = mode === 'standalone';
+	const serverPort = isStandalone ? 1101 : 5173;
+
 	return {
 		define: {
-			'process.env.NODE_ENV': JSON.stringify(mode)
+			'process.env.NODE_ENV': JSON.stringify(mode),
+			'__STANDALONE_MODE__': isStandalone
 		},
 		plugins: [
+			// Code Inspector - Enhanced version with copy mode
+			// Activate: Shift + Alt/Option
+			// Toggle mode: Press 'C' to switch between IDE mode (📝) and Copy mode (📋)
+			codeInspectorPlugin({
+				bundler: 'vite',
+			}),
 			react({
 				// Use automatic runtime for better HMR
 				jsxRuntime: 'automatic',
@@ -19,7 +29,7 @@ export default defineConfig(({ mode }) => {
 				fastRefresh: true,
 				// Include all JSX/TSX files
 				include: '**/*.{jsx,tsx,js,ts}'
-			}), 
+			}),
 			tailwindcss()
 		],
 		resolve: {
@@ -27,11 +37,12 @@ export default defineConfig(({ mode }) => {
 				"@": path.resolve(__dirname, "./src"),
 			},
 		},
-		
+
 		// Dev server configuration for HMR
 		server: {
-			port: 5173,
+			port: serverPort,
 			host: 'localhost',
+			open: isStandalone,
 			cors: {
 				origin: '*',
 				credentials: true,
@@ -47,7 +58,7 @@ export default defineConfig(({ mode }) => {
 			hmr: {
 				protocol: 'ws',
 				host: 'localhost',
-				port: 5173
+				port: serverPort
 			}
 		},
 		

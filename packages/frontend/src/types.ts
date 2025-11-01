@@ -214,7 +214,7 @@ export interface LovpenReactProps {
 	cssContent: string;
 	plugins: UnifiedPluginData[];
 	onRefresh: () => void;
-	onCopy: () => void;
+	onCopy: (mode?: string) => void;
 	onDistribute: () => void;
 	onTemplateChange: (template: string) => void;
 	onThemeChange: (theme: string) => void;

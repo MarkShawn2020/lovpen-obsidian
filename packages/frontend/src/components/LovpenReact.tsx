@@ -9,6 +9,7 @@ import {HMRTest} from "./HMRTest";
 import {ArticleRenderer} from "./ArticleRenderer";
 import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
+import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
 
 import {logger} from "../../../shared/src/logger";
 
@@ -187,16 +188,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						zIndex: 40,
 						padding: '16px'
 					}}>
-						<button
-							onClick={onCopy}
-							className="inline-flex items-center justify-center w-9 h-9 bg-white/60 backdrop-blur-sm border border-[#E8E6DC]/50 text-[#87867F]/70 rounded-xl shadow-sm transition-all hover:bg-[#D97757] hover:text-white hover:scale-105 hover:shadow-md hover:border-[#D97757] focus:outline-none focus:ring-2 focus:ring-[#D97757]/50 focus:ring-offset-2"
-							title="复制内容"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-								<rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-								<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-							</svg>
-						</button>
+						<CopySplitButton
+							onCopy={(option: CopyOption) => onCopy(option.id)}
+						/>
 					</div>
 					{/* 关键内联样式：确保基本样式始终存在 */}
 					<style dangerouslySetInnerHTML={{ __html: `

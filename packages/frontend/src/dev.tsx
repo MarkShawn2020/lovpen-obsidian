@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { LovpenReactBridge } from './components/LovpenReactBridge'
 import { JotaiProvider } from './providers/JotaiProvider'
 import { logger } from '../../shared/src/logger'
+import { webAdapter } from './adapters/web-adapter'
 import './index.css'
 
 // Types (we'll need to ensure these are available)
@@ -103,40 +104,91 @@ if (rootElement) {
       expandedAccordionSections: [],
       showStyleUI: true,
       personalInfo: {
-        name: '',
+        name: 'LovPen Web',
         avatar: { type: 'default' as const },
-        bio: '',
+        bio: '基于 Web 的 Markdown 格式化工具',
         email: '',
         website: ''
       }
     },
-    articleHTML: '<h1>测试标题</h1><p>这是一个测试内容。</p>',
-    cssContent: 'body { font-family: system-ui; }',
+    articleHTML: `
+      <h1>欢迎使用 LovPen Web 版</h1>
+      <p>这是一个独立的 Web 应用，可以将 Markdown 格式化并分发到多个平台。</p>
+      <h2>主要功能</h2>
+      <ul>
+        <li>支持多种主题和代码高亮</li>
+        <li>模板系统</li>
+        <li>多平台分发</li>
+      </ul>
+      <h2>代码示例</h2>
+      <pre><code class="language-javascript">console.log('Hello, LovPen!');</code></pre>
+    `,
+    cssContent: 'body { font-family: system-ui; padding: 20px; }',
     plugins: [],
-    onRefresh: () => logger.debug('Refresh clicked'),
-    onCopy: () => logger.debug('Copy clicked'),
-    onDistribute: () => logger.debug('Distribute clicked'),
-    onTemplateChange: (template: string) => logger.debug('Template changed:', template),
-    onThemeChange: (theme: string) => logger.debug('Theme changed:', theme),
-    onHighlightChange: (highlight: string) => logger.debug('Highlight changed:', highlight),
+    onRefresh: () => {
+      logger.debug('Refresh clicked');
+      new webAdapter.Notice('刷新成功！');
+    },
+    onCopy: () => {
+      logger.debug('Copy clicked');
+      new webAdapter.Notice('已复制到剪贴板');
+    },
+    onDistribute: () => {
+      logger.debug('Distribute clicked');
+      new webAdapter.Notice('分发功能开发中...');
+    },
+    onTemplateChange: (template: string) => {
+      logger.debug('Template changed:', template);
+      new webAdapter.Notice(`模板已切换: ${template}`);
+    },
+    onThemeChange: (theme: string) => {
+      logger.debug('Theme changed:', theme);
+      new webAdapter.Notice(`主题已切换: ${theme}`);
+    },
+    onHighlightChange: (highlight: string) => {
+      logger.debug('Highlight changed:', highlight);
+      new webAdapter.Notice(`代码高亮已切换: ${highlight}`);
+    },
     onThemeColorToggle: (enabled: boolean) => logger.debug('Theme color toggle:', enabled),
     onThemeColorChange: (color: string) => logger.debug('Theme color changed:', color),
-    onRenderArticle: () => logger.debug('Render article'),
-    onSaveSettings: () => logger.debug('Save settings'),
+    onRenderArticle: () => {
+      logger.debug('Render article');
+      new webAdapter.Notice('文章渲染完成');
+    },
+    onSaveSettings: () => {
+      logger.debug('Save settings');
+      new webAdapter.Notice('设置已保存');
+    },
     onUpdateCSSVariables: () => logger.debug('CSS variables updated'),
-    onPluginToggle: (pluginName: string, enabled: boolean) => logger.debug('Plugin toggle:', pluginName, enabled),
+    onPluginToggle: (pluginName: string, enabled: boolean) => {
+      logger.debug('Plugin toggle:', pluginName, enabled);
+      new webAdapter.Notice(`插件 ${pluginName} 已${enabled ? '启用' : '禁用'}`);
+    },
     onPluginConfigChange: (pluginName: string, key: string, value: string | boolean) => logger.debug('Plugin config change:', pluginName, key, value),
     onExpandedSectionsChange: (sections: string[]) => logger.debug('Expanded sections:', sections),
     onArticleInfoChange: (info: any) => logger.debug('Article info:', info),
     onPersonalInfoChange: (info: any) => logger.debug('Personal info:', info),
-    onSettingsChange: (settings: any) => logger.debug('Settings change:', settings),
-    onKitApply: (kitId: string) => logger.debug('Apply kit:', kitId),
-    onKitCreate: (info: any) => logger.debug('Create kit:', info),
-    onKitDelete: (kitId: string) => logger.debug('Delete kit:', kitId),
+    onSettingsChange: (settings: any) => {
+      logger.debug('Settings change:', settings);
+      // 持久化到 localStorage
+      webAdapter.persistentStorage.setItem('lovpen-settings', JSON.stringify(settings));
+    },
+    onKitApply: (kitId: string) => {
+      logger.debug('Apply kit:', kitId);
+      new webAdapter.Notice(`应用套装: ${kitId}`);
+    },
+    onKitCreate: (info: any) => {
+      logger.debug('Create kit:', info);
+      new webAdapter.Notice('套装创建成功');
+    },
+    onKitDelete: (kitId: string) => {
+      logger.debug('Delete kit:', kitId);
+      new webAdapter.Notice('套装已删除');
+    },
     loadTemplateKits: async () => [],
     loadTemplates: async () => [],
-    persistentStorage: {} as any,
-    requestUrl: async (url: string) => ({ text: '', json: {}, arrayBuffer: new ArrayBuffer(0), headers: {} }),
+    persistentStorage: webAdapter.persistentStorage as any,
+    requestUrl: webAdapter.requestUrl,
   }
   
   root && root.render(
