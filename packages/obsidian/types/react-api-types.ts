@@ -93,6 +93,7 @@ export interface UISpecificCallbacks {
 	onPluginToggle: (pluginName: string, enabled: boolean) => void;
 	onPluginConfigChange: (pluginName: string, key: string, value: string | boolean) => void;
 	onExpandedSectionsChange: (sections: string[]) => void;
+	onWidthChange?: (width: number) => void;
 }
 
 /**

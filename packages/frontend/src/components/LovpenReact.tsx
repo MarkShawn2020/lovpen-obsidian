@@ -35,7 +35,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		onExpandedSectionsChange,
 		onArticleInfoChange,
 		onPersonalInfoChange,
-		onSettingsChange
+		onSettingsChange,
+		onWidthChange
 	} = props;
 	
 	// 从atom读取频繁变化的数据，如果atom为空则使用props的值
@@ -90,7 +91,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	// Toolbar 自动隐藏状态（基于空间不足）
 	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
-	const obsidianContainerRef = useRef<HTMLElement | null>(null);
 
 
 	// 初始化Jotai状态 - 只初始化一次
@@ -118,73 +118,22 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	// 监听容器宽度变化，自动隐藏/显示 Toolbar（保证 Renderer 始终可见）
 	useEffect(() => {
 		const container = containerRef.current;
-		if (!container) return;
+		if (!container) {
+			console.warn('[LovpenReact] containerRef.current is null, cannot observe width');
+			return;
+		}
 
-		// 查找Obsidian的React容器 (#lovpen-react-container)
-		// 这是实际受Obsidian workspace resize影响的容器
-		const findObsidianContainer = (element: HTMLElement): HTMLElement | null => {
-			let current: HTMLElement | null = element;
-			while (current) {
-				if (current.id === 'lovpen-react-container') {
-					logger.debug('[容器宽度] 找到Obsidian React容器', {
-						id: current.id,
-						width: current.getBoundingClientRect().width
-					});
-					return current;
-				}
-				current = current.parentElement;
-			}
-			logger.warn('[容器宽度] 未找到Obsidian React容器，使用当前容器');
-			return element;
-		};
+		console.log('[LovpenReact] ResizeObserver 已设置, onWidthChange:', typeof onWidthChange);
 
-		obsidianContainerRef.current = findObsidianContainer(container);
-		const targetContainer = obsidianContainerRef.current || container;
-
-		// 立即执行一次检查，避免初始渲染时的闪烁
-		const checkAndUpdateToolbarVisibility = () => {
-			const containerWidth = targetContainer.getBoundingClientRect().width;
-
-			// 如果用户手动隐藏了工具栏，不需要自动隐藏逻辑
-			if (!isToolbarVisible) {
-				logger.debug('[容器宽度] 用户手动隐藏工具栏，跳过自动隐藏逻辑');
-				setIsToolbarAutoHidden(false);
-				return;
-			}
-
-			// 计算所需的最小宽度
-			const rendererMinWidth = 320; // Renderer 最小宽度
-			const toolbarWidthNum = parseInt(toolbarWidth) || 420;
-			const resizerWidth = 6;
-			const minTotalWidth = rendererMinWidth + toolbarWidthNum + resizerWidth;
-
-			// 如果容器宽度不足以同时显示 Renderer 和 Toolbar，自动隐藏 Toolbar
-			const shouldHideToolbar = containerWidth < minTotalWidth;
-
-			logger.debug('[容器宽度] 初始检查', {
-				容器类型: targetContainer.id ? `#${targetContainer.id}` : targetContainer.className,
-				containerWidth: `${containerWidth.toFixed(0)}px`,
-				rendererMinWidth: `${rendererMinWidth}px`,
-				toolbarWidth: `${toolbarWidthNum}px`,
-				resizerWidth: `${resizerWidth}px`,
-				minTotalWidth: `${minTotalWidth}px`,
-				shouldHideToolbar,
-				action: shouldHideToolbar ? '🙈 隐藏工具栏' : '👁️ 显示工具栏'
-			});
-
-			setIsToolbarAutoHidden(shouldHideToolbar);
-		};
-
-		// 立即执行一次
-		checkAndUpdateToolbarVisibility();
+		let widthChangeTimer: NodeJS.Timeout | null = null;
 
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const containerWidth = entry.contentRect.width;
+				console.log('[LovpenReact] ResizeObserver fired, width:', containerWidth);
 
 				// 如果用户手动隐藏了工具栏，不需要自动隐藏逻辑
 				if (!isToolbarVisible) {
-					logger.debug('[容器宽度] 用户手动隐藏工具栏，跳过自动隐藏逻辑');
 					setIsToolbarAutoHidden(false);
 					return;
 				}
@@ -198,33 +147,33 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				// 如果容器宽度不足以同时显示 Renderer 和 Toolbar，自动隐藏 Toolbar
 				const shouldHideToolbar = containerWidth < minTotalWidth;
 
-				logger.debug('[容器宽度] 🔄 Resize触发', {
-					容器类型: targetContainer.id ? `#${targetContainer.id}` : targetContainer.className,
-					containerWidth: `${containerWidth.toFixed(0)}px`,
-					rendererMinWidth: `${rendererMinWidth}px`,
-					toolbarWidth: `${toolbarWidthNum}px`,
-					resizerWidth: `${resizerWidth}px`,
-					minTotalWidth: `${minTotalWidth}px`,
-					差值: `${(containerWidth - minTotalWidth).toFixed(0)}px`,
-					shouldHideToolbar,
-					action: shouldHideToolbar ? '🙈 隐藏工具栏' : '👁️ 显示工具栏'
-				});
-
 				setIsToolbarAutoHidden(shouldHideToolbar);
+
+				// 调用 width change callback (with debouncing)
+				if (onWidthChange) {
+					if (widthChangeTimer) {
+						clearTimeout(widthChangeTimer);
+					}
+					widthChangeTimer = setTimeout(() => {
+						console.log(`[LovpenReact] 调用 onWidthChange: ${containerWidth}px`);
+						logger.info(`[LovpenReact] 容器宽度变化: ${containerWidth}px`);
+						onWidthChange(containerWidth);
+					}, 200); // 200ms debounce
+				} else {
+					console.warn('[LovpenReact] onWidthChange is undefined, skipping callback');
+				}
 			}
 		});
 
-		logger.debug('[容器宽度] 📡 开始监听容器', {
-			容器: targetContainer.id ? `#${targetContainer.id}` : targetContainer.className
-		});
-
-		resizeObserver.observe(targetContainer);
+		resizeObserver.observe(container);
 
 		return () => {
-			logger.debug('[容器宽度] 🛑 停止监听容器');
+			if (widthChangeTimer) {
+				clearTimeout(widthChangeTimer);
+			}
 			resizeObserver.disconnect();
 		};
-	}, [toolbarWidth, isToolbarVisible]);
+	}, [toolbarWidth, isToolbarVisible, onWidthChange]);
 
 	// React会自动处理增量更新，无需手动操作DOM
 
@@ -301,7 +250,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				width: "100%",
 				overflow: "hidden",
 				position: "relative",
-				containerType: "inline-size", // 启用CSS容器查询
 			}}
 		>
 			{/* 左侧渲染区域 - 始终可见，占用剩余空间 */}

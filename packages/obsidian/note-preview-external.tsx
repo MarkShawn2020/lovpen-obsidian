@@ -52,6 +52,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	private pluginCache: Map<string, string> = new Map(); // 缓存插件处理结果
 	private debounceTimer: NodeJS.Timeout | null = null; // 防抖定时器
 	private readonly DEBOUNCE_DELAY = 200; // 防抖延迟（毫秒）
+	private currentWidth: number = 0; // 当前容器宽度
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -652,16 +653,16 @@ ${customCSS}`;
 		this.container = this.containerEl.children[1];
 		this.container.empty();
 
-		// 设置容器最小宽度，确保有足够空间显示工具栏
-		if (this.containerEl) {
-			this.containerEl.style.minWidth = '800px';
-		}
+		// // 设置容器最小宽度，确保有足够空间显示工具栏
+		// if (this.containerEl) {
+		// 	this.containerEl.style.minWidth = '800px';
+		// }
 
 		// 创建React容器
 		this.reactContainer = document.createElement('div');
 		this.reactContainer.style.width = '100%';
 		this.reactContainer.style.height = '100%';
-		this.reactContainer.style.minWidth = '800px'; // 确保React容器也有最小宽度
+		// this.reactContainer.style.minWidth = '800px'; // 确保React容器也有最小宽度
 		this.reactContainer.id = 'lovpen-react-container';
 
 		// 🔑 关键：添加 Obsidian 环境类，启用 CSS 变量映射
@@ -1177,7 +1178,8 @@ ${customCSS}`;
 			loadTemplateKits: this.reactAPIService.loadTemplateKits.bind(this.reactAPIService),
 			loadTemplates: this.reactAPIService.loadTemplates.bind(this.reactAPIService),
 			persistentStorage: this.buildPersistentStorageAPI(),
-			requestUrl: requestUrl
+			requestUrl: requestUrl,
+			onWidthChange: this.handleWidthChange.bind(this)
 		};
 	}
 
@@ -1438,6 +1440,27 @@ ${customCSS}`;
 	private handleExpandedSectionsChange(sections: string[]): void {
 		this.settings.expandedAccordionSections = sections;
 		this.saveSettingsToPlugin();
+	}
+
+	/**
+	 * 处理容器宽度变更
+	 */
+	private handleWidthChange(width: number): void {
+		this.currentWidth = width;
+		console.log(`[NotePreviewExternal] handleWidthChange called: ${width}px`);
+		logger.info(`[NotePreviewExternal] 容器宽度变更: ${width}px`);
+
+		// 通知主插件（如果主插件实现了回调）
+		const plugin = (this.app as any).plugins.plugins["lovpen"];
+		if (plugin && typeof plugin.onViewWidthChange === 'function') {
+			console.log(`[NotePreviewExternal] 调用 plugin.onViewWidthChange`);
+			plugin.onViewWidthChange(width);
+		} else {
+			console.warn(`[NotePreviewExternal] plugin.onViewWidthChange not available`, {
+				hasPlugin: !!plugin,
+				type: plugin ? typeof plugin.onViewWidthChange : 'N/A'
+			});
+		}
 	}
 
 	/**

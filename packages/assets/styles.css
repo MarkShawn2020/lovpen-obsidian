@@ -559,23 +559,7 @@ input:checked + .slider:before {
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* 容器查询 - 根据父容器宽度自动隐藏工具栏 */
-/* 当容器宽度小于 746px (320px renderer + 420px toolbar + 6px resizer) 时隐藏工具栏 */
-@container (max-width: 746px) {
-	.toolbar-container {
-		display: none !important;
-	}
-
-	.column-resizer {
-		display: none !important;
-	}
-
-	.lovpen-renderer {
-		border-right: none !important;
-	}
-}
-
-/* Responsive design - 视口级别的响应式 */
+/* Responsive design */
 @media (max-width: 768px) {
 	.toolbar-container {
 		width: 100% !important;

@@ -14,6 +14,7 @@ export default class LovpenPlugin extends Plugin {
 	settings: NMPSettings;
 	assetsManager: AssetsManager;
 	templateKitManager: TemplateKitManager;
+	private currentViewWidth: number = 0; // 当前视图宽度
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -115,5 +116,18 @@ export default class LovpenPlugin extends Plugin {
 		}
 
 		if (leaf) workspace.revealLeaf(leaf);
+	}
+
+	/**
+	 * 处理视图宽度变化（由 NotePreviewExternal 调用）
+	 * @param width 新的视图宽度（像素）
+	 */
+	onViewWidthChange(width: number): void {
+		this.currentViewWidth = width;
+		console.log(`[LovpenPlugin] onViewWidthChange called: ${width}px`);
+		logger.info(`[LovpenPlugin] 视图宽度已更新: ${width}px`);
+
+		// 在这里可以添加自定义的宽度变化处理逻辑
+		// 例如：调整UI布局、更新设置、触发重新渲染等
 	}
 }

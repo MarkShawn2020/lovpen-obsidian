@@ -230,6 +230,7 @@ export interface LovpenReactProps {
 	onArticleInfoChange?: (info: ArticleInfoData) => void;
 	onPersonalInfoChange?: (info: PersonalInfo) => void;
 	onSettingsChange?: (settings: Partial<ViteReactSettings>) => void;
+	onWidthChange?: (width: number) => void;
 }
 
 // Global interface for the exported library
