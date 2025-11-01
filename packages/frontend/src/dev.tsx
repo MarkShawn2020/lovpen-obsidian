@@ -138,31 +138,44 @@ if (rootElement) {
       try {
         if (mode === 'image') {
           // 图片复制模式
+          logger.debug('🖼️ [图片复制] 开始生成图片...');
           new webAdapter.Notice('正在生成图片...');
 
           // 查找要截图的元素 - 尝试多个选择器
+          logger.debug('🖼️ [图片复制] 查找 .lovpen 元素...');
           let articleElement = document.querySelector('.lovpen') as HTMLElement;
           if (!articleElement) {
             // 如果找不到 .lovpen，尝试查找内容容器
+            logger.debug('🖼️ [图片复制] 未找到 .lovpen，尝试 .lovpen-content-container...');
             articleElement = document.querySelector('.lovpen-content-container') as HTMLElement;
           }
           if (!articleElement) {
             new webAdapter.Notice('未找到文章内容，无法生成图片');
-            logger.error('找不到 .lovpen 或 .lovpen-content-container 元素');
+            logger.error('🖼️ [图片复制] 找不到 .lovpen 或 .lovpen-content-container 元素');
             return;
           }
+          logger.debug('🖼️ [图片复制] 找到文章元素，尺寸:', articleElement.offsetWidth, 'x', articleElement.offsetHeight);
 
           // 先对原始元素截图
+          logger.debug('🖼️ [图片复制] 开始截图...');
           const originalDataUrl = await domToPng(articleElement, {
             quality: 1,
             scale: 2, // 2倍分辨率，提高清晰度
           });
+          logger.debug('🖼️ [图片复制] 截图完成，dataUrl 长度:', originalDataUrl.length);
 
           // 创建 Image 对象加载截图
+          logger.debug('🖼️ [图片复制] 加载图片到 Image 对象...');
           const img = new Image();
           await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve();
-            img.onerror = reject;
+            img.onload = () => {
+              logger.debug('🖼️ [图片复制] 图片加载成功，尺寸:', img.width, 'x', img.height);
+              resolve();
+            };
+            img.onerror = (e) => {
+              logger.error('🖼️ [图片复制] 图片加载失败:', e);
+              reject(e);
+            };
             img.src = originalDataUrl;
           });
 
@@ -171,6 +184,7 @@ if (rootElement) {
           const canvas = document.createElement('canvas');
           canvas.width = img.width + padding * 2;
           canvas.height = img.height + padding * 2;
+          logger.debug('🖼️ [图片复制] 创建 Canvas，尺寸:', canvas.width, 'x', canvas.height);
 
           const ctx = canvas.getContext('2d');
           if (!ctx) {
@@ -183,18 +197,23 @@ if (rootElement) {
 
           // 绘制截图，添加 padding
           ctx.drawImage(img, padding, padding);
+          logger.debug('🖼️ [图片复制] 绘制完成');
 
           // 转换为 data URL
           const dataUrl = canvas.toDataURL('image/png', 1.0);
+          logger.debug('🖼️ [图片复制] 转换为 dataURL，长度:', dataUrl.length);
 
           // 将 data URL 转换为 Blob
           const response = await fetch(dataUrl);
           const blob = await response.blob();
+          logger.debug('🖼️ [图片复制] 创建 Blob，大小:', blob.size, '字节');
 
           // 复制到剪贴板
+          logger.debug('🖼️ [图片复制] 开始写入剪贴板...');
           await navigator.clipboard.write([new ClipboardItem({
             'image/png': blob
           })]);
+          logger.debug('🖼️ [图片复制] 写入剪贴板成功');
 
           new webAdapter.Notice('已复制图片到剪贴板！');
         } else {
