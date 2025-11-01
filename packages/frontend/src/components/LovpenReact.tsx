@@ -87,6 +87,10 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		});
 	}, []);
 
+	// Toolbar 自动隐藏状态（基于空间不足）
+	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
+	const containerRef = useRef<HTMLDivElement>(null);
+
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -104,11 +108,46 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				personalInfo
 			});
 
-			
+
 			isInitializedRef.current = true;
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // 只在组件挂载时执行
+
+	// 监听容器宽度变化，自动隐藏/显示 Toolbar（保证 Renderer 始终可见）
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const containerWidth = entry.contentRect.width;
+
+				// 如果用户手动隐藏了工具栏，不需要自动隐藏逻辑
+				if (!isToolbarVisible) {
+					setIsToolbarAutoHidden(false);
+					return;
+				}
+
+				// 计算所需的最小宽度
+				const rendererMinWidth = 320; // Renderer 最小宽度
+				const toolbarWidthNum = parseInt(toolbarWidth) || 420;
+				const resizerWidth = 6;
+				const minTotalWidth = rendererMinWidth + toolbarWidthNum + resizerWidth;
+
+				// 如果容器宽度不足以同时显示 Renderer 和 Toolbar，自动隐藏 Toolbar
+				const shouldHideToolbar = containerWidth < minTotalWidth;
+
+				setIsToolbarAutoHidden(shouldHideToolbar);
+			}
+		});
+
+		resizeObserver.observe(container);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [toolbarWidth, isToolbarVisible]);
 
 	// React会自动处理增量更新，无需手动操作DOM
 
@@ -176,6 +215,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 
 	return (
 		<div
+			ref={containerRef}
 			className="note-preview"
 			style={{
 				display: "flex",
@@ -186,7 +226,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				position: "relative",
 			}}
 		>
-			{/* 左侧渲染区域 - 占用剩余空间 */}
+			{/* 左侧渲染区域 - 始终可见，占用剩余空间 */}
 			<ScrollContainer
 				className="lovpen-renderer"
 				style={{
@@ -194,8 +234,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					userSelect: "text",
 					flex: "1", // 占用剩余空间
 					overflow: "auto",
-					borderRight: "1px solid var(--background-modifier-border)",
-					minWidth: "300px", // 最小宽度保护
+					borderRight: isToolbarVisible && !isToolbarAutoHidden ? "1px solid var(--background-modifier-border)" : "none",
+					minWidth: "320px", // 最小宽度保护（与阈值一致）
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
 					flexDirection: "column"
@@ -287,8 +327,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				</div>
 			</ScrollContainer>
 
-			{/* 可拖动的分隔条 */}
-			{isToolbarVisible && (
+			{/* 可拖动的分隔条 - 仅在工具栏可见且未被自动隐藏时显示 */}
+			{isToolbarVisible && !isToolbarAutoHidden && (
 				<div
 					className="column-resizer"
 					style={{
@@ -315,8 +355,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				/>
 			)}
 
-			{/* 右侧工具栏容器 - 自适应内容宽度 */}
-			{isToolbarVisible && (
+			{/* 右侧工具栏容器 - 仅在可见且未被自动隐藏时显示 */}
+			{isToolbarVisible && !isToolbarAutoHidden && (
 				<div
 					className="toolbar-container"
 					style={{

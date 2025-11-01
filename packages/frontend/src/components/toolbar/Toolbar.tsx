@@ -308,7 +308,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				style={{
 					minWidth: '320px',
 					width: '100%',
-					overflow: 'hidden'
+					maxWidth: '100%',
+					overflow: 'hidden',
+					boxSizing: 'border-box'
 				}}>
 				<BrandSection
 					onCopy={onCopy}
@@ -318,7 +320,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				/>
 
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">
-					<div className="p-3 sm:p-6" style={{minWidth: '280px'}}>
+					<div className="p-3 sm:p-6">
 						{/* 工具栏标题 */}
 						<div className="mb-6">
 							<h2 className="text-xl font-semibold text-[#181818] mb-2 tracking-tight">内容工具栏</h2>

@@ -516,7 +516,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			</div>
 
 			{/* 封面卡片区域 - 并排布局模拟最终3.25:1拼接效果 */}
-			<div className="grid grid-cols-[2.25fr_1fr] gap-2 sm:gap-3 w-full">
+			<div className="grid grid-cols-1 sm:grid-cols-[2.25fr_1fr] gap-2 sm:gap-3 w-full">
 				<CoverCard
 					coverData={cover1Data}
 					aspectRatio={2.25}

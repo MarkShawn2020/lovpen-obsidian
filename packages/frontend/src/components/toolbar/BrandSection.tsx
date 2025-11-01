@@ -26,27 +26,27 @@ export const BrandSection: React.FC<BrandSectionProps> = ({
 		<>
 			{/* 品牌标题栏 */}
 			<div className="bg-[#F9F9F7] border-b border-[#E8E6DC]">
-				<div className="px-6 py-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-4">
-							<div className="w-10 h-10 bg-[#D97757] rounded-xl flex items-center justify-center">
+				<div className="px-3 sm:px-6 py-4">
+					<div className="flex items-center justify-between gap-2">
+						<div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+							<div className="w-10 h-10 bg-[#D97757] rounded-xl flex items-center justify-center flex-shrink-0">
 								<span className="text-white font-medium text-lg">O</span>
 							</div>
-							<div className="flex items-center gap-2">
-								<h1 className="text-xl font-semibold text-[#181818] tracking-tight">Lovpen</h1>
+							<div className="flex items-center gap-2 min-w-0">
+								<h1 className="text-lg sm:text-xl font-semibold text-[#181818] tracking-tight truncate">Lovpen</h1>
 								<span
-									className="bg-[#F0EEE6] text-[#87867F] text-xs font-medium px-2 py-1 rounded-full">
+									className="bg-[#F0EEE6] text-[#87867F] text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0">
 									v{packageJson.version}
 								</span>
 							</div>
 						</div>
 
-						<div className="relative">
+						<div className="relative flex-shrink-0">
 							<Avatar
 
 
 								onClick={() => setShowDropdown(!showDropdown)}
-									className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
+									className="cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
 
 							>
 								<AvatarImage/>
