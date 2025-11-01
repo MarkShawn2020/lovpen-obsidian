@@ -10,6 +10,7 @@ import {ArticleRenderer} from "./ArticleRenderer";
 import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
+import {Sheet, SheetContent, SheetTitle, SheetDescription} from "./ui/sheet";
 
 import {logger} from "../../../shared/src/logger";
 
@@ -75,28 +76,30 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		}
 	});
 
-	// Toggle 工具栏显示状态
-	const toggleToolbar = useCallback(() => {
-		setIsToolbarVisible(prev => {
-			const newValue = !prev;
-			try {
-				localStorage.setItem('lovpen-toolbar-visible', String(newValue));
-			} catch (error) {
-				console.warn('Failed to save toolbar visibility to localStorage:', error);
-			}
-			return newValue;
-		});
-		// 标记为手动控制，禁用自动隐藏逻辑
-		setIsManualControl(true);
-		// 如果用户手动显示工具栏，清除自动隐藏状态
-		setIsToolbarAutoHidden(false);
-	}, []);
-
 	// Toolbar 自动隐藏状态（基于空间不足）
 	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
-	// 用户是否手动控制了工具栏（手动控制时禁用自动隐藏）
-	const [isManualControl, setIsManualControl] = useState(false);
+	// Sheet 模式的打开状态（当自动隐藏时使用）
+	const [isSheetOpen, setIsSheetOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
+
+	// Toggle 工具栏显示状态
+	const toggleToolbar = useCallback(() => {
+		// 如果当前是自动隐藏状态（Sheet 模式），切换 Sheet 的开关
+		if (isToolbarAutoHidden) {
+			setIsSheetOpen(prev => !prev);
+		} else {
+			// 否则切换工具栏可见性（正常模式）
+			setIsToolbarVisible(prev => {
+				const newValue = !prev;
+				try {
+					localStorage.setItem('lovpen-toolbar-visible', String(newValue));
+				} catch (error) {
+					console.warn('Failed to save toolbar visibility to localStorage:', error);
+				}
+				return newValue;
+			});
+		}
+	}, [isToolbarAutoHidden]);
 
 	// 工具栏实际是否可见（考虑自动隐藏）
 	const isToolbarActuallyVisible = isToolbarVisible && !isToolbarAutoHidden;
@@ -146,21 +149,15 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					return;
 				}
 
-				// 如果用户手动控制过工具栏，禁用自动隐藏逻辑
-				if (isManualControl) {
-					setIsToolbarAutoHidden(false);
-					return;
-				}
-
-				// 计算所需的最小宽度
-				const rendererMinWidth = 320; // Renderer 最小宽度
-				const toolbarMinWidth = 320; // Toolbar 最小宽度（关键要求）
-				const toolbarWidthNum = Math.max(parseInt(toolbarWidth) || 420, toolbarMinWidth);
+				// 计算 A(渲染器) 的实际宽度
+				// A_width = C_width - B_width - resizer_width
+				const rendererMinWidth = 320; // A 的最小宽度要求
+				const toolbarWidthNum = parseInt(toolbarWidth) || 420; // B 的实际宽度
 				const resizerWidth = 6;
-				const minTotalWidth = rendererMinWidth + toolbarWidthNum + resizerWidth;
+				const calculatedRendererWidth = containerWidth - toolbarWidthNum - resizerWidth;
 
-				// 如果容器宽度不足以同时显示 Renderer 和 Toolbar（工具栏最小320px），自动隐藏 Toolbar
-				const shouldHideToolbar = containerWidth < minTotalWidth;
+				// 如果 A 的计算宽度 < 320px，则隐藏 B，让 A 占满整个 C
+				const shouldHideToolbar = calculatedRendererWidth < rendererMinWidth;
 
 				setIsToolbarAutoHidden(shouldHideToolbar);
 
@@ -188,7 +185,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			}
 			resizeObserver.disconnect();
 		};
-	}, [toolbarWidth, isToolbarVisible, isManualControl, onWidthChange]);
+	}, [toolbarWidth, isToolbarVisible, onWidthChange]);
 
 	// React会自动处理增量更新，无需手动操作DOM
 
@@ -273,10 +270,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				style={{
 					WebkitUserSelect: "text",
 					userSelect: "text",
-					flex: "1", // 占用剩余空间
+					flex: "1", // 占用剩余空间，宽度 = C - B - resizer（当B显示时）或 C（当B隐藏时）
 					overflow: "auto",
 					borderRight: isToolbarVisible && !isToolbarAutoHidden ? "1px solid var(--background-modifier-border)" : "none",
-					minWidth: "320px", // 最小宽度保护（与阈值一致）
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
 					flexDirection: "column"
@@ -327,7 +323,11 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								e.currentTarget.style.backgroundColor = 'var(--background-primary)';
 								e.currentTarget.style.borderColor = 'var(--background-modifier-border)';
 							}}
-							title={isToolbarActuallyVisible ? '隐藏工具栏' : '显示工具栏'}
+							title={
+								isToolbarAutoHidden
+									? (isSheetOpen ? '关闭工具栏' : '打开工具栏')
+									: (isToolbarActuallyVisible ? '隐藏工具栏' : '显示工具栏')
+							}
 						>
 							<svg
 								width="16"
@@ -337,7 +337,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								xmlns="http://www.w3.org/2000/svg"
 								style={{ flexShrink: 0 }}
 							>
-								{isToolbarActuallyVisible ? (
+								{(isToolbarActuallyVisible || isSheetOpen) ? (
 									// 显示状态的图标 - 侧边栏开启
 									<>
 										<rect x="10" y="2" width="4" height="12" fill="currentColor" opacity="0.6" rx="1"/>
@@ -349,7 +349,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								)}
 							</svg>
 							<span style={{ fontSize: '12px', fontWeight: 500 }}>
-								{isToolbarActuallyVisible ? '隐藏' : '显示'}
+								{(isToolbarActuallyVisible || isSheetOpen) ? '关闭' : '打开'}
 							</span>
 						</button>
 					</div>
@@ -401,16 +401,13 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				<div
 					className="toolbar-container"
 					style={{
-						flexBasis: toolbarWidth, // 使用 flexBasis 替代 width
-						flexGrow: 0, // 不增长
-						flexShrink: 1, // 允许缩小
-						minWidth: "320px", // 最小宽度保护
-						maxWidth: toolbarWidth, // 最大宽度限制
+						width: toolbarWidth, // 用户可调整的宽度（通过拖拽），ResizeObserver确保不会使A<320px
 						height: "100%",
 						overflowY: "auto",
 						overflowX: "hidden",
 						backgroundColor: "var(--background-secondary-alt)",
-						borderLeft: "1px solid var(--background-modifier-border)"
+						borderLeft: "1px solid var(--background-modifier-border)",
+						flexShrink: 0 // 防止被压缩
 					}}
 				>
 					<Toolbar
@@ -444,7 +441,52 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				showOkButton={showOkButton}
 				onClose={closeMessage}
 			/>
-			
+
+			{/* Sheet 模式工具栏 - 当空间不足时显示 */}
+			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+				<SheetContent
+					side="right"
+					width="320px"
+					container={containerRef.current}
+					className="p-0 gap-0"
+					style={{
+						backgroundColor: "var(--background-secondary-alt)",
+					}}
+				>
+					<SheetTitle className="sr-only">工具栏</SheetTitle>
+					<SheetDescription className="sr-only">文章编辑和发布工具栏</SheetDescription>
+					<div
+						style={{
+							height: "100%",
+							overflowY: "auto",
+							overflowX: "hidden"
+						}}
+					>
+						<Toolbar
+							settings={settings}
+							plugins={plugins}
+							articleHTML={articleHTML}
+							onRefresh={onRefresh}
+							onCopy={onCopy}
+							onDistribute={onDistribute}
+							onTemplateChange={onTemplateChange}
+							onThemeChange={onThemeChange}
+							onHighlightChange={onHighlightChange}
+							onThemeColorToggle={onThemeColorToggle}
+							onThemeColorChange={onThemeColorChange}
+							onRenderArticle={onRenderArticle}
+							onSaveSettings={onSaveSettings}
+							onPluginToggle={onPluginToggle}
+							onPluginConfigChange={onPluginConfigChange}
+							onExpandedSectionsChange={onExpandedSectionsChange}
+							onArticleInfoChange={onArticleInfoChange}
+							onPersonalInfoChange={onPersonalInfoChange}
+							onSettingsChange={onSettingsChange}
+						/>
+					</div>
+				</SheetContent>
+			</Sheet>
+
 			{/* HMR 测试指示器 - 仅在开发模式显示 */}
 			{(window as any).__LOVPEN_HMR_MODE__ && <HMRTest />}
 		</div>
