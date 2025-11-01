@@ -326,6 +326,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					const dataUrl = await domToPng(articleElement, {
 						quality: 1,
 						scale: 2, // 2倍分辨率，提高清晰度
+						style: {
+							padding: '40px', // 添加 padding，让图片更美观
+						},
 					});
 
 					// 将 data URL 转换为 Blob
