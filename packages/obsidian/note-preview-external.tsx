@@ -14,6 +14,7 @@ import {ReactAPIService} from "./services/ReactAPIService";
 import {uevent} from "./utils";
 import {persistentStorageService} from "@/services/persistentStorage";
 import {logger} from "@lovpen/shared";
+import {domToPng} from "modern-screenshot";
 import {
 	ArticleInfo,
 	ExternalReactLib,
@@ -310,8 +311,37 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				break;
 
 			case 'image':
-				// 图片格式 - 暂时使用HTML格式，后续可以实现真正的图片生成
-				new Notice(`图片格式功能开发中...`);
+				// 图片格式 - 使用 modern-screenshot 生成图片
+				try {
+					new Notice(`正在生成图片...`);
+
+					// 查找要截图的元素
+					const articleElement = this.reactContainer?.querySelector('.lovpen') as HTMLElement;
+					if (!articleElement) {
+						new Notice(`未找到文章内容，无法生成图片`);
+						return;
+					}
+
+					// 使用 modern-screenshot 生成 PNG
+					const dataUrl = await domToPng(articleElement, {
+						quality: 1,
+						scale: 2, // 2倍分辨率，提高清晰度
+					});
+
+					// 将 data URL 转换为 Blob
+					const response = await fetch(dataUrl);
+					const blob = await response.blob();
+
+					// 复制到剪贴板
+					await navigator.clipboard.write([new ClipboardItem({
+						'image/png': blob
+					})]);
+
+					new Notice(`已复制图片到剪贴板！`);
+				} catch (error) {
+					logger.error('生成图片失败:', error);
+					new Notice(`生成图片失败: ${error.message}`);
+				}
 				break;
 
 			case 'zhihu':

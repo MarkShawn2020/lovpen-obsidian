@@ -50,6 +50,7 @@
 		"jotai": "^2.12.5",
 		"jszip": "^3.10.1",
 		"lucide-react": "^0.525.0",
+		"modern-screenshot": "^4.6.6",
 		"next-themes": "^0.4.6",
 		"obsidian": "^1.8.7",
 		"react": "^19.1.0",
