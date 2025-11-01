@@ -113,16 +113,18 @@ if (rootElement) {
       }
     },
     articleHTML: `
-      <h1>欢迎使用 LovPen Web 版</h1>
-      <p>这是一个独立的 Web 应用，可以将 Markdown 格式化并分发到多个平台。</p>
-      <h2>主要功能</h2>
-      <ul>
-        <li>支持多种主题和代码高亮</li>
-        <li>模板系统</li>
-        <li>多平台分发</li>
-      </ul>
-      <h2>代码示例</h2>
-      <pre><code class="language-javascript">console.log('Hello, LovPen!');</code></pre>
+      <div class="lovpen">
+        <h1>欢迎使用 LovPen Web 版</h1>
+        <p>这是一个独立的 Web 应用，可以将 Markdown 格式化并分发到多个平台。</p>
+        <h2>主要功能</h2>
+        <ul>
+          <li>支持多种主题和代码高亮</li>
+          <li>模板系统</li>
+          <li>多平台分发</li>
+        </ul>
+        <h2>代码示例</h2>
+        <pre><code class="language-javascript">console.log('Hello, LovPen!');</code></pre>
+      </div>
     `,
     cssContent: 'body { font-family: system-ui; padding: 20px; }',
     plugins: [],
@@ -138,10 +140,15 @@ if (rootElement) {
           // 图片复制模式
           new webAdapter.Notice('正在生成图片...');
 
-          // 查找要截图的元素
-          const articleElement = document.querySelector('.lovpen') as HTMLElement;
+          // 查找要截图的元素 - 尝试多个选择器
+          let articleElement = document.querySelector('.lovpen') as HTMLElement;
+          if (!articleElement) {
+            // 如果找不到 .lovpen，尝试查找内容容器
+            articleElement = document.querySelector('.lovpen-content-container') as HTMLElement;
+          }
           if (!articleElement) {
             new webAdapter.Notice('未找到文章内容，无法生成图片');
+            logger.error('找不到 .lovpen 或 .lovpen-content-container 元素');
             return;
           }
 
