@@ -64,6 +64,29 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		}
 	});
 
+	// 工具栏显示/隐藏状态
+	const [isToolbarVisible, setIsToolbarVisible] = useState(() => {
+		try {
+			const saved = localStorage.getItem('lovpen-toolbar-visible');
+			return saved === null ? true : saved === 'true';
+		} catch {
+			return true;
+		}
+	});
+
+	// Toggle 工具栏显示状态
+	const toggleToolbar = useCallback(() => {
+		setIsToolbarVisible(prev => {
+			const newValue = !prev;
+			try {
+				localStorage.setItem('lovpen-toolbar-visible', String(newValue));
+			} catch (error) {
+				console.warn('Failed to save toolbar visibility to localStorage:', error);
+			}
+			return newValue;
+		});
+	}, []);
+
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -180,13 +203,16 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			>
 				{/* 内容容器 - 保持padding，但不影响滚动 */}
 				<div className="lovpen-content-container" style={{ position: "relative" }}>
-					{/* 复制按钮容器 - 固定在右上角 */}
+					{/* 复制按钮和工具栏切换按钮容器 - 固定在右上角 */}
 					<div style={{
 						position: 'absolute',
 						top: 0,
 						right: 0,
 						zIndex: 40,
-						padding: '16px'
+						padding: '16px',
+						display: 'flex',
+						gap: '8px',
+						alignItems: 'flex-start'
 					}}>
 						<CopySplitButton
 							onCopy={(option: CopyOption) => {
@@ -194,6 +220,57 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 							onCopy(option.id);
 						}}
 						/>
+
+						{/* 工具栏切换按钮 */}
+						<button
+							onClick={toggleToolbar}
+							style={{
+								padding: '8px 12px',
+								backgroundColor: 'var(--background-primary)',
+								border: '1px solid var(--background-modifier-border)',
+								borderRadius: '6px',
+								cursor: 'pointer',
+								display: 'flex',
+								alignItems: 'center',
+								gap: '4px',
+								fontSize: '14px',
+								color: 'var(--text-normal)',
+								transition: 'all 0.2s ease',
+								boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+							}}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.backgroundColor = 'var(--background-modifier-hover)';
+								e.currentTarget.style.borderColor = 'var(--interactive-accent)';
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+								e.currentTarget.style.borderColor = 'var(--background-modifier-border)';
+							}}
+							title={isToolbarVisible ? '隐藏工具栏' : '显示工具栏'}
+						>
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 16 16"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+								style={{ flexShrink: 0 }}
+							>
+								{isToolbarVisible ? (
+									// 显示状态的图标 - 侧边栏开启
+									<>
+										<rect x="10" y="2" width="4" height="12" fill="currentColor" opacity="0.6" rx="1"/>
+										<rect x="2" y="2" width="6" height="12" fill="currentColor" rx="1"/>
+									</>
+								) : (
+									// 隐藏状态的图标 - 侧边栏关闭
+									<rect x="2" y="2" width="12" height="12" fill="currentColor" rx="1"/>
+								)}
+							</svg>
+							<span style={{ fontSize: '12px', fontWeight: 500 }}>
+								{isToolbarVisible ? '隐藏' : '显示'}
+							</span>
+						</button>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}
 					<style
@@ -211,67 +288,71 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			</ScrollContainer>
 
 			{/* 可拖动的分隔条 */}
-			<div
-				className="column-resizer"
-				style={{
-					width: "6px",
-					backgroundColor: "var(--background-modifier-border)",
-					cursor: "col-resize",
-					opacity: 0.5,
-					transition: "all 0.2s ease",
-					zIndex: 10,
-					flexShrink: 0, // 防止被压缩
-					borderRadius: "2px"
-				}}
-				onMouseDown={handleMouseDown}
-				onMouseEnter={(e) => {
-					e.currentTarget.style.opacity = "1";
-					e.currentTarget.style.backgroundColor = "var(--interactive-accent)";
-					e.currentTarget.style.width = "8px";
-				}}
-				onMouseLeave={(e) => {
-					e.currentTarget.style.opacity = "0.5";
-					e.currentTarget.style.backgroundColor = "var(--background-modifier-border)";
-					e.currentTarget.style.width = "6px";
-				}}
-			/>
+			{isToolbarVisible && (
+				<div
+					className="column-resizer"
+					style={{
+						width: "6px",
+						backgroundColor: "var(--background-modifier-border)",
+						cursor: "col-resize",
+						opacity: 0.5,
+						transition: "all 0.2s ease",
+						zIndex: 10,
+						flexShrink: 0, // 防止被压缩
+						borderRadius: "2px"
+					}}
+					onMouseDown={handleMouseDown}
+					onMouseEnter={(e) => {
+						e.currentTarget.style.opacity = "1";
+						e.currentTarget.style.backgroundColor = "var(--interactive-accent)";
+						e.currentTarget.style.width = "8px";
+					}}
+					onMouseLeave={(e) => {
+						e.currentTarget.style.opacity = "0.5";
+						e.currentTarget.style.backgroundColor = "var(--background-modifier-border)";
+						e.currentTarget.style.width = "6px";
+					}}
+				/>
+			)}
 
 			{/* 右侧工具栏容器 - 自适应内容宽度 */}
-			<div
-				className="toolbar-container"
-				style={{
-					width: toolbarWidth,
-					height: "100%",
-					overflowY: "auto",
-					overflowX: "hidden",
-					backgroundColor: "var(--background-secondary-alt)",
-					borderLeft: "1px solid var(--background-modifier-border)",
-					minWidth: "320px", // 最小宽度保护
-					flexShrink: 0 // 防止被压缩
-				}}
-			>
-				<Toolbar
-							settings={settings}
-							plugins={plugins}
-							articleHTML={articleHTML}
-							onRefresh={onRefresh}
-							onCopy={onCopy}
-							onDistribute={onDistribute}
-							onTemplateChange={onTemplateChange}
-							onThemeChange={onThemeChange}
-							onHighlightChange={onHighlightChange}
-							onThemeColorToggle={onThemeColorToggle}
-							onThemeColorChange={onThemeColorChange}
-							onRenderArticle={onRenderArticle}
-							onSaveSettings={onSaveSettings}
-							onPluginToggle={onPluginToggle}
-							onPluginConfigChange={onPluginConfigChange}
-							onExpandedSectionsChange={onExpandedSectionsChange}
-							onArticleInfoChange={onArticleInfoChange}
-							onPersonalInfoChange={onPersonalInfoChange}
-							onSettingsChange={onSettingsChange}
-					/>
-			</div>
+			{isToolbarVisible && (
+				<div
+					className="toolbar-container"
+					style={{
+						width: toolbarWidth,
+						height: "100%",
+						overflowY: "auto",
+						overflowX: "hidden",
+						backgroundColor: "var(--background-secondary-alt)",
+						borderLeft: "1px solid var(--background-modifier-border)",
+						minWidth: "320px", // 最小宽度保护
+						flexShrink: 0 // 防止被压缩
+					}}
+				>
+					<Toolbar
+								settings={settings}
+								plugins={plugins}
+								articleHTML={articleHTML}
+								onRefresh={onRefresh}
+								onCopy={onCopy}
+								onDistribute={onDistribute}
+								onTemplateChange={onTemplateChange}
+								onThemeChange={onThemeChange}
+								onHighlightChange={onHighlightChange}
+								onThemeColorToggle={onThemeColorToggle}
+								onThemeColorChange={onThemeColorChange}
+								onRenderArticle={onRenderArticle}
+								onSaveSettings={onSaveSettings}
+								onPluginToggle={onPluginToggle}
+								onPluginConfigChange={onPluginConfigChange}
+								onExpandedSectionsChange={onExpandedSectionsChange}
+								onArticleInfoChange={onArticleInfoChange}
+								onPersonalInfoChange={onPersonalInfoChange}
+								onSettingsChange={onSettingsChange}
+						/>
+				</div>
+			)}
 
 			{/* 消息模态框 */}
 			<MessageModal
