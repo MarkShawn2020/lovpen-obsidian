@@ -340,7 +340,8 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					new Notice(`已复制图片到剪贴板！`);
 				} catch (error) {
 					logger.error('生成图片失败:', error);
-					new Notice(`生成图片失败: ${error.message}`);
+					const errorMessage = error instanceof Error ? error.message : String(error);
+					new Notice(`生成图片失败: ${errorMessage}`);
 				}
 				break;
 

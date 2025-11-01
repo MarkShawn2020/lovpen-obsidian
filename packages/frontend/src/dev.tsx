@@ -4,6 +4,7 @@ import { LovpenReactBridge } from './components/LovpenReactBridge'
 import { JotaiProvider } from './providers/JotaiProvider'
 import { logger } from '../../shared/src/logger'
 import { webAdapter } from './adapters/web-adapter'
+import { domToPng } from 'modern-screenshot'
 import './index.css'
 
 // Types (we'll need to ensure these are available)
@@ -129,9 +130,62 @@ if (rootElement) {
       logger.debug('Refresh clicked');
       new webAdapter.Notice('刷新成功！');
     },
-    onCopy: () => {
-      logger.debug('Copy clicked');
-      new webAdapter.Notice('已复制到剪贴板');
+    onCopy: async (mode?: string) => {
+      logger.debug('Copy clicked, mode:', mode);
+
+      try {
+        if (mode === 'image') {
+          // 图片复制模式
+          new webAdapter.Notice('正在生成图片...');
+
+          // 查找要截图的元素
+          const articleElement = document.querySelector('.lovpen') as HTMLElement;
+          if (!articleElement) {
+            new webAdapter.Notice('未找到文章内容，无法生成图片');
+            return;
+          }
+
+          // 使用 modern-screenshot 生成 PNG
+          const dataUrl = await domToPng(articleElement, {
+            quality: 1,
+            scale: 2, // 2倍分辨率，提高清晰度
+          });
+
+          // 将 data URL 转换为 Blob
+          const response = await fetch(dataUrl);
+          const blob = await response.blob();
+
+          // 复制到剪贴板
+          await navigator.clipboard.write([new ClipboardItem({
+            'image/png': blob
+          })]);
+
+          new webAdapter.Notice('已复制图片到剪贴板！');
+        } else {
+          // HTML 复制模式
+          const articleElement = document.querySelector('.lovpen');
+          if (!articleElement) {
+            new webAdapter.Notice('未找到文章内容');
+            return;
+          }
+
+          const htmlContent = articleElement.outerHTML;
+
+          await navigator.clipboard.write([new ClipboardItem({
+            'text/html': new Blob([htmlContent], { type: 'text/html' }),
+          })]);
+
+          const modeText = mode === 'wechat' ? '（微信公众号格式）' :
+                          mode === 'zhihu' ? '（知乎格式）' :
+                          mode === 'xiaohongshu' ? '（小红书格式）' :
+                          mode === 'html' ? '（HTML格式）' : '';
+          new webAdapter.Notice(`已复制到剪贴板${modeText}`);
+        }
+      } catch (error) {
+        logger.error('复制失败:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        new webAdapter.Notice(`复制失败: ${errorMessage}`);
+      }
     },
     onDistribute: () => {
       logger.debug('Distribute clicked');
