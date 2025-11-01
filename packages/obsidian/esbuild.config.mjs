@@ -16,6 +16,8 @@ if you want to view the source, please visit the github repository of this plugi
 const prod = process.env.NODE_ENV === "production";
 const obsidianVaultPath = process.env.OBSIDIAN_VAULT_PATH;
 const obsidianPluginPath = obsidianVaultPath ? path.join(obsidianVaultPath, '.obsidian', 'plugins', 'obsidian-lovpen') : process.env.OBSIDIAN_PLUGIN_PATH;
+console.log({obsidianVaultPath, obsidianPluginPath});
+
 
 // 自动同步到 Obsidian 插件目录的函数
 const syncToObsidian = () => {
@@ -38,8 +40,7 @@ const syncToObsidian = () => {
 				stdio: 'pipe',
 				cwd: path.resolve('../..')
 			});
-			const shortPath = obsidianPluginPath.replace(process.env.HOME, '~');
-			console.log(`✅ Synced to vault: ${shortPath.split('/').slice(-1)[0]}`);
+			console.log(`✅ Synced to plugin path: ${obsidianPluginPath}`);
 		} catch (error) {
 			console.error('❌ Sync failed:', error.message);
 			process.exit(1);
