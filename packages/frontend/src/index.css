@@ -115,6 +115,11 @@
 		@apply border-border outline-ring/50;
 	}
 
+	html {
+		/* 防止下拉菜单打开时滚动条消失导致的页面抖动 */
+		scrollbar-gutter: stable;
+	}
+
 	body {
 		@apply bg-background text-foreground;
 	}
