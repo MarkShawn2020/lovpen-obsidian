@@ -133,9 +133,17 @@ if (rootElement) {
       new webAdapter.Notice('刷新成功！');
     },
     onCopy: async (mode?: string) => {
-      logger.debug('Copy clicked, mode:', mode);
+      logger.debug('🔥 [DEBUG] Copy clicked, mode:', mode, 'type:', typeof mode);
+      logger.debug('🔥 [DEBUG] mode === "image":', mode === 'image');
+      logger.debug('🔥 [DEBUG] mode === "wechat":', mode === 'wechat');
 
       try {
+        if (mode === 'image') {
+          logger.debug('🔥 [DEBUG] 进入 image 分支');
+        } else {
+          logger.debug('🔥 [DEBUG] 进入 else 分支，mode:', mode);
+        }
+
         if (mode === 'image') {
           // 图片复制模式
           logger.debug('🖼️ [图片复制] 开始生成图片...');

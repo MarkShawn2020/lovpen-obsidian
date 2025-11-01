@@ -290,11 +290,16 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	async copyArticle(mode: string = 'wechat') {
+		logger.debug('🔥 [DEBUG] copyArticle called, mode:', mode, 'type:', typeof mode);
+		logger.debug('🔥 [DEBUG] mode === "image":', mode === 'image');
+		logger.debug('🔥 [DEBUG] mode === "wechat":', mode === 'wechat');
+
 		let content = await this.getArticleContent();
 
 		// 根据不同模式处理内容
 		switch (mode) {
 			case 'wechat':
+				logger.debug('🔥 [DEBUG] 进入 wechat case');
 				// 微信公众号格式 - 默认格式
 				await navigator.clipboard.write([new ClipboardItem({
 					"text/html": new Blob([content], {type: "text/html"}),
@@ -311,6 +316,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				break;
 
 			case 'image':
+				logger.debug('🔥 [DEBUG] 进入 image case');
 				// 图片格式 - 使用 modern-screenshot 生成图片
 				try {
 					logger.debug('开始生成图片...');
