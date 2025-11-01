@@ -122,5 +122,17 @@
 
 	body {
 		@apply bg-background text-foreground;
+		/* 防止 Radix UI 修改 body 的 padding */
+		padding: 0 !important;
+	}
+
+	/* 确保 Radix UI Portal 不会影响页面布局 */
+	body[data-scroll-locked] {
+		padding-right: 0 !important;
+	}
+
+	/* 防止内容容器的 padding 被覆盖 */
+	.lovpen-content-container {
+		padding: 10px !important;
 	}
 }

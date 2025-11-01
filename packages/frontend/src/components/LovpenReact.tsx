@@ -179,7 +179,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				}}
 			>
 				{/* 内容容器 - 保持padding，但不影响滚动 */}
-				<div style={{ padding: "10px", position: "relative" }}>
+				<div className="lovpen-content-container" style={{ position: "relative" }}>
 					{/* 复制按钮容器 - 固定在右上角 */}
 					<div style={{
 						position: 'absolute',
