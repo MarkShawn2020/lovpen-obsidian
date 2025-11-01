@@ -272,6 +272,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					userSelect: "text",
 					flex: "1", // 占用剩余空间，宽度 = C - B - resizer（当B显示时）或 C（当B隐藏时）
 					overflow: "auto",
+					scrollbarGutter: "stable", // 预留滚动条空间，防止内容跳动
 					borderRight: isToolbarVisible && !isToolbarAutoHidden ? "1px solid var(--background-modifier-border)" : "none",
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
@@ -447,7 +448,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				<SheetContent
 					side="right"
 					width="320px"
-					container={containerRef.current}
 					className="p-0 gap-0"
 					style={{
 						backgroundColor: "var(--background-secondary-alt)",
