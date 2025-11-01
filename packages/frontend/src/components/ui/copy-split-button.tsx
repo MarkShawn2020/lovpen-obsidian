@@ -57,11 +57,14 @@ export const CopySplitButton: React.FC<CopySplitButtonProps> = ({
 	const [selectedOption, setSelectedOption] = useState<CopyOption>(currentOption || COPY_OPTIONS[0]);
 
 	const handleMainClick = () => {
+		console.log('🎯 [CopySplitButton] Main button clicked, selectedOption:', selectedOption);
 		onCopy(selectedOption);
 	};
 
 	const handleValueChange = (value: string) => {
+		console.log('🎯 [CopySplitButton] Dropdown value changed to:', value);
 		const option = COPY_OPTIONS.find(o => o.id === value);
+		console.log('🎯 [CopySplitButton] Found option:', option);
 		if (option) {
 			setSelectedOption(option);
 			onCopy(option);

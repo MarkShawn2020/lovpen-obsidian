@@ -5,6 +5,7 @@ import { JotaiProvider } from './providers/JotaiProvider'
 import { logger } from '../../shared/src/logger'
 import { webAdapter } from './adapters/web-adapter'
 import { domToPng } from 'modern-screenshot'
+import { findScreenshotElement } from '@lovpen/shared'
 import './index.css'
 
 // Types (we'll need to ensure these are available)
@@ -149,20 +150,16 @@ if (rootElement) {
           logger.debug('🖼️ [图片复制] 开始生成图片...');
           new webAdapter.Notice('正在生成图片...');
 
-          // 查找要截图的元素 - 尝试多个选择器
-          logger.debug('🖼️ [图片复制] 查找 .lovpen 元素...');
-          let articleElement = document.querySelector('.lovpen') as HTMLElement;
-          if (!articleElement) {
-            // 如果找不到 .lovpen，尝试查找内容容器
-            logger.debug('🖼️ [图片复制] 未找到 .lovpen，尝试 .lovpen-content-container...');
-            articleElement = document.querySelector('.lovpen-content-container') as HTMLElement;
-          }
-          if (!articleElement) {
+          // 使用共享的截图元素查找逻辑
+          const result = findScreenshotElement(document);
+          if (!result) {
             new webAdapter.Notice('未找到文章内容，无法生成图片');
-            logger.error('🖼️ [图片复制] 找不到 .lovpen 或 .lovpen-content-container 元素');
+            logger.error('🖼️ [图片复制] 找不到任何可截图的元素');
             return;
           }
-          logger.debug('🖼️ [图片复制] 找到文章元素，尺寸:', articleElement.offsetWidth, 'x', articleElement.offsetHeight);
+
+          const { element: articleElement, selector, includesTemplate } = result;
+          logger.debug(`🖼️ [图片复制] 使用选择器: ${selector}, 包含模板: ${includesTemplate}`);
 
           // 先对原始元素截图
           logger.debug('🖼️ [图片复制] 开始截图...');

@@ -189,42 +189,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						padding: '16px'
 					}}>
 						<CopySplitButton
-							onCopy={(option: CopyOption) => onCopy(option.id)}
+							onCopy={(option: CopyOption) => {
+							console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
+							onCopy(option.id);
+						}}
 						/>
 					</div>
-					{/* 关键内联样式：确保基本样式始终存在 */}
-					<style dangerouslySetInnerHTML={{ __html: `
-						.lovpen {
-							font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-							line-height: 1.6;
-							color: #333;
-						}
-						.lovpen h1, .lovpen h2, .lovpen h3 {
-							margin-top: 1em;
-							margin-bottom: 0.5em;
-							font-weight: 600;
-						}
-						.lovpen p {
-							margin-bottom: 1em;
-						}
-						.lovpen pre {
-							background: #f6f8fa;
-							padding: 1em;
-							border-radius: 6px;
-							overflow-x: auto;
-						}
-						.lovpen code {
-							background: #f6f8fa;
-							padding: 0.2em 0.4em;
-							border-radius: 3px;
-							font-size: 0.9em;
-						}
-						.lovpen pre code {
-							background: none;
-							padding: 0;
-						}
-					`}} />
-					<style 
+					{/* 动态样式：来自主题和高亮 */}
+					<style
 						title="lovpen-style"
 						ref={(el) => {
 							if (el) {

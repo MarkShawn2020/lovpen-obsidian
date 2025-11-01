@@ -13,7 +13,7 @@ import TemplateManager from "./template-manager";
 import {ReactAPIService} from "./services/ReactAPIService";
 import {uevent} from "./utils";
 import {persistentStorageService} from "@/services/persistentStorage";
-import {logger} from "@lovpen/shared";
+import {logger, findScreenshotElement} from "@lovpen/shared";
 import {domToPng} from "modern-screenshot";
 import {
 	ArticleInfo,
@@ -290,6 +290,9 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	}
 
 	async copyArticle(mode: string = 'wechat') {
+		console.log('🎯 [NotePreview] copyArticle method called, mode:', mode, 'type:', typeof mode);
+		console.log('🎯 [NotePreview] mode === "image":', mode === 'image');
+		console.log('🎯 [NotePreview] mode === "wechat":', mode === 'wechat');
 		logger.debug('🔥 [DEBUG] copyArticle called, mode:', mode, 'type:', typeof mode);
 		logger.debug('🔥 [DEBUG] mode === "image":', mode === 'image');
 		logger.debug('🔥 [DEBUG] mode === "wechat":', mode === 'wechat');
@@ -297,8 +300,10 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		let content = await this.getArticleContent();
 
 		// 根据不同模式处理内容
+		console.log('🎯 [NotePreview] About to enter switch statement, mode:', mode);
 		switch (mode) {
 			case 'wechat':
+				console.log('🎯 [NotePreview] Entered wechat case');
 				logger.debug('🔥 [DEBUG] 进入 wechat case');
 				// 微信公众号格式 - 默认格式
 				await navigator.clipboard.write([new ClipboardItem({
@@ -316,21 +321,23 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				break;
 
 			case 'image':
+				console.log('🎯 [NotePreview] Entered image case');
 				logger.debug('🔥 [DEBUG] 进入 image case');
 				// 图片格式 - 使用 modern-screenshot 生成图片
 				try {
 					logger.debug('开始生成图片...');
 					new Notice(`正在生成图片...`);
 
-					// 查找要截图的元素
-					logger.debug('查找 .lovpen 元素, reactContainer:', this.reactContainer);
-					const articleElement = this.reactContainer?.querySelector('.lovpen') as HTMLElement;
-					if (!articleElement) {
-						logger.error('未找到 .lovpen 元素');
+					// 使用共享的截图元素查找逻辑
+					const result = findScreenshotElement(this.reactContainer || document);
+					if (!result) {
+						logger.error('未找到任何可截图的元素');
 						new Notice(`未找到文章内容，无法生成图片`);
 						return;
 					}
-					logger.debug('找到文章元素，尺寸:', articleElement.offsetWidth, 'x', articleElement.offsetHeight);
+
+					const { element: articleElement, selector, includesTemplate } = result;
+					logger.debug(`使用选择器: ${selector}, 包含模板: ${includesTemplate}`);
 
 					// 先对原始元素截图
 					logger.debug('开始截图...');
@@ -656,6 +663,10 @@ ${customCSS}`;
 		this.reactContainer.style.height = '100%';
 		this.reactContainer.style.minWidth = '800px'; // 确保React容器也有最小宽度
 		this.reactContainer.id = 'lovpen-react-container';
+
+		// 🔑 关键：添加 Obsidian 环境类，启用 CSS 变量映射
+		this.reactContainer.classList.add('lovpen-obsidian-env');
+
 		this.container.appendChild(this.reactContainer);
 
 
@@ -1138,6 +1149,7 @@ ${customCSS}`;
 				uevent("refresh");
 			},
 			onCopy: async (mode?: string) => {
+				console.log('🎯 [NotePreview] onCopy callback called with mode:', mode, 'type:', typeof mode);
 				await this.copyArticle(mode);
 				uevent("copy");
 			},
