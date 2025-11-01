@@ -313,26 +313,39 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			case 'image':
 				// 图片格式 - 使用 modern-screenshot 生成图片
 				try {
+					logger.debug('开始生成图片...');
 					new Notice(`正在生成图片...`);
 
 					// 查找要截图的元素
+					logger.debug('查找 .lovpen 元素, reactContainer:', this.reactContainer);
 					const articleElement = this.reactContainer?.querySelector('.lovpen') as HTMLElement;
 					if (!articleElement) {
+						logger.error('未找到 .lovpen 元素');
 						new Notice(`未找到文章内容，无法生成图片`);
 						return;
 					}
+					logger.debug('找到文章元素，尺寸:', articleElement.offsetWidth, 'x', articleElement.offsetHeight);
 
 					// 先对原始元素截图
+					logger.debug('开始截图...');
 					const originalDataUrl = await domToPng(articleElement, {
 						quality: 1,
 						scale: 2, // 2倍分辨率，提高清晰度
 					});
+					logger.debug('截图完成，dataUrl 长度:', originalDataUrl.length);
 
 					// 创建 Image 对象加载截图
+					logger.debug('加载图片到 Image 对象...');
 					const img = new Image();
 					await new Promise<void>((resolve, reject) => {
-						img.onload = () => resolve();
-						img.onerror = reject;
+						img.onload = () => {
+							logger.debug('图片加载成功，尺寸:', img.width, 'x', img.height);
+							resolve();
+						};
+						img.onerror = (e) => {
+							logger.error('图片加载失败:', e);
+							reject(e);
+						};
 						img.src = originalDataUrl;
 					});
 
@@ -341,6 +354,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					const canvas = document.createElement('canvas');
 					canvas.width = img.width + padding * 2;
 					canvas.height = img.height + padding * 2;
+					logger.debug('创建 Canvas，尺寸:', canvas.width, 'x', canvas.height);
 
 					const ctx = canvas.getContext('2d');
 					if (!ctx) {
@@ -353,18 +367,23 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 					// 绘制截图，添加 padding
 					ctx.drawImage(img, padding, padding);
+					logger.debug('绘制完成');
 
 					// 转换为 data URL
 					const dataUrl = canvas.toDataURL('image/png', 1.0);
+					logger.debug('转换为 dataURL，长度:', dataUrl.length);
 
 					// 将 data URL 转换为 Blob
 					const response = await fetch(dataUrl);
 					const blob = await response.blob();
+					logger.debug('创建 Blob，大小:', blob.size, '字节');
 
 					// 复制到剪贴板
+					logger.debug('开始写入剪贴板...');
 					await navigator.clipboard.write([new ClipboardItem({
 						'image/png': blob
 					})]);
+					logger.debug('写入剪贴板成功');
 
 					new Notice(`已复制图片到剪贴板！`);
 				} catch (error) {
