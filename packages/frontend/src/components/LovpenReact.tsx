@@ -86,12 +86,20 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			}
 			return newValue;
 		});
+		// 标记为手动控制，禁用自动隐藏逻辑
+		setIsManualControl(true);
+		// 如果用户手动显示工具栏，清除自动隐藏状态
+		setIsToolbarAutoHidden(false);
 	}, []);
 
 	// Toolbar 自动隐藏状态（基于空间不足）
 	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
+	// 用户是否手动控制了工具栏（手动控制时禁用自动隐藏）
+	const [isManualControl, setIsManualControl] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
+	// 工具栏实际是否可见（考虑自动隐藏）
+	const isToolbarActuallyVisible = isToolbarVisible && !isToolbarAutoHidden;
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -138,13 +146,20 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					return;
 				}
 
+				// 如果用户手动控制过工具栏，禁用自动隐藏逻辑
+				if (isManualControl) {
+					setIsToolbarAutoHidden(false);
+					return;
+				}
+
 				// 计算所需的最小宽度
 				const rendererMinWidth = 320; // Renderer 最小宽度
-				const toolbarWidthNum = parseInt(toolbarWidth) || 420;
+				const toolbarMinWidth = 320; // Toolbar 最小宽度（关键要求）
+				const toolbarWidthNum = Math.max(parseInt(toolbarWidth) || 420, toolbarMinWidth);
 				const resizerWidth = 6;
 				const minTotalWidth = rendererMinWidth + toolbarWidthNum + resizerWidth;
 
-				// 如果容器宽度不足以同时显示 Renderer 和 Toolbar，自动隐藏 Toolbar
+				// 如果容器宽度不足以同时显示 Renderer 和 Toolbar（工具栏最小320px），自动隐藏 Toolbar
 				const shouldHideToolbar = containerWidth < minTotalWidth;
 
 				setIsToolbarAutoHidden(shouldHideToolbar);
@@ -173,7 +188,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			}
 			resizeObserver.disconnect();
 		};
-	}, [toolbarWidth, isToolbarVisible, onWidthChange]);
+	}, [toolbarWidth, isToolbarVisible, isManualControl, onWidthChange]);
 
 	// React会自动处理增量更新，无需手动操作DOM
 
@@ -312,7 +327,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								e.currentTarget.style.backgroundColor = 'var(--background-primary)';
 								e.currentTarget.style.borderColor = 'var(--background-modifier-border)';
 							}}
-							title={isToolbarVisible ? '隐藏工具栏' : '显示工具栏'}
+							title={isToolbarActuallyVisible ? '隐藏工具栏' : '显示工具栏'}
 						>
 							<svg
 								width="16"
@@ -322,7 +337,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								xmlns="http://www.w3.org/2000/svg"
 								style={{ flexShrink: 0 }}
 							>
-								{isToolbarVisible ? (
+								{isToolbarActuallyVisible ? (
 									// 显示状态的图标 - 侧边栏开启
 									<>
 										<rect x="10" y="2" width="4" height="12" fill="currentColor" opacity="0.6" rx="1"/>
@@ -334,7 +349,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								)}
 							</svg>
 							<span style={{ fontSize: '12px', fontWeight: 500 }}>
-								{isToolbarVisible ? '隐藏' : '显示'}
+								{isToolbarActuallyVisible ? '隐藏' : '显示'}
 							</span>
 						</button>
 					</div>
@@ -386,14 +401,16 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				<div
 					className="toolbar-container"
 					style={{
-						width: toolbarWidth,
+						flexBasis: toolbarWidth, // 使用 flexBasis 替代 width
+						flexGrow: 0, // 不增长
+						flexShrink: 1, // 允许缩小
+						minWidth: "320px", // 最小宽度保护
+						maxWidth: toolbarWidth, // 最大宽度限制
 						height: "100%",
 						overflowY: "auto",
 						overflowX: "hidden",
 						backgroundColor: "var(--background-secondary-alt)",
-						borderLeft: "1px solid var(--background-modifier-border)",
-						minWidth: "320px", // 最小宽度保护
-						flexShrink: 0 // 防止被压缩
+						borderLeft: "1px solid var(--background-modifier-border)"
 					}}
 				>
 					<Toolbar
