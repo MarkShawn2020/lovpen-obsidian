@@ -288,14 +288,55 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		}
 	}
 
-	async copyArticle() {
+	async copyArticle(mode: string = 'wechat') {
 		let content = await this.getArticleContent();
 
-		// 复制到剪贴板
-		await navigator.clipboard.write([new ClipboardItem({
-			"text/html": new Blob([content], {type: "text/html"}),
-		}),]);
-		new Notice(`已复制到剪贴板！`);
+		// 根据不同模式处理内容
+		switch (mode) {
+			case 'wechat':
+				// 微信公众号格式 - 默认格式
+				await navigator.clipboard.write([new ClipboardItem({
+					"text/html": new Blob([content], {type: "text/html"}),
+				})]);
+				new Notice(`已复制到剪贴板（微信公众号格式）！`);
+				break;
+
+			case 'html':
+				// 标准HTML格式
+				await navigator.clipboard.write([new ClipboardItem({
+					"text/html": new Blob([content], {type: "text/html"}),
+				})]);
+				new Notice(`已复制到剪贴板（HTML格式）！`);
+				break;
+
+			case 'image':
+				// 图片格式 - 暂时使用HTML格式，后续可以实现真正的图片生成
+				new Notice(`图片格式功能开发中...`);
+				break;
+
+			case 'zhihu':
+				// 知乎格式 - 目前使用HTML格式
+				await navigator.clipboard.write([new ClipboardItem({
+					"text/html": new Blob([content], {type: "text/html"}),
+				})]);
+				new Notice(`已复制到剪贴板（知乎格式）！`);
+				break;
+
+			case 'xiaohongshu':
+				// 小红书格式 - 目前使用HTML格式
+				await navigator.clipboard.write([new ClipboardItem({
+					"text/html": new Blob([content], {type: "text/html"}),
+				})]);
+				new Notice(`已复制到剪贴板（小红书格式）！`);
+				break;
+
+			default:
+				// 默认使用微信格式
+				await navigator.clipboard.write([new ClipboardItem({
+					"text/html": new Blob([content], {type: "text/html"}),
+				})]);
+				new Notice(`已复制到剪贴板！`);
+		}
 	}
 
 	updateCSSVariables() {
@@ -1011,8 +1052,8 @@ ${customCSS}`;
 				await this.renderMarkdown();
 				uevent("refresh");
 			},
-			onCopy: async () => {
-				await this.copyArticle();
+			onCopy: async (mode?: string) => {
+				await this.copyArticle(mode);
 				uevent("copy");
 			},
 			onDistribute: async () => {

@@ -81,7 +81,7 @@ export interface PluginData {
  */
 export interface UISpecificCallbacks {
 	onRefresh: () => Promise<void>;
-	onCopy: () => Promise<void>;
+	onCopy: (mode?: string) => Promise<void>;
 	onDistribute: () => Promise<void>;
 	onTemplateChange: (template: string) => Promise<void>;
 	onThemeChange: (theme: string) => Promise<void>;

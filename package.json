@@ -8,6 +8,7 @@
 		"dev": "turbo dev",
 		"dev:hmr": "node scripts/dev-hmr.mjs",
 		"dev:obsidian": "turbo dev",
+		"dev:web": "cd packages/frontend && pnpm dev:serve --port 1101 --mode standalone",
 		"build": "turbo build",
 		"check": "turbo check",
 		"download-highlights": "node scripts/download-highlights.mjs",
