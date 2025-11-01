@@ -322,14 +322,30 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 						return;
 					}
 
+					// 创建临时包裹元素来添加 padding
+					const wrapper = document.createElement('div');
+					wrapper.style.cssText = `
+						padding: 40px;
+						background-color: #ffffff;
+						display: inline-block;
+						position: absolute;
+						left: -9999px;
+						top: -9999px;
+					`;
+
+					// 克隆文章元素
+					const clonedElement = articleElement.cloneNode(true) as HTMLElement;
+					wrapper.appendChild(clonedElement);
+					document.body.appendChild(wrapper);
+
 					// 使用 modern-screenshot 生成 PNG
-					const dataUrl = await domToPng(articleElement, {
+					const dataUrl = await domToPng(wrapper, {
 						quality: 1,
 						scale: 2, // 2倍分辨率，提高清晰度
-						style: {
-							padding: '40px', // 添加 padding，让图片更美观
-						},
 					});
+
+					// 清理临时元素
+					document.body.removeChild(wrapper);
 
 					// 将 data URL 转换为 Blob
 					const response = await fetch(dataUrl);
