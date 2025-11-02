@@ -313,12 +313,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				}}>
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">
 					<div className="p-3 sm:p-6">
-						{/* 工具栏标题 */}
-						<div className="mb-6">
-							<h2 className="text-xl font-semibold text-[#181818] mb-2 tracking-tight">内容工具栏</h2>
-							<p className="text-sm text-[#87867F]">管理文章信息、样式和插件配置</p>
-						</div>
-
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
 							<TabsList
 								className="sticky top-0 z-10 grid w-full grid-cols-3 bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-1 gap-1 backdrop-blur-sm">
