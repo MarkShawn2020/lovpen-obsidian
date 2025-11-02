@@ -185,7 +185,7 @@
 
 	/* 防止内容容器的 padding 被覆盖 */
 	.lovpen-content-container {
-		padding: 10px !important;
+		padding: 0 !important;
 	}
 
 	/* ===================================
