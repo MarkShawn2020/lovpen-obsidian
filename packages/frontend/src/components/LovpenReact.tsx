@@ -277,8 +277,12 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						zIndex: 40,
 						display: 'flex',
 						gap: '8px',
-						alignItems: 'flex-start',
-						justifyContent: 'flex-end'
+						alignItems: 'center',
+						justifyContent: 'flex-end',
+						padding: '12px 16px',
+						backgroundColor: '#F9F9F7',
+						borderBottom: '1px solid #E8E6DC',
+						backdropFilter: 'blur(8px)'
 					}}>
 						<CopySplitButton
 							onCopy={(option: CopyOption) => {
