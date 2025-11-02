@@ -29,8 +29,14 @@ export const BrandSection: React.FC<BrandSectionProps> = ({
 				<div className="px-3 sm:px-6 py-4">
 					<div className="flex items-center justify-between gap-2">
 						<div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-							<div className="w-10 h-10 bg-[#D97757] rounded-xl flex items-center justify-center flex-shrink-0">
-								<span className="text-white font-medium text-lg">O</span>
+							<div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+								<svg viewBox="0 0 986.05 1080" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+									<g fill="#D97757">
+										<path d="M281.73,892.18V281.73C281.73,126.13,155.6,0,0,0l0,0v610.44C0,766.04,126.13,892.18,281.73,892.18z"/>
+										<path d="M633.91,1080V469.56c0-155.6-126.13-281.73-281.73-281.73l0,0v610.44C352.14,953.87,478.31,1080,633.91,1080L633.91,1080z"/>
+										<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
+									</g>
+								</svg>
 							</div>
 							<div className="flex items-center gap-2 min-w-0">
 								<h1 className="text-lg sm:text-xl font-semibold text-[#181818] tracking-tight truncate">Lovpen</h1>

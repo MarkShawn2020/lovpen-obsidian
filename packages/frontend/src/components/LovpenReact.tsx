@@ -278,12 +278,25 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						display: 'flex',
 						gap: '8px',
 						alignItems: 'center',
-						justifyContent: 'flex-end',
+						justifyContent: 'space-between',
 						padding: '12px 16px',
 						backgroundColor: '#F9F9F7',
 						borderBottom: '1px solid #E8E6DC',
 						backdropFilter: 'blur(8px)'
 					}}>
+						{/* Logo */}
+						<div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
+							<svg viewBox="0 0 986.05 1080" style={{ width: '100%', height: '100%' }} xmlns="http://www.w3.org/2000/svg">
+								<g fill="#D97757">
+									<path d="M281.73,892.18V281.73C281.73,126.13,155.6,0,0,0l0,0v610.44C0,766.04,126.13,892.18,281.73,892.18z"/>
+									<path d="M633.91,1080V469.56c0-155.6-126.13-281.73-281.73-281.73l0,0v610.44C352.14,953.87,478.31,1080,633.91,1080L633.91,1080z"/>
+									<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
+								</g>
+							</svg>
+						</div>
+
+						{/* 右侧按钮组 */}
+						<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
 						<CopySplitButton
 							onCopy={(option: CopyOption) => {
 							console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
@@ -345,6 +358,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								{(isToolbarActuallyVisible || isSheetOpen) ? '关闭' : '打开'}
 							</span>
 						</button>
+						</div>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}
 					<style
