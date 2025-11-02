@@ -315,7 +315,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					<div className="p-3 sm:p-6">
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
 							<TabsList
-								className="sticky top-0 z-10 grid w-full grid-cols-3 bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-1 gap-1 backdrop-blur-sm">
+								className="sticky top-0 z-10 grid w-full grid-cols-3 gap-2 backdrop-blur-sm bg-[#F9F9F7]/80 pb-4">
 								<TabsTrigger
 									value="basic"
 									className="flex items-center justify-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-3 py-3 rounded-xl transition-all"
