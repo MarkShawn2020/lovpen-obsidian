@@ -269,17 +269,22 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			>
 				{/* 内容容器 - 保持padding，但不影响滚动 */}
 				<div className="lovpen-content-container" style={{ position: "relative" }}>
-					{/* 复制按钮和工具栏切换按钮容器 - 固定在右上角 */}
+					{/* 复制按钮和工具栏切换按钮容器 - sticky 置顶区域 */}
 					<div style={{
-						position: 'absolute',
-						top: 0,
-						right: 0,
-						zIndex: 40,
-						padding: '16px',
-						display: 'flex',
-						gap: '8px',
-						alignItems: 'flex-start'
+						height: '38.16px',
+						position: 'relative'
 					}}>
+						<div style={{
+							position: 'sticky',
+							top: 0,
+							right: 0,
+							zIndex: 40,
+							padding: '16px',
+							display: 'flex',
+							gap: '8px',
+							alignItems: 'flex-start',
+							justifyContent: 'flex-end'
+						}}>
 						<CopySplitButton
 							onCopy={(option: CopyOption) => {
 							console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
@@ -341,6 +346,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								{(isToolbarActuallyVisible || isSheetOpen) ? '关闭' : '打开'}
 							</span>
 						</button>
+						</div>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}
 					<style
