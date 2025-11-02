@@ -239,16 +239,10 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 						<h3 className="text-lg font-semibold text-[#181818] tracking-tight">模板套装</h3>
 					</div>
 				</div>
-				<div className="flex gap-3">
-					<Button onClick={handleCreateKit} variant="outline" size="sm" className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium px-4 py-2">
-						<Plus className="w-4 h-4 mr-2"/>
-						创建套装
-					</Button>
-					<Button onClick={loadKits} variant="outline" size="sm" className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium px-4 py-2">
-						<RefreshCw className="w-4 h-4 mr-2"/>
-						刷新
-					</Button>
-				</div>
+				<Button onClick={handleCreateKit} variant="outline" size="sm" className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium px-4 py-2">
+					<Plus className="w-4 h-4 mr-2"/>
+					创建套装
+				</Button>
 			</div>
 
 

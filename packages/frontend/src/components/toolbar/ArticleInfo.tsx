@@ -252,7 +252,7 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 	return (
 		<div className="w-full space-y-6">
 			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
-				<h3 className="text-lg font-semibold text-[#181818] tracking-tight">文章基本信息</h3>
+				<h3 className="text-lg font-semibold text-[#181818] tracking-tight">基本信息</h3>
 				<div className="flex space-x-2">
 					<AIAnalysisSplitButton
 						isGenerating={isAIGenerating}

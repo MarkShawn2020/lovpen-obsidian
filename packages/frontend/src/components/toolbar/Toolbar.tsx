@@ -8,8 +8,9 @@ import {SettingsModal} from "../settings/SettingsModal";
 import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {CheckCircle2, FileText, Package, Plug, XCircle, Zap} from "lucide-react";
+import {FileText, Package, Plug, Zap} from "lucide-react";
 import JSZip from 'jszip';
+import {Checkbox} from "../ui/checkbox";
 
 interface ToolbarProps {
 	settings: ViteReactSettings;
@@ -121,6 +122,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		(pluginType === 'remark' ? remarkPlugins : rehypePlugins)
 			.forEach(plugin => onPluginToggle?.(plugin.name, enabled));
 		onRenderArticle();
+	};
+
+	// 计算插件的全选状态
+	const getPluginsCheckState = (plugins: UnifiedPluginData[]): boolean | 'indeterminate' => {
+		const enabledCount = plugins.filter(p => p.enabled).length;
+		if (enabledCount === 0) return false;
+		if (enabledCount === plugins.length) return true;
+		return 'indeterminate';
+	};
+
+	// 处理全选checkbox点击
+	const handleSelectAllToggle = (pluginType: 'remark' | 'rehype') => {
+		const plugins = pluginType === 'remark' ? remarkPlugins : rehypePlugins;
+		const currentState = getPluginsCheckState(plugins);
+		// 如果当前是全选或部分选中，则取消全选；如果是全不选，则全选
+		const newState = currentState === false;
+		handleBatchToggle(pluginType, newState);
 	};
 
 	// 处理插件展开/折叠
@@ -436,22 +454,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 											{remarkPlugins.length > 0 && (
 												<TabsContent value="remark" className="mt-6">
 													<div className="space-y-4">
-														<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl gap-3 sm:gap-0">
+														<div className="flex items-center p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl gap-3">
+															<Checkbox
+																checked={getPluginsCheckState(remarkPlugins)}
+																onCheckedChange={() => handleSelectAllToggle('remark')}
+																className="border-[#629A90] data-[state=checked]:bg-[#629A90]"
+															/>
 															<div>
 																<h4 className="font-semibold text-[#181818]">Remark插件</h4>
 																<p className="text-sm text-[#87867F]">Markdown语法解析插件({remarkPlugins.length}个)</p>
-															</div>
-															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
-																<button onClick={() => handleBatchToggle('remark', true)}
-																	className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm bg-[#629A90] text-white hover:bg-[#52847C] rounded-xl transition-colors font-medium">
-																	<CheckCircle2 className="h-4 w-4"/>
-																	全部启用
-																</button>
-																<button onClick={() => handleBatchToggle('remark', false)}
-																	className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm bg-transparent border border-[#87867F] text-[#181818] hover:bg-[#F0EEE6] rounded-xl transition-colors font-medium">
-																	<XCircle className="h-4 w-4"/>
-																	全部关闭
-																</button>
 															</div>
 														</div>
 														<div className="space-y-1">
@@ -471,22 +482,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 											{rehypePlugins.length > 0 && (
 												<TabsContent value="rehype" className="mt-6">
 													<div className="space-y-4">
-														<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl gap-3 sm:gap-0">
+														<div className="flex items-center p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl gap-3">
+															<Checkbox
+																checked={getPluginsCheckState(rehypePlugins)}
+																onCheckedChange={() => handleSelectAllToggle('rehype')}
+																className="border-[#97B5D5] data-[state=checked]:bg-[#97B5D5]"
+															/>
 															<div>
 																<h4 className="font-semibold text-[#181818]">Rehype插件</h4>
 																<p className="text-sm text-[#87867F]">HTML处理和转换插件({rehypePlugins.length}个)</p>
-															</div>
-															<div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 w-full sm:w-auto">
-																<button onClick={() => handleBatchToggle('rehype', true)}
-																	className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm bg-[#97B5D5] text-white hover:bg-[#7FA3C3] rounded-xl transition-colors font-medium">
-																	<CheckCircle2 className="h-4 w-4"/>
-																	全部启用
-																</button>
-																<button onClick={() => handleBatchToggle('rehype', false)}
-																	className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm bg-transparent border border-[#87867F] text-[#181818] hover:bg-[#F0EEE6] rounded-xl transition-colors font-medium">
-																	<XCircle className="h-4 w-4"/>
-																	全部关闭
-																</button>
 															</div>
 														</div>
 														<div className="space-y-1">
