@@ -9,7 +9,9 @@ import {ArticleRenderer} from "./ArticleRenderer";
 import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
-import {Sheet, SheetContent, SheetTitle, SheetDescription} from "./ui/sheet";
+import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
+import {Settings, Key} from "lucide-react";
+import packageJson from "../../package.json";
 
 import {logger} from "../../../shared/src/logger";
 
@@ -59,43 +61,12 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		}
 	});
 
-	// 工具栏显示/隐藏状态
-	const [isToolbarVisible, setIsToolbarVisible] = useState(() => {
-		try {
-			const saved = localStorage.getItem('lovpen-toolbar-visible');
-			return saved === null ? true : saved === 'true';
-		} catch {
-			return true;
-		}
-	});
-
 	// Toolbar 自动隐藏状态（基于空间不足）
 	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
-	// Sheet 模式的打开状态（当自动隐藏时使用）
-	const [isSheetOpen, setIsSheetOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// Toggle 工具栏显示状态
-	const toggleToolbar = useCallback(() => {
-		// 如果当前是自动隐藏状态（Sheet 模式），切换 Sheet 的开关
-		if (isToolbarAutoHidden) {
-			setIsSheetOpen(prev => !prev);
-		} else {
-			// 否则切换工具栏可见性（正常模式）
-			setIsToolbarVisible(prev => {
-				const newValue = !prev;
-				try {
-					localStorage.setItem('lovpen-toolbar-visible', String(newValue));
-				} catch (error) {
-					console.warn('Failed to save toolbar visibility to localStorage:', error);
-				}
-				return newValue;
-			});
-		}
-	}, [isToolbarAutoHidden]);
-
-	// 工具栏实际是否可见（考虑自动隐藏）
-	const isToolbarActuallyVisible = isToolbarVisible && !isToolbarAutoHidden;
+	// 头像下拉菜单状态
+	const [showDropdown, setShowDropdown] = useState(false);
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -136,12 +107,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				const containerWidth = entry.contentRect.width;
 				console.log('[LovpenReact] ResizeObserver fired, width:', containerWidth);
 
-				// 如果用户手动隐藏了工具栏，不需要自动隐藏逻辑
-				if (!isToolbarVisible) {
-					setIsToolbarAutoHidden(false);
-					return;
-				}
-
 				// 计算 A(渲染器) 的实际宽度
 				// A_width = C_width - B_width - resizer_width
 				const rendererMinWidth = 320; // A 的最小宽度要求
@@ -178,7 +143,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			}
 			resizeObserver.disconnect();
 		};
-	}, [toolbarWidth, isToolbarVisible, onWidthChange]);
+	}, [toolbarWidth, onWidthChange]);
 
 	// 提取 Toolbar props，避免重复代码
 	const toolbarProps = {
@@ -261,7 +226,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					flex: "1", // 占用剩余空间，宽度 = C - B - resizer（当B显示时）或 C（当B隐藏时）
 					overflow: "auto",
 					scrollbarGutter: "stable", // 预留滚动条空间，防止内容跳动
-					borderRight: isToolbarVisible && !isToolbarAutoHidden ? "1px solid var(--background-modifier-border)" : "none",
+					borderRight: !isToolbarAutoHidden ? "1px solid var(--background-modifier-border)" : "none",
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
 					flexDirection: "column"
@@ -284,80 +249,84 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						borderBottom: '1px solid #E8E6DC',
 						backdropFilter: 'blur(8px)'
 					}}>
-						{/* Logo */}
-						<div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
-							<svg viewBox="0 0 986.05 1080" style={{ width: '100%', height: '100%' }} xmlns="http://www.w3.org/2000/svg">
-								<g fill="#D97757">
-									<path d="M281.73,892.18V281.73C281.73,126.13,155.6,0,0,0l0,0v610.44C0,766.04,126.13,892.18,281.73,892.18z"/>
-									<path d="M633.91,1080V469.56c0-155.6-126.13-281.73-281.73-281.73l0,0v610.44C352.14,953.87,478.31,1080,633.91,1080L633.91,1080z"/>
-									<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
-								</g>
-							</svg>
+						{/* Logo 和版本号 */}
+						<div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+							<div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
+								<svg viewBox="0 0 986.05 1080" style={{ width: '100%', height: '100%' }} xmlns="http://www.w3.org/2000/svg">
+									<g fill="#D97757">
+										<path d="M281.73,892.18V281.73C281.73,126.13,155.6,0,0,0l0,0v610.44C0,766.04,126.13,892.18,281.73,892.18z"/>
+										<path d="M633.91,1080V469.56c0-155.6-126.13-281.73-281.73-281.73l0,0v610.44C352.14,953.87,478.31,1080,633.91,1080L633.91,1080z"/>
+										<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
+									</g>
+								</svg>
+							</div>
+							<span className="bg-[#F0EEE6] text-[#87867F] text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0">
+								v{packageJson.version}
+							</span>
 						</div>
 
 						{/* 右侧按钮组 */}
 						<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-						<CopySplitButton
-							onCopy={(option: CopyOption) => {
-							console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
-							onCopy(option.id);
-						}}
-						/>
+							<CopySplitButton
+								onCopy={(option: CopyOption) => {
+									console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
+									onCopy(option.id);
+								}}
+							/>
 
-						{/* 工具栏切换按钮 */}
-						<button
-							onClick={toggleToolbar}
-							style={{
-								padding: '8px 12px',
-								backgroundColor: 'var(--background-primary)',
-								border: '1px solid var(--background-modifier-border)',
-								borderRadius: '6px',
-								cursor: 'pointer',
-								display: 'flex',
-								alignItems: 'center',
-								gap: '4px',
-								fontSize: '14px',
-								color: 'var(--text-normal)',
-								transition: 'all 0.2s ease',
-								boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-							}}
-							onMouseEnter={(e) => {
-								e.currentTarget.style.backgroundColor = 'var(--background-modifier-hover)';
-								e.currentTarget.style.borderColor = 'var(--interactive-accent)';
-							}}
-							onMouseLeave={(e) => {
-								e.currentTarget.style.backgroundColor = 'var(--background-primary)';
-								e.currentTarget.style.borderColor = 'var(--background-modifier-border)';
-							}}
-							title={
-								isToolbarAutoHidden
-									? (isSheetOpen ? '关闭工具栏' : '打开工具栏')
-									: (isToolbarActuallyVisible ? '隐藏工具栏' : '显示工具栏')
-							}
-						>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 16 16"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-								style={{ flexShrink: 0 }}
-							>
-								{(isToolbarActuallyVisible || isSheetOpen) ? (
-									// 显示状态的图标 - 侧边栏开启
-									<>
-										<rect x="10" y="2" width="4" height="12" fill="currentColor" opacity="0.6" rx="1"/>
-										<rect x="2" y="2" width="6" height="12" fill="currentColor" rx="1"/>
-									</>
-								) : (
-									// 隐藏状态的图标 - 侧边栏关闭
-									<rect x="2" y="2" width="12" height="12" fill="currentColor" rx="1"/>
+							{/* 头像和下拉菜单 */}
+							<div style={{ position: 'relative', flexShrink: 0 }}>
+								<Avatar
+									onClick={() => setShowDropdown(!showDropdown)}
+									className="cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
+								>
+									<AvatarImage />
+									<AvatarFallback className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 text-[#D97757] shadow-sm">
+										{settings?.personalInfo?.name?.[0] ?? "L"}
+									</AvatarFallback>
+								</Avatar>
+
+								{/* 下拉菜单 */}
+								{showDropdown && (
+									<div
+										className="absolute top-12 right-0 w-48 bg-white border border-[#E8E6DC] rounded-xl shadow-lg z-50 py-2"
+									>
+										<div className="px-3 py-2 border-b border-[#F0EEE6]">
+											<p className="text-xs text-[#87867F] font-medium">用户设置</p>
+										</div>
+
+										<button
+											onClick={() => {
+												// TODO: 触发设置面板
+												setShowDropdown(false);
+											}}
+											className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#181818] hover:bg-[#F7F4EC] transition-colors"
+										>
+											<Settings className="h-4 w-4 text-[#87867F]" />
+											<span>应用设置</span>
+										</button>
+
+										<button
+											onClick={() => {
+												// TODO: 触发 Auth 管理
+												setShowDropdown(false);
+											}}
+											className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[#181818] hover:bg-[#F7F4EC] transition-colors"
+										>
+											<Key className="h-4 w-4 text-[#87867F]" />
+											<span>Auth 管理</span>
+										</button>
+									</div>
 								)}
-							</svg>
-							<span style={{ fontSize: '12px', fontWeight: 500 }}>
-								{(isToolbarActuallyVisible || isSheetOpen) ? '关闭' : '打开'}
-							</span>
-						</button>
+
+								{/* 点击外部关闭下拉菜单 */}
+								{showDropdown && (
+									<div
+										className="fixed inset-0 z-40"
+										onClick={() => setShowDropdown(false)}
+									/>
+								)}
+							</div>
 						</div>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}
@@ -375,8 +344,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				</div>
 			</ScrollContainer>
 
-			{/* 可拖动的分隔条 - 仅在工具栏可见且未被自动隐藏时显示 */}
-			{isToolbarVisible && !isToolbarAutoHidden && (
+			{/* 可拖动的分隔条 - 仅在工具栏未被自动隐藏时显示 */}
+			{!isToolbarAutoHidden && (
 				<div
 					className="column-resizer"
 					style={{
@@ -403,8 +372,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				/>
 			)}
 
-			{/* 右侧工具栏容器 - 仅在可见且未被自动隐藏时显示 */}
-			{isToolbarVisible && !isToolbarAutoHidden && (
+			{/* 右侧工具栏容器 - 仅在未被自动隐藏时显示 */}
+			{!isToolbarAutoHidden && (
 				<div
 					className="toolbar-container"
 					style={{
@@ -420,31 +389,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					<Toolbar {...toolbarProps} />
 				</div>
 			)}
-
-			{/* Sheet 模式工具栏 - 当空间不足时显示 */}
-			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen} modal={false}>
-				<SheetContent
-					side="right"
-					width="320px"
-					showOverlay={false}
-					className="p-0 gap-0"
-					style={{
-						backgroundColor: "var(--background-secondary-alt)",
-					}}
-				>
-					<SheetTitle className="sr-only">工具栏</SheetTitle>
-					<SheetDescription className="sr-only">文章编辑和发布工具栏</SheetDescription>
-					<div
-						style={{
-							height: "100%",
-							overflowY: "auto",
-							overflowX: "hidden"
-						}}
-					>
-						<Toolbar {...toolbarProps} />
-					</div>
-				</SheetContent>
-			</Sheet>
 
 			{/* HMR 测试指示器 - 仅在开发模式显示 */}
 			{(window as any).__LOVPEN_HMR_MODE__ && <HMRTest />}
