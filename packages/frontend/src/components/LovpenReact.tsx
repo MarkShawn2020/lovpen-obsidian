@@ -1,10 +1,9 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {LovpenReactProps} from "../types";
 import {Toolbar} from "./toolbar/Toolbar";
-import {MessageModal} from "./preview/MessageModal";
 import {useSetAtom, useAtomValue} from "jotai";
 import {initializeSettingsAtom} from "../store/atoms";
-import {articleHTMLAtom, cssContentAtom, staticCallbacksAtom} from "../store/contentAtoms";
+import {articleHTMLAtom, cssContentAtom} from "../store/contentAtoms";
 import {HMRTest} from "./HMRTest";
 import {ArticleRenderer} from "./ArticleRenderer";
 import {ScrollContainer} from "./ScrollContainer";
@@ -50,12 +49,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
 	const isInitializedRef = useRef(false);
-
-	// HMR模式检查
-
-	const [isMessageVisible, setIsMessageVisible] = useState(false);
-	const [messageTitle, setMessageTitle] = useState("");
-	const [showOkButton, setShowOkButton] = useState(false);
 
 	// 工具栏宽度状态 - 从localStorage恢复或使用默认宽度
 	const [toolbarWidth, setToolbarWidth] = useState<string>(() => {
@@ -187,34 +180,28 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		};
 	}, [toolbarWidth, isToolbarVisible, onWidthChange]);
 
-	// React会自动处理增量更新，无需手动操作DOM
-
-	// 暂时移除MathJax自动加载，避免与现有数学公式渲染冲突
-	// 等原有渲染恢复正常后再考虑如何集成
-
-	// 显示加载消息
-	const showLoading = useCallback((msg: string) => {
-		setMessageTitle(msg);
-		setShowOkButton(false);
-		setIsMessageVisible(true);
-	}, []);
-
-	// 显示消息
-	const showMsg = useCallback((msg: string) => {
-		setMessageTitle(msg);
-		setShowOkButton(true);
-		setIsMessageVisible(true);
-	}, []);
-
-	// 为了避免编译错误，我们保持这些方法的引用
-	// showLoading 和 showMsg 方法在实际使用中会被调用
-	void showLoading;
-	void showMsg;
-
-	// 关闭消息
-	const closeMessage = useCallback(() => {
-		setIsMessageVisible(false);
-	}, []);
+	// 提取 Toolbar props，避免重复代码
+	const toolbarProps = {
+		settings,
+		plugins,
+		articleHTML,
+		onRefresh,
+		onCopy,
+		onDistribute,
+		onTemplateChange,
+		onThemeChange,
+		onHighlightChange,
+		onThemeColorToggle,
+		onThemeColorChange,
+		onRenderArticle,
+		onSaveSettings,
+		onPluginToggle,
+		onPluginConfigChange,
+		onExpandedSectionsChange,
+		onArticleInfoChange,
+		onPersonalInfoChange,
+		onSettingsChange,
+	};
 
 	// 拖拽调整工具栏宽度的处理
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -262,6 +249,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				width: "100%",
 				overflow: "hidden",
 				position: "relative",
+				isolation: "isolate", // 创建新的层叠上下文，防止外部动画影响
 			}}
 		>
 			{/* 左侧渲染区域 - 始终可见，占用剩余空间 */}
@@ -411,43 +399,16 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						flexShrink: 0 // 防止被压缩
 					}}
 				>
-					<Toolbar
-								settings={settings}
-								plugins={plugins}
-								articleHTML={articleHTML}
-								onRefresh={onRefresh}
-								onCopy={onCopy}
-								onDistribute={onDistribute}
-								onTemplateChange={onTemplateChange}
-								onThemeChange={onThemeChange}
-								onHighlightChange={onHighlightChange}
-								onThemeColorToggle={onThemeColorToggle}
-								onThemeColorChange={onThemeColorChange}
-								onRenderArticle={onRenderArticle}
-								onSaveSettings={onSaveSettings}
-								onPluginToggle={onPluginToggle}
-								onPluginConfigChange={onPluginConfigChange}
-								onExpandedSectionsChange={onExpandedSectionsChange}
-								onArticleInfoChange={onArticleInfoChange}
-								onPersonalInfoChange={onPersonalInfoChange}
-								onSettingsChange={onSettingsChange}
-						/>
+					<Toolbar {...toolbarProps} />
 				</div>
 			)}
 
-			{/* 消息模态框 */}
-			<MessageModal
-				isVisible={isMessageVisible}
-				title={messageTitle}
-				showOkButton={showOkButton}
-				onClose={closeMessage}
-			/>
-
 			{/* Sheet 模式工具栏 - 当空间不足时显示 */}
-			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen} modal={false}>
 				<SheetContent
 					side="right"
 					width="320px"
+					showOverlay={false}
 					className="p-0 gap-0"
 					style={{
 						backgroundColor: "var(--background-secondary-alt)",
@@ -462,27 +423,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 							overflowX: "hidden"
 						}}
 					>
-						<Toolbar
-							settings={settings}
-							plugins={plugins}
-							articleHTML={articleHTML}
-							onRefresh={onRefresh}
-							onCopy={onCopy}
-							onDistribute={onDistribute}
-							onTemplateChange={onTemplateChange}
-							onThemeChange={onThemeChange}
-							onHighlightChange={onHighlightChange}
-							onThemeColorToggle={onThemeColorToggle}
-							onThemeColorChange={onThemeColorChange}
-							onRenderArticle={onRenderArticle}
-							onSaveSettings={onSaveSettings}
-							onPluginToggle={onPluginToggle}
-							onPluginConfigChange={onPluginConfigChange}
-							onExpandedSectionsChange={onExpandedSectionsChange}
-							onArticleInfoChange={onArticleInfoChange}
-							onPersonalInfoChange={onPersonalInfoChange}
-							onSettingsChange={onSettingsChange}
-						/>
+						<Toolbar {...toolbarProps} />
 					</div>
 				</SheetContent>
 			</Sheet>
