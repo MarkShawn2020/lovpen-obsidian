@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {BrandSection} from "./BrandSection";
 import {TemplateKitSelector} from "./TemplateKitSelector";
 import {CoverDesigner} from "./CoverDesigner";
 import {ArticleInfo, ArticleInfoData} from "./ArticleInfo";
@@ -312,13 +311,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					overflow: 'hidden',
 					boxSizing: 'border-box'
 				}}>
-				<BrandSection
-					onCopy={onCopy}
-					onSettings={() => setIsSettingsModalOpen(true)}
-					avatarConfig={settings.personalInfo?.avatar}
-					userName={settings.personalInfo?.name}
-				/>
-
 				<div className="flex-1 overflow-y-auto overflow-x-hidden">
 					<div className="p-3 sm:p-6">
 						{/* 工具栏标题 */}
@@ -329,7 +321,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
 							<TabsList
-								className="grid w-full grid-cols-3 bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-1 gap-1">
+								className="sticky top-0 z-10 grid w-full grid-cols-3 bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-1 gap-1 backdrop-blur-sm">
 								<TabsTrigger
 									value="basic"
 									className="flex items-center justify-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-3 py-3 rounded-xl transition-all"
