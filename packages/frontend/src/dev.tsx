@@ -163,17 +163,64 @@ if (rootElement) {
 
           // 先对原始元素截图
           logger.debug('🖼️ [图片复制] 开始截图...');
+
+          // 预处理：为所有图片设置 crossOrigin 属性以支持跨域，并等待图片加载
+          const images = articleElement.querySelectorAll('img');
+          const originalCrossOrigins = new Map<HTMLImageElement, string | null>();
+
+          // 保存原始 crossOrigin 并设置新值
+          images.forEach(img => {
+            originalCrossOrigins.set(img, img.getAttribute('crossOrigin'));
+            img.crossOrigin = 'anonymous';
+          });
+
+          // 等待所有图片重新加载（带 crossOrigin）
+          await Promise.all(
+            Array.from(images).map(img => {
+              if (img.complete) {
+                return Promise.resolve();
+              }
+              return new Promise<void>((resolve, reject) => {
+                const timer = setTimeout(() => {
+                  logger.warn('🖼️ [图片复制] 图片加载超时:', img.src);
+                  resolve(); // 超时也继续
+                }, 5000);
+
+                img.onload = () => {
+                  clearTimeout(timer);
+                  resolve();
+                };
+                img.onerror = () => {
+                  clearTimeout(timer);
+                  logger.warn('🖼️ [图片复制] 图片加载失败:', img.src);
+                  resolve(); // 失败也继续
+                };
+
+                // 触发重新加载
+                const src = img.src;
+                img.src = '';
+                img.src = src;
+              });
+            })
+          );
+
+          logger.debug('🖼️ [图片复制] 所有图片加载完成，开始截图');
+
           const originalDataUrl = await domToPng(articleElement, {
             quality: 1,
             scale: 2, // 2倍分辨率，提高清晰度
-            fetch: {
-              requestInit: {
-                mode: 'cors',
-                credentials: 'omit'
-              }
-            }
           });
           logger.debug('🖼️ [图片复制] 截图完成，dataUrl 长度:', originalDataUrl.length);
+
+          // 恢复原始 crossOrigin 属性
+          images.forEach(img => {
+            const original = originalCrossOrigins.get(img);
+            if (original === null || original === undefined) {
+              img.removeAttribute('crossOrigin');
+            } else {
+              img.crossOrigin = original;
+            }
+          });
 
           // 创建 Image 对象加载截图
           logger.debug('🖼️ [图片复制] 加载图片到 Image 对象...');
