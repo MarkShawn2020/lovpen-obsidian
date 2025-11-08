@@ -164,47 +164,46 @@ if (rootElement) {
           // 先对原始元素截图
           logger.debug('🖼️ [图片复制] 开始截图...');
 
-          // 预处理：为所有图片设置 crossOrigin 属性以支持跨域，并等待图片加载
+          // 预处理：将外部图片转换为 data URL 以避免 CORS 问题
           const images = articleElement.querySelectorAll('img');
-          const originalCrossOrigins = new Map<HTMLImageElement, string | null>();
+          const imageData = new Map<HTMLImageElement, { originalSrc: string; dataUrl?: string }>();
 
-          // 保存原始 crossOrigin 并设置新值
-          images.forEach(img => {
-            originalCrossOrigins.set(img, img.getAttribute('crossOrigin'));
-            img.crossOrigin = 'anonymous';
-          });
-
-          // 等待所有图片重新加载（带 crossOrigin）
+          // 使用 fetch 获取图片并转换为 data URL
           await Promise.all(
-            Array.from(images).map(img => {
-              if (img.complete) {
-                return Promise.resolve();
+            Array.from(images).map(async (img) => {
+              const src = img.src;
+              imageData.set(img, { originalSrc: src });
+
+              // 跳过已经是 data URL 的图片
+              if (src.startsWith('data:')) {
+                return;
               }
-              return new Promise<void>((resolve, reject) => {
-                const timer = setTimeout(() => {
-                  logger.warn('🖼️ [图片复制] 图片加载超时:', img.src);
-                  resolve(); // 超时也继续
-                }, 5000);
 
-                img.onload = () => {
-                  clearTimeout(timer);
-                  resolve();
-                };
-                img.onerror = () => {
-                  clearTimeout(timer);
-                  logger.warn('🖼️ [图片复制] 图片加载失败:', img.src);
-                  resolve(); // 失败也继续
-                };
+              try {
+                logger.debug('🖼️ [图片复制] 正在加载图片:', src);
+                // 使用 fetch 获取图片（Web 环境）
+                const response = await fetch(src);
+                const blob = await response.blob();
 
-                // 触发重新加载
-                const src = img.src;
-                img.src = '';
-                img.src = src;
-              });
+                // 转换为 data URL
+                const dataUrl = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result as string);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(blob);
+                });
+
+                imageData.get(img)!.dataUrl = dataUrl;
+                img.src = dataUrl;
+                logger.debug('🖼️ [图片复制] 图片已转换为 data URL:', src);
+              } catch (error) {
+                logger.warn('🖼️ [图片复制] 图片加载失败，将使用原始 URL:', src, error);
+                // 失败也继续，使用原始 URL
+              }
             })
           );
 
-          logger.debug('🖼️ [图片复制] 所有图片加载完成，开始截图');
+          logger.debug('🖼️ [图片复制] 所有图片预处理完成，开始截图');
 
           const originalDataUrl = await domToPng(articleElement, {
             quality: 1,
@@ -212,13 +211,11 @@ if (rootElement) {
           });
           logger.debug('🖼️ [图片复制] 截图完成，dataUrl 长度:', originalDataUrl.length);
 
-          // 恢复原始 crossOrigin 属性
+          // 恢复原始图片 URL
           images.forEach(img => {
-            const original = originalCrossOrigins.get(img);
-            if (original === null || original === undefined) {
-              img.removeAttribute('crossOrigin');
-            } else {
-              img.crossOrigin = original;
+            const data = imageData.get(img);
+            if (data && data.dataUrl) {
+              img.src = data.originalSrc;
             }
           });
 
