@@ -345,6 +345,12 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					const originalDataUrl = await domToPng(articleElement, {
 						quality: 1,
 						scale: 2, // 2倍分辨率，提高清晰度
+						fetch: {
+							requestInit: {
+								mode: 'cors',
+								credentials: 'omit'
+							}
+						}
 					});
 					logger.debug('截图完成，dataUrl 长度:', originalDataUrl.length);
 
