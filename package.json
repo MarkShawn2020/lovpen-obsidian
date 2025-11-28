@@ -5,10 +5,7 @@
 	"main": "dist/main.js",
 	"packageManager": "pnpm@10.12.1",
 	"scripts": {
-		"dev": "node scripts/dev-hmr.mjs",
-		"dev:turbo": "turbo dev",
-		"dev:hmr": "node scripts/dev-hmr.mjs",
-		"dev:obsidian": "turbo dev",
+		"dev": "turbo dev",
 		"dev:web": "cd packages/frontend && pnpm dev:serve --port 1101 --mode standalone",
 		"build": "turbo build",
 		"check": "turbo check",
