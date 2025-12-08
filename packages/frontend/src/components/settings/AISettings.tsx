@@ -37,7 +37,6 @@ import {
 } from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 import { OPENROUTER_MODELS, testAIConnection } from '../../services/aiService';
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '../ui/accordion';
 
 // 可用的AI模型定义
 const AVAILABLE_MODELS: AIModel[] = [
@@ -106,7 +105,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 	const [isTestingConnection, setIsTestingConnection] = useState(false);
 	const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 	const [errorMessage, setErrorMessage] = useState<string>('');
-	const [expandedItem, setExpandedItem] = useState<string | undefined>(aiProvider);
+
 
 	useEffect(() => {
 		setAiProvider(settings.aiProvider || 'claude');
@@ -240,7 +239,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setAiPromptTemplate(getDefaultPromptTemplate());
 	};
 
-	// Claude配置组件
+	// Claude配置组件 - 温暖学术风格
 	const ClaudeConfiguration = () => (
 		<div className="space-y-4">
 			<FormInput
@@ -255,8 +254,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			/>
 
 			<div className="space-y-2">
-				<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-					<Brain className="w-4 h-4 text-indigo-600"/>
+				<label className="text-sm font-medium text-[#181818] flex items-center gap-2">
+					<Brain className="w-4 h-4 text-[#CC785C]"/>
 					AI 模型选择
 				</label>
 				<Select value={selectedModel} onValueChange={handleModelChange}>
@@ -275,15 +274,15 @@ export const AISettings: React.FC<AISettingsProps> = ({
 										<div>
 											<span className="font-medium">{model.name}</span>
 											{model.recommended && (
-												<span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">推荐</span>
+												<span className="ml-2 text-xs bg-[#7C9A5E]/10 text-[#7C9A5E] px-2 py-0.5 rounded-full">推荐</span>
 											)}
-											<div className="text-xs text-gray-500">{model.description}</div>
+											<div className="text-xs text-[#87867F]">{model.description}</div>
 										</div>
 									</div>
 								</SelectItem>
 							))}
 						</SelectGroup>
-						
+
 						<SelectGroup>
 							<SelectLabel className="flex items-center gap-2">
 								<Target className="w-3 h-3"/>
@@ -294,13 +293,13 @@ export const AISettings: React.FC<AISettingsProps> = ({
 									<div className="flex items-center justify-between w-full">
 										<div>
 											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-gray-500">{model.description}</div>
+											<div className="text-xs text-[#87867F]">{model.description}</div>
 										</div>
 									</div>
 								</SelectItem>
 							))}
 						</SelectGroup>
-						
+
 						<SelectGroup>
 							<SelectLabel className="flex items-center gap-2">
 								<Brain className="w-3 h-3"/>
@@ -311,7 +310,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 									<div className="flex items-center justify-between w-full">
 										<div>
 											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-gray-500">{model.description}</div>
+											<div className="text-xs text-[#87867F]">{model.description}</div>
 										</div>
 									</div>
 								</SelectItem>
@@ -319,27 +318,27 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						</SelectGroup>
 					</SelectContent>
 				</Select>
-				
+
 				{/* 显示当前选择模型的详细信息 */}
 				{(() => {
 					const currentModel = AVAILABLE_MODELS.find(m => m.id === selectedModel);
 					if (currentModel) {
-						const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
-							currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
+						const priceColor = currentModel.pricing === 'low' ? 'text-[#7C9A5E]' :
+							currentModel.pricing === 'medium' ? 'text-[#CC785C]' : 'text-[#B85450]';
 						const priceText = currentModel.pricing === 'low' ? '低成本' :
 							currentModel.pricing === 'medium' ? '中等成本' : '高成本';
-						
+
 						return (
-							<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+							<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl p-3">
 								<div className="flex items-center justify-between">
-									<div className="text-sm text-gray-700">
+									<div className="text-sm text-[#181818]">
 										<span className="font-medium">当前选择：</span> {currentModel.name}
 									</div>
-									<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
+									<div className={`text-xs px-2 py-1 rounded-full bg-white border border-[#E8E6DC] ${priceColor}`}>
 										{priceText}
 									</div>
 								</div>
-								<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
+								<div className="text-xs text-[#87867F] mt-1">{currentModel.description}</div>
 							</div>
 						);
 					}
@@ -352,7 +351,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 					onClick={testConnection}
 					disabled={isTestingConnection || !claudeApiKey.trim()}
 					size="sm"
-					className="bg-blue-600 hover:bg-blue-700 text-white"
+					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl"
 				>
 					{isTestingConnection ? (
 						<>
@@ -368,14 +367,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 				</Button>
 
 				{connectionStatus === 'success' && (
-					<div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+					<div className="flex items-center gap-2 text-[#7C9A5E] bg-[#7C9A5E]/10 px-3 py-2 rounded-xl">
 						<CheckCircle className="w-4 h-4"/>
 						<span className="text-sm font-medium">连接成功</span>
 					</div>
 				)}
 
 				{connectionStatus === 'error' && (
-					<div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+					<div className="flex items-center gap-2 text-[#B85450] bg-[#B85450]/10 px-3 py-2 rounded-xl">
 						<XCircle className="w-4 h-4"/>
 						<span className="text-sm font-medium">连接失败</span>
 					</div>
@@ -383,8 +382,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			</div>
 
 			{errorMessage && (
-				<div className="bg-red-50 border border-red-200 rounded-lg p-3">
-					<p className="text-red-600 text-sm flex items-center gap-2">
+				<div className="bg-[#B85450]/10 border border-[#B85450]/20 rounded-xl p-3">
+					<p className="text-[#B85450] text-sm flex items-center gap-2">
 						<XCircle className="w-4 h-4"/>
 						{errorMessage}
 					</p>
@@ -392,27 +391,27 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			)}
 
 			{/* API密钥安全说明 */}
-			<div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+			<div className="bg-[#CC785C]/10 border border-[#CC785C]/20 rounded-xl p-3">
 				<div className="flex items-start gap-2">
-					<Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-amber-800">
+					<Info className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-[#181818]">
 						<p className="font-medium">安全提醒</p>
-						<p className="mt-1">API密钥仅在本地存储，不会上传到任何服务器。</p>
+						<p className="mt-1 text-[#87867F]">API密钥仅在本地存储，不会上传到任何服务器。</p>
 					</div>
 				</div>
 			</div>
 
 			{/* 获取密钥指南 */}
-			<div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+			<div className="mt-4 p-4 bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl">
 				<div className="flex items-start gap-2">
-					<Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-blue-800">
+					<Info className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-[#181818]">
 						<p className="font-medium mb-1">如何获取Claude API密钥？</p>
 						<a
 							href="https://console.anthropic.com/"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-blue-600 hover:text-blue-800 underline"
+							className="text-[#CC785C] hover:text-[#B86A4E] underline"
 						>
 							访问Anthropic Console
 						</a>
@@ -422,7 +421,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		</div>
 	);
 
-	// OpenRouter配置组件
+	// OpenRouter配置组件 - 温暖学术风格
 	const OpenRouterConfiguration = () => (
 		<div className="space-y-4">
 			<FormInput
@@ -442,8 +441,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			/>
 
 			<div className="space-y-2">
-				<label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-					<Brain className="w-4 h-4 text-indigo-600"/>
+				<label className="text-sm font-medium text-[#181818] flex items-center gap-2">
+					<Brain className="w-4 h-4 text-[#CC785C]"/>
 					模型选择
 				</label>
 				<Select value={openRouterModel} onValueChange={(value) => {
@@ -466,13 +465,13 @@ export const AISettings: React.FC<AISettingsProps> = ({
 									<div className="flex items-center justify-between w-full">
 										<div>
 											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-gray-500">{model.description}</div>
+											<div className="text-xs text-[#87867F]">{model.description}</div>
 										</div>
 									</div>
 								</SelectItem>
 							))}
 						</SelectGroup>
-						
+
 						<SelectGroup>
 							<SelectLabel className="flex items-center gap-2">
 								<Target className="w-3 h-3"/>
@@ -483,13 +482,13 @@ export const AISettings: React.FC<AISettingsProps> = ({
 									<div className="flex items-center justify-between w-full">
 										<div>
 											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-gray-500">{model.description}</div>
+											<div className="text-xs text-[#87867F]">{model.description}</div>
 										</div>
 									</div>
 								</SelectItem>
 							))}
 						</SelectGroup>
-						
+
 						<SelectGroup>
 							<SelectLabel className="flex items-center gap-2">
 								<Brain className="w-3 h-3"/>
@@ -500,7 +499,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 									<div className="flex items-center justify-between w-full">
 										<div>
 											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-gray-500">{model.description}</div>
+											<div className="text-xs text-[#87867F]">{model.description}</div>
 										</div>
 									</div>
 								</SelectItem>
@@ -508,27 +507,27 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						</SelectGroup>
 					</SelectContent>
 				</Select>
-				
+
 				{/* 显示当前选择模型的详细信息 */}
 				{(() => {
 					const currentModel = OPENROUTER_MODELS.find(m => m.id === openRouterModel);
 					if (currentModel) {
-						const priceColor = currentModel.pricing === 'low' ? 'text-green-600' :
-							currentModel.pricing === 'medium' ? 'text-yellow-600' : 'text-red-600';
+						const priceColor = currentModel.pricing === 'low' ? 'text-[#7C9A5E]' :
+							currentModel.pricing === 'medium' ? 'text-[#CC785C]' : 'text-[#B85450]';
 						const priceText = currentModel.pricing === 'low' ? '低成本' :
 							currentModel.pricing === 'medium' ? '中等成本' : '高成本';
-						
+
 						return (
-							<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+							<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl p-3">
 								<div className="flex items-center justify-between">
-									<div className="text-sm text-gray-700">
+									<div className="text-sm text-[#181818]">
 										<span className="font-medium">当前选择：</span> {currentModel.name}
 									</div>
-									<div className={`text-xs px-2 py-1 rounded-full bg-white border ${priceColor}`}>
+									<div className={`text-xs px-2 py-1 rounded-full bg-white border border-[#E8E6DC] ${priceColor}`}>
 										{priceText}
 									</div>
 								</div>
-								<div className="text-xs text-gray-600 mt-1">{currentModel.description}</div>
+								<div className="text-xs text-[#87867F] mt-1">{currentModel.description}</div>
 							</div>
 						);
 					}
@@ -541,7 +540,7 @@ export const AISettings: React.FC<AISettingsProps> = ({
 					onClick={testConnection}
 					disabled={isTestingConnection || !openRouterApiKey.trim()}
 					size="sm"
-					className="bg-purple-600 hover:bg-purple-700 text-white"
+					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl"
 				>
 					{isTestingConnection ? (
 						<>
@@ -557,14 +556,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 				</Button>
 
 				{connectionStatus === 'success' && (
-					<div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+					<div className="flex items-center gap-2 text-[#7C9A5E] bg-[#7C9A5E]/10 px-3 py-2 rounded-xl">
 						<CheckCircle className="w-4 h-4"/>
 						<span className="text-sm font-medium">连接成功</span>
 					</div>
 				)}
 
 				{connectionStatus === 'error' && (
-					<div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+					<div className="flex items-center gap-2 text-[#B85450] bg-[#B85450]/10 px-3 py-2 rounded-xl">
 						<XCircle className="w-4 h-4"/>
 						<span className="text-sm font-medium">连接失败</span>
 					</div>
@@ -572,8 +571,8 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			</div>
 
 			{errorMessage && (
-				<div className="bg-red-50 border border-red-200 rounded-lg p-3">
-					<p className="text-red-600 text-sm flex items-center gap-2">
+				<div className="bg-[#B85450]/10 border border-[#B85450]/20 rounded-xl p-3">
+					<p className="text-[#B85450] text-sm flex items-center gap-2">
 						<XCircle className="w-4 h-4"/>
 						{errorMessage}
 					</p>
@@ -581,12 +580,12 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			)}
 
 			{/* OpenRouter优势说明 */}
-			<div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+			<div className="bg-[#CC785C]/10 border border-[#CC785C]/20 rounded-xl p-3">
 				<div className="flex items-start gap-2">
-					<Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-purple-800">
+					<Sparkles className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-[#181818]">
 						<p className="font-medium">OpenRouter优势</p>
-						<ul className="mt-1 space-y-1 text-xs">
+						<ul className="mt-1 space-y-1 text-xs text-[#87867F]">
 							<li>• 支持多种AI模型（GPT、Claude、Gemini等）</li>
 							<li>• 结构化输出确保返回格式正确</li>
 							<li>• 统一的API接口，切换模型更方便</li>
@@ -596,16 +595,16 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			</div>
 
 			{/* 获取密钥指南 */}
-			<div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+			<div className="mt-4 p-4 bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl">
 				<div className="flex items-start gap-2">
-					<Info className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-purple-800">
+					<Info className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
+					<div className="text-sm text-[#181818]">
 						<p className="font-medium mb-1">如何获取OpenRouter API密钥？</p>
 						<a
 							href="https://openrouter.ai/keys"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-purple-600 hover:text-purple-800 underline"
+							className="text-[#CC785C] hover:text-[#B86A4E] underline"
 						>
 							访问OpenRouter Keys
 						</a>
@@ -615,24 +614,24 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		</div>
 	);
 
-	// 公共提示词模板配置组件
+	// 公共提示词模板配置组件 - 温暖学术风格
 	const CommonPromptConfiguration = () => (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-3">
-					<div className="p-2 bg-purple-100 rounded-lg">
-						<Code className="h-5 w-5 text-purple-600"/>
+					<div className="p-2 bg-[#CC785C]/10 rounded-xl">
+						<Code className="h-5 w-5 text-[#CC785C]"/>
 					</div>
 					<div>
-						<h4 className="font-semibold text-gray-900">提示词模板</h4>
-						<p className="text-sm text-gray-600">自定义AI分析的指令模板（支持Handlebars语法）</p>
+						<h4 className="font-semibold text-[#181818]">提示词模板</h4>
+						<p className="text-sm text-[#87867F]">自定义AI分析的指令模板（支持Handlebars语法）</p>
 					</div>
 				</div>
 				<Button
 					onClick={handleUseDefaultTemplate}
 					size="sm"
 					variant="outline"
-					className="text-purple-600 border-purple-300 hover:bg-purple-50"
+					className="text-[#CC785C] border-[#CC785C]/30 hover:bg-[#CC785C]/5 rounded-xl"
 				>
 					<RefreshCw className="w-4 h-4 mr-2"/>
 					恢复默认
@@ -643,14 +642,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 				value={aiPromptTemplate}
 				onChange={(e) => handlePromptTemplateChange(e.target.value)}
 				placeholder="输入自定义的AI提示词模板..."
-				className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-0 h-40 resize-y font-mono text-sm transition-colors"
+				className="w-full px-4 py-3 border-2 border-[#E8E6DC] rounded-xl focus:outline-none focus:border-[#CC785C] focus:ring-0 h-40 resize-y font-mono text-sm transition-colors bg-white text-[#181818] placeholder:text-[#87867F]"
 			/>
 
 			{/* 模板变量说明 */}
-			<div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
+			<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-4">
 				<div className="flex items-center gap-2 mb-3">
-					<Code className="h-4 w-4 text-yellow-600"/>
-					<h5 className="text-sm font-medium text-yellow-800">可用的模板变量</h5>
+					<Code className="h-4 w-4 text-[#CC785C]"/>
+					<h5 className="text-sm font-medium text-[#181818]">可用的模板变量</h5>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
 					{[
@@ -661,9 +660,9 @@ export const AISettings: React.FC<AISettingsProps> = ({
 						{var: '{{frontmatter}}', desc: '当前文档的frontmatter对象'},
 						{var: '{{today}}', desc: '当前日期（YYYY-MM-DD格式）'}
 					].map((item, index) => (
-						<div key={index} className="bg-white/60 border border-yellow-200 rounded-lg p-2">
-							<code className="text-yellow-700 font-medium">{item.var}</code>
-							<p className="text-yellow-600 mt-1">{item.desc}</p>
+						<div key={index} className="bg-white border border-[#E8E6DC] rounded-xl p-2">
+							<code className="text-[#CC785C] font-medium">{item.var}</code>
+							<p className="text-[#87867F] mt-1">{item.desc}</p>
 						</div>
 					))}
 				</div>
@@ -673,143 +672,101 @@ export const AISettings: React.FC<AISettingsProps> = ({
 
 	return (
 		<div className="space-y-6">
-			{/* 头部说明 */}
+			{/* 头部说明 - 温暖学术风格 */}
 			<div className="text-center">
 				<div className="flex items-center justify-center gap-2 mb-2">
-					<Bot className="h-6 w-6 text-blue-600"/>
-					<h3 className="text-lg font-semibold text-gray-900">AI 智能设置</h3>
+					<Bot className="h-6 w-6 text-[#CC785C]"/>
+					<h3 className="text-lg font-serif font-semibold text-[#181818]">AI 智能设置</h3>
 				</div>
-				<p className="text-gray-600">配置AI服务，解锁智能内容分析功能</p>
+				<p className="text-[#87867F]">配置AI服务，解锁智能内容分析功能</p>
 			</div>
 
-			{/* AI功能介绍 */}
-			<div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4">
+			{/* AI功能介绍 - 温暖学术风格 */}
+			<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-4">
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-					<div className="bg-white/60 backdrop-blur-sm border border-blue-200 rounded-lg p-3">
+					<div className="bg-white border border-[#E8E6DC] rounded-xl p-3">
 						<div className="flex items-center gap-2 mb-2">
-							<Sparkles className="h-4 w-4 text-blue-600"/>
-							<h5 className="text-sm font-medium text-gray-800">智能分析</h5>
+							<Sparkles className="h-4 w-4 text-[#CC785C]"/>
+							<h5 className="text-sm font-medium text-[#181818]">智能分析</h5>
 						</div>
-						<p className="text-xs text-gray-600">自动分析文章内容，提取关键信息</p>
+						<p className="text-xs text-[#87867F]">自动分析文章内容，提取关键信息</p>
 					</div>
-					<div className="bg-white/60 backdrop-blur-sm border border-purple-200 rounded-lg p-3">
+					<div className="bg-white border border-[#E8E6DC] rounded-xl p-3">
 						<div className="flex items-center gap-2 mb-2">
-							<FileText className="h-4 w-4 text-purple-600"/>
-							<h5 className="text-sm font-medium text-gray-800">内容建议</h5>
+							<FileText className="h-4 w-4 text-[#CC785C]"/>
+							<h5 className="text-sm font-medium text-[#181818]">内容建议</h5>
 						</div>
-						<p className="text-xs text-gray-600">智能建议标题、副标题等元数据</p>
+						<p className="text-xs text-[#87867F]">智能建议标题、副标题等元数据</p>
 					</div>
-					<div className="bg-white/60 backdrop-blur-sm border border-indigo-200 rounded-lg p-3">
+					<div className="bg-white border border-[#E8E6DC] rounded-xl p-3">
 						<div className="flex items-center gap-2 mb-2">
-							<Tag className="h-4 w-4 text-indigo-600"/>
-							<h5 className="text-sm font-medium text-gray-800">自动标签</h5>
+							<Tag className="h-4 w-4 text-[#CC785C]"/>
+							<h5 className="text-sm font-medium text-[#181818]">自动标签</h5>
 						</div>
-						<p className="text-xs text-gray-600">基于内容主题生成相关标签</p>
+						<p className="text-xs text-[#87867F]">基于内容主题生成相关标签</p>
 					</div>
 				</div>
 			</div>
 
-			{/* AI配置主体 - 使用Accordion */}
-			<Accordion 
-				type="single" 
-				collapsible 
-				className="w-full" 
-				value={expandedItem}
-				onValueChange={(value) => {
-					setExpandedItem(value);
-					// 当展开某个项时，自动设置为当前选中的provider
-					if (value) {
-						setAiProvider(value as 'claude' | 'openrouter');
-					}
-				}}
-			>
-				{/* Claude 配置 */}
-				<AccordionItem value="claude" className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
-					<AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50 w-full">
-						<div className="flex items-center gap-4 flex-1">
-							<div className={`p-2.5 rounded-lg transition-colors ${
-								aiProvider === 'claude' ? 'bg-blue-100' : 'bg-gray-100'
-							}`}>
-								<Bot className={`h-5 w-5 ${
-									aiProvider === 'claude' ? 'text-blue-600' : 'text-gray-500'
-								}`}/>
-							</div>
-							<div className="flex-1 text-left">
-								<div className="flex items-center gap-2">
-									<h4 className="font-semibold text-gray-900">Claude</h4>
-									{claudeApiKey && (
-										<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-											已配置
-										</span>
-									)}
-									{aiProvider === 'claude' && (
-										<span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-											当前选中
-										</span>
-									)}
-								</div>
-								<p className="text-sm text-gray-600 mt-1">Anthropic原生API，高质量响应</p>
-							</div>
-						</div>
-					</AccordionTrigger>
-					<AccordionContent className="px-6 pb-6">
-						<ClaudeConfiguration />
-					</AccordionContent>
-				</AccordionItem>
+			{/* AI Provider 选择 - 简单 Tab 布局 */}
+			<div className="bg-white border border-[#E8E6DC] rounded-2xl overflow-hidden">
+				{/* Tab 切换按钮 */}
+				<div className="flex border-b border-[#E8E6DC]">
+					<button
+						onClick={() => setAiProvider('claude')}
+						className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors ${
+							aiProvider === 'claude'
+								? 'bg-[#CC785C]/10 text-[#CC785C] border-b-2 border-[#CC785C]'
+								: 'text-[#87867F] hover:bg-[#F9F9F7]'
+						}`}
+					>
+						<Bot className="h-4 w-4"/>
+						<span className="font-medium">Claude</span>
+						{claudeApiKey && (
+							<span className="text-xs bg-[#7C9A5E]/20 text-[#7C9A5E] px-1.5 py-0.5 rounded">已配置</span>
+						)}
+					</button>
+					<button
+						onClick={() => setAiProvider('openrouter')}
+						className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors ${
+							aiProvider === 'openrouter'
+								? 'bg-[#CC785C]/10 text-[#CC785C] border-b-2 border-[#CC785C]'
+								: 'text-[#87867F] hover:bg-[#F9F9F7]'
+						}`}
+					>
+						<Zap className="h-4 w-4"/>
+						<span className="font-medium">OpenRouter</span>
+						{openRouterApiKey && (
+							<span className="text-xs bg-[#7C9A5E]/20 text-[#7C9A5E] px-1.5 py-0.5 rounded">已配置</span>
+						)}
+					</button>
+				</div>
 
-				{/* OpenRouter 配置 */}
-				<AccordionItem value="openrouter" className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
-					<AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50 w-full">
-						<div className="flex items-center gap-4 flex-1">
-							<div className={`p-2.5 rounded-lg transition-colors ${
-								aiProvider === 'openrouter' ? 'bg-purple-100' : 'bg-gray-100'
-							}`}>
-								<Zap className={`h-5 w-5 ${
-									aiProvider === 'openrouter' ? 'text-purple-600' : 'text-gray-500'
-								}`}/>
-							</div>
-							<div className="flex-1 text-left">
-								<div className="flex items-center gap-2">
-									<h4 className="font-semibold text-gray-900">OpenRouter</h4>
-									{openRouterApiKey && (
-										<span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-											已配置
-										</span>
-									)}
-									{aiProvider === 'openrouter' && (
-										<span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-											当前选中
-										</span>
-									)}
-								</div>
-								<p className="text-sm text-gray-600 mt-1">多模型统一接口，结构化输出</p>
-							</div>
-						</div>
-					</AccordionTrigger>
-					<AccordionContent className="px-6 pb-6">
-						<OpenRouterConfiguration />
-					</AccordionContent>
-				</AccordionItem>
-			</Accordion>
+				{/* 配置内容区域 */}
+				<div className="p-6">
+					{aiProvider === 'claude' && <ClaudeConfiguration />}
+					{aiProvider === 'openrouter' && <OpenRouterConfiguration />}
+				</div>
+			</div>
 
-			{/* 公共配置部分 - 提示词模板 */}
-			<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+			{/* 公共配置部分 - 提示词模板 - 温暖学术风格 */}
+			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6">
 				<CommonPromptConfiguration />
 			</div>
 
-			{/* 操作按钮 */}
+			{/* 操作按钮 - 温暖学术风格 */}
 			<div className="flex justify-between items-center pt-2">
 				<Button
 					onClick={handleReset}
 					variant="outline"
-					className="text-red-600 border-red-300 hover:bg-red-50"
+					className="text-[#B85450] border-[#B85450]/30 hover:bg-[#B85450]/5 rounded-xl"
 				>
 					<RotateCcw className="w-4 h-4 mr-2"/>
 					清空设置
 				</Button>
 				<Button
 					onClick={handleSave}
-					className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl shadow-sm"
 				>
 					<Save className="w-4 h-4 mr-2"/>
 					保存设置

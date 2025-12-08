@@ -56,36 +56,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
 			{/* 背景遮罩 */}
 			<div
-				className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+				className="absolute inset-0 bg-[#181818]/40 backdrop-blur-sm"
 				onClick={onClose}
 			/>
 
-			{/* 模态框内容 */}
+			{/* 模态框内容 - 温暖学术风格 */}
 			<div className="relative z-10 w-full max-w-sm sm:max-w-2xl lg:max-w-5xl max-h-[95vh] overflow-hidden">
-				<div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl">
-					{/* 头部 */}
+				<div className="bg-[#F9F9F7] rounded-2xl shadow-xl border border-[#E8E6DC]">
+					{/* 头部 - 使用暖色调 */}
 					<div
-						className="relative bg-gradient-to-r from-blue-600 to-purple-600 px-3 sm:px-6 py-4 sm:py-6 text-white">
+						className="relative bg-[#F0EEE6] px-3 sm:px-6 py-4 sm:py-6 border-b border-[#E8E6DC]">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-3">
-								<div className="p-2 bg-white/20 rounded-lg">
-									<Settings className="h-6 w-6"/>
+								<div className="p-2 bg-[#CC785C]/10 rounded-xl">
+									<Settings className="h-6 w-6 text-[#CC785C]"/>
 								</div>
 								<div>
-									<h2 className="text-2xl font-bold">应用设置</h2>
-									<p className="text-blue-100 mt-1">配置您的个人信息和应用偏好</p>
+									<h2 className="text-2xl font-serif font-semibold text-[#181818]">应用设置</h2>
+									<p className="text-[#87867F] mt-1">配置您的个人信息和应用偏好</p>
 								</div>
 							</div>
 							<button
 								onClick={onClose}
-								className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+								className="p-2 hover:bg-[#CC785C]/10 rounded-xl transition-colors text-[#87867F] hover:text-[#CC785C]"
 							>
 								<X className="h-6 w-6"/>
 							</button>
 						</div>
 
 						{/* 标签页导航 */}
-						<div className="flex gap-1 mt-6">
+						<div className="flex gap-2 mt-6">
 							{[
 								{key: 'personal', label: '个人信息', icon: User},
 								{key: 'ai', label: 'AI设置', icon: Bot},
@@ -96,28 +96,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 									onClick={() => {
 										const tabKey = key as 'personal' | 'ai' | 'general';
 										setActiveTab(tabKey);
-										// 持久化保存选中的tab
 										try {
 											localStorage.setItem('lovpen-settings-active-tab', tabKey);
 										} catch (error) {
 											console.warn('Failed to save settings tab to localStorage:', error);
 										}
 									}}
-									className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+									className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
 										activeTab === key
-											? 'bg-white text-blue-600 shadow-lg'
-											: 'text-blue-100 hover:bg-white/20'
+											? 'bg-white text-[#CC785C] shadow-sm border border-[#E8E6DC]'
+											: 'text-[#87867F] hover:bg-white/50 hover:text-[#181818]'
 									}`}
 								>
 									<Icon className="h-4 w-4"/>
-									{label}
+									<span className="font-medium">{label}</span>
 								</button>
 							))}
 						</div>
 					</div>
 
 					{/* 内容区域 */}
-					<div className="p-6 max-h-[60vh] overflow-y-auto">
+					<div className="p-6 max-h-[60vh] overflow-y-auto bg-[#F9F9F7]">
 						{activeTab === 'personal' && (
 							<PersonalInfoSettings
 								onClose={onClose}
@@ -137,8 +136,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 						{activeTab === 'general' && (
 							<div className="space-y-6">
 								<div className="text-center">
-									<h3 className="text-lg font-semibold text-gray-900 mb-2">通用设置</h3>
-									<p className="text-gray-600">应用的基础配置和偏好设置</p>
+									<h3 className="text-lg font-serif font-semibold text-[#181818] mb-2">通用设置</h3>
+									<p className="text-[#87867F]">应用的基础配置和偏好设置</p>
 								</div>
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,20 +158,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 										}
 									].map((feature, index) => (
 										<div key={index}
-											 className="group border-2 border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-lg transition-all">
+											 className="group bg-white border border-[#E8E6DC] rounded-2xl p-4 hover:border-[#CC785C]/40 hover:shadow-md transition-all">
 											<div className="flex items-center gap-3 mb-3">
 												<div
-													className="p-2 bg-gray-100 group-hover:bg-blue-100 rounded-lg transition-colors">
+													className="p-2 bg-[#F0EEE6] group-hover:bg-[#CC785C]/10 rounded-xl transition-colors">
 													<span className="text-xl">{feature.icon}</span>
 												</div>
 												<div>
-													<h4 className="font-semibold text-gray-900">{feature.title}</h4>
-													<p className="text-sm text-gray-500">{feature.desc}</p>
+													<h4 className="font-semibold text-[#181818]">{feature.title}</h4>
+													<p className="text-sm text-[#87867F]">{feature.desc}</p>
 												</div>
 											</div>
 											<div className="flex items-center justify-between">
 												<span
-													className="text-xs text-orange-500 bg-orange-50 px-2 py-1 rounded-full">
+													className="text-xs text-[#CC785C] bg-[#CC785C]/10 px-2 py-1 rounded-full">
 													{feature.status}
 												</span>
 											</div>
@@ -181,9 +180,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 								</div>
 
 								<div
-									className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4">
-									<h4 className="font-medium text-blue-900 mb-2">🚀 功能路线图</h4>
-									<p className="text-sm text-blue-800">
+									className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-4">
+									<h4 className="font-serif font-medium text-[#181818] mb-2">功能路线图</h4>
+									<p className="text-sm text-[#87867F]">
 										我们正在持续完善应用功能，更多实用设置选项将在后续版本中推出。
 										如果您有特定需求或建议，欢迎反馈！
 									</p>
@@ -193,13 +192,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 					</div>
 
 					{/* 底部操作栏 */}
-					<div className="border-t bg-gray-50 px-6 py-4">
+					<div className="border-t border-[#E8E6DC] bg-[#F0EEE6] px-6 py-4">
 						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-2 text-sm text-gray-500">
+							<div className="flex items-center gap-2 text-sm text-[#87867F]">
 								<span className={`w-2 h-2 rounded-full ${
-									saveStatus === 'saved' ? 'bg-green-500' :
-										saveStatus === 'saving' ? 'bg-yellow-500' :
-											saveStatus === 'error' ? 'bg-red-500' : 'bg-gray-400'
+									saveStatus === 'saved' ? 'bg-[#7C9A5E]' :
+										saveStatus === 'saving' ? 'bg-[#CC785C]' :
+											saveStatus === 'error' ? 'bg-[#B85450]' : 'bg-[#87867F]'
 								}`}></span>
 								{saveStatus === 'saved' ? '设置已同步保存' :
 									saveStatus === 'saving' ? '正在保存...' :
@@ -208,14 +207,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 							<button
 								onClick={() => {
 									console.log('[SettingsModal] 完成设置 button clicked!');
-									// 确保在关闭前保存数据
 									if (onSaveSettings) {
 										console.log('[SettingsModal] Auto-saving before close');
 										onSaveSettings();
 									}
 									onClose();
 								}}
-								className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all shadow-lg"
+								className="px-6 py-2 bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl transition-all shadow-sm font-medium"
 							>
 								完成设置
 							</button>
