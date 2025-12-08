@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {PersonalInfoSettings} from './PersonalInfoSettings';
 import {AISettings} from './AISettings';
 import {PersonalInfo, ViteReactSettings} from '../../types';
@@ -11,6 +11,7 @@ interface SettingsModalProps {
 	onPersonalInfoChange?: (info: PersonalInfo) => void;
 	onSaveSettings?: () => void;
 	onSettingsChange?: (settings: Partial<ViteReactSettings>) => void;
+	initialTab?: 'personal' | 'ai' | 'general';
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -18,10 +19,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 																onClose,
 																onPersonalInfoChange,
 																onSaveSettings,
-																onSettingsChange
+																onSettingsChange,
+																initialTab
 															}) => {
 	const {saveStatus} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
 	const [activeTab, setActiveTab] = useState<'personal' | 'ai' | 'general'>(() => {
+		if (initialTab) return initialTab;
 		try {
 			const saved = localStorage.getItem('lovpen-settings-active-tab') as 'personal' | 'ai' | 'general';
 			return saved || 'personal';
@@ -29,6 +32,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 			return 'personal';
 		}
 	});
+
+	// 当 initialTab 或 isOpen 变化时更新 activeTab
+	useEffect(() => {
+		if (isOpen && initialTab) {
+			setActiveTab(initialTab);
+		}
+	}, [isOpen, initialTab]);
 
 	// 调试信息
 	React.useEffect(() => {
