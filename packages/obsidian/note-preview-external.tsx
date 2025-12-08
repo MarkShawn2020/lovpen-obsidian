@@ -306,10 +306,18 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			case 'wechat':
 				console.log('🎯 [NotePreview] Entered wechat case');
 				logger.debug('🔥 [DEBUG] 进入 wechat case');
-				// 微信公众号格式 - 默认格式
-				await navigator.clipboard.write([new ClipboardItem({
-					"text/html": new Blob([content], {type: "text/html"}),
-				})]);
+				// 微信公众号格式 - 处理代码块横向滚动问题
+				// 微信会强制覆盖 white-space: pre 为 pre-wrap，需要用 HTML 结构处理
+				{
+					const tempContainer = document.createElement('div');
+					tempContainer.innerHTML = content;
+					this.preserveCodeSpacing(tempContainer);
+					const processedContent = tempContainer.innerHTML;
+					console.log('[Lovpen] Copied HTML for WeChat:', processedContent.substring(0, 500) + '...');
+					await navigator.clipboard.write([new ClipboardItem({
+						"text/html": new Blob([processedContent], {type: "text/html"}),
+					})]);
+				}
 				new Notice(`已复制到剪贴板（微信公众号格式）！`);
 				break;
 
@@ -482,6 +490,150 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				})]);
 				new Notice(`已复制到剪贴板！`);
 		}
+	}
+
+	/**
+	 * 处理代码块格式，用于微信公众号导出
+	 * 微信会强制覆盖 white-space: pre 为 pre-wrap，导致代码自动换行
+	 * 解决方案：用 HTML 结构代替 CSS 行为
+	 */
+	private preserveCodeSpacing(container: HTMLElement): void {
+		container.querySelectorAll('pre').forEach((pre) => {
+			const preEl = pre as HTMLElement;
+			// 不依赖 white-space，微信会强制覆盖
+			preEl.style.overflow = 'auto';
+			preEl.style.overflowWrap = 'normal';
+			preEl.style.wordBreak = 'normal';
+		});
+
+		container.querySelectorAll('pre code').forEach((code) => {
+			const codeEl = code as HTMLElement;
+
+			// 收集所有内容，按行重建，用 <br> 换行
+			const lines = this.extractCodeLines(codeEl);
+			codeEl.innerHTML = '';
+
+			lines.forEach((lineNodes, idx) => {
+				// 每行用 span 包裹，nowrap 防止断行
+				const lineSpan = document.createElement('span');
+				lineSpan.style.display = 'inline';
+				lineSpan.style.whiteSpace = 'nowrap';
+
+				lineNodes.forEach((node) => lineSpan.appendChild(node));
+				codeEl.appendChild(lineSpan);
+
+				// 除了最后一行，都加 <br>
+				if (idx < lines.length - 1) {
+					codeEl.appendChild(document.createElement('br'));
+				}
+			});
+		});
+	}
+
+	/**
+	 * 提取 code 元素的内容，按换行符拆分成行
+	 * 每行是一个 Node 数组（保留 span 高亮）
+	 */
+	private extractCodeLines(codeEl: HTMLElement): Node[][] {
+		const lines: Node[][] = [[]];
+
+		const processNode = (node: Node): void => {
+			if (node.nodeType === Node.TEXT_NODE) {
+				const text = node.textContent ?? '';
+				const parts = text.split('\n');
+
+				parts.forEach((part, i) => {
+					if (i > 0) lines.push([]); // 换行，开启新行
+
+					if (part) {
+						// 空格转 &nbsp;，tab 转 4 空格
+						const converted = part
+							.replace(/\t/g, '\u00a0\u00a0\u00a0\u00a0')
+							.replace(/ /g, '\u00a0');
+						lines[lines.length - 1].push(document.createTextNode(converted));
+					}
+				});
+			} else if (node.nodeType === Node.ELEMENT_NODE) {
+				const el = node as HTMLElement;
+				// 克隆元素但不克隆子节点
+				const clone = el.cloneNode(false) as HTMLElement;
+				// 内联样式
+				const style = getComputedStyle(el);
+				if (style.color) clone.style.color = style.color;
+				if (style.fontWeight) clone.style.fontWeight = style.fontWeight;
+				if (style.fontStyle && style.fontStyle !== 'normal') clone.style.fontStyle = style.fontStyle;
+
+				// 递归处理子节点
+				const childLines: Node[][] = [[]];
+				el.childNodes.forEach((child) => {
+					const subLines = this.extractLinesFromNode(child);
+
+					subLines.forEach((subLine, i) => {
+						if (i > 0) childLines.push([]);
+						childLines[childLines.length - 1].push(...subLine);
+					});
+				});
+
+				// 把子节点的行合并回来
+				childLines.forEach((childLine, i) => {
+					if (i > 0) lines.push([]);
+					if (childLine.length > 0) {
+						const wrapper = clone.cloneNode(false) as HTMLElement;
+						childLine.forEach((n) => wrapper.appendChild(n));
+						lines[lines.length - 1].push(wrapper);
+					}
+				});
+			}
+		};
+
+		codeEl.childNodes.forEach((child) => processNode(child));
+		return lines;
+	}
+
+	private extractLinesFromNode(node: Node): Node[][] {
+		const lines: Node[][] = [[]];
+
+		if (node.nodeType === Node.TEXT_NODE) {
+			const text = node.textContent ?? '';
+			const parts = text.split('\n');
+
+			parts.forEach((part, i) => {
+				if (i > 0) lines.push([]);
+				if (part) {
+					const converted = part
+						.replace(/\t/g, '\u00a0\u00a0\u00a0\u00a0')
+						.replace(/ /g, '\u00a0');
+					lines[lines.length - 1].push(document.createTextNode(converted));
+				}
+			});
+		} else if (node.nodeType === Node.ELEMENT_NODE) {
+			const el = node as HTMLElement;
+			const clone = el.cloneNode(false) as HTMLElement;
+			const style = getComputedStyle(el);
+			if (style.color) clone.style.color = style.color;
+			if (style.fontWeight) clone.style.fontWeight = style.fontWeight;
+			if (style.fontStyle && style.fontStyle !== 'normal') clone.style.fontStyle = style.fontStyle;
+
+			const childLines: Node[][] = [[]];
+			el.childNodes.forEach((child) => {
+				const subLines = this.extractLinesFromNode(child);
+				subLines.forEach((subLine, i) => {
+					if (i > 0) childLines.push([]);
+					childLines[childLines.length - 1].push(...subLine);
+				});
+			});
+
+			childLines.forEach((childLine, i) => {
+				if (i > 0) lines.push([]);
+				if (childLine.length > 0) {
+					const wrapper = clone.cloneNode(false) as HTMLElement;
+					childLine.forEach((n) => wrapper.appendChild(n));
+					lines[lines.length - 1].push(wrapper);
+				}
+			});
+		}
+
+		return lines;
 	}
 
 	updateCSSVariables() {

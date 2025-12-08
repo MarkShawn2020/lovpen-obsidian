@@ -6,7 +6,7 @@
 	"packageManager": "pnpm@10.12.1",
 	"scripts": {
 		"dev": "turbo dev",
-		"dev:web": "cd packages/frontend && pnpm dev:serve --port 1101 --mode standalone",
+		"dev:web": "cd packages/frontend && pnpm dev --port 1101 --mode standalone",
 		"build": "turbo build",
 		"check": "turbo check",
 		"download-highlights": "node scripts/download-highlights.mjs",
