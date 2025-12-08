@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {createPortal} from "react-dom";
 import {LovpenReactProps} from "../types";
 import {Toolbar} from "./toolbar/Toolbar";
 import {useSetAtom, useAtomValue} from "jotai";
@@ -11,7 +10,6 @@ import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
 import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
-import {Settings, Key} from "lucide-react";
 import {SettingsModal} from "./settings/SettingsModal";
 import packageJson from "../../package.json";
 
@@ -67,14 +65,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// 头像下拉菜单状态
-	const [showDropdown, setShowDropdown] = useState(false);
-	const avatarRef = useRef<HTMLDivElement>(null);
-	const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
-
 	// 设置弹窗状态
 	const [showSettingsModal, setShowSettingsModal] = useState(false);
-	const [settingsInitialTab, setSettingsInitialTab] = useState<'personal' | 'ai' | 'general'>('personal');
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -282,119 +274,16 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								}}
 							/>
 
-							{/* 头像和下拉菜单 */}
-							<div ref={avatarRef} style={{ position: 'relative', flexShrink: 0 }}>
-								<Avatar
-									onClick={() => {
-										if (!showDropdown && avatarRef.current) {
-											const rect = avatarRef.current.getBoundingClientRect();
-											setDropdownPosition({
-												top: rect.bottom + 8,
-												right: window.innerWidth - rect.right
-											});
-										}
-										setShowDropdown(!showDropdown);
-									}}
-									className="cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
-								>
-									<AvatarImage />
-									<AvatarFallback className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 text-[#D97757] shadow-sm">
-										{settings?.personalInfo?.name?.[0] ?? "L"}
-									</AvatarFallback>
-								</Avatar>
-
-								{/* 下拉菜单 - 使用 Portal 渲染到 body，避免 overflow 和 z-index 问题 */}
-								{showDropdown && createPortal(
-									<>
-										{/* 点击外部关闭下拉菜单 */}
-										<div
-											style={{
-												position: 'fixed',
-												top: 0,
-												left: 0,
-												right: 0,
-												bottom: 0,
-												zIndex: 9998
-											}}
-											onClick={() => setShowDropdown(false)}
-										/>
-										<div
-											style={{
-												position: 'fixed',
-												width: '192px',
-												backgroundColor: '#ffffff',
-												border: '1px solid #E8E6DC',
-												borderRadius: '12px',
-												boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-												padding: '8px 0',
-												zIndex: 9999,
-												top: dropdownPosition.top,
-												right: dropdownPosition.right
-											}}
-											onClick={(e) => e.stopPropagation()}
-										>
-											<div style={{ padding: '8px 12px', borderBottom: '1px solid #F0EEE6' }}>
-												<p style={{ fontSize: '12px', color: '#87867F', fontWeight: 500, margin: 0 }}>用户设置</p>
-											</div>
-
-											<button
-												onClick={() => {
-													console.log('应用设置 clicked');
-													setShowDropdown(false);
-													setSettingsInitialTab('personal');
-													setShowSettingsModal(true);
-												}}
-												style={{
-													width: '100%',
-													display: 'flex',
-													alignItems: 'center',
-													gap: '12px',
-													padding: '8px 12px',
-													fontSize: '14px',
-													color: '#181818',
-													backgroundColor: 'transparent',
-													border: 'none',
-													cursor: 'pointer',
-													textAlign: 'left'
-												}}
-												onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F7F4EC'}
-												onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-											>
-												<Settings style={{ width: '16px', height: '16px', color: '#87867F' }} />
-												<span>应用设置</span>
-											</button>
-
-											<button
-												onClick={() => {
-													console.log('Auth 管理 clicked');
-													setShowDropdown(false);
-													setSettingsInitialTab('ai');
-													setShowSettingsModal(true);
-												}}
-												style={{
-													width: '100%',
-													display: 'flex',
-													alignItems: 'center',
-													gap: '12px',
-													padding: '8px 12px',
-													fontSize: '14px',
-													color: '#181818',
-													backgroundColor: 'transparent',
-													border: 'none',
-													cursor: 'pointer',
-													textAlign: 'left'
-												}}
-												onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F7F4EC'}
-												onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-											>
-												<Key style={{ width: '16px', height: '16px', color: '#87867F' }} />
-												<span>Auth 管理</span>
-											</button>
-										</div>
-									</>,
-									document.body
-								)}
-							</div>
+							{/* 头像 - 点击直接打开设置弹窗 */}
+							<Avatar
+								onClick={() => setShowSettingsModal(true)}
+								className="cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
+							>
+								<AvatarImage />
+								<AvatarFallback className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 text-[#D97757] shadow-sm">
+									{settings?.personalInfo?.name?.[0] ?? "L"}
+								</AvatarFallback>
+							</Avatar>
 						</div>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}
@@ -468,7 +357,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				onPersonalInfoChange={onPersonalInfoChange}
 				onSaveSettings={onSaveSettings}
 				onSettingsChange={onSettingsChange}
-				initialTab={settingsInitialTab}
 			/>
 		</div>
 	);
