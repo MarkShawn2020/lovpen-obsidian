@@ -4,13 +4,15 @@ import {CoverDesigner} from "./CoverDesigner";
 import {ArticleInfo, ArticleInfoData} from "./ArticleInfo";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ConfigComponent} from "./PluginConfigComponent";
-import {SettingsModal} from "../settings/SettingsModal";
+import {PersonalInfoSettings} from "../settings/PersonalInfoSettings";
+import {AISettings} from "../settings/AISettings";
 import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {FileText, Package, Plug, Zap} from "lucide-react";
+import {FileText, Package, Plug, Zap, Settings, User, Bot, Globe, PanelLeft, PanelRight} from "lucide-react";
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
+import {useSettings} from "../../hooks/useSettings";
 
 interface ToolbarProps {
 	settings: ViteReactSettings;
@@ -35,6 +37,9 @@ interface ToolbarProps {
 	onKitApply?: (kitId: string) => void;
 	onKitCreate?: (basicInfo: any) => void;
 	onKitDelete?: (kitId: string) => void;
+	// 外部控制 tab 切换
+	activeTab?: string;
+	onActiveTabChange?: (tab: string) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -60,16 +65,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													onKitApply,
 													onKitCreate,
 													onKitDelete,
+													activeTab: externalActiveTab,
+													onActiveTabChange,
 												}) => {
 
-	// 使用本地状态管理当前选中的tab
-	const [activeTab, setActiveTab] = useState<string>(() => {
+	// 使用 useSettings hook 获取设置更新方法
+	const {settings: atomSettings, updateSettings, saveSettings} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
+
+	// 使用本地状态管理当前选中的tab（支持外部控制）
+	const [internalActiveTab, setInternalActiveTab] = useState<string>(() => {
 		try {
 			return localStorage.getItem('lovpen-toolbar-active-tab') || 'basic';
 		} catch {
 			return 'basic';
 		}
 	});
+
+	// 如果外部提供了 activeTab，则使用外部值；否则使用内部值
+	const activeTab = externalActiveTab ?? internalActiveTab;
+	const setActiveTab = (tab: string) => {
+		setInternalActiveTab(tab);
+		onActiveTabChange?.(tab);
+	};
+
+	// 设置 tab 内的子 tab 状态
+	const [settingsSubTab, setSettingsSubTab] = useState<'personal' | 'ai' | 'general'>('personal');
 
 	// 插件管理中的子tab状态
 	const [pluginTab, setPluginTab] = useState<string>(() => {
@@ -85,8 +105,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		settings.expandedAccordionSections || []
 	);
 
-	// 设置模态框状态
-	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
 
 	// 当外部settings发生变化时，同步更新本地状态
@@ -333,33 +351,40 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					<div className="p-3 sm:p-6">
 						<Tabs value={activeTab} onValueChange={handleTabChange}>
 							<TabsList
-								className="sticky top-0 z-10 grid w-full grid-cols-3 gap-2 backdrop-blur-sm bg-[#F9F9F7]/80 pb-4">
+								className="sticky top-0 z-10 grid w-full grid-cols-4 gap-2 backdrop-blur-sm bg-[#F9F9F7]/80 pb-4">
 								<TabsTrigger
 									value="basic"
-									className="flex items-center justify-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-3 py-3 rounded-xl transition-all"
+									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all"
 								>
 									<FileText className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate">基础</span>
+									<span className="truncate hidden sm:inline">基础</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="kits"
-									className="flex items-center justify-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-3 py-3 rounded-xl transition-all"
+									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all"
 								>
 									<Package className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate">套装</span>
+									<span className="truncate hidden sm:inline">套装</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="plugins"
-									className="flex items-center justify-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-3 py-3 rounded-xl transition-all relative"
+									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all relative"
 								>
 									<Plug className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate">插件</span>
+									<span className="truncate hidden sm:inline">插件</span>
 									{plugins.length > 0 && (
 										<span
 											className="absolute -top-1 -right-1 bg-[#D97757] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center leading-none text-[10px] sm:static sm:bg-[#E8E6DC] sm:text-[#87867F] sm:px-2 sm:py-1 sm:ml-1 sm:w-auto sm:h-auto sm:rounded-full">
 											{plugins.length > 99 ? '99+' : plugins.length}
 										</span>
 									)}
+								</TabsTrigger>
+								<TabsTrigger
+									value="settings"
+									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all"
+								>
+									<Settings className="h-4 w-4 flex-shrink-0"/>
+									<span className="truncate hidden sm:inline">设置</span>
 								</TabsTrigger>
 							</TabsList>
 
@@ -520,18 +545,122 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								</div>
 							</TabsContent>
 
+							{/* 设置 */}
+							<TabsContent value="settings" className="mt-6">
+								<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+									{/* 设置子 tabs */}
+									<div className="flex gap-2 mb-6 border-b border-[#E8E6DC] pb-4">
+										{[
+											{key: 'personal', label: '个人信息', icon: User},
+											{key: 'ai', label: 'AI设置', icon: Bot},
+											{key: 'general', label: '通用设置', icon: Globe}
+										].map(({key, label, icon: Icon}) => (
+											<button
+												key={key}
+												onClick={() => setSettingsSubTab(key as 'personal' | 'ai' | 'general')}
+												className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all text-sm ${
+													settingsSubTab === key
+														? 'bg-[#CC785C]/10 text-[#CC785C] font-medium'
+														: 'text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818]'
+												}`}
+											>
+												<Icon className="h-4 w-4"/>
+												<span className="hidden sm:inline">{label}</span>
+											</button>
+										))}
+									</div>
+
+									{/* 设置内容 */}
+									{settingsSubTab === 'personal' && (
+										<PersonalInfoSettings
+											onClose={() => setActiveTab('basic')}
+											onPersonalInfoChange={onPersonalInfoChange}
+											onSaveSettings={onSaveSettings}
+										/>
+									)}
+
+									{settingsSubTab === 'ai' && (
+										<AISettings
+											onClose={() => setActiveTab('basic')}
+											onSettingsChange={onSettingsChange}
+											onSaveSettings={onSaveSettings}
+										/>
+									)}
+
+									{settingsSubTab === 'general' && (
+										<div className="space-y-6">
+											{/* 工具栏位置设置 */}
+											<div className="bg-[#F9F9F7] border border-[#E8E6DC] rounded-xl p-4">
+												<div className="flex items-center gap-3 mb-4">
+													<div className="p-2 bg-white rounded-lg">
+														<PanelLeft className="h-5 w-5 text-[#CC785C]"/>
+													</div>
+													<div>
+														<h4 className="font-semibold text-[#181818]">工具栏位置</h4>
+														<p className="text-sm text-[#87867F]">选择工具栏显示在预览区域的左侧或右侧</p>
+													</div>
+												</div>
+												<div className="flex gap-3">
+													<button
+														onClick={() => {
+															updateSettings({toolbarPosition: 'left'});
+															saveSettings();
+														}}
+														className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all ${
+															atomSettings.toolbarPosition === 'left'
+																? 'bg-[#CC785C] text-white border-[#CC785C]'
+																: 'bg-white text-[#181818] border-[#E8E6DC] hover:border-[#CC785C]/40'
+														}`}
+													>
+														<PanelLeft className="h-4 w-4"/>
+														<span>左侧</span>
+													</button>
+													<button
+														onClick={() => {
+															updateSettings({toolbarPosition: 'right'});
+															saveSettings();
+														}}
+														className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all ${
+															(atomSettings.toolbarPosition ?? 'right') === 'right'
+																? 'bg-[#CC785C] text-white border-[#CC785C]'
+																: 'bg-white text-[#181818] border-[#E8E6DC] hover:border-[#CC785C]/40'
+														}`}
+													>
+														<PanelRight className="h-4 w-4"/>
+														<span>右侧</span>
+													</button>
+												</div>
+											</div>
+
+											{/* 即将推出的功能 */}
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+												{[
+													{title: '应用主题', desc: '明亮或暗色主题', icon: '🎨'},
+													{title: '语言偏好', desc: '界面显示语言', icon: '🌍'},
+													{title: '快捷键', desc: '自定义键盘快捷键', icon: '⌨️'},
+													{title: '数据备份', desc: '备份和恢复设置', icon: '📁'}
+												].map((feature, index) => (
+													<div key={index}
+														 className="group bg-[#F9F9F7] border border-[#E8E6DC] rounded-xl p-3 opacity-60">
+														<div className="flex items-center gap-2">
+															<span className="text-lg">{feature.icon}</span>
+															<div>
+																<h4 className="font-medium text-[#181818] text-sm">{feature.title}</h4>
+																<p className="text-xs text-[#87867F]">{feature.desc}</p>
+															</div>
+														</div>
+														<span className="text-xs text-[#CC785C] mt-2 inline-block">即将推出</span>
+													</div>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
+							</TabsContent>
+
 						</Tabs>
 					</div>
 				</div>
-
-				{/* 设置模态框 */}
-				<SettingsModal
-					isOpen={isSettingsModalOpen}
-					onClose={() => setIsSettingsModalOpen(false)}
-					onPersonalInfoChange={onPersonalInfoChange}
-					onSaveSettings={onSaveSettings}
-					onSettingsChange={onSettingsChange}
-				/>
 			</div>
 		);
 	} catch (error) {

@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {PersonalInfoSettings} from './PersonalInfoSettings';
 import {AISettings} from './AISettings';
 import {PersonalInfo, ViteReactSettings} from '../../types';
-import {Bot, Globe, Settings, User, X} from 'lucide-react';
+import {Bot, Globe, Settings, User, X, PanelLeft, PanelRight} from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 
 interface SettingsModalProps {
@@ -22,7 +22,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 																onSettingsChange,
 																initialTab
 															}) => {
-	const {saveStatus} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
+	const {saveStatus, settings, updateSettings, saveSettings} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
 	const [activeTab, setActiveTab] = useState<'personal' | 'ai' | 'general'>(() => {
 		if (initialTab) return initialTab;
 		try {
@@ -138,6 +138,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 								<div className="text-center">
 									<h3 className="text-lg font-serif font-semibold text-[#181818] mb-2">通用设置</h3>
 									<p className="text-[#87867F]">应用的基础配置和偏好设置</p>
+								</div>
+
+								{/* 工具栏位置设置 */}
+								<div className="bg-white border border-[#E8E6DC] rounded-2xl p-4">
+									<div className="flex items-center gap-3 mb-4">
+										<div className="p-2 bg-[#F0EEE6] rounded-xl">
+											<PanelLeft className="h-5 w-5 text-[#CC785C]"/>
+										</div>
+										<div>
+											<h4 className="font-semibold text-[#181818]">工具栏位置</h4>
+											<p className="text-sm text-[#87867F]">选择工具栏显示在预览区域的左侧或右侧</p>
+										</div>
+									</div>
+									<div className="flex gap-3">
+										<button
+											onClick={() => {
+												updateSettings({toolbarPosition: 'left'});
+												saveSettings();
+											}}
+											className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all ${
+												settings.toolbarPosition === 'left'
+													? 'bg-[#CC785C] text-white border-[#CC785C]'
+													: 'bg-white text-[#181818] border-[#E8E6DC] hover:border-[#CC785C]/40'
+											}`}
+										>
+											<PanelLeft className="h-4 w-4"/>
+											<span>左侧</span>
+										</button>
+										<button
+											onClick={() => {
+												updateSettings({toolbarPosition: 'right'});
+												saveSettings();
+											}}
+											className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all ${
+												(settings.toolbarPosition ?? 'right') === 'right'
+													? 'bg-[#CC785C] text-white border-[#CC785C]'
+													: 'bg-white text-[#181818] border-[#E8E6DC] hover:border-[#CC785C]/40'
+											}`}
+										>
+											<PanelRight className="h-4 w-4"/>
+											<span>右侧</span>
+										</button>
+									</div>
 								</div>
 
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">

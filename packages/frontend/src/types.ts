@@ -83,6 +83,7 @@ export interface ViteReactSettings {
 	aiProvider?: 'claude' | 'openrouter'; // AI提供商选择
 	openRouterApiKey?: string; // OpenRouter API密钥
 	openRouterModel?: string; // OpenRouter模型选择
+	toolbarPosition?: 'left' | 'right'; // 工具栏位置
 }
 
 // Configuration option types

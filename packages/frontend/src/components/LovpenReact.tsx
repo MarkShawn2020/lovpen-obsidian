@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {LovpenReactProps} from "../types";
 import {Toolbar} from "./toolbar/Toolbar";
 import {useSetAtom, useAtomValue} from "jotai";
-import {initializeSettingsAtom} from "../store/atoms";
+import {initializeSettingsAtom, settingsAtom} from "../store/atoms";
 import {articleHTMLAtom, cssContentAtom} from "../store/contentAtoms";
 import {HMRTest} from "./HMRTest";
 import {ArticleRenderer} from "./ArticleRenderer";
@@ -10,7 +10,6 @@ import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
 import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
-import {SettingsModal} from "./settings/SettingsModal";
 import packageJson from "../../package.json";
 
 import {logger} from "../../../shared/src/logger";
@@ -44,7 +43,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	// 从atom读取频繁变化的数据，如果atom为空则使用props的值
 	const atomArticleHTML = useAtomValue(articleHTMLAtom);
 	const atomCssContent = useAtomValue(cssContentAtom);
-	
+	const atomSettings = useAtomValue(settingsAtom);
+
 	// 使用atom值或props值作为fallback
 	const articleHTML = atomArticleHTML || propsArticleHTML;
 	const cssContent = atomCssContent || propsCssContent;
@@ -65,8 +65,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// 设置弹窗状态
-	const [showSettingsModal, setShowSettingsModal] = useState(false);
+	// Toolbar 当前 tab 状态（用于头像点击切换到设置）
+	const [toolbarActiveTab, setToolbarActiveTab] = useState<string | undefined>(undefined);
 
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
@@ -166,7 +166,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		onArticleInfoChange,
 		onPersonalInfoChange,
 		onSettingsChange,
+		// 外部控制 tab 切换
+		activeTab: toolbarActiveTab,
+		onActiveTabChange: setToolbarActiveTab,
 	};
+
+	// 工具栏位置：优先从 atom 读取（响应式更新），fallback 到 props
+	const toolbarPosition = atomSettings.toolbarPosition ?? settings.toolbarPosition ?? 'right';
+	const isToolbarLeft = toolbarPosition === 'left';
 
 	// 拖拽调整工具栏宽度的处理
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -177,8 +184,11 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		const startWidth = toolbarContainer.getBoundingClientRect().width;
 
 		const handleMouseMove = (e: MouseEvent) => {
-			// 在正常布局中，向左拖拽增加工具栏宽度，向右拖拽减少工具栏宽度
-			const newWidth = startWidth - (e.clientX - startX);
+			// 根据工具栏位置决定拖拽方向
+			// 工具栏在右边：向左拖拽增加宽度
+			// 工具栏在左边：向右拖拽增加宽度
+			const delta = e.clientX - startX;
+			const newWidth = isToolbarLeft ? startWidth + delta : startWidth - delta;
 			const minWidth = 320; // 工具栏最小宽度
 			const maxWidth = 800; // 工具栏最大宽度
 
@@ -201,7 +211,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 
 		document.addEventListener("mousemove", handleMouseMove);
 		document.addEventListener("mouseup", handleMouseUp);
-	}, []);
+	}, [isToolbarLeft]);
 
 	return (
 		<div
@@ -209,7 +219,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			className="note-preview"
 			style={{
 				display: "flex",
-				flexDirection: "row", // 正常布局，工具栏在右边
+				flexDirection: isToolbarLeft ? "row-reverse" : "row", // 根据设置调整布局方向
 				height: "100%",
 				width: "100%",
 				overflow: "hidden",
@@ -226,7 +236,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					flex: "1", // 占用剩余空间，宽度 = C - B - resizer（当B显示时）或 C（当B隐藏时）
 					overflow: "auto",
 					scrollbarGutter: "stable", // 预留滚动条空间，防止内容跳动
-					borderRight: !isToolbarAutoHidden ? "1px solid var(--background-modifier-border)" : "none",
+					borderRight: !isToolbarAutoHidden && !isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
+					borderLeft: !isToolbarAutoHidden && isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
 					flexDirection: "column"
@@ -274,9 +285,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								}}
 							/>
 
-							{/* 头像 - 点击直接打开设置弹窗 */}
+							{/* 头像 - 点击切换到设置 tab */}
 							<Avatar
-								onClick={() => setShowSettingsModal(true)}
+								onClick={() => setToolbarActiveTab('settings')}
 								className="cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
 							>
 								<AvatarImage />
@@ -329,7 +340,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				/>
 			)}
 
-			{/* 右侧工具栏容器 - 仅在未被自动隐藏时显示 */}
+			{/* 工具栏容器 - 仅在未被自动隐藏时显示 */}
 			{!isToolbarAutoHidden && (
 				<div
 					className="toolbar-container"
@@ -339,7 +350,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						overflowY: "auto",
 						overflowX: "hidden",
 						backgroundColor: "var(--background-secondary-alt)",
-						borderLeft: "1px solid var(--background-modifier-border)",
+						borderLeft: !isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
+						borderRight: isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
 						flexShrink: 0 // 防止被压缩
 					}}
 				>
@@ -349,15 +361,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 
 			{/* HMR 测试指示器 - 仅在开发模式显示 */}
 			{(window as any).__LOVPEN_HMR_MODE__ && <HMRTest />}
-
-			{/* 设置弹窗 */}
-			<SettingsModal
-				isOpen={showSettingsModal}
-				onClose={() => setShowSettingsModal(false)}
-				onPersonalInfoChange={onPersonalInfoChange}
-				onSaveSettings={onSaveSettings}
-				onSettingsChange={onSettingsChange}
-			/>
 		</div>
 	);
 };
