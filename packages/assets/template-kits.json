@@ -4,6 +4,36 @@
 	"kits": [
 		{
 			"basicInfo": {
+				"id": "raw",
+				"name": "Raw 原始",
+				"description": "不使用任何模板和额外样式，保持原始 Markdown 渲染效果",
+				"author": "Lovpen Team",
+				"version": "1.0.0",
+				"createdAt": "2025-01-01T00:00:00.000Z",
+				"updatedAt": "2025-01-01T00:00:00.000Z",
+				"tags": ["原始", "无样式", "默认"],
+				"previewImage": ""
+			},
+			"styleConfig": {
+				"theme": "",
+				"codeHighlight": "",
+				"cssVariables": {},
+				"enableCustomThemeColor": false,
+				"customThemeColor": "",
+				"customCSS": ""
+			},
+			"templateConfig": {
+				"templateFileName": "",
+				"useTemplate": false
+			},
+			"pluginConfig": {
+				"enabledMarkdownPlugins": [],
+				"enabledHtmlPlugins": [],
+				"pluginSettings": {}
+			}
+		},
+		{
+			"basicInfo": {
 				"id": "anthropic-style",
 				"name": "Anthropic Style",
 				"description": "基于微信公众号 Anthropic 风格的优雅模板套装，采用温暖的橙红色主题和圆角设计，适合技术文章和知识分享",
@@ -298,8 +328,9 @@
 		}
 	],
 	"metadata": {
-		"totalKits": 3,
+		"totalKits": 4,
 		"categories": [
+			"原始",
 			"极简主义",
 			"日式美学",
 			"Anthropic 风格",
