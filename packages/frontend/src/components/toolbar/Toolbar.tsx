@@ -632,6 +632,39 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 												</div>
 											</div>
 
+											{/* 代码块缩放设置 */}
+											<div className="bg-[#F9F9F7] border border-[#E8E6DC] rounded-xl p-4">
+												<div className="flex items-center justify-between">
+													<div className="flex items-center gap-3">
+														<div className="p-2 bg-white rounded-lg">
+															<Image className="h-5 w-5 text-[#CC785C]"/>
+														</div>
+														<div>
+															<h4 className="font-semibold text-[#181818]">代码块自动缩放</h4>
+															<p className="text-sm text-[#87867F]">复制为图片时，自动缩放溢出的代码块</p>
+														</div>
+													</div>
+													<button
+														onClick={() => {
+															const newValue = !(atomSettings.scaleCodeBlockInImage ?? true);
+															updateSettings({scaleCodeBlockInImage: newValue});
+															saveSettings();
+														}}
+														className={`relative w-12 h-6 rounded-full transition-colors ${
+															(atomSettings.scaleCodeBlockInImage ?? true)
+																? 'bg-[#CC785C]'
+																: 'bg-[#E8E6DC]'
+														}`}
+													>
+														<span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+															(atomSettings.scaleCodeBlockInImage ?? true)
+																? 'translate-x-7'
+																: 'translate-x-1'
+														}`}/>
+													</button>
+												</div>
+											</div>
+
 											{/* 即将推出的功能 */}
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 												{[

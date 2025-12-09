@@ -137,6 +137,7 @@ export class NMPSettings implements SettingsData {
 	};
 	aiPromptTemplate: string = '';
 	aiModel: string = 'claude-3-5-haiku-latest';
+	scaleCodeBlockInImage: boolean = true;
 
 	// 私有构造函数 - 所有默认值已通过属性初始化
 	private constructor() {

@@ -11,6 +11,7 @@ import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
 import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
 import packageJson from "../../package.json";
+import {applyCodeBlockScale, findScreenshotElement} from "@lovpen/shared";
 
 import {logger} from "../../../shared/src/logger";
 
@@ -68,6 +69,11 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	// Toolbar 当前 tab 状态（用于头像点击切换到设置）
 	const [toolbarActiveTab, setToolbarActiveTab] = useState<string | undefined>(undefined);
 
+	// 代码块缩放预览的恢复函数
+	const codeBlockScaleRestoreRef = useRef<(() => void) | null>(null);
+	// 内容容器的 ref
+	const contentContainerRef = useRef<HTMLDivElement>(null);
+
 	// 初始化Jotai状态 - 只初始化一次
 	useEffect(() => {
 		if (!isInitializedRef.current && settings) {
@@ -89,6 +95,40 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // 只在组件挂载时执行
+
+	// 监听代码块缩放设置变化，实时应用/恢复缩放效果
+	useEffect(() => {
+		const shouldScale = atomSettings.scaleCodeBlockInImage ?? true;
+		const container = contentContainerRef.current;
+
+		if (!container) return;
+
+		// 先恢复之前的缩放
+		if (codeBlockScaleRestoreRef.current) {
+			codeBlockScaleRestoreRef.current();
+			codeBlockScaleRestoreRef.current = null;
+		}
+
+		// 如果启用缩放，应用缩放效果
+		if (shouldScale) {
+			const result = findScreenshotElement(container);
+			if (result) {
+				const { restore } = applyCodeBlockScale(result.element);
+				codeBlockScaleRestoreRef.current = restore;
+				logger.debug('[LovpenReact] 已应用代码块缩放预览');
+			}
+		} else {
+			logger.debug('[LovpenReact] 已关闭代码块缩放预览');
+		}
+
+		// 组件卸载时恢复
+		return () => {
+			if (codeBlockScaleRestoreRef.current) {
+				codeBlockScaleRestoreRef.current();
+				codeBlockScaleRestoreRef.current = null;
+			}
+		};
+	}, [atomSettings.scaleCodeBlockInImage, articleHTML]); // 当设置或文章内容变化时重新计算
 
 	// 监听容器宽度变化，自动隐藏/显示 Toolbar（保证 Renderer 始终可见）
 	useEffect(() => {
@@ -244,7 +284,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				}}
 			>
 				{/* 内容容器 */}
-				<div className="lovpen-content-container" style={{ position: "relative" }}>
+				<div ref={contentContainerRef} className="lovpen-content-container" style={{ position: "relative" }}>
 					{/* 复制按钮和工具栏切换按钮容器 - sticky 置顶区域 */}
 					<div style={{
 						position: 'sticky',

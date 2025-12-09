@@ -18,9 +18,6 @@ interface ExternalReactLib {
 // Track mounted roots for HMR
 const mountedRoots = new Map<HTMLElement, ReactDOM.Root>()
 
-// 图片预览状态 - 用于 toggle 代码块缩放效果
-let imagePreviewRestoreFn: (() => void) | null = null
-
 // Wrapper component to manage props updates without remounting JotaiProvider
 const LovpenReactWrapper: React.FC<{ initialProps: any; container?: HTMLElement }> = ({ initialProps, container }) => {
   const [props, setProps] = useState(initialProps);
@@ -142,36 +139,6 @@ if (rootElement) {
       logger.debug('🔥 [DEBUG] mode === "wechat":', mode === 'wechat');
 
       try {
-        // 处理图片预览 toggle
-        if (mode === 'image-preview') {
-          const result = findScreenshotElement(document);
-          if (!result) {
-            new webAdapter.Notice('未找到文章内容');
-            return;
-          }
-
-          if (imagePreviewRestoreFn) {
-            // 已经在预览状态，恢复原样
-            imagePreviewRestoreFn();
-            imagePreviewRestoreFn = null;
-            new webAdapter.Notice('已退出图片预览模式');
-            logger.debug('👁️ [图片预览] 已恢复原始样式');
-          } else {
-            // 应用代码块缩放
-            const { restore } = applyCodeBlockScale(result.element);
-            imagePreviewRestoreFn = restore;
-            new webAdapter.Notice('已进入图片预览模式（点击再次切换可退出）');
-            logger.debug('👁️ [图片预览] 已应用代码块缩放');
-          }
-          return;
-        }
-
-        if (mode === 'image') {
-          logger.debug('🔥 [DEBUG] 进入 image 分支');
-        } else {
-          logger.debug('🔥 [DEBUG] 进入 else 分支，mode:', mode);
-        }
-
         if (mode === 'image') {
           // 图片复制模式
           logger.debug('🖼️ [图片复制] 开始生成图片...');
@@ -232,8 +199,20 @@ if (rootElement) {
 
           logger.debug('🖼️ [图片复制] 所有图片预处理完成，开始截图');
 
-          // 预处理：临时修改溢出代码块的样式，自动缩放以适应原始宽度
-          const codeBlockScale = applyCodeBlockScale(articleElement);
+          // 从 localStorage 读取设置，判断是否需要缩放代码块
+          let scaleCodeBlockInImage = true; // 默认开启
+          try {
+            const savedSettings = await webAdapter.persistentStorage.getItem('lovpen-settings');
+            if (savedSettings) {
+              const parsed = JSON.parse(savedSettings);
+              scaleCodeBlockInImage = parsed.scaleCodeBlockInImage ?? true;
+            }
+          } catch (e) {
+            logger.warn('读取设置失败，使用默认值', e);
+          }
+
+          // 预处理：根据设置决定是否缩放溢出的代码块
+          const codeBlockScale = scaleCodeBlockInImage ? applyCodeBlockScale(articleElement) : null;
 
           const originalDataUrl = await domToPng(articleElement, {
             quality: 1,
@@ -242,7 +221,7 @@ if (rootElement) {
           logger.debug('🖼️ [图片复制] 截图完成，dataUrl 长度:', originalDataUrl.length);
 
           // 恢复代码块原始样式
-          codeBlockScale.restore();
+          codeBlockScale?.restore();
 
           // 恢复原始图片 URL
           images.forEach(img => {
@@ -365,10 +344,18 @@ if (rootElement) {
     onExpandedSectionsChange: (sections: string[]) => logger.debug('Expanded sections:', sections),
     onArticleInfoChange: (info: any) => logger.debug('Article info:', info),
     onPersonalInfoChange: (info: any) => logger.debug('Personal info:', info),
-    onSettingsChange: (settings: any) => {
-      logger.debug('Settings change:', settings);
-      // 持久化到 localStorage
-      webAdapter.persistentStorage.setItem('lovpen-settings', JSON.stringify(settings));
+    onSettingsChange: async (settingsUpdate: any) => {
+      logger.debug('Settings change:', settingsUpdate);
+      // 合并现有设置后持久化到 localStorage
+      try {
+        const existing = await webAdapter.persistentStorage.getItem('lovpen-settings');
+        const currentSettings = existing ? JSON.parse(existing) : {};
+        const mergedSettings = { ...currentSettings, ...settingsUpdate };
+        await webAdapter.persistentStorage.setItem('lovpen-settings', JSON.stringify(mergedSettings));
+        logger.debug('Settings saved:', mergedSettings);
+      } catch (e) {
+        logger.error('保存设置失败:', e);
+      }
     },
     onKitApply: (kitId: string) => {
       logger.debug('Apply kit:', kitId);
