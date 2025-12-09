@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { LovpenReactBridge } from './components/LovpenReactBridge'
+import { LovpenReactWrapper } from './components/LovpenReactWrapper'
 import { JotaiProvider } from './providers/JotaiProvider'
 import { logger } from '../../shared/src/logger'
 import { webAdapter } from './adapters/web-adapter'
@@ -25,20 +25,6 @@ interface ExternalReactLib {
 
 // Track mounted roots for HMR
 const mountedRoots = new Map<HTMLElement, ReactDOM.Root>()
-
-// Wrapper component to manage props updates without remounting JotaiProvider
-const LovpenReactWrapper: React.FC<{ initialProps: any; container?: HTMLElement }> = ({ initialProps, container }) => {
-  const [props, setProps] = useState(initialProps);
-
-  // Expose update function to parent
-  useEffect(() => {
-    if (container) {
-      (container as any).__updateProps = setProps;
-    }
-  }, [container]);
-
-  return <LovpenReactBridge {...props} />;
-}
 
 // Create the external library interface for Obsidian plugin
 const LovpenReactLib: ExternalReactLib = {
