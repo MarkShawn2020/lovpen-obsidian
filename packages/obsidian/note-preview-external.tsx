@@ -13,7 +13,7 @@ import TemplateManager from "./template-manager";
 import {ReactAPIService} from "./services/ReactAPIService";
 import {uevent} from "./utils";
 import {persistentStorageService} from "@/services/persistentStorage";
-import {logger, findScreenshotElement} from "@lovpen/shared";
+import {logger, findScreenshotElement, applyCodeBlockScale} from "@lovpen/shared";
 import {domToPng} from "modern-screenshot";
 import {
 	ArticleInfo,
@@ -53,6 +53,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	private debounceTimer: NodeJS.Timeout | null = null; // 防抖定时器
 	private readonly DEBOUNCE_DELAY = 200; // 防抖延迟（毫秒）
 	private currentWidth: number = 0; // 当前容器宽度
+	private imagePreviewRestoreFn: (() => void) | null = null; // 图片预览恢复函数
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -298,6 +299,34 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		logger.debug('🔥 [DEBUG] mode === "image":', mode === 'image');
 		logger.debug('🔥 [DEBUG] mode === "wechat":', mode === 'wechat');
 
+		// 处理图片预览 toggle
+		if (mode === 'image-preview') {
+			if (!this.reactContainer) {
+				new Notice('未找到文章容器');
+				return;
+			}
+			const result = findScreenshotElement(this.reactContainer);
+			if (!result) {
+				new Notice('未找到文章内容');
+				return;
+			}
+
+			if (this.imagePreviewRestoreFn) {
+				// 已经在预览状态，恢复原样
+				this.imagePreviewRestoreFn();
+				this.imagePreviewRestoreFn = null;
+				new Notice('已退出图片预览模式');
+				logger.debug('👁️ [图片预览] 已恢复原始样式');
+			} else {
+				// 应用代码块缩放
+				const { restore } = applyCodeBlockScale(result.element);
+				this.imagePreviewRestoreFn = restore;
+				new Notice('已进入图片预览模式（再次点击可退出）');
+				logger.debug('👁️ [图片预览] 已应用代码块缩放');
+			}
+			return;
+		}
+
 		let content = await this.getArticleContent();
 
 		// 根据不同模式处理内容
@@ -394,10 +423,16 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 					logger.debug('所有图片预处理完成，开始截图');
 
+					// 预处理：临时修改溢出代码块的样式，自动缩放以适应原始宽度
+					const codeBlockScale = applyCodeBlockScale(articleElement);
+
 					const originalDataUrl = await domToPng(articleElement, {
 						quality: 1,
 						scale: 2, // 2倍分辨率，提高清晰度
 					});
+
+					// 恢复代码块原始样式
+					codeBlockScale.restore();
 					logger.debug('截图完成，dataUrl 长度:', originalDataUrl.length);
 
 					// 恢复原始图片 URL

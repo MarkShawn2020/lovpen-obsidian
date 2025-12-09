@@ -84,6 +84,7 @@ export interface ViteReactSettings {
 	openRouterApiKey?: string; // OpenRouter API密钥
 	openRouterModel?: string; // OpenRouter模型选择
 	toolbarPosition?: 'left' | 'right'; // 工具栏位置
+	scaleCodeBlockInImage?: boolean; // 复制为图片时是否缩放溢出的代码块
 }
 
 // Configuration option types

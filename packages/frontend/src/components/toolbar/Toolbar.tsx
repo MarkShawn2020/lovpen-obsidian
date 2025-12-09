@@ -9,7 +9,7 @@ import {AISettings} from "../settings/AISettings";
 import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {FileText, Package, Plug, Zap, Settings, User, Bot, Globe, PanelLeft, PanelRight} from "lucide-react";
+import {FileText, Package, Plug, Zap, Settings, User, Bot, Globe, PanelLeft, PanelRight, Image} from "lucide-react";
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
 import {useSettings} from "../../hooks/useSettings";

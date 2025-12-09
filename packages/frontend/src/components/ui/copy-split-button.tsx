@@ -36,6 +36,12 @@ export const COPY_OPTIONS: CopyOption[] = [
 		icon: '🖼️',
 	},
 	{
+		id: 'image-preview',
+		name: '图片预览',
+		description: '预览截图效果（代码块缩放）',
+		icon: '👁️',
+	},
+	{
 		id: 'zhihu',
 		name: '知乎',
 		description: '复制为适合知乎的格式',

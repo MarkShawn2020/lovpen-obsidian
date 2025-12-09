@@ -87,6 +87,10 @@ interface SettingsData {
 	aiPromptTemplate?: string;
 	/** AI模型选择 */
 	aiModel?: string;
+
+	// ===== 图片导出设置 =====
+	/** 复制为图片时是否缩放溢出的代码块 */
+	scaleCodeBlockInImage?: boolean;
 }
 
 // 定义分发服务配置类型

@@ -46,10 +46,12 @@ export const useSettings = (
 	}, [updatePersonalInfoAction, onPersonalInfoChange]);
 
 	const updateSettings = useCallback((settingsUpdate: Partial<ViteReactSettings>) => {
+		console.log('[useSettings] updateSettings called with:', settingsUpdate);
+		console.log('[useSettings] current settings before update:', settings);
 		updateSettingsAction(settingsUpdate);
 		// 立即调用回调，确保后端同步
 		onSettingsChange?.(settingsUpdate);
-	}, [updateSettingsAction, onSettingsChange]);
+	}, [updateSettingsAction, onSettingsChange, settings]);
 
 	const saveSettings = useCallback(() => {
 		console.log('[useSettings] saveSettings called');

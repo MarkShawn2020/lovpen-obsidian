@@ -48,7 +48,10 @@ export const updateSettingsAtom = atom(
 	null,
 	(get, set, update: Partial<ViteReactSettings>) => {
 		const currentSettings = get(settingsAtom);
+		console.log('[atoms] updateSettingsAtom - current:', currentSettings);
+		console.log('[atoms] updateSettingsAtom - update:', update);
 		const newSettings = {...currentSettings, ...update};
+		console.log('[atoms] updateSettingsAtom - new:', newSettings);
 		set(settingsAtom, newSettings);
 
 		// 同步更新个人信息

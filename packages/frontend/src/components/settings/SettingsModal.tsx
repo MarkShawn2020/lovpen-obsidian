@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {PersonalInfoSettings} from './PersonalInfoSettings';
 import {AISettings} from './AISettings';
 import {PersonalInfo, ViteReactSettings} from '../../types';
-import {Bot, Globe, Settings, User, X, PanelLeft, PanelRight} from 'lucide-react';
+import {Bot, Globe, Settings, User, X, PanelLeft, PanelRight, Image} from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 
 interface SettingsModalProps {

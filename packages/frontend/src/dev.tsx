@@ -5,7 +5,7 @@ import { JotaiProvider } from './providers/JotaiProvider'
 import { logger } from '../../shared/src/logger'
 import { webAdapter } from './adapters/web-adapter'
 import { domToPng } from 'modern-screenshot'
-import { findScreenshotElement } from '@lovpen/shared'
+import { findScreenshotElement, applyCodeBlockScale } from '@lovpen/shared'
 import './index.css'
 
 // Types (we'll need to ensure these are available)
@@ -17,6 +17,9 @@ interface ExternalReactLib {
 
 // Track mounted roots for HMR
 const mountedRoots = new Map<HTMLElement, ReactDOM.Root>()
+
+// 图片预览状态 - 用于 toggle 代码块缩放效果
+let imagePreviewRestoreFn: (() => void) | null = null
 
 // Wrapper component to manage props updates without remounting JotaiProvider
 const LovpenReactWrapper: React.FC<{ initialProps: any; container?: HTMLElement }> = ({ initialProps, container }) => {
@@ -139,6 +142,30 @@ if (rootElement) {
       logger.debug('🔥 [DEBUG] mode === "wechat":', mode === 'wechat');
 
       try {
+        // 处理图片预览 toggle
+        if (mode === 'image-preview') {
+          const result = findScreenshotElement(document);
+          if (!result) {
+            new webAdapter.Notice('未找到文章内容');
+            return;
+          }
+
+          if (imagePreviewRestoreFn) {
+            // 已经在预览状态，恢复原样
+            imagePreviewRestoreFn();
+            imagePreviewRestoreFn = null;
+            new webAdapter.Notice('已退出图片预览模式');
+            logger.debug('👁️ [图片预览] 已恢复原始样式');
+          } else {
+            // 应用代码块缩放
+            const { restore } = applyCodeBlockScale(result.element);
+            imagePreviewRestoreFn = restore;
+            new webAdapter.Notice('已进入图片预览模式（点击再次切换可退出）');
+            logger.debug('👁️ [图片预览] 已应用代码块缩放');
+          }
+          return;
+        }
+
         if (mode === 'image') {
           logger.debug('🔥 [DEBUG] 进入 image 分支');
         } else {
@@ -205,11 +232,17 @@ if (rootElement) {
 
           logger.debug('🖼️ [图片复制] 所有图片预处理完成，开始截图');
 
+          // 预处理：临时修改溢出代码块的样式，自动缩放以适应原始宽度
+          const codeBlockScale = applyCodeBlockScale(articleElement);
+
           const originalDataUrl = await domToPng(articleElement, {
             quality: 1,
             scale: 2, // 2倍分辨率，提高清晰度
           });
           logger.debug('🖼️ [图片复制] 截图完成，dataUrl 长度:', originalDataUrl.length);
+
+          // 恢复代码块原始样式
+          codeBlockScale.restore();
 
           // 恢复原始图片 URL
           images.forEach(img => {
