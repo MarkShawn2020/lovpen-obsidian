@@ -9,7 +9,7 @@ import {AISettings} from "../settings/AISettings";
 import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {FileText, Package, Plug, Zap, Settings, User, Bot, Globe, PanelLeft, PanelRight, Image} from "lucide-react";
+import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft} from "lucide-react";
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
 import {useSettings} from "../../hooks/useSettings";
@@ -18,9 +18,6 @@ interface ToolbarProps {
 	settings: ViteReactSettings;
 	plugins: UnifiedPluginData[];
 	articleHTML: string;
-	onRefresh: () => void;
-	onCopy: () => void;
-	onDistribute: () => void;
 	onTemplateChange: (template: string) => void;
 	onThemeChange: (theme: string) => void;
 	onHighlightChange: (highlight: string) => void;
@@ -30,25 +27,18 @@ interface ToolbarProps {
 	onSaveSettings: () => void;
 	onPluginToggle?: (pluginName: string, enabled: boolean) => void;
 	onPluginConfigChange?: (pluginName: string, key: string, value: string | boolean) => void;
-	onExpandedSectionsChange?: (sections: string[]) => void;
 	onArticleInfoChange?: (info: ArticleInfoData) => void;
 	onPersonalInfoChange?: (info: PersonalInfo) => void;
 	onSettingsChange?: (settings: Partial<ViteReactSettings>) => void;
 	onKitApply?: (kitId: string) => void;
 	onKitCreate?: (basicInfo: any) => void;
 	onKitDelete?: (kitId: string) => void;
-	// 外部控制 tab 切换
-	activeTab?: string;
-	onActiveTabChange?: (tab: string) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
 													settings,
 													plugins,
 													articleHTML,
-													onRefresh,
-													onCopy,
-													onDistribute,
 													onTemplateChange,
 													onThemeChange,
 													onHighlightChange,
@@ -58,38 +48,52 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													onSaveSettings,
 													onPluginToggle,
 													onPluginConfigChange,
-													onExpandedSectionsChange,
 													onArticleInfoChange,
 													onPersonalInfoChange,
 													onSettingsChange,
 													onKitApply,
 													onKitCreate,
 													onKitDelete,
-													activeTab: externalActiveTab,
-													onActiveTabChange,
 												}) => {
 
 	// 使用 useSettings hook 获取设置更新方法
 	const {settings: atomSettings, updateSettings, saveSettings} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
 
-	// 使用本地状态管理当前选中的tab（支持外部控制）
-	const [internalActiveTab, setInternalActiveTab] = useState<string>(() => {
+	// 统一的导航状态 - 苹果风格侧边栏
+	type NavSection = 'article' | 'cover' | 'kits' | 'plugins' | 'personal' | 'ai' | 'general';
+	const [activeSection, setActiveSection] = useState<NavSection>(() => {
 		try {
-			return localStorage.getItem('lovpen-toolbar-active-tab') || 'basic';
+			const saved = localStorage.getItem('lovpen-toolbar-section') as NavSection;
+			return saved || 'article';
 		} catch {
-			return 'basic';
+			return 'article';
 		}
 	});
 
-	// 如果外部提供了 activeTab，则使用外部值；否则使用内部值
-	const activeTab = externalActiveTab ?? internalActiveTab;
-	const setActiveTab = (tab: string) => {
-		setInternalActiveTab(tab);
-		onActiveTabChange?.(tab);
+	const handleSectionChange = (section: NavSection) => {
+		setActiveSection(section);
+		try {
+			localStorage.setItem('lovpen-toolbar-section', section);
+		} catch {}
 	};
 
-	// 设置 tab 内的子 tab 状态
-	const [settingsSubTab, setSettingsSubTab] = useState<'personal' | 'ai' | 'general'>('personal');
+	// 侧边栏展开/收起状态
+	const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(() => {
+		try {
+			const saved = localStorage.getItem('lovpen-sidebar-expanded');
+			return saved !== 'false'; // 默认展开
+		} catch {
+			return true;
+		}
+	});
+
+	const toggleSidebar = () => {
+		const newValue = !sidebarExpanded;
+		setSidebarExpanded(newValue);
+		try {
+			localStorage.setItem('lovpen-sidebar-expanded', String(newValue));
+		} catch {}
+	};
 
 	// 插件管理中的子tab状态
 	const [pluginTab, setPluginTab] = useState<string>(() => {
@@ -107,31 +111,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 
 
-	// 当外部settings发生变化时，同步更新本地状态
+	// 同步插件展开状态
 	useEffect(() => {
-		// 如果当前tab是样式设置但样式设置被关闭了，切换到基本信息
-		if (activeTab === 'style' && !settings.showStyleUI) {
-			setActiveTab('info');
-		}
-		// 同步插件展开状态
 		setPluginExpandedSections(settings.expandedAccordionSections || []);
-	}, [settings.showStyleUI, activeTab, settings.expandedAccordionSections]);
-
-	const handleTabChange = (value: string) => {
-		setActiveTab(value);
-		// 持久化保存选中的tab
-		try {
-			localStorage.setItem('lovpen-toolbar-active-tab', value);
-		} catch (error) {
-			console.warn('Failed to save active tab to localStorage:', error);
-		}
-		// 保存当前选中的tab到settings
-		const newSections = [value];
-		if (onExpandedSectionsChange) {
-			onExpandedSectionsChange(newSections);
-		}
-		onSaveSettings();
-	};
+	}, [settings.expandedAccordionSections]);
 
 	const remarkPlugins = plugins.filter(p => p.type === 'remark');
 	const rehypePlugins = plugins.filter(p => p.type === 'rehype');
@@ -172,11 +155,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 		// 更新本地状态
 		setPluginExpandedSections(newSections);
-
-		// 通过回调函数更新外部settings
-		if (onExpandedSectionsChange) {
-			onExpandedSectionsChange(newSections);
-		}
 		onSaveSettings();
 	};
 
@@ -335,11 +313,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		});
 	};
 
+	// 导航菜单配置
+	const navItems: {key: typeof activeSection; label: string; icon: React.ElementType; color: string; group: 'content' | 'settings'}[] = [
+		{key: 'article', label: '文章信息', icon: FileText, color: 'from-[#CC785C] to-[#B86A4E]', group: 'content'},
+		{key: 'cover', label: '封面设计', icon: Palette, color: 'from-[#B49FD8] to-[#8B7CB8]', group: 'content'},
+		{key: 'kits', label: '模板套装', icon: Package, color: 'from-[#629A90] to-[#4A7A70]', group: 'content'},
+		{key: 'plugins', label: '插件管理', icon: Plug, color: 'from-[#97B5D5] to-[#7095B5]', group: 'content'},
+		{key: 'personal', label: '个人信息', icon: User, color: 'from-[#C2C07D] to-[#A2A05D]', group: 'settings'},
+		{key: 'ai', label: 'AI 设置', icon: Bot, color: 'from-[#CC785C] to-[#AC583C]', group: 'settings'},
+		{key: 'general', label: '通用', icon: Globe, color: 'from-[#87867F] to-[#6A6A63]', group: 'settings'},
+	];
+
 	try {
 		return (
 			<div
 				id="lovpen-toolbar-container"
-				className="h-full flex flex-col bg-[#F9F9F7] relative"
+				className="h-full flex bg-[#F9F9F7] relative"
 				style={{
 					minWidth: '320px',
 					width: '100%',
@@ -347,77 +336,145 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					overflow: 'hidden',
 					boxSizing: 'border-box'
 				}}>
-				<div className="flex-1 overflow-y-auto overflow-x-hidden">
-					<div className="p-3 sm:p-6">
-						<Tabs value={activeTab} onValueChange={handleTabChange}>
-							<TabsList
-								className="sticky top-0 z-10 grid w-full grid-cols-4 gap-2 backdrop-blur-sm bg-[#F9F9F7]/80 pb-4">
-								<TabsTrigger
-									value="basic"
-									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all"
-								>
-									<FileText className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate hidden sm:inline">基础</span>
-								</TabsTrigger>
-								<TabsTrigger
-									value="kits"
-									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all"
-								>
-									<Package className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate hidden sm:inline">套装</span>
-								</TabsTrigger>
-								<TabsTrigger
-									value="plugins"
-									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all relative"
-								>
-									<Plug className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate hidden sm:inline">插件</span>
-									{plugins.length > 0 && (
-										<span
-											className="absolute -top-1 -right-1 bg-[#D97757] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center leading-none text-[10px] sm:static sm:bg-[#E8E6DC] sm:text-[#87867F] sm:px-2 sm:py-1 sm:ml-1 sm:w-auto sm:h-auto sm:rounded-full">
-											{plugins.length > 99 ? '99+' : plugins.length}
-										</span>
-									)}
-								</TabsTrigger>
-								<TabsTrigger
-									value="settings"
-									className="flex items-center justify-center gap-1 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-[#D97757] data-[state=active]:shadow-md text-[#87867F] px-2 py-3 rounded-xl transition-all"
-								>
-									<Settings className="h-4 w-4 flex-shrink-0"/>
-									<span className="truncate hidden sm:inline">设置</span>
-								</TabsTrigger>
-							</TabsList>
+				{/* 左侧导航栏 - macOS 系统偏好设置风格 */}
+				<div
+					className={`bg-[#F0EEE6]/80 backdrop-blur-xl border-r border-[#E8E6DC] flex flex-col flex-shrink-0 transition-all duration-200 ${
+						sidebarExpanded ? 'w-[180px]' : 'w-[52px]'
+					}`}
+				>
+					{/* 顶部切换按钮 */}
+					<div className="p-2 border-b border-[#E8E6DC]">
+						<button
+							onClick={toggleSidebar}
+							className="w-full flex items-center justify-center p-2 rounded-lg text-[#87867F] hover:bg-[#E8E6DC]/80 hover:text-[#3d3d3d] transition-all"
+							title={sidebarExpanded ? '收起菜单' : '展开菜单'}
+						>
+							{sidebarExpanded ? (
+								<ChevronsLeft className="h-4 w-4"/>
+							) : (
+								<Menu className="h-4 w-4"/>
+							)}
+						</button>
+					</div>
 
-							<TabsContent value="basic" className="mt-6 space-y-6">
-								{/* 基本信息 */}
-								<div
-									className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+					<div className="flex-1 overflow-y-auto py-3 px-2">
+						{/* 内容分组 */}
+						<div className="mb-4">
+							{sidebarExpanded && (
+								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium px-2 mb-2">内容</p>
+							)}
+							<nav className={sidebarExpanded ? 'space-y-1' : 'space-y-2'}>
+								{navItems.filter(item => item.group === 'content').map(({key, label, icon: Icon, color}) => (
+									<button
+										key={key}
+										onClick={() => handleSectionChange(key)}
+										title={!sidebarExpanded ? label : undefined}
+										className={`w-full flex items-center transition-all ${
+											sidebarExpanded
+												? `gap-3 px-2 py-2 rounded-lg ${activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'}`
+												: 'justify-center py-1'
+										}`}
+										style={!sidebarExpanded ? { background: 'none', border: 'none', boxShadow: 'none' } : undefined}
+									>
+										<div
+											className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} transition-transform ${
+												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
+											}`}
+											style={{ boxShadow: activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
+										>
+											<Icon className="h-4 w-4 text-white"/>
+										</div>
+										{sidebarExpanded && (
+											<>
+												<span className="text-sm font-medium text-left flex-1">{label}</span>
+												{key === 'plugins' && plugins.length > 0 && (
+													<span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+														activeSection === key ? 'bg-white/25 text-white' : 'bg-[#E8E6DC] text-[#87867F]'
+													}`}>
+														{plugins.length}
+													</span>
+												)}
+											</>
+										)}
+									</button>
+								))}
+							</nav>
+						</div>
+
+						{/* 设置分组 */}
+						<div>
+							{sidebarExpanded && (
+								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium px-2 mb-2">设置</p>
+							)}
+							<nav className={sidebarExpanded ? 'space-y-1' : 'space-y-2'}>
+								{navItems.filter(item => item.group === 'settings').map(({key, label, icon: Icon, color}) => (
+									<button
+										key={key}
+										onClick={() => handleSectionChange(key)}
+										title={!sidebarExpanded ? label : undefined}
+										className={`w-full flex items-center transition-all ${
+											sidebarExpanded
+												? `gap-3 px-2 py-2 rounded-lg ${activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'}`
+												: 'justify-center py-1'
+										}`}
+										style={!sidebarExpanded ? { background: 'none', border: 'none', boxShadow: 'none' } : undefined}
+									>
+										<div
+											className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} transition-transform ${
+												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
+											}`}
+											style={{ boxShadow: activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
+										>
+											<Icon className="h-4 w-4 text-white"/>
+										</div>
+										{sidebarExpanded && (
+											<span className="text-sm font-medium text-left flex-1">{label}</span>
+										)}
+									</button>
+								))}
+							</nav>
+						</div>
+					</div>
+				</div>
+
+				{/* 右侧内容区 */}
+				<div className="flex-1 overflow-y-auto bg-[#F9F9F7]">
+					<div className="p-4 sm:p-5">
+						{/* 文章信息 */}
+						{activeSection === 'article' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">文章信息</h3>
+								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
 									<ArticleInfo
 										settings={settings}
 										onSaveSettings={onSaveSettings}
-										onInfoChange={onArticleInfoChange || (() => {
-										})}
+										onInfoChange={onArticleInfoChange || (() => {})}
 										onRenderArticle={onRenderArticle}
 										onSettingsChange={onSettingsChange}
 									/>
 								</div>
+							</div>
+						)}
 
-								{/* 封面设计 */}
-								<div
-									className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+						{/* 封面设计 */}
+						{activeSection === 'cover' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">封面设计</h3>
+								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
 									<CoverDesigner
 										articleHTML={articleHTML}
 										onDownloadCovers={handleDownloadCovers}
-										onClose={() => {
-										}}
+										onClose={() => {}}
 									/>
 								</div>
-							</TabsContent>
+							</div>
+						)}
 
-
-							<TabsContent value="kits" className="mt-6">
-								<div
-									className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+						{/* 模板套装 */}
+						{activeSection === 'kits' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">模板套装</h3>
+								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
 									<TemplateKitSelector
 										settings={settings}
 										onKitApply={onKitApply}
@@ -431,67 +488,56 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										onThemeColorChange={onThemeColorChange}
 									/>
 								</div>
-							</TabsContent>
+							</div>
+						)}
 
-							<TabsContent value="plugins" className="mt-6">
-								<div
-									className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
+						{/* 插件管理 */}
+						{activeSection === 'plugins' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">插件管理</h3>
+								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
 									{plugins.length > 0 ? (
 										<Tabs value={pluginTab} onValueChange={(value) => {
 											setPluginTab(value);
-											// 持久化保存插件tab选择
 											try {
 												localStorage.setItem('lovpen-toolbar-plugin-tab', value);
-											} catch (error) {
-												console.warn('Failed to save plugin tab to localStorage:', error);
-											}
+											} catch {}
 										}}>
-											<div className="mb-4">
-												<h3 className="text-lg font-semibold text-[#181818] mb-2">插件管理</h3>
-												<p className="text-sm text-[#87867F]">配置和管理Markdown处理插件</p>
-											</div>
-
-											<TabsList className="bg-[#F0EEE6] rounded-xl p-1">
+											<TabsList className="bg-[#F0EEE6] rounded-lg p-0.5 mb-4">
 												{remarkPlugins.length > 0 && (
 													<TabsTrigger value="remark"
-														className="flex items-center justify-center gap-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#D97757] text-[#87867F] px-3 py-2 rounded-lg transition-all">
-														<Plug className="h-4 w-4 flex-shrink-0"/>
-														<span className="hidden sm:inline">Remark</span>
-														<span className="sm:hidden">R</span>
-														<span className="bg-[#C2C07D] text-white text-xs px-2 py-0.5 rounded-full">
-															{remarkPlugins.length}
-														</span>
+														className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
+														<Plug className="h-3.5 w-3.5"/>
+														<span>Remark</span>
+														<span className="bg-[#C2C07D] text-white text-[10px] px-1.5 py-0.5 rounded-full">{remarkPlugins.length}</span>
 													</TabsTrigger>
 												)}
 												{rehypePlugins.length > 0 && (
 													<TabsTrigger value="rehype"
-														className="flex items-center justify-center gap-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#D97757] text-[#87867F] px-3 py-2 rounded-lg transition-all">
-														<Zap className="h-4 w-4 flex-shrink-0"/>
-														<span className="hidden sm:inline">Rehype</span>
-														<span className="sm:hidden">H</span>
-														<span className="bg-[#B49FD8] text-white text-xs px-2 py-0.5 rounded-full">
-															{rehypePlugins.length}
-														</span>
+														className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
+														<Zap className="h-3.5 w-3.5"/>
+														<span>Rehype</span>
+														<span className="bg-[#B49FD8] text-white text-[10px] px-1.5 py-0.5 rounded-full">{rehypePlugins.length}</span>
 													</TabsTrigger>
 												)}
 											</TabsList>
 
 											{remarkPlugins.length > 0 && (
-												<TabsContent value="remark" className="mt-6">
-													<div className="space-y-4">
-														<div className="flex items-center p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl gap-3">
+												<TabsContent value="remark" className="mt-0">
+													<div className="space-y-3">
+														<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
 															<Checkbox
 																checked={getPluginsCheckState(remarkPlugins)}
 																onCheckedChange={() => handleSelectAllToggle('remark')}
 																className="border-[#629A90] data-[state=checked]:bg-[#629A90]"
 															/>
 															<div>
-																<h4 className="font-semibold text-[#181818]">Remark插件</h4>
-																<p className="text-sm text-[#87867F]">Markdown语法解析插件({remarkPlugins.length}个)</p>
+																<h4 className="font-medium text-[#181818] text-sm">全选 Remark</h4>
+																<p className="text-xs text-[#87867F]">Markdown 语法解析插件</p>
 															</div>
 														</div>
 														<div className="space-y-1">
-															{remarkPlugins.map(plugin => 
+															{remarkPlugins.map(plugin =>
 																<ConfigComponent key={plugin.name} item={plugin} type="plugin"
 																	expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
 																	onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
@@ -504,22 +550,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													</div>
 												</TabsContent>
 											)}
+
 											{rehypePlugins.length > 0 && (
-												<TabsContent value="rehype" className="mt-6">
-													<div className="space-y-4">
-														<div className="flex items-center p-4 bg-[#F7F4EC] border border-[#E8E6DC] rounded-xl gap-3">
+												<TabsContent value="rehype" className="mt-0">
+													<div className="space-y-3">
+														<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
 															<Checkbox
 																checked={getPluginsCheckState(rehypePlugins)}
 																onCheckedChange={() => handleSelectAllToggle('rehype')}
 																className="border-[#97B5D5] data-[state=checked]:bg-[#97B5D5]"
 															/>
 															<div>
-																<h4 className="font-semibold text-[#181818]">Rehype插件</h4>
-																<p className="text-sm text-[#87867F]">HTML处理和转换插件({rehypePlugins.length}个)</p>
+																<h4 className="font-medium text-[#181818] text-sm">全选 Rehype</h4>
+																<p className="text-xs text-[#87867F]">HTML 处理和转换插件</p>
 															</div>
 														</div>
 														<div className="space-y-1">
-															{rehypePlugins.map(plugin => 
+															{rehypePlugins.map(plugin =>
 																<ConfigComponent key={plugin.name} item={plugin} type="plugin"
 																	expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
 																	onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
@@ -534,164 +581,129 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 											)}
 										</Tabs>
 									) : (
-										<div className="text-center py-12">
-											<div className="p-6 bg-[#F7F4EC] border border-[#E8E6DC] rounded-2xl">
-												<Plug className="h-12 w-12 text-[#87867F] mx-auto mb-4"/>
-												<h3 className="text-lg font-semibold text-[#181818] mb-2">暂无插件</h3>
-												<p className="text-sm text-[#87867F]">当前没有可用的Markdown处理插件</p>
-											</div>
+										<div className="text-center py-8">
+											<Plug className="h-10 w-10 text-[#87867F] mx-auto mb-3"/>
+											<h4 className="font-medium text-[#181818] mb-1">暂无插件</h4>
+											<p className="text-sm text-[#87867F]">当前没有可用的 Markdown 处理插件</p>
 										</div>
 									)}
 								</div>
-							</TabsContent>
+							</div>
+						)}
 
-							{/* 设置 */}
-							<TabsContent value="settings" className="mt-6">
-								<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
-									{/* 设置子 tabs */}
-									<div className="flex gap-2 mb-6 border-b border-[#E8E6DC] pb-4">
-										{[
-											{key: 'personal', label: '个人信息', icon: User},
-											{key: 'ai', label: 'AI设置', icon: Bot},
-											{key: 'general', label: '通用设置', icon: Globe}
-										].map(({key, label, icon: Icon}) => (
+						{/* 个人信息 */}
+						{activeSection === 'personal' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">个人信息</h3>
+								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
+									<PersonalInfoSettings
+										onClose={() => handleSectionChange('article')}
+										onPersonalInfoChange={onPersonalInfoChange}
+										onSaveSettings={onSaveSettings}
+									/>
+								</div>
+							</div>
+						)}
+
+						{/* AI 设置 */}
+						{activeSection === 'ai' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">AI 设置</h3>
+								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
+									<AISettings
+										onClose={() => handleSectionChange('article')}
+										onSettingsChange={onSettingsChange}
+										onSaveSettings={onSaveSettings}
+									/>
+								</div>
+							</div>
+						)}
+
+						{/* 通用设置 */}
+						{activeSection === 'general' && (
+							<div className="space-y-4">
+								<h3 className="text-lg font-semibold text-[#181818]">通用</h3>
+
+								{/* 设置卡片组 */}
+								<div className="bg-white rounded-xl border border-[#E8E6DC] overflow-hidden">
+									<div className="divide-y divide-[#E8E6DC]">
+										{/* 工具栏位置 */}
+										<div className="flex items-center justify-between px-4 py-3">
+											<div className="flex items-center gap-3">
+												<div className="w-7 h-7 bg-gradient-to-br from-[#CC785C] to-[#B86A4E] rounded-md flex items-center justify-center">
+													<PanelLeft className="h-4 w-4 text-white"/>
+												</div>
+												<span className="text-[#181818] text-sm">工具栏位置</span>
+											</div>
+											<div className="flex bg-[#E8E6DC] rounded-lg p-0.5">
+												<button
+													onClick={() => { updateSettings({toolbarPosition: 'left'}); saveSettings(); }}
+													className={`px-3 py-1 text-xs rounded-md transition-all ${
+														atomSettings.toolbarPosition === 'left' ? 'bg-white text-[#181818] shadow-sm' : 'text-[#87867F]'
+													}`}
+												>左</button>
+												<button
+													onClick={() => { updateSettings({toolbarPosition: 'right'}); saveSettings(); }}
+													className={`px-3 py-1 text-xs rounded-md transition-all ${
+														(atomSettings.toolbarPosition ?? 'right') === 'right' ? 'bg-white text-[#181818] shadow-sm' : 'text-[#87867F]'
+													}`}
+												>右</button>
+											</div>
+										</div>
+
+										{/* 代码块缩放 */}
+										<div className="flex items-center justify-between px-4 py-3">
+											<div className="flex items-center gap-3">
+												<div className="w-7 h-7 bg-gradient-to-br from-[#629A90] to-[#4A7A70] rounded-md flex items-center justify-center">
+													<Image className="h-4 w-4 text-white"/>
+												</div>
+												<div>
+													<span className="text-[#181818] text-sm block">代码块自动缩放</span>
+													<span className="text-[#87867F] text-xs">复制图片时自动适配</span>
+												</div>
+											</div>
 											<button
-												key={key}
-												onClick={() => setSettingsSubTab(key as 'personal' | 'ai' | 'general')}
-												className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all text-sm ${
-													settingsSubTab === key
-														? 'bg-[#CC785C]/10 text-[#CC785C] font-medium'
-														: 'text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818]'
+												onClick={() => {
+													const newValue = !(atomSettings.scaleCodeBlockInImage ?? true);
+													updateSettings({scaleCodeBlockInImage: newValue});
+													saveSettings();
+												}}
+												className={`relative w-[42px] h-[26px] rounded-full transition-colors ${
+													(atomSettings.scaleCodeBlockInImage ?? true) ? 'bg-[#629A90]' : 'bg-[#D1D1D6]'
 												}`}
 											>
-												<Icon className="h-4 w-4"/>
-												<span className="hidden sm:inline">{label}</span>
+												<span className={`absolute top-[3px] w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+													(atomSettings.scaleCodeBlockInImage ?? true) ? 'translate-x-[19px]' : 'translate-x-[3px]'
+												}`}/>
 											</button>
-										))}
-									</div>
-
-									{/* 设置内容 */}
-									{settingsSubTab === 'personal' && (
-										<PersonalInfoSettings
-											onClose={() => setActiveTab('basic')}
-											onPersonalInfoChange={onPersonalInfoChange}
-											onSaveSettings={onSaveSettings}
-										/>
-									)}
-
-									{settingsSubTab === 'ai' && (
-										<AISettings
-											onClose={() => setActiveTab('basic')}
-											onSettingsChange={onSettingsChange}
-											onSaveSettings={onSaveSettings}
-										/>
-									)}
-
-									{settingsSubTab === 'general' && (
-										<div className="space-y-6">
-											{/* 工具栏位置设置 */}
-											<div className="bg-[#F9F9F7] border border-[#E8E6DC] rounded-xl p-4">
-												<div className="flex items-center gap-3 mb-4">
-													<div className="p-2 bg-white rounded-lg">
-														<PanelLeft className="h-5 w-5 text-[#CC785C]"/>
-													</div>
-													<div>
-														<h4 className="font-semibold text-[#181818]">工具栏位置</h4>
-														<p className="text-sm text-[#87867F]">选择工具栏显示在预览区域的左侧或右侧</p>
-													</div>
-												</div>
-												<div className="flex gap-3">
-													<button
-														onClick={() => {
-															updateSettings({toolbarPosition: 'left'});
-															saveSettings();
-														}}
-														className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all ${
-															atomSettings.toolbarPosition === 'left'
-																? 'bg-[#CC785C] text-white border-[#CC785C]'
-																: 'bg-white text-[#181818] border-[#E8E6DC] hover:border-[#CC785C]/40'
-														}`}
-													>
-														<PanelLeft className="h-4 w-4"/>
-														<span>左侧</span>
-													</button>
-													<button
-														onClick={() => {
-															updateSettings({toolbarPosition: 'right'});
-															saveSettings();
-														}}
-														className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all ${
-															(atomSettings.toolbarPosition ?? 'right') === 'right'
-																? 'bg-[#CC785C] text-white border-[#CC785C]'
-																: 'bg-white text-[#181818] border-[#E8E6DC] hover:border-[#CC785C]/40'
-														}`}
-													>
-														<PanelRight className="h-4 w-4"/>
-														<span>右侧</span>
-													</button>
-												</div>
-											</div>
-
-											{/* 代码块缩放设置 */}
-											<div className="bg-[#F9F9F7] border border-[#E8E6DC] rounded-xl p-4">
-												<div className="flex items-center justify-between">
-													<div className="flex items-center gap-3">
-														<div className="p-2 bg-white rounded-lg">
-															<Image className="h-5 w-5 text-[#CC785C]"/>
-														</div>
-														<div>
-															<h4 className="font-semibold text-[#181818]">代码块自动缩放</h4>
-															<p className="text-sm text-[#87867F]">复制为图片时，自动缩放溢出的代码块</p>
-														</div>
-													</div>
-													<button
-														onClick={() => {
-															const newValue = !(atomSettings.scaleCodeBlockInImage ?? true);
-															updateSettings({scaleCodeBlockInImage: newValue});
-															saveSettings();
-														}}
-														className={`relative w-12 h-6 rounded-full transition-colors ${
-															(atomSettings.scaleCodeBlockInImage ?? true)
-																? 'bg-[#CC785C]'
-																: 'bg-[#E8E6DC]'
-														}`}
-													>
-														<span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-															(atomSettings.scaleCodeBlockInImage ?? true)
-																? 'translate-x-7'
-																: 'translate-x-1'
-														}`}/>
-													</button>
-												</div>
-											</div>
-
-											{/* 即将推出的功能 */}
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-												{[
-													{title: '应用主题', desc: '明亮或暗色主题', icon: '🎨'},
-													{title: '语言偏好', desc: '界面显示语言', icon: '🌍'},
-													{title: '快捷键', desc: '自定义键盘快捷键', icon: '⌨️'},
-													{title: '数据备份', desc: '备份和恢复设置', icon: '📁'}
-												].map((feature, index) => (
-													<div key={index}
-														 className="group bg-[#F9F9F7] border border-[#E8E6DC] rounded-xl p-3 opacity-60">
-														<div className="flex items-center gap-2">
-															<span className="text-lg">{feature.icon}</span>
-															<div>
-																<h4 className="font-medium text-[#181818] text-sm">{feature.title}</h4>
-																<p className="text-xs text-[#87867F]">{feature.desc}</p>
-															</div>
-														</div>
-														<span className="text-xs text-[#CC785C] mt-2 inline-block">即将推出</span>
-													</div>
-												))}
-											</div>
 										</div>
-									)}
+									</div>
 								</div>
-							</TabsContent>
 
-						</Tabs>
+								{/* 即将推出 */}
+								<div>
+									<p className="text-xs text-[#87867F] uppercase tracking-wide px-1 mb-2">即将推出</p>
+									<div className="bg-white/60 rounded-xl border border-[#E8E6DC] overflow-hidden">
+										<div className="divide-y divide-[#E8E6DC]">
+											{[
+												{label: '主题', desc: '明亮 / 暗色', color: 'from-[#B49FD8] to-[#8B7CB8]'},
+												{label: '语言', desc: '简体中文', color: 'from-[#97B5D5] to-[#7095B5]'},
+												{label: '快捷键', desc: '自定义', color: 'from-[#C2C07D] to-[#A2A05D]'},
+												{label: '数据', desc: '导入 / 导出', color: 'from-[#CC785C] to-[#AC583C]'}
+											].map((item, i) => (
+												<div key={i} className="flex items-center justify-between px-4 py-3 opacity-50">
+													<div className="flex items-center gap-3">
+														<div className={`w-7 h-7 bg-gradient-to-br ${item.color} rounded-md`}/>
+														<span className="text-[#181818] text-sm">{item.label}</span>
+													</div>
+													<span className="text-[#87867F] text-xs">{item.desc}</span>
+												</div>
+											))}
+										</div>
+									</div>
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
