@@ -271,6 +271,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				overflow: "hidden",
 				position: "relative",
 				isolation: "isolate", // 创建新的层叠上下文，防止外部动画影响
+				// 🔑 直接设置背景色，防止 Obsidian CSS 变量穿透
+				backgroundColor: "#ffffff",
+				color: "#1a1a1a",
 			}}
 		>
 			{/* 左侧渲染区域 - 始终可见，占用剩余空间 */}
@@ -282,11 +285,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					flex: "1", // 占用剩余空间，宽度 = C - B - resizer（当B显示时）或 C（当B隐藏时）
 					overflow: "auto",
 					scrollbarGutter: "stable", // 预留滚动条空间，防止内容跳动
-					borderRight: !isToolbarAutoHidden && !isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
-					borderLeft: !isToolbarAutoHidden && isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
+					borderRight: !isToolbarAutoHidden && !isToolbarLeft ? "1px solid #e5e5e5" : "none",
+					borderLeft: !isToolbarAutoHidden && isToolbarLeft ? "1px solid #e5e5e5" : "none",
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
-					flexDirection: "column"
+					flexDirection: "column",
+					// 🔑 直接设置背景色，防止 Obsidian CSS 变量穿透
+					backgroundColor: "#ffffff",
+					color: "#1a1a1a"
 				}}
 			>
 				{/* 内容容器 */}

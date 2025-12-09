@@ -6,11 +6,19 @@ import { logger } from '../../shared/src/logger'
 import { webAdapter } from './adapters/web-adapter'
 import { domToPng } from 'modern-screenshot'
 import { findScreenshotElement, applyCodeBlockScale } from '@lovpen/shared'
+// 🔑 使用 ?inline 导入编译后的 CSS 字符串（供 Shadow DOM 使用）
+import compiledCSS from './index.css?inline'
 import './index.css'
 
 // Types (we'll need to ensure these are available)
+interface ShadowMountOptions {
+  shadowRoot?: ShadowRoot;
+  portalContainer?: HTMLElement;
+  styles?: string[];
+}
+
 interface ExternalReactLib {
-  mount: (container: HTMLElement, props: any) => Promise<void>
+  mount: (container: HTMLElement, props: any, options?: ShadowMountOptions) => Promise<void>
   update: (container: HTMLElement, props: any) => Promise<void>
   unmount: (container: HTMLElement) => void
 }
@@ -21,48 +29,131 @@ const mountedRoots = new Map<HTMLElement, ReactDOM.Root>()
 // Wrapper component to manage props updates without remounting JotaiProvider
 const LovpenReactWrapper: React.FC<{ initialProps: any; container?: HTMLElement }> = ({ initialProps, container }) => {
   const [props, setProps] = useState(initialProps);
-  
+
   // Expose update function to parent
   useEffect(() => {
     if (container) {
       (container as any).__updateProps = setProps;
     }
   }, [container]);
-  
+
   return <LovpenReactBridge {...props} />;
 }
 
 // Create the external library interface for Obsidian plugin
 const LovpenReactLib: ExternalReactLib = {
-  mount: async (container: HTMLElement, props: any) => {
-    logger.debug('Mounting React component');
-    let root = mountedRoots.get(container);
-    if (!root) {
-      root = ReactDOM.createRoot(container);
-      mountedRoots.set(container, root);
+  mount: async (container: HTMLElement, props: any, options?: ShadowMountOptions) => {
+    console.log('[LovpenReactLib][Dev] mount() called', {
+      containerId: container?.id,
+      hasShadowRoot: !!options?.shadowRoot,
+      hasProps: !!props
+    });
+
+    // Clean up existing root if any
+    const existingRoot = mountedRoots.get(container);
+    if (existingRoot) {
+      existingRoot.unmount();
+      mountedRoots.delete(container);
     }
-    // Store props for HMR updates
+
+    // Determine the actual mount target
+    let mountTarget: HTMLElement = container;
+    let portalContainer: HTMLElement | null = null;
+
+    if (options?.shadowRoot) {
+      console.log('[LovpenReactLib][Dev] Shadow DOM mode - creating containers');
+
+      // Shadow DOM mode: create mount container inside shadow root
+      const shadowContainer = document.createElement('div');
+      shadowContainer.id = 'lovpen-shadow-mount';
+
+      // 🔑 使用内联样式直接设置，确保最高优先级
+      // CSS 变量会穿透 Shadow DOM，所以必须在这里显式覆盖
+      shadowContainer.style.cssText = `
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        --background: #ffffff;
+        --foreground: #1a1a1a;
+        --background-primary: #ffffff;
+        --background-secondary: #fafafa;
+        --text-normal: #1a1a1a;
+        --text-muted: #737373;
+        --card: #ffffff;
+        --card-foreground: #1a1a1a;
+        --popover: #ffffff;
+        --popover-foreground: #1a1a1a;
+        --primary: #2d2d2d;
+        --primary-foreground: #fafafa;
+        --secondary: #f5f5f5;
+        --secondary-foreground: #2d2d2d;
+        --muted: #f5f5f5;
+        --muted-foreground: #737373;
+        --accent: #f5f5f5;
+        --accent-foreground: #2d2d2d;
+        --destructive: #dc2626;
+        --border: #e5e5e5;
+        --input: #e5e5e5;
+        --ring: #a3a3a3;
+        --radius: 0.625rem;
+      `;
+
+      options.shadowRoot.appendChild(shadowContainer);
+      mountTarget = shadowContainer;
+
+      // Create portal container for Radix UI
+      const portalDiv = document.createElement('div');
+      portalDiv.id = 'lovpen-portal-root';
+      portalDiv.style.position = 'relative';
+      portalDiv.style.zIndex = '9999';
+      options.shadowRoot.appendChild(portalDiv);
+      portalContainer = options.portalContainer || portalDiv;
+
+      console.log('[LovpenReactLib][Dev] Shadow containers created');
+    }
+
+    // Create new root and render component
+    const root = ReactDOM.createRoot(mountTarget);
+    mountedRoots.set(container, root);
+
+    // Store props, shadow info, and options for updates/remounts
     (container as any).__lovpenProps = props;
-    root.render(
-      <JotaiProvider>
-        <LovpenReactWrapper initialProps={props} container={container} />
-      </JotaiProvider>
-    );
+    (container as any).__shadowRoot = options?.shadowRoot;
+    (container as any).__portalContainer = portalContainer;
+    (container as any).__shadowOptions = options;
+
+    console.log('[LovpenReactLib][Dev] Rendering to mountTarget', {
+      mountTargetId: mountTarget.id,
+      portalContainerId: portalContainer?.id
+    });
+
+    try {
+      root.render(
+        <JotaiProvider portalContainer={portalContainer}>
+          <LovpenReactWrapper initialProps={props} container={container} />
+        </JotaiProvider>
+      );
+      console.log('[LovpenReactLib][Dev] render() completed successfully');
+    } catch (error) {
+      console.error('[LovpenReactLib][Dev] render() failed:', error);
+    }
   },
 
   update: async (container: HTMLElement, props: any) => {
     logger.debug('Updating React component');
-    
+
     // Store new props
     (container as any).__lovpenProps = props;
-    
+
     const root = mountedRoots.get(container);
     if (root && (container as any).__updateProps) {
       // Update props without remounting JotaiProvider
       (container as any).__updateProps(props);
     } else if (!root) {
-      // If no root exists, mount it
-      await LovpenReactLib.mount(container, props);
+      // If no root exists, mount it with stored options
+      const storedOptions = (container as any).__shadowOptions;
+      await LovpenReactLib.mount(container, props, storedOptions);
     }
   },
 
@@ -79,8 +170,11 @@ const LovpenReactLib: ExternalReactLib = {
 // Expose to window for Obsidian plugin to access
 if (typeof window !== 'undefined') {
   (window as any).LovpenReactLib = LovpenReactLib;
+  // 🔑 暴露编译后的 CSS，供 Obsidian Shadow DOM 使用
+  (window as any).__LOVPEN_COMPILED_CSS__ = compiledCSS;
   logger.info('Dev Mode initialized with HMR support');
-  
+  logger.info('Compiled CSS length:', compiledCSS.length);
+
   // Also expose a flag to indicate HMR mode
   (window as any).__LOVPEN_HMR_MODE__ = true;
 }

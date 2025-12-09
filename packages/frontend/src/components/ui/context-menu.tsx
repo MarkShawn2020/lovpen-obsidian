@@ -5,6 +5,7 @@ import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useShadowRoot } from "@/providers/ShadowRootProvider"
 
 function ContextMenu({
   ...props
@@ -29,10 +30,16 @@ function ContextMenuGroup({
 }
 
 function ContextMenuPortal({
+  container,
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.Portal>) {
+  const { portalContainer } = useShadowRoot();
   return (
-    <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />
+    <ContextMenuPrimitive.Portal
+      data-slot="context-menu-portal"
+      container={container ?? portalContainer ?? undefined}
+      {...props}
+    />
   )
 }
 
@@ -97,8 +104,9 @@ function ContextMenuContent({
   className,
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.Content>) {
+  const { portalContainer } = useShadowRoot();
   return (
-    <ContextMenuPrimitive.Portal>
+    <ContextMenuPrimitive.Portal container={portalContainer ?? undefined}>
       <ContextMenuPrimitive.Content
         data-slot="context-menu-content"
         className={cn(

@@ -235,9 +235,19 @@ export interface LovpenReactProps {
 	onWidthChange?: (width: number) => void;
 }
 
+// Shadow DOM mount options
+export interface ShadowMountOptions {
+	/** Shadow root to mount into (if using Shadow DOM isolation) */
+	shadowRoot?: ShadowRoot;
+	/** Portal container for Radix UI components */
+	portalContainer?: HTMLElement;
+	/** Style sheets to inject into shadow root */
+	styles?: string[];
+}
+
 // Global interface for the exported library
 export interface LovpenReactLib {
-	mount: (container: HTMLElement, props: LovpenReactProps) => void;
+	mount: (container: HTMLElement, props: LovpenReactProps, options?: ShadowMountOptions) => void;
 	unmount: (container: HTMLElement) => void;
 	update: (container: HTMLElement, props: LovpenReactProps) => Promise<void>;
 }

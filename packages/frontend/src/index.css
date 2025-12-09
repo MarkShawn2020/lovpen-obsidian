@@ -90,8 +90,62 @@
 }
 
 /* ===================================
+   Shadow DOM 内部默认变量
+   由于 CSS 变量会穿透 Shadow DOM 边界（继承特性），需要显式覆盖
+   使用 hex 颜色 + 直接设置，确保不受 Obsidian 变量影响
+   =================================== */
+#lovpen-shadow-mount {
+	/* 🔑 重置所有可能从 Obsidian 继承的变量 */
+	--radius: 0.625rem;
+	--background: #ffffff;
+	--foreground: #1a1a1a;
+	--card: #ffffff;
+	--card-foreground: #1a1a1a;
+	--popover: #ffffff;
+	--popover-foreground: #1a1a1a;
+	--primary: #2d2d2d;
+	--primary-foreground: #fafafa;
+	--secondary: #f5f5f5;
+	--secondary-foreground: #2d2d2d;
+	--muted: #f5f5f5;
+	--muted-foreground: #737373;
+	--accent: #f5f5f5;
+	--accent-foreground: #2d2d2d;
+	--destructive: #dc2626;
+	--border: #e5e5e5;
+	--input: #e5e5e5;
+	--ring: #a3a3a3;
+	--chart-1: #f97316;
+	--chart-2: #14b8a6;
+	--chart-3: #3b82f6;
+	--chart-4: #eab308;
+	--chart-5: #f59e0b;
+	--sidebar: #fafafa;
+	--sidebar-foreground: #1a1a1a;
+	--sidebar-primary: #2d2d2d;
+	--sidebar-primary-foreground: #fafafa;
+	--sidebar-accent: #f5f5f5;
+	--sidebar-accent-foreground: #2d2d2d;
+	--sidebar-border: #e5e5e5;
+	--sidebar-ring: #a3a3a3;
+
+	/* 🔑 重置 Obsidian 的变量名，防止穿透影响 */
+	--background-primary: #ffffff;
+	--background-secondary: #fafafa;
+	--text-normal: #1a1a1a;
+	--text-muted: #737373;
+	--interactive-accent: #2d2d2d;
+
+	/* 🔑 直接设置背景色，不依赖变量 */
+	background-color: #ffffff;
+	color: #1a1a1a;
+}
+
+/* ===================================
    Obsidian 环境适配
    将 Obsidian 的 CSS 变量映射到我们的设计系统
+   注意：由于 Shadow DOM 隔离，Obsidian 变量无法穿透
+   这里保留映射以备将来通过 JS 桥接使用
    =================================== */
 .lovpen-obsidian-env {
 	/* 背景和前景色 */
@@ -175,15 +229,22 @@
 
 	/* 容器内所有元素的边框和轮廓样式 */
 	.note-preview *,
-	#lovpen-react-container * {
+	#lovpen-react-container *,
+	#lovpen-shadow-mount * {
 		@apply border-border outline-ring/50;
 	}
 
 	/* 容器基础样式 */
 	.note-preview,
-	#lovpen-react-container {
+	#lovpen-react-container,
+	#lovpen-shadow-mount {
 		@apply bg-background text-foreground;
 		scrollbar-gutter: stable;
+	}
+
+	/* 渲染区域背景色 - 确保不继承深色 */
+	.lovpen-renderer {
+		@apply bg-background;
 	}
 
 	/* Web 独立运行时的 body 样式（非 Obsidian 环境） */

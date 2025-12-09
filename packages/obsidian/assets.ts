@@ -117,7 +117,8 @@ export default class AssetsManager {
 			const defaultHighlight = {name: '默认', url: '', css: DefaultHighlight};
 			this.highlights = [defaultHighlight];
 			if (!await this.app.vault.adapter.exists(this.hilightCfg)) {
-				new Notice('高亮资源未下载，请前往设置下载！');
+				// 高亮资源可选，不强制要求下载
+				logger.debug('高亮资源未下载，使用默认高亮');
 				return;
 			}
 
@@ -126,13 +127,18 @@ export default class AssetsManager {
 				const items = JSON.parse(data);
 				for (const item of items) {
 					const cssFile = this.hilightPath + item.name + '.css';
+					// 检查文件是否存在，不存在则跳过
+					if (!await this.app.vault.adapter.exists(cssFile)) {
+						logger.debug(`高亮CSS文件不存在，跳过: ${cssFile}`);
+						continue;
+					}
 					const cssContent = await this.app.vault.adapter.read(cssFile);
 					this.highlights.push({name: item.name, url: item.url, css: cssContent});
 				}
 			}
 		} catch (error) {
 			logger.error('Failed to parse highlights.json:', error);
-			new Notice('highlights.json解析失败！');
+			// 不显示错误通知，允许继续使用默认高亮
 		}
 	}
 

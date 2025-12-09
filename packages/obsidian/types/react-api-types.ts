@@ -2,12 +2,24 @@ import {TemplateKit, TemplateKitBasicInfo} from "../template-kit-types";
 import {PersistentStorageAPI, RequestUrlFunction, SettingsAPI, TemplateKitAPI} from "@lovpen/shared";
 
 /**
+ * Shadow DOM 挂载选项
+ */
+export interface ShadowMountOptions {
+	/** Shadow root 用于样式隔离 */
+	shadowRoot?: ShadowRoot;
+	/** Portal 容器（用于 Radix UI 弹出层） */
+	portalContainer?: HTMLElement;
+	/** 要注入到 shadow root 的样式 */
+	styles?: string[];
+}
+
+/**
  * 外部React库接口定义
  * 扩展原有的简单接口，添加具体的方法签名和类型安全
  */
 export interface ExternalReactLib {
-	/** 挂载React组件到指定容器 */
-	mount: (container: HTMLElement, props: ReactComponentProps) => void;
+	/** 挂载React组件到指定容器，支持 Shadow DOM 模式 */
+	mount: (container: HTMLElement, props: ReactComponentProps, options?: ShadowMountOptions) => void;
 	/** 卸载React组件 */
 	unmount: (container: HTMLElement) => void;
 	/** 更新React组件的props */

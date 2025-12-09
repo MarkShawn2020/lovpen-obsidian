@@ -3,6 +3,7 @@ import * as MenubarPrimitive from "@radix-ui/react-menubar"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useShadowRoot } from "@/providers/ShadowRootProvider"
 
 function Menubar({
   className,
@@ -33,9 +34,17 @@ function MenubarGroup({
 }
 
 function MenubarPortal({
+  container,
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
-  return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />
+  const { portalContainer } = useShadowRoot();
+  return (
+    <MenubarPrimitive.Portal
+      data-slot="menubar-portal"
+      container={container ?? portalContainer ?? undefined}
+      {...props}
+    />
+  );
 }
 
 function MenubarRadioGroup({

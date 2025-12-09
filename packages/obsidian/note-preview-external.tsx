@@ -860,30 +860,81 @@ ${customCSS}`;
 		// todo: 在React组件中实现分发对话框
 	}
 
+	// Shadow DOM 相关属性
+	private shadowRoot: ShadowRoot | null = null;
+	private isMounted: boolean = false;
+	// 🔑 启用 Shadow DOM 实现样式隔离，确保 Obsidian 端效果与 Web 端一致
+	private readonly USE_SHADOW_DOM = true;
+
 	async buildUI() {
 		this.container = this.containerEl.children[1];
 		this.container.empty();
 
-		// // 设置容器最小宽度，确保有足够空间显示工具栏
-		// if (this.containerEl) {
-		// 	this.containerEl.style.minWidth = '800px';
-		// }
+		console.log("[LovPen] buildUI() 开始");
 
-		// 创建React容器
+		// 创建 React 容器
 		this.reactContainer = document.createElement('div');
 		this.reactContainer.style.width = '100%';
 		this.reactContainer.style.height = '100%';
-		// this.reactContainer.style.minWidth = '800px'; // 确保React容器也有最小宽度
 		this.reactContainer.id = 'lovpen-react-container';
-
-		// 🔑 关键：添加 Obsidian 环境类，启用 CSS 变量映射
-		this.reactContainer.classList.add('lovpen-obsidian-env');
-
 		this.container.appendChild(this.reactContainer);
 
+		if (this.USE_SHADOW_DOM) {
+			console.log("[LovPen] 启用 Shadow DOM 模式");
+			logger.info("[Shadow DOM] 启用 Shadow DOM 模式");
+
+			// 🔑 创建 Shadow Root 实现样式隔离
+			this.shadowRoot = this.reactContainer.attachShadow({ mode: 'open' });
+
+			// 🔑 Shadow Root 创建后立即注入 CSS
+			await this.injectCSSToShadowRoot();
+		} else {
+			console.log("[LovPen] 禁用 Shadow DOM 模式，使用传统渲染");
+			logger.info("[Shadow DOM] 禁用 Shadow DOM 模式，使用传统渲染");
+
+			// 传统模式：添加 Obsidian 环境类
+			this.reactContainer.classList.add('lovpen-obsidian-env');
+			this.shadowRoot = null;
+
+			// 传统模式下，如果是生产环境，需要加载 CSS 到 document.head
+			if (!(window as any).__LOVPEN_HMR_MODE__) {
+				await this.loadExternalCSSToHead();
+			}
+			// HMR 模式下，Vite 会自动将 CSS 注入到 document.head
+		}
+
+		// 重置挂载状态
+		this.isMounted = false;
+
+		console.log("[LovPen] buildUI() 即将调用 updateExternalReactComponent");
 
 		// 渲染外部React组件
 		await this.updateExternalReactComponent();
+
+		console.log("[LovPen] buildUI() 完成");
+	}
+
+	/**
+	 * 将 CSS 注入到 Shadow Root
+	 * 根据运行模式（HMR/Production）选择不同的加载方式
+	 */
+	private async injectCSSToShadowRoot(): Promise<void> {
+		if (!this.shadowRoot) {
+			logger.warn("Shadow Root 不存在，无法注入 CSS");
+			return;
+		}
+
+		if ((window as any).__LOVPEN_HMR_MODE__) {
+			// HMR 模式：从 Vite dev server 获取 CSS
+			const viteDevServerUrl = (window as any).__LOVPEN_HMR_URL__ || 'http://localhost:5173';
+			await this.loadHMRCSSToShadowRoot(viteDevServerUrl);
+		} else {
+			// 生产模式：从插件目录加载打包的 CSS
+			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
+			if (pluginDir) {
+				await this.loadExternalCSS(pluginDir);
+			}
+		}
 	}
 
 	private getPluginSettings(): NMPSettings {
@@ -961,11 +1012,13 @@ ${customCSS}`;
 					});
 					
 					this.externalReactLib = (window as any).LovpenReactLib;
-					
+
 					if (this.externalReactLib) {
 						logger.info("[HMR] ✅ Successfully loaded React app with HMR support");
 						this.setupGlobalAPI();
-						
+
+						// CSS 将在 buildUI() 中通过 injectCSSToShadowRoot() 注入
+
 						// Setup HMR update listener
 						this.setupHMRListener();
 						return;
@@ -986,8 +1039,7 @@ ${customCSS}`;
 			script.textContent = scriptContent;
 			document.head.appendChild(script);
 
-			// 加载对应的CSS文件
-			await this.loadExternalCSS(pluginDir);
+			// CSS 将在 buildUI() 中通过 injectCSSToShadowRoot() 注入
 
 			// 获取全局对象
 			this.externalReactLib = (window as any).LovpenReactLib ||
@@ -1022,34 +1074,133 @@ ${customCSS}`;
 		}
 	}
 
+	/**
+	 * HMR 模式下加载 CSS 到 Shadow Root
+	 * 🔑 从 window.__LOVPEN_COMPILED_CSS__ 获取 Vite 编译后的 CSS
+	 * 这样可以获取到完整的 TailwindCSS 编译结果，而不是原始的 @tailwind 指令
+	 */
+	private async loadHMRCSSToShadowRoot(_viteDevServerUrl: string): Promise<void> {
+		if (!this.shadowRoot) {
+			console.warn("[LovPen][HMR] Shadow Root 不存在，无法注入 CSS");
+			logger.warn("[HMR] Shadow Root 不存在，无法注入 CSS");
+			return;
+		}
+
+		try {
+			// 🔑 从 window 获取 Vite 编译后的 CSS
+			const compiledCSS = (window as any).__LOVPEN_COMPILED_CSS__;
+
+			if (!compiledCSS) {
+				console.warn("[LovPen][HMR] 编译后的 CSS 尚未加载，等待...");
+				// 等待 CSS 加载完成（最多等待 5 秒）
+				let attempts = 0;
+				while (!(window as any).__LOVPEN_COMPILED_CSS__ && attempts < 50) {
+					await new Promise(resolve => setTimeout(resolve, 100));
+					attempts++;
+				}
+
+				const css = (window as any).__LOVPEN_COMPILED_CSS__;
+				if (!css) {
+					console.error("[LovPen][HMR] CSS 加载超时");
+					logger.error("[HMR] CSS 加载超时");
+					return;
+				}
+			}
+
+			const cssText = (window as any).__LOVPEN_COMPILED_CSS__;
+			console.log("[LovPen][HMR] 获取到编译后的 CSS，长度:", cssText.length);
+
+			// 检查是否已存在 HMR CSS
+			const existingStyle = this.shadowRoot.querySelector('style[data-lovpen-hmr-css]');
+			if (existingStyle) {
+				existingStyle.textContent = cssText;
+				console.log("[LovPen][HMR] 已更新现有 CSS");
+			} else {
+				const style = document.createElement('style');
+				style.setAttribute('data-lovpen-hmr-css', 'true');
+				style.textContent = cssText;
+				this.shadowRoot.appendChild(style);
+				console.log("[LovPen][HMR] 已注入新 CSS 到 Shadow Root");
+			}
+
+			console.log("[LovPen][HMR] ✅ CSS 注入完成");
+			logger.info("[HMR] ✅ CSS 已注入到 Shadow Root");
+		} catch (error) {
+			console.error("[LovPen][HMR] 加载 CSS 失败:", error);
+			logger.warn("[HMR] 加载 CSS 失败:", error);
+		}
+	}
+
 	private async loadExternalCSS(pluginDir: string) {
 		try {
-			// Check if we're in HMR mode - CSS is handled by Vite in dev mode
+			// Check if we're in HMR mode - CSS is handled by loadHMRCSSToShadowRoot
 			if ((window as any).__LOVPEN_HMR_MODE__) {
-				logger.debug("[HMR] CSS 由 Vite Dev Server 管理");
+				logger.debug("[HMR] CSS 已通过 loadHMRCSSToShadowRoot 管理");
 				return;
 			}
-			
+
+			if (!this.shadowRoot) {
+				logger.warn("Shadow Root 不存在，无法注入 CSS");
+				return;
+			}
+
+			const cssPath = `${pluginDir}/frontend/style.css`;
+			const adapter = this.app.vault.adapter;
+			const cssContent = await adapter.read(cssPath);
+
+			// 🔑 将 CSS 注入到 Shadow Root 内，而不是 document.head
+			// 检查是否已经有这个CSS
+			const existingStyle = this.shadowRoot.querySelector('style[data-lovpen-react]');
+			if (existingStyle) {
+				existingStyle.remove();
+			}
+
+			// 创建style标签并插入CSS到Shadow Root
+			const style = document.createElement('style');
+			style.setAttribute('data-lovpen-react', 'true');
+			style.textContent = cssContent;
+			this.shadowRoot.appendChild(style);
+
+			logger.debug("成功加载外部CSS到Shadow Root:", cssPath);
+
+		} catch (error) {
+			logger.warn("加载外部CSS失败:", error.message);
+		}
+	}
+
+	/**
+	 * 加载外部 CSS 到 document.head (传统模式，非 Shadow DOM)
+	 */
+	private async loadExternalCSSToHead() {
+		try {
+			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
+			if (!pluginDir) {
+				console.warn("[LovPen] 无法获取插件目录");
+				return;
+			}
+
 			const cssPath = `${pluginDir}/frontend/style.css`;
 			const adapter = this.app.vault.adapter;
 			const cssContent = await adapter.read(cssPath);
 
 			// 检查是否已经有这个CSS
-			const existingStyle = document.querySelector('style[data-lovpen-react]');
+			const existingStyle = document.head.querySelector('style[data-lovpen-react]');
 			if (existingStyle) {
 				existingStyle.remove();
 			}
 
-			// 创建style标签并插入CSS
+			// 创建style标签并插入CSS到document.head
 			const style = document.createElement('style');
 			style.setAttribute('data-lovpen-react', 'true');
 			style.textContent = cssContent;
 			document.head.appendChild(style);
 
-			logger.debug("成功加载外部CSS:", cssPath);
+			console.log("[LovPen] 成功加载外部CSS到document.head:", cssPath);
+			logger.debug("成功加载外部CSS到document.head:", cssPath);
 
 		} catch (error) {
-			logger.warn("加载外部CSS失败:", error.message);
+			console.warn("[LovPen] 加载外部CSS失败:", error);
+			logger.warn("加载外部CSS失败:", error);
 		}
 	}
 
@@ -1114,25 +1265,62 @@ ${customCSS}`;
 		}
 	}
 
+	// 防止无限循环的标志
+	private isUpdating: boolean = false;
+	private lastUpdateTime: number = 0;
+	private readonly MIN_UPDATE_INTERVAL = 100; // 最小更新间隔（毫秒）
+
 	/**
 	 * 更新外部React组件
 	 */
 	private async updateExternalReactComponent(): Promise<void> {
+		// 🔒 防止无限循环
+		const now = Date.now();
+		if (this.isUpdating) {
+			console.warn("[LovPen] 跳过更新：正在更新中");
+			return;
+		}
+		if (now - this.lastUpdateTime < this.MIN_UPDATE_INTERVAL) {
+			console.warn("[LovPen] 跳过更新：更新过于频繁");
+			return;
+		}
+
+		this.isUpdating = true;
+		this.lastUpdateTime = now;
+
+		try {
+			await this._doUpdateExternalReactComponent();
+		} finally {
+			this.isUpdating = false;
+		}
+	}
+
+	private async _doUpdateExternalReactComponent(): Promise<void> {
+		console.log("[LovPen] updateExternalReactComponent() 开始", {
+			hasExternalReactLib: !!this.externalReactLib,
+			hasReactContainer: !!this.reactContainer,
+			isMounted: this.isMounted,
+			useShadowDom: this.USE_SHADOW_DOM
+		});
+
 		if (!this.externalReactLib || !this.reactContainer) {
+			console.error("[LovPen] 外部React应用未加载或容器不存在");
 			logger.warn("外部React应用未加载或容器不存在", {
 				externalReactLib: !!this.externalReactLib,
 				reactContainer: !!this.reactContainer
 			});
 
 			// 如果没有外部React应用，显示一个简单的错误消息
-			if (this.reactContainer) {
-				this.reactContainer.innerHTML = `
-					<div style="padding: 20px; text-align: center; color: var(--text-muted);">
-						<h3>React应用加载失败</h3>
-						<p>请检查控制台日志获取更多信息</p>
-						<p>插件可能需要重新安装或构建</p>
-					</div>
+			const targetContainer = this.shadowRoot || this.reactContainer;
+			if (targetContainer) {
+				const errorDiv = document.createElement('div');
+				errorDiv.style.cssText = 'padding: 20px; text-align: center; color: var(--text-muted);';
+				errorDiv.innerHTML = `
+					<h3>React应用加载失败</h3>
+					<p>请检查控制台日志获取更多信息</p>
+					<p>插件可能需要重新安装或构建</p>
 				`;
+				targetContainer.appendChild(errorDiv);
 			}
 			return;
 		}
@@ -1140,11 +1328,11 @@ ${customCSS}`;
 		try {
 			// 检查是否需要重新构建props
 			const currentCSS = this.getCSS();
-			const needsUpdate = !this.cachedProps || 
-				this.articleHTML !== this.lastArticleHTML || 
+			const needsUpdate = !this.cachedProps ||
+				this.articleHTML !== this.lastArticleHTML ||
 				currentCSS !== this.lastCSSContent;
-			
-			if (!needsUpdate) {
+
+			if (!needsUpdate && this.isMounted) {
 				logger.debug("Props未变化，跳过更新");
 				return;
 			}
@@ -1152,10 +1340,10 @@ ${customCSS}`;
 			logger.debug("更新外部React组件", {
 				articleHTMLLength: this.articleHTML?.length || 0,
 				hasCSS: !!this.getCSS(),
+				isMounted: this.isMounted,
 				availableMethods: this.externalReactLib ? Object.keys(this.externalReactLib) : [],
 				reactContainerInDOM: this.reactContainer ? document.contains(this.reactContainer) : false,
-				reactContainerElement: this.reactContainer ? this.reactContainer.tagName : null,
-				reactContainerChildren: this.reactContainer ? this.reactContainer.children.length : 0
+				reactContainerElement: this.reactContainer ? this.reactContainer.tagName : null
 			});
 
 			// 使用新的构建方法获取props
@@ -1164,23 +1352,43 @@ ${customCSS}`;
 			this.lastArticleHTML = this.articleHTML;
 			this.lastCSSContent = currentCSS;
 
-			// 使用外部React应用进行渲染，等待渲染完成
-			await this.externalReactLib.update(this.reactContainer, props);
-			logger.debug("外部React组件更新成功", {
-				containerChildrenAfterUpdate: this.reactContainer.children.length,
-				containerInnerHTML: this.reactContainer.innerHTML.substring(0, 200) + "..."
-			});
+			if (!this.isMounted) {
+				// 首次挂载
+				if (this.USE_SHADOW_DOM && this.shadowRoot) {
+					console.log("[LovPen] 首次挂载 React 组件到 Shadow Root");
+					logger.info("[Shadow DOM] 首次挂载 React 组件到 Shadow Root");
+					this.externalReactLib.mount(this.reactContainer, props, {
+						shadowRoot: this.shadowRoot
+					});
+				} else {
+					console.log("[LovPen] 首次挂载 React 组件 (传统模式)");
+					logger.info("[传统模式] 首次挂载 React 组件");
+					this.externalReactLib.mount(this.reactContainer, props);
+				}
+				this.isMounted = true;
+				console.log("[LovPen] React 组件挂载完成");
+			} else {
+				// 后续更新：使用 update 方法
+				console.log("[LovPen] 更新 React 组件");
+				await this.externalReactLib.update(this.reactContainer, props);
+				console.log("[LovPen] React 组件更新完成");
+			}
+
+			console.log("[LovPen] updateExternalReactComponent() 完成");
+			logger.debug("外部React组件更新成功");
 
 		} catch (error) {
 			logger.error("更新外部React组件时出错:", error);
-			if (this.reactContainer) {
-				this.reactContainer.innerHTML = `
-					<div style="padding: 20px; text-align: center; color: var(--text-error);">
-						<h3>React组件更新失败</h3>
-						<p>错误: ${error.message}</p>
-						<p>请检查控制台日志获取详细信息</p>
-					</div>
+			const targetContainer = this.shadowRoot || this.reactContainer;
+			if (targetContainer) {
+				const errorDiv = document.createElement('div');
+				errorDiv.style.cssText = 'padding: 20px; text-align: center; color: var(--text-error);';
+				errorDiv.innerHTML = `
+					<h3>React组件更新失败</h3>
+					<p>错误: ${(error as Error).message}</p>
+					<p>请检查控制台日志获取详细信息</p>
 				`;
+				targetContainer.appendChild(errorDiv);
 			}
 		}
 	}
