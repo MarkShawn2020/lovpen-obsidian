@@ -218,10 +218,18 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	// 拖拽调整工具栏宽度的处理
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
 		const toolbarContainer = document.querySelector('.toolbar-container') as HTMLElement;
-		if (!toolbarContainer) return;
+		const container = containerRef.current;
+		if (!toolbarContainer || !container) return;
 
 		const startX = e.clientX;
 		const startWidth = toolbarContainer.getBoundingClientRect().width;
+		const containerWidth = container.getBoundingClientRect().width;
+
+		// 动态计算最大宽度：确保渲染器至少有 320px 空间
+		const rendererMinWidth = 320;
+		const resizerWidth = 6;
+		const minWidth = 320; // 工具栏最小宽度
+		const maxWidth = Math.min(800, containerWidth - rendererMinWidth - resizerWidth);
 
 		const handleMouseMove = (e: MouseEvent) => {
 			// 根据工具栏位置决定拖拽方向
@@ -229,8 +237,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			// 工具栏在左边：向右拖拽增加宽度
 			const delta = e.clientX - startX;
 			const newWidth = isToolbarLeft ? startWidth + delta : startWidth - delta;
-			const minWidth = 320; // 工具栏最小宽度
-			const maxWidth = 800; // 工具栏最大宽度
 
 			if (newWidth >= minWidth && newWidth <= maxWidth) {
 				const widthPx = `${newWidth}px`;

@@ -669,7 +669,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													updateSettings({scaleCodeBlockInImage: checked});
 													saveSettings();
 												}}
-												className="data-[state=checked]:bg-[#629A90]"
 											/>
 										</div>
 									</div>

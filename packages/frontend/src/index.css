@@ -1,7 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* 支持多种深色模式检测：
+   - .dark 类（Web 端）
+   - body.theme-dark（Obsidian 端）
+*/
+@custom-variant dark (&:is(.dark *, .theme-dark *));
 
 /* ===================================
    统一设计系统 - CSS 变量映射
@@ -127,7 +131,9 @@
 	--ring: var(--background-modifier-border-focus, oklch(0.708 0 0));
 }
 
-.dark {
+/* 深色模式变量 - 支持 .dark（Web）和 .theme-dark（Obsidian） */
+.dark,
+.theme-dark {
 	--background: oklch(0.145 0 0);
 	--foreground: oklch(0.985 0 0);
 	--card: oklch(0.205 0 0);
@@ -162,24 +168,32 @@
 }
 
 @layer base {
-	* {
+	/* ===================================
+	   作用域化样式 - 仅影响 Lovpen 容器内的元素
+	   避免污染 Obsidian 全局环境
+	   =================================== */
+
+	/* 容器内所有元素的边框和轮廓样式 */
+	.note-preview *,
+	#lovpen-react-container * {
 		@apply border-border outline-ring/50;
 	}
 
-	html {
-		/* 防止下拉菜单打开时滚动条消失导致的页面抖动 */
+	/* 容器基础样式 */
+	.note-preview,
+	#lovpen-react-container {
+		@apply bg-background text-foreground;
 		scrollbar-gutter: stable;
 	}
 
-	body {
+	/* Web 独立运行时的 body 样式（非 Obsidian 环境） */
+	body:has(#root > .note-preview) {
 		@apply bg-background text-foreground;
-		/* 保持舒适的视觉间距 */
 		padding: 20px !important;
 	}
 
-	/* 确保 Radix UI Portal 不会影响页面布局 */
-	body[data-scroll-locked] {
-		/* 保持原有的 padding，不被 Radix UI 修改 */
+	/* Radix UI Portal 样式保持 */
+	body[data-scroll-locked]:has(#root > .note-preview) {
 		padding: 20px !important;
 	}
 
