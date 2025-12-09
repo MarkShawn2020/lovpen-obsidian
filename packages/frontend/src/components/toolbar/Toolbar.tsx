@@ -12,6 +12,7 @@ import {logger} from "../../../../shared/src/logger";
 import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft} from "lucide-react";
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
+import {Switch} from "../ui/switch";
 import {useSettings} from "../../hooks/useSettings";
 
 interface ToolbarProps {
@@ -662,20 +663,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													<span className="text-[#87867F] text-xs">复制图片时自动适配</span>
 												</div>
 											</div>
-											<button
-												onClick={() => {
-													const newValue = !(atomSettings.scaleCodeBlockInImage ?? true);
-													updateSettings({scaleCodeBlockInImage: newValue});
+											<Switch
+												checked={atomSettings.scaleCodeBlockInImage ?? true}
+												onCheckedChange={(checked) => {
+													updateSettings({scaleCodeBlockInImage: checked});
 													saveSettings();
 												}}
-												className={`relative w-[42px] h-[26px] rounded-full transition-colors ${
-													(atomSettings.scaleCodeBlockInImage ?? true) ? 'bg-[#629A90]' : 'bg-[#D1D1D6]'
-												}`}
-											>
-												<span className={`absolute top-[3px] w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
-													(atomSettings.scaleCodeBlockInImage ?? true) ? 'translate-x-[19px]' : 'translate-x-[3px]'
-												}`}/>
-											</button>
+												className="data-[state=checked]:bg-[#629A90]"
+											/>
 										</div>
 									</div>
 								</div>
