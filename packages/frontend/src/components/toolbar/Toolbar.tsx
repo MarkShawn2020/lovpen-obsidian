@@ -6,10 +6,10 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ConfigComponent} from "./PluginConfigComponent";
 import {PersonalInfoSettings} from "../settings/PersonalInfoSettings";
 import {AISettings} from "../settings/AISettings";
-import {PersonalInfo, UnifiedPluginData, ViteReactSettings, CloudStorageSettings, defaultCloudStorageSettings} from "../../types";
+import {PersonalInfo, UnifiedPluginData, ViteReactSettings, CloudStorageSettings, defaultCloudStorageSettings, UploadedImage} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft, Cloud, Eye, EyeOff, AlertCircle, ChevronDown, CheckCircle2, XCircle, Loader2} from "lucide-react";
+import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft, Cloud, Eye, EyeOff, AlertCircle, ChevronDown, CheckCircle2, XCircle, Loader2, Upload, Trash2, Copy, ExternalLink, ImagePlus} from "lucide-react";
 
 const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
 	<svg viewBox="-127 -80 1240 1240" className={className} fill="currentColor">
@@ -288,6 +288,343 @@ const CloudStorageSettingsSection: React.FC<{
 	);
 };
 
+// 七牛云上传区域配置
+const QINIU_UPLOAD_HOSTS: Record<CloudStorageSettings['qiniu']['region'], string> = {
+	'z0': 'https://up.qiniup.com',
+	'z1': 'https://up-z1.qiniup.com',
+	'z2': 'https://up-z2.qiniup.com',
+	'na0': 'https://up-na0.qiniup.com',
+	'as0': 'https://up-as0.qiniup.com',
+};
+
+// 本地存储键名
+const UPLOADED_IMAGES_STORAGE_KEY = 'lovpen-uploaded-images';
+
+// 获取已上传图片列表
+const getUploadedImages = (): UploadedImage[] => {
+	try {
+		const data = localStorage.getItem(UPLOADED_IMAGES_STORAGE_KEY);
+		return data ? JSON.parse(data) : [];
+	} catch {
+		return [];
+	}
+};
+
+// 保存已上传图片列表
+const saveUploadedImages = (images: UploadedImage[]) => {
+	localStorage.setItem(UPLOADED_IMAGES_STORAGE_KEY, JSON.stringify(images));
+};
+
+// 生成文件 key（七牛云存储路径）
+const generateFileKey = (file: File): string => {
+	const ext = file.name.split('.').pop() || 'jpg';
+	const timestamp = Date.now();
+	const random = Math.random().toString(36).substring(2, 8);
+	return `lovpen/${timestamp}-${random}.${ext}`;
+};
+
+// Base64 URL 编码
+const base64UrlEncode = (str: string): string => {
+	return btoa(str).replace(/\+/g, '-').replace(/\//g, '_');
+};
+
+// HMAC-SHA1 签名
+const hmacSha1 = async (key: string, message: string): Promise<string> => {
+	const encoder = new TextEncoder();
+	const keyData = encoder.encode(key);
+	const messageData = encoder.encode(message);
+
+	const cryptoKey = await crypto.subtle.importKey(
+		'raw',
+		keyData,
+		{name: 'HMAC', hash: 'SHA-1'},
+		false,
+		['sign']
+	);
+
+	const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+	const base64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+	return base64.replace(/\+/g, '-').replace(/\//g, '_');
+};
+
+// 生成七牛云上传 Token
+const generateUploadToken = async (
+	accessKey: string,
+	secretKey: string,
+	bucket: string,
+	key: string
+): Promise<string> => {
+	const deadline = Math.floor(Date.now() / 1000) + 3600; // 1小时有效期
+	const putPolicy = {
+		scope: `${bucket}:${key}`,
+		deadline,
+	};
+	const encodedPolicy = base64UrlEncode(JSON.stringify(putPolicy));
+	const sign = await hmacSha1(secretKey, encodedPolicy);
+	return `${accessKey}:${sign}:${encodedPolicy}`;
+};
+
+// 云存储面板组件
+const CloudStoragePanel: React.FC<{
+	cloudSettings: CloudStorageSettings;
+	onSettingsChange: (settings: CloudStorageSettings) => void;
+}> = ({cloudSettings, onSettingsChange}) => {
+	const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(() => getUploadedImages());
+	const [uploading, setUploading] = useState(false);
+	const [uploadProgress, setUploadProgress] = useState(0);
+	const [dragOver, setDragOver] = useState(false);
+	const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+	const isConfigComplete = cloudSettings.enabled &&
+		cloudSettings.qiniu.accessKey &&
+		cloudSettings.qiniu.secretKey &&
+		cloudSettings.qiniu.bucket &&
+		cloudSettings.qiniu.domain;
+
+	// 上传文件到七牛云
+	const uploadToQiniu = async (file: File): Promise<UploadedImage | null> => {
+		if (!isConfigComplete) return null;
+
+		const key = generateFileKey(file);
+		const token = await generateUploadToken(
+			cloudSettings.qiniu.accessKey,
+			cloudSettings.qiniu.secretKey,
+			cloudSettings.qiniu.bucket,
+			key
+		);
+
+		const formData = new FormData();
+		formData.append('file', file);
+		formData.append('token', token);
+		formData.append('key', key);
+
+		const uploadHost = QINIU_UPLOAD_HOSTS[cloudSettings.qiniu.region];
+
+		const response = await fetch(uploadHost, {
+			method: 'POST',
+			body: formData,
+		});
+
+		if (!response.ok) {
+			throw new Error(`上传失败: ${response.status}`);
+		}
+
+		const result = await response.json();
+		let domain = cloudSettings.qiniu.domain.trim();
+		if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+			domain = 'https://' + domain;
+		}
+		domain = domain.replace(/\/$/, '');
+
+		const uploadedImage: UploadedImage = {
+			id: crypto.randomUUID(),
+			name: file.name,
+			url: `${domain}/${result.key}`,
+			key: result.key,
+			size: file.size,
+			type: file.type,
+			uploadedAt: new Date().toISOString(),
+		};
+
+		return uploadedImage;
+	};
+
+	// 处理文件上传
+	const handleUpload = async (files: FileList | File[]) => {
+		if (!isConfigComplete) {
+			alert('请先完成云存储配置');
+			return;
+		}
+
+		const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+		if (imageFiles.length === 0) {
+			alert('请选择图片文件');
+			return;
+		}
+
+		setUploading(true);
+		setUploadProgress(0);
+
+		const newImages: UploadedImage[] = [];
+		for (let i = 0; i < imageFiles.length; i++) {
+			try {
+				const image = await uploadToQiniu(imageFiles[i]);
+				if (image) {
+					newImages.push(image);
+				}
+			} catch (error) {
+				console.error('上传失败:', error);
+			}
+			setUploadProgress(Math.round(((i + 1) / imageFiles.length) * 100));
+		}
+
+		if (newImages.length > 0) {
+			const updated = [...newImages, ...uploadedImages];
+			setUploadedImages(updated);
+			saveUploadedImages(updated);
+		}
+
+		setUploading(false);
+		setUploadProgress(0);
+	};
+
+	// 删除图片记录
+	const handleDelete = (id: string) => {
+		const updated = uploadedImages.filter(img => img.id !== id);
+		setUploadedImages(updated);
+		saveUploadedImages(updated);
+	};
+
+	// 复制 URL
+	const handleCopyUrl = async (url: string) => {
+		await navigator.clipboard.writeText(url);
+	};
+
+	// 格式化文件大小
+	const formatSize = (bytes: number): string => {
+		if (bytes < 1024) return bytes + ' B';
+		if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+	};
+
+	// 格式化日期
+	const formatDate = (dateStr: string): string => {
+		const date = new Date(dateStr);
+		return date.toLocaleDateString('zh-CN', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+	};
+
+	return (
+		<div className="space-y-4">
+			<h3 className="text-lg font-semibold text-[#181818]">云存储</h3>
+
+			{/* 云存储配置 */}
+			<CloudStorageSettingsSection
+				cloudSettings={cloudSettings}
+				onSettingsChange={onSettingsChange}
+			/>
+
+			{/* 上传区域 */}
+			{isConfigComplete && (
+				<div className="space-y-3">
+					<p className="text-xs text-[#87867F] uppercase tracking-wide px-1">上传图片</p>
+					<div
+						className={`relative border-2 border-dashed rounded-xl p-6 transition-all cursor-pointer ${
+							dragOver
+								? 'border-[#D97757] bg-[#D97757]/5'
+								: 'border-[#E8E6DC] hover:border-[#D97757]/50 bg-white'
+						}`}
+						onDragOver={(e) => {e.preventDefault(); setDragOver(true);}}
+						onDragLeave={() => setDragOver(false)}
+						onDrop={(e) => {
+							e.preventDefault();
+							setDragOver(false);
+							handleUpload(e.dataTransfer.files);
+						}}
+						onClick={() => fileInputRef.current?.click()}
+					>
+						<input
+							ref={fileInputRef}
+							type="file"
+							accept="image/*"
+							multiple
+							className="hidden"
+							onChange={(e) => e.target.files && handleUpload(e.target.files)}
+						/>
+						<div className="flex flex-col items-center gap-2">
+							{uploading ? (
+								<>
+									<Loader2 className="h-8 w-8 text-[#D97757] animate-spin"/>
+									<p className="text-sm text-[#181818]">上传中 {uploadProgress}%</p>
+								</>
+							) : (
+								<>
+									<ImagePlus className="h-8 w-8 text-[#87867F]"/>
+									<p className="text-sm text-[#181818]">点击或拖拽图片到这里</p>
+									<p className="text-xs text-[#87867F]">支持 JPG、PNG、GIF 等格式</p>
+								</>
+							)}
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* 已上传图片列表 */}
+			{uploadedImages.length > 0 && (
+				<div className="space-y-3">
+					<div className="flex items-center justify-between px-1">
+						<p className="text-xs text-[#87867F] uppercase tracking-wide">已上传 ({uploadedImages.length})</p>
+						<button
+							onClick={() => {
+								if (confirm('确定清空所有上传记录吗？')) {
+									setUploadedImages([]);
+									saveUploadedImages([]);
+								}
+							}}
+							className="text-xs text-[#87867F] hover:text-red-500 transition-colors"
+						>
+							清空
+						</button>
+					</div>
+					<div className="bg-white rounded-xl border border-[#E8E6DC] overflow-hidden">
+						<div className="divide-y divide-[#E8E6DC] max-h-[300px] overflow-y-auto">
+							{uploadedImages.map((img) => (
+								<div key={img.id} className="flex items-center gap-3 p-3 hover:bg-[#F9F9F7]">
+									<img
+										src={img.url}
+										alt={img.name}
+										className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+									/>
+									<div className="flex-1 min-w-0">
+										<p className="text-sm text-[#181818] truncate">{img.name}</p>
+										<p className="text-xs text-[#87867F]">
+											{formatSize(img.size)} · {formatDate(img.uploadedAt)}
+										</p>
+									</div>
+									<div className="flex items-center gap-1">
+										<button
+											onClick={() => handleCopyUrl(img.url)}
+											className="p-1.5 rounded-md text-[#87867F] hover:bg-[#E8E6DC] hover:text-[#181818] transition-all"
+											title="复制链接"
+										>
+											<Copy className="h-4 w-4"/>
+										</button>
+										<a
+											href={img.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="p-1.5 rounded-md text-[#87867F] hover:bg-[#E8E6DC] hover:text-[#181818] transition-all"
+											title="打开"
+										>
+											<ExternalLink className="h-4 w-4"/>
+										</a>
+										<button
+											onClick={() => handleDelete(img.id)}
+											className="p-1.5 rounded-md text-[#87867F] hover:bg-red-50 hover:text-red-500 transition-all"
+											title="删除"
+										>
+											<Trash2 className="h-4 w-4"/>
+										</button>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* 未配置提示 */}
+			{!isConfigComplete && (
+				<div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+					<AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0"/>
+					<p className="text-xs text-amber-800">
+						请先启用并完成七牛云配置，然后即可上传图片
+					</p>
+				</div>
+			)}
+		</div>
+	);
+};
+
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
 import {Switch} from "../ui/switch";
@@ -339,7 +676,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 	const {settings: atomSettings, updateSettings, saveSettings} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
 
 	// 统一的导航状态 - 苹果风格侧边栏
-	type NavSection = 'article' | 'cover' | 'kits' | 'plugins' | 'personal' | 'ai' | 'general';
+	type NavSection = 'article' | 'cover' | 'kits' | 'plugins' | 'cloud' | 'personal' | 'ai' | 'general';
 	const [activeSection, setActiveSection] = useState<NavSection>(() => {
 		try {
 			const saved = localStorage.getItem('lovpen-toolbar-section') as NavSection;
@@ -598,6 +935,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		{key: 'cover', label: '封面设计', icon: Palette, color: 'from-[#B49FD8] to-[#8B7CB8]', group: 'content'},
 		{key: 'kits', label: '模板套装', icon: Package, color: 'from-[#629A90] to-[#4A7A70]', group: 'content'},
 		{key: 'plugins', label: '插件管理', icon: Plug, color: 'from-[#97B5D5] to-[#7095B5]', group: 'content'},
+		{key: 'cloud', label: '云存储', icon: Cloud, color: 'from-[#97B5D5] to-[#7095B5]', group: 'settings'},
 		{key: 'personal', label: '个人信息', icon: User, color: 'from-[#C2C07D] to-[#A2A05D]', group: 'settings'},
 		{key: 'ai', label: 'AI 设置', icon: Bot, color: 'from-[#CC785C] to-[#AC583C]', group: 'settings'},
 		{key: 'general', label: '通用', icon: Globe, color: 'from-[#87867F] to-[#6A6A63]', group: 'settings'},
@@ -910,6 +1248,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 							</div>
 						)}
 
+						{/* 云存储 */}
+						{activeSection === 'cloud' && (
+							<CloudStoragePanel
+								cloudSettings={atomSettings.cloudStorage ?? defaultCloudStorageSettings}
+								onSettingsChange={(newCloudSettings) => {
+									updateSettings({cloudStorage: newCloudSettings});
+									saveSettings();
+								}}
+							/>
+						)}
+
 						{/* 通用设置 */}
 						{activeSection === 'general' && (
 							<div className="space-y-4">
@@ -963,15 +1312,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										</div>
 									</div>
 								</div>
-
-								{/* 云存储设置 */}
-								<CloudStorageSettingsSection
-									cloudSettings={atomSettings.cloudStorage ?? defaultCloudStorageSettings}
-									onSettingsChange={(newCloudSettings) => {
-										updateSettings({cloudStorage: newCloudSettings});
-										saveSettings();
-									}}
-								/>
 
 								{/* 即将推出 */}
 								<div>

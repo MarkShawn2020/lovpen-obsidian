@@ -84,6 +84,17 @@ export const defaultCloudStorageSettings: CloudStorageSettings = {
 	},
 };
 
+// 已上传图片记录
+export interface UploadedImage {
+	id: string;
+	name: string;
+	url: string; // CDN URL
+	key: string; // 七牛云文件 key
+	size: number;
+	type: string;
+	uploadedAt: string;
+}
+
 // Settings interface for the Vite React components
 export interface ViteReactSettings {
 	defaultStyle: string;
