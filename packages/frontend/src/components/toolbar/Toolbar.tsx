@@ -10,6 +10,14 @@ import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
 import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft} from "lucide-react";
+
+const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
+	<svg viewBox="-127 -80 1240 1240" className={className} fill="currentColor">
+		<path d="M281.73,892.18V281.73C281.73,126.13,155.6,0,0,0l0,0v610.44C0,766.04,126.13,892.18,281.73,892.18z"/>
+		<path d="M633.91,1080V469.56c0-155.6-126.13-281.73-281.73-281.73l0,0v610.44C352.14,953.87,478.31,1080,633.91,1080L633.91,1080z"/>
+		<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
+	</svg>
+);
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
 import {Switch} from "../ui/switch";
@@ -343,19 +351,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 						sidebarExpanded ? 'w-[180px]' : 'w-[52px]'
 					}`}
 				>
-					{/* 顶部切换按钮 */}
+					{/* 顶部品牌区域 */}
 					<div className="p-2 border-b border-[#E8E6DC]">
-						<button
-							onClick={toggleSidebar}
-							className="w-full flex items-center justify-center p-2 rounded-lg text-[#87867F] hover:bg-[#E8E6DC]/80 hover:text-[#3d3d3d] transition-all"
-							title={sidebarExpanded ? '收起菜单' : '展开菜单'}
-						>
-							{sidebarExpanded ? (
-								<ChevronsLeft className="h-4 w-4"/>
-							) : (
-								<Menu className="h-4 w-4"/>
-							)}
-						</button>
+						{sidebarExpanded ? (
+							<div className="flex items-center justify-between px-1">
+								<div className="flex items-center gap-2">
+									<LovpenLogo className="w-6 h-6 text-[#D97757]"/>
+									<span className="text-sm font-semibold text-[#3d3d3d]">Lovpen</span>
+								</div>
+								<button
+									onClick={toggleSidebar}
+									className="p-1.5 rounded-md text-[#87867F] hover:bg-[#E8E6DC]/80 hover:text-[#3d3d3d] transition-all"
+									title="收起菜单"
+								>
+									<ChevronsLeft className="h-4 w-4"/>
+								</button>
+							</div>
+						) : (
+							<button
+								onClick={toggleSidebar}
+								className="w-full flex items-center justify-center p-1"
+								title="展开菜单"
+							>
+								<LovpenLogo className="w-7 h-7 text-[#D97757] hover:scale-105 transition-transform"/>
+							</button>
+						)}
 					</div>
 
 					<div className="flex-1 overflow-y-auto py-3 px-2">
