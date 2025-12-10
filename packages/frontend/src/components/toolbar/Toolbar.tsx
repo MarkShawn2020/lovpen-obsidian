@@ -6,10 +6,10 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ConfigComponent} from "./PluginConfigComponent";
 import {PersonalInfoSettings} from "../settings/PersonalInfoSettings";
 import {AISettings} from "../settings/AISettings";
-import {PersonalInfo, UnifiedPluginData, ViteReactSettings} from "../../types";
+import {PersonalInfo, UnifiedPluginData, ViteReactSettings, CloudStorageSettings, defaultCloudStorageSettings} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft} from "lucide-react";
+import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft, Cloud, Eye, EyeOff, AlertCircle, ChevronDown, CheckCircle2, XCircle, Loader2} from "lucide-react";
 
 const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
 	<svg viewBox="-127 -80 1240 1240" className={className} fill="currentColor">
@@ -18,6 +18,276 @@ const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
 		<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
 	</svg>
 );
+
+// 七牛云区域配置
+const QINIU_REGIONS: Array<{
+	value: CloudStorageSettings['qiniu']['region'];
+	label: string;
+	description: string;
+}> = [
+	{value: 'z0', label: '华东', description: 'East China (z0)'},
+	{value: 'z1', label: '华北', description: 'North China (z1)'},
+	{value: 'z2', label: '华南', description: 'South China (z2)'},
+	{value: 'na0', label: '北美', description: 'North America (na0)'},
+	{value: 'as0', label: '东南亚', description: 'Southeast Asia (as0)'},
+];
+
+// 云存储设置组件
+const CloudStorageSettingsSection: React.FC<{
+	cloudSettings: CloudStorageSettings;
+	onSettingsChange: (settings: CloudStorageSettings) => void;
+}> = ({cloudSettings, onSettingsChange}) => {
+	const [showSecretKey, setShowSecretKey] = useState(false);
+	const [expanded, setExpanded] = useState(cloudSettings.enabled);
+	const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+	const [testMessage, setTestMessage] = useState('');
+
+	const updateQiniuField = (field: keyof CloudStorageSettings['qiniu'], value: string) => {
+		onSettingsChange({
+			...cloudSettings,
+			qiniu: {...cloudSettings.qiniu, [field]: value}
+		});
+	};
+
+	const isConfigComplete = cloudSettings.qiniu.accessKey &&
+		cloudSettings.qiniu.secretKey &&
+		cloudSettings.qiniu.bucket &&
+		cloudSettings.qiniu.domain;
+
+	// 测试配置
+	const testConnection = async () => {
+		if (!isConfigComplete) {
+			setTestStatus('error');
+			setTestMessage('请先填写所有配置项');
+			return;
+		}
+
+		setTestStatus('testing');
+		setTestMessage('正在测试域名连通性...');
+
+		try {
+			// 规范化域名
+			let domain = cloudSettings.qiniu.domain.trim();
+			if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+				domain = 'https://' + domain;
+			}
+			domain = domain.replace(/\/$/, '');
+
+			// 使用 Obsidian 的 requestUrl API（如果可用）或 fetch
+			const requestUrl = window.lovpenReactAPI?.requestUrl;
+
+			if (requestUrl) {
+				// Obsidian 环境 - 使用 GET 请求测试
+				try {
+					const response = await requestUrl({url: domain, method: 'GET'});
+					// 任何 HTTP 响应都说明域名可访问（包括 404）
+					setTestStatus('success');
+					setTestMessage('域名连接正常');
+				} catch (reqError: any) {
+					// 检查是否是 HTTP 错误（有状态码说明域名可访问）
+					if (reqError?.status) {
+						setTestStatus('success');
+						setTestMessage('域名连接正常');
+					} else {
+						throw reqError;
+					}
+				}
+			} else {
+				// Web 环境 - 简单检查
+				setTestStatus('success');
+				setTestMessage('配置已保存');
+			}
+		} catch (error) {
+			setTestStatus('error');
+			setTestMessage(`测试失败: ${error instanceof Error ? error.message : '未知错误'}`);
+		}
+
+		// 5秒后重置状态
+		setTimeout(() => {
+			setTestStatus('idle');
+			setTestMessage('');
+		}, 5000);
+	};
+
+	return (
+		<div className="space-y-3">
+			<p className="text-xs text-[#87867F] uppercase tracking-wide px-1">云存储</p>
+			<div className="bg-white rounded-xl border border-[#E8E6DC] overflow-hidden">
+				{/* 标题栏 - 点击展开/收起 */}
+				<div
+					className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#F9F9F7] select-none"
+					onClick={() => setExpanded(!expanded)}
+				>
+					<div className="flex items-center gap-3">
+						<div className="w-7 h-7 bg-gradient-to-br from-[#97B5D5] to-[#7095B5] rounded-md flex items-center justify-center">
+							<Cloud className="h-4 w-4 text-white"/>
+						</div>
+						<div>
+							<span className="text-[#181818] text-sm block">七牛云存储</span>
+							<span className="text-[#87867F] text-xs">
+								{cloudSettings.enabled && isConfigComplete ? '已启用' : cloudSettings.enabled ? '配置不完整' : '点击配置'}
+							</span>
+						</div>
+					</div>
+					<div className="flex items-center gap-2">
+						<Switch
+							checked={cloudSettings.enabled}
+							onCheckedChange={(checked) => {
+								onSettingsChange({
+									...cloudSettings,
+									enabled: checked,
+									provider: checked ? 'qiniu' : 'local'
+								});
+								if (checked) setExpanded(true);
+							}}
+							onClick={(e) => e.stopPropagation()}
+						/>
+						<ChevronDown
+							className={`h-4 w-4 text-[#87867F] transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+						/>
+					</div>
+				</div>
+
+				{/* 展开配置区域 */}
+				{expanded && (
+					<div className="border-t border-[#E8E6DC] p-4 space-y-4 bg-[#F9F9F7]/50">
+						{/* 配置不完整警告 */}
+						{cloudSettings.enabled && !isConfigComplete && (
+							<div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+								<AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0"/>
+								<p className="text-xs text-amber-800">
+									云存储已启用但配置不完整，请填写以下所有字段
+								</p>
+							</div>
+						)}
+
+						{/* Access Key */}
+						<div>
+							<label className="block text-xs font-medium text-[#181818] mb-1.5">Access Key</label>
+							<input
+								type="text"
+								value={cloudSettings.qiniu.accessKey}
+								onChange={(e) => updateQiniuField('accessKey', e.target.value)}
+								placeholder="七牛 Access Key"
+								className="w-full px-3 py-2 bg-white border border-[#E8E6DC] rounded-lg text-sm text-[#181818] placeholder:text-[#87867F]/50 focus:outline-none focus:border-[#D97757] focus:ring-1 focus:ring-[#D97757]"
+							/>
+						</div>
+
+						{/* Secret Key */}
+						<div>
+							<label className="block text-xs font-medium text-[#181818] mb-1.5">Secret Key</label>
+							<div className="relative">
+								<input
+									type={showSecretKey ? 'text' : 'password'}
+									value={cloudSettings.qiniu.secretKey}
+									onChange={(e) => updateQiniuField('secretKey', e.target.value)}
+									placeholder="七牛 Secret Key"
+									className="w-full px-3 py-2 pr-10 bg-white border border-[#E8E6DC] rounded-lg text-sm text-[#181818] placeholder:text-[#87867F]/50 focus:outline-none focus:border-[#D97757] focus:ring-1 focus:ring-[#D97757]"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowSecretKey(!showSecretKey)}
+									className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#87867F] hover:text-[#181818] transition-colors"
+								>
+									{showSecretKey ? <EyeOff className="h-4 w-4"/> : <Eye className="h-4 w-4"/>}
+								</button>
+							</div>
+							<p className="mt-1 text-[10px] text-[#87867F]">Secret Key 仅存储在本地</p>
+						</div>
+
+						{/* Bucket */}
+						<div>
+							<label className="block text-xs font-medium text-[#181818] mb-1.5">Bucket 名称</label>
+							<input
+								type="text"
+								value={cloudSettings.qiniu.bucket}
+								onChange={(e) => updateQiniuField('bucket', e.target.value)}
+								placeholder="存储空间名称"
+								className="w-full px-3 py-2 bg-white border border-[#E8E6DC] rounded-lg text-sm text-[#181818] placeholder:text-[#87867F]/50 focus:outline-none focus:border-[#D97757] focus:ring-1 focus:ring-[#D97757]"
+							/>
+						</div>
+
+						{/* Domain */}
+						<div>
+							<label className="block text-xs font-medium text-[#181818] mb-1.5">CDN 域名</label>
+							<input
+								type="text"
+								value={cloudSettings.qiniu.domain}
+								onChange={(e) => updateQiniuField('domain', e.target.value)}
+								placeholder="https://cdn.example.com"
+								className="w-full px-3 py-2 bg-white border border-[#E8E6DC] rounded-lg text-sm text-[#181818] placeholder:text-[#87867F]/50 focus:outline-none focus:border-[#D97757] focus:ring-1 focus:ring-[#D97757]"
+							/>
+							<p className="mt-1 text-[10px] text-[#87867F]">七牛控制台 → 存储空间 → 域名管理</p>
+						</div>
+
+						{/* Region */}
+						<div>
+							<label className="block text-xs font-medium text-[#181818] mb-1.5">存储区域</label>
+							<select
+								value={cloudSettings.qiniu.region}
+								onChange={(e) => updateQiniuField('region', e.target.value)}
+								className="w-full px-3 py-2 bg-white border border-[#E8E6DC] rounded-lg text-sm text-[#181818] focus:outline-none focus:border-[#D97757] focus:ring-1 focus:ring-[#D97757] cursor-pointer"
+							>
+								{QINIU_REGIONS.map((region) => (
+									<option key={region.value} value={region.value}>
+										{region.label} - {region.description}
+									</option>
+								))}
+							</select>
+						</div>
+
+						{/* 测试按钮 */}
+						<div className="pt-2 border-t border-[#E8E6DC]">
+							<button
+								onClick={testConnection}
+								disabled={testStatus === 'testing' || !isConfigComplete}
+								className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+									testStatus === 'testing'
+										? 'bg-[#E8E6DC] text-[#87867F] cursor-wait'
+										: testStatus === 'success'
+										? 'bg-green-50 text-green-700 border border-green-200'
+										: testStatus === 'error'
+										? 'bg-red-50 text-red-700 border border-red-200'
+										: isConfigComplete
+										? 'bg-[#D97757] text-white hover:bg-[#C96747]'
+										: 'bg-[#E8E6DC] text-[#87867F] cursor-not-allowed'
+								}`}
+							>
+								{testStatus === 'testing' ? (
+									<>
+										<Loader2 className="h-4 w-4 animate-spin"/>
+										测试中...
+									</>
+								) : testStatus === 'success' ? (
+									<>
+										<CheckCircle2 className="h-4 w-4"/>
+										{testMessage}
+									</>
+								) : testStatus === 'error' ? (
+									<>
+										<XCircle className="h-4 w-4"/>
+										{testMessage}
+									</>
+								) : (
+									<>
+										<Cloud className="h-4 w-4"/>
+										测试配置
+									</>
+								)}
+							</button>
+							{!isConfigComplete && testStatus === 'idle' && (
+								<p className="mt-2 text-[10px] text-[#87867F] text-center">
+									请填写所有必填项后测试
+								</p>
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
+	);
+};
+
 import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
 import {Switch} from "../ui/switch";
@@ -693,6 +963,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										</div>
 									</div>
 								</div>
+
+								{/* 云存储设置 */}
+								<CloudStorageSettingsSection
+									cloudSettings={atomSettings.cloudStorage ?? defaultCloudStorageSettings}
+									onSettingsChange={(newCloudSettings) => {
+										updateSettings({cloudStorage: newCloudSettings});
+										saveSettings();
+									}}
+								/>
 
 								{/* 即将推出 */}
 								<div>

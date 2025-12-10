@@ -1,5 +1,5 @@
 import {atom} from 'jotai';
-import {PersonalInfo, ViteReactSettings} from '../types';
+import {PersonalInfo, ViteReactSettings, defaultCloudStorageSettings} from '../types';
 
 // 默认的个人信息
 export const defaultPersonalInfo: PersonalInfo = {
@@ -28,7 +28,8 @@ export const defaultSettings: ViteReactSettings = {
 	showStyleUI: true,
 	personalInfo: defaultPersonalInfo,
 	aiPromptTemplate: '',
-	aiModel: 'claude-3-5-haiku-latest'
+	aiModel: 'claude-3-5-haiku-latest',
+	cloudStorage: defaultCloudStorageSettings
 };
 
 // 个人信息的atom

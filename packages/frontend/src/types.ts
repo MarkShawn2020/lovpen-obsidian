@@ -59,6 +59,31 @@ export interface TemplateKit {
 }
 
 
+// Cloud Storage Settings (Qiniu)
+export interface CloudStorageSettings {
+	enabled: boolean;
+	provider: 'qiniu' | 'local';
+	qiniu: {
+		accessKey: string;
+		secretKey: string;
+		bucket: string;
+		domain: string; // CDN domain for accessing uploaded files
+		region: 'z0' | 'z1' | 'z2' | 'na0' | 'as0'; // Qiniu regions
+	};
+}
+
+export const defaultCloudStorageSettings: CloudStorageSettings = {
+	enabled: false,
+	provider: 'local',
+	qiniu: {
+		accessKey: '',
+		secretKey: '',
+		bucket: '',
+		domain: '',
+		region: 'z0', // Default: East China
+	},
+};
+
 // Settings interface for the Vite React components
 export interface ViteReactSettings {
 	defaultStyle: string;
@@ -85,6 +110,8 @@ export interface ViteReactSettings {
 	openRouterModel?: string; // OpenRouter模型选择
 	toolbarPosition?: 'left' | 'right'; // 工具栏位置
 	scaleCodeBlockInImage?: boolean; // 复制为图片时是否缩放溢出的代码块
+	// Cloud Storage settings
+	cloudStorage?: CloudStorageSettings;
 }
 
 // Configuration option types

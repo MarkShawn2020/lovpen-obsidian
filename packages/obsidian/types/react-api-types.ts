@@ -1,5 +1,6 @@
 import {TemplateKit, TemplateKitBasicInfo} from "../template-kit-types";
 import {PersistentStorageAPI, RequestUrlFunction, SettingsAPI, TemplateKitAPI} from "@lovpen/shared";
+import {CloudStorageSettings} from "../settings";
 
 /**
  * Shadow DOM 挂载选项
@@ -45,6 +46,7 @@ export interface ReactSettings {
 	personalInfo: PersonalInfo;
 	aiPromptTemplate: string;
 	aiModel: string;
+	cloudStorage?: CloudStorageSettings;
 
 	[key: string]: any; // 添加索引签名以支持动态属性访问
 }

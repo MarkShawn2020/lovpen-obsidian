@@ -91,6 +91,23 @@ interface SettingsData {
 	// ===== 图片导出设置 =====
 	/** 复制为图片时是否缩放溢出的代码块 */
 	scaleCodeBlockInImage?: boolean;
+
+	// ===== 云存储设置 =====
+	/** 云存储配置 */
+	cloudStorage?: CloudStorageSettings;
+}
+
+// 云存储设置类型
+export interface CloudStorageSettings {
+	enabled: boolean;
+	provider: 'qiniu' | 'local';
+	qiniu: {
+		accessKey: string;
+		secretKey: string;
+		bucket: string;
+		domain: string;
+		region: 'z0' | 'z1' | 'z2' | 'na0' | 'as0';
+	};
 }
 
 // 定义分发服务配置类型
@@ -138,6 +155,17 @@ export class NMPSettings implements SettingsData {
 	aiPromptTemplate: string = '';
 	aiModel: string = 'claude-3-5-haiku-latest';
 	scaleCodeBlockInImage: boolean = true;
+	cloudStorage: CloudStorageSettings = {
+		enabled: false,
+		provider: 'local',
+		qiniu: {
+			accessKey: '',
+			secretKey: '',
+			bucket: '',
+			domain: '',
+			region: 'z0'
+		}
+	};
 
 	// 私有构造函数 - 所有默认值已通过属性初始化
 	private constructor() {

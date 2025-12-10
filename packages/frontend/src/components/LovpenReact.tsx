@@ -217,9 +217,11 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 
 	// 拖拽调整工具栏宽度的处理
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
-		const toolbarContainer = document.querySelector('.toolbar-container') as HTMLElement;
 		const container = containerRef.current;
-		if (!toolbarContainer || !container) return;
+		if (!container) return;
+		// 使用 containerRef 而非 document，以支持 Shadow DOM
+		const toolbarContainer = container.querySelector('.toolbar-container') as HTMLElement;
+		if (!toolbarContainer) return;
 
 		const startX = e.clientX;
 		const startWidth = toolbarContainer.getBoundingClientRect().width;
