@@ -98,37 +98,46 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 
 	// 监听代码块缩放设置变化，实时应用/恢复缩放效果
 	useEffect(() => {
-		const shouldScale = atomSettings.scaleCodeBlockInImage ?? true;
+		// 使用 props.settings 作为 fallback，确保首次渲染时能获取正确的设置
+		const shouldScale = atomSettings.scaleCodeBlockInImage ?? settings.scaleCodeBlockInImage ?? true;
 		const container = contentContainerRef.current;
 
 		if (!container) return;
 
-		// 先恢复之前的缩放
-		if (codeBlockScaleRestoreRef.current) {
-			codeBlockScaleRestoreRef.current();
-			codeBlockScaleRestoreRef.current = null;
-		}
+		// 如果 articleHTML 为空，不执行缩放
+		if (!articleHTML) return;
 
-		// 如果启用缩放，应用缩放效果
-		if (shouldScale) {
-			const result = findScreenshotElement(container);
-			if (result) {
-				const { restore } = applyCodeBlockScale(result.element);
-				codeBlockScaleRestoreRef.current = restore;
-				logger.debug('[LovpenReact] 已应用代码块缩放预览');
+		// 使用 requestAnimationFrame 确保 CSS 已经应用后再执行缩放检测
+		// 这解决了初始化时 CSS 可能还没完全应用的问题
+		const rafId = requestAnimationFrame(() => {
+			// 先恢复之前的缩放
+			if (codeBlockScaleRestoreRef.current) {
+				codeBlockScaleRestoreRef.current();
+				codeBlockScaleRestoreRef.current = null;
 			}
-		} else {
-			logger.debug('[LovpenReact] 已关闭代码块缩放预览');
-		}
+
+			// 如果启用缩放，应用缩放效果
+			if (shouldScale) {
+				const result = findScreenshotElement(container);
+				if (result) {
+					const { restore } = applyCodeBlockScale(result.element);
+					codeBlockScaleRestoreRef.current = restore;
+					logger.debug('[LovpenReact] 已应用代码块缩放预览');
+				}
+			} else {
+				logger.debug('[LovpenReact] 已关闭代码块缩放预览');
+			}
+		});
 
 		// 组件卸载时恢复
 		return () => {
+			cancelAnimationFrame(rafId);
 			if (codeBlockScaleRestoreRef.current) {
 				codeBlockScaleRestoreRef.current();
 				codeBlockScaleRestoreRef.current = null;
 			}
 		};
-	}, [atomSettings.scaleCodeBlockInImage, articleHTML]); // 当设置或文章内容变化时重新计算
+	}, [atomSettings.scaleCodeBlockInImage, settings.scaleCodeBlockInImage, articleHTML]); // 当设置或文章内容变化时重新计算
 
 	// 监听容器宽度变化，自动隐藏/显示 Toolbar（保证 Renderer 始终可见）
 	useEffect(() => {

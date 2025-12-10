@@ -1555,6 +1555,8 @@ ${customCSS}`;
 			aiPromptTemplate: this.settings.aiPromptTemplate || '',
 			aiModel: this.settings.aiModel || 'claude-3-5-haiku-latest',
 			cloudStorage: this.settings.cloudStorage,
+			toolbarPosition: this.settings.toolbarPosition,
+			scaleCodeBlockInImage: this.settings.scaleCodeBlockInImage,
 		};
 
 		// 获取统一插件数据

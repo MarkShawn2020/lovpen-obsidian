@@ -92,6 +92,10 @@ interface SettingsData {
 	/** 复制为图片时是否缩放溢出的代码块 */
 	scaleCodeBlockInImage?: boolean;
 
+	// ===== 工具栏设置 =====
+	/** 工具栏位置 */
+	toolbarPosition?: 'left' | 'right';
+
 	// ===== 云存储设置 =====
 	/** 云存储配置 */
 	cloudStorage?: CloudStorageSettings;
@@ -155,6 +159,7 @@ export class NMPSettings implements SettingsData {
 	aiPromptTemplate: string = '';
 	aiModel: string = 'claude-3-5-haiku-latest';
 	scaleCodeBlockInImage: boolean = true;
+	toolbarPosition: 'left' | 'right' = 'right';
 	cloudStorage: CloudStorageSettings = {
 		enabled: false,
 		provider: 'local',
