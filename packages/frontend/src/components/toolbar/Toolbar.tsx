@@ -364,8 +364,8 @@ const generateUploadToken = async (
 	return `${accessKey}:${sign}:${encodedPolicy}`;
 };
 
-// 云存储面板组件
-const CloudStoragePanel: React.FC<{
+// 云存储面板组件（内容部分，不含标题）
+const CloudStoragePanelContent: React.FC<{
 	cloudSettings: CloudStorageSettings;
 	onSettingsChange: (settings: CloudStorageSettings) => void;
 }> = ({cloudSettings, onSettingsChange}) => {
@@ -380,9 +380,7 @@ const CloudStoragePanel: React.FC<{
 		const handleStorageChange = () => {
 			setUploadedImages(getUploadedImages());
 		};
-		// 监听 localStorage 变化（跨 tab）
 		window.addEventListener('storage', handleStorageChange);
-		// 监听自定义事件（同 tab）
 		window.addEventListener('lovpen-images-updated', handleStorageChange);
 		return () => {
 			window.removeEventListener('storage', handleStorageChange);
@@ -509,9 +507,7 @@ const CloudStoragePanel: React.FC<{
 	};
 
 	return (
-		<div className="space-y-4">
-			<h3 className="text-lg font-semibold text-[#181818]">云存储</h3>
-
+		<>
 			{/* 云存储配置 */}
 			<CloudStorageSettingsSection
 				cloudSettings={cloudSettings}
@@ -636,7 +632,7 @@ const CloudStoragePanel: React.FC<{
 					</p>
 				</div>
 			)}
-		</div>
+		</>
 	);
 };
 
@@ -644,6 +640,22 @@ import JSZip from 'jszip';
 import {Checkbox} from "../ui/checkbox";
 import {Switch} from "../ui/switch";
 import {useSettings} from "../../hooks/useSettings";
+
+// Unified section layout for all menu panels - DRY
+const SectionLayout: React.FC<{
+	title: string;
+	children: React.ReactNode;
+	withCard?: boolean;
+}> = ({ title, children, withCard = true }) => (
+	<div className="space-y-4">
+		<h3 className="text-lg font-semibold text-[#181818]">{title}</h3>
+		{withCard ? (
+			<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
+				{children}
+			</div>
+		) : children}
+	</div>
+);
 
 interface ToolbarProps {
 	settings: ViteReactSettings;
@@ -1086,200 +1098,182 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					<div className="p-4 sm:p-5">
 						{/* 文章信息 */}
 						{activeSection === 'article' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">文章信息</h3>
-								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
-									<ArticleInfo
-										settings={atomSettings}
-										onSaveSettings={onSaveSettings}
-										onInfoChange={onArticleInfoChange || (() => {})}
-										onRenderArticle={onRenderArticle}
-										onSettingsChange={onSettingsChange}
-										onOpenAISettings={() => handleSectionChange('ai')}
-									/>
-								</div>
-							</div>
+							<SectionLayout title="文章信息">
+								<ArticleInfo
+									settings={atomSettings}
+									onSaveSettings={onSaveSettings}
+									onInfoChange={onArticleInfoChange || (() => {})}
+									onRenderArticle={onRenderArticle}
+									onSettingsChange={onSettingsChange}
+									onOpenAISettings={() => handleSectionChange('ai')}
+								/>
+							</SectionLayout>
 						)}
 
 						{/* 封面设计 */}
 						{activeSection === 'cover' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">封面设计</h3>
-								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
-									<CoverDesigner
-										articleHTML={articleHTML}
-										onDownloadCovers={handleDownloadCovers}
-										onClose={() => {}}
-									/>
-								</div>
-							</div>
+							<SectionLayout title="封面设计">
+								<CoverDesigner
+									articleHTML={articleHTML}
+									onDownloadCovers={handleDownloadCovers}
+									onClose={() => {}}
+								/>
+							</SectionLayout>
 						)}
 
 						{/* 模板套装 */}
 						{activeSection === 'kits' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">模板套装</h3>
-								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
-									<TemplateKitSelector
-										settings={settings}
-										onKitApply={onKitApply}
-										onKitCreate={onKitCreate}
-										onKitDelete={onKitDelete}
-										onSettingsChange={onSettingsChange}
-										onTemplateChange={onTemplateChange}
-										onThemeChange={onThemeChange}
-										onHighlightChange={onHighlightChange}
-										onThemeColorToggle={onThemeColorToggle}
-										onThemeColorChange={onThemeColorChange}
-									/>
-								</div>
-							</div>
+							<SectionLayout title="模板套装">
+								<TemplateKitSelector
+									settings={settings}
+									onKitApply={onKitApply}
+									onKitCreate={onKitCreate}
+									onKitDelete={onKitDelete}
+									onSettingsChange={onSettingsChange}
+									onTemplateChange={onTemplateChange}
+									onThemeChange={onThemeChange}
+									onHighlightChange={onHighlightChange}
+									onThemeColorToggle={onThemeColorToggle}
+									onThemeColorChange={onThemeColorChange}
+								/>
+							</SectionLayout>
 						)}
 
 						{/* 插件管理 */}
 						{activeSection === 'plugins' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">插件管理</h3>
-								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
-									{plugins.length > 0 ? (
-										<Tabs value={pluginTab} onValueChange={(value) => {
-											setPluginTab(value);
-											try {
-												localStorage.setItem('lovpen-toolbar-plugin-tab', value);
-											} catch {}
-										}}>
-											<TabsList className="bg-[#F0EEE6] rounded-lg p-0.5 mb-4">
-												{remarkPlugins.length > 0 && (
-													<TabsTrigger value="remark"
-														className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
-														<Plug className="h-3.5 w-3.5"/>
-														<span>Remark</span>
-														<span className="bg-[#C2C07D] text-white text-[10px] px-1.5 py-0.5 rounded-full">{remarkPlugins.length}</span>
-													</TabsTrigger>
-												)}
-												{rehypePlugins.length > 0 && (
-													<TabsTrigger value="rehype"
-														className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
-														<Zap className="h-3.5 w-3.5"/>
-														<span>Rehype</span>
-														<span className="bg-[#B49FD8] text-white text-[10px] px-1.5 py-0.5 rounded-full">{rehypePlugins.length}</span>
-													</TabsTrigger>
-												)}
-											</TabsList>
-
+							<SectionLayout title="插件管理">
+								{plugins.length > 0 ? (
+									<Tabs value={pluginTab} onValueChange={(value) => {
+										setPluginTab(value);
+										try {
+											localStorage.setItem('lovpen-toolbar-plugin-tab', value);
+										} catch {}
+									}}>
+										<TabsList className="bg-[#F0EEE6] rounded-lg p-0.5 mb-4">
 											{remarkPlugins.length > 0 && (
-												<TabsContent value="remark" className="mt-0">
-													<div className="space-y-3">
-														<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
-															<Checkbox
-																checked={getPluginsCheckState(remarkPlugins)}
-																onCheckedChange={() => handleSelectAllToggle('remark')}
-																className="border-[#629A90] data-[state=checked]:bg-[#629A90]"
-															/>
-															<div>
-																<h4 className="font-medium text-[#181818] text-sm">全选 Remark</h4>
-																<p className="text-xs text-[#87867F]">Markdown 语法解析插件</p>
-															</div>
-														</div>
-														<div className="space-y-1">
-															{remarkPlugins.map(plugin =>
-																<ConfigComponent key={plugin.name} item={plugin} type="plugin"
-																	expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
-																	onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
-																	onConfigChange={async (name, key, value) => {
-																		onPluginConfigChange && await onPluginConfigChange(name, key, value);
-																		onRenderArticle();
-																	}}/>
-															)}
-														</div>
-													</div>
-												</TabsContent>
+												<TabsTrigger value="remark"
+													className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
+													<Plug className="h-3.5 w-3.5"/>
+													<span>Remark</span>
+													<span className="bg-[#C2C07D] text-white text-[10px] px-1.5 py-0.5 rounded-full">{remarkPlugins.length}</span>
+												</TabsTrigger>
 											)}
-
 											{rehypePlugins.length > 0 && (
-												<TabsContent value="rehype" className="mt-0">
-													<div className="space-y-3">
-														<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
-															<Checkbox
-																checked={getPluginsCheckState(rehypePlugins)}
-																onCheckedChange={() => handleSelectAllToggle('rehype')}
-																className="border-[#97B5D5] data-[state=checked]:bg-[#97B5D5]"
-															/>
-															<div>
-																<h4 className="font-medium text-[#181818] text-sm">全选 Rehype</h4>
-																<p className="text-xs text-[#87867F]">HTML 处理和转换插件</p>
-															</div>
-														</div>
-														<div className="space-y-1">
-															{rehypePlugins.map(plugin =>
-																<ConfigComponent key={plugin.name} item={plugin} type="plugin"
-																	expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
-																	onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
-																	onConfigChange={async (name, key, value) => {
-																		onPluginConfigChange && await onPluginConfigChange(name, key, value);
-																		onRenderArticle();
-																	}}/>
-															)}
+												<TabsTrigger value="rehype"
+													className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
+													<Zap className="h-3.5 w-3.5"/>
+													<span>Rehype</span>
+													<span className="bg-[#B49FD8] text-white text-[10px] px-1.5 py-0.5 rounded-full">{rehypePlugins.length}</span>
+												</TabsTrigger>
+											)}
+										</TabsList>
+
+										{remarkPlugins.length > 0 && (
+											<TabsContent value="remark" className="mt-0">
+												<div className="space-y-3">
+													<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
+														<Checkbox
+															checked={getPluginsCheckState(remarkPlugins)}
+															onCheckedChange={() => handleSelectAllToggle('remark')}
+															className="border-[#629A90] data-[state=checked]:bg-[#629A90]"
+														/>
+														<div>
+															<h4 className="font-medium text-[#181818] text-sm">全选 Remark</h4>
+															<p className="text-xs text-[#87867F]">Markdown 语法解析插件</p>
 														</div>
 													</div>
-												</TabsContent>
-											)}
-										</Tabs>
-									) : (
-										<div className="text-center py-8">
-											<Plug className="h-10 w-10 text-[#87867F] mx-auto mb-3"/>
-											<h4 className="font-medium text-[#181818] mb-1">暂无插件</h4>
-											<p className="text-sm text-[#87867F]">当前没有可用的 Markdown 处理插件</p>
-										</div>
-									)}
-								</div>
-							</div>
+													<div className="space-y-1">
+														{remarkPlugins.map(plugin =>
+															<ConfigComponent key={plugin.name} item={plugin} type="plugin"
+																expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
+																onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
+																onConfigChange={async (name, key, value) => {
+																	onPluginConfigChange && await onPluginConfigChange(name, key, value);
+																	onRenderArticle();
+																}}/>
+														)}
+													</div>
+												</div>
+											</TabsContent>
+										)}
+
+										{rehypePlugins.length > 0 && (
+											<TabsContent value="rehype" className="mt-0">
+												<div className="space-y-3">
+													<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
+														<Checkbox
+															checked={getPluginsCheckState(rehypePlugins)}
+															onCheckedChange={() => handleSelectAllToggle('rehype')}
+															className="border-[#97B5D5] data-[state=checked]:bg-[#97B5D5]"
+														/>
+														<div>
+															<h4 className="font-medium text-[#181818] text-sm">全选 Rehype</h4>
+															<p className="text-xs text-[#87867F]">HTML 处理和转换插件</p>
+														</div>
+													</div>
+													<div className="space-y-1">
+														{rehypePlugins.map(plugin =>
+															<ConfigComponent key={plugin.name} item={plugin} type="plugin"
+																expandedSections={pluginExpandedSections} onToggle={handlePluginToggle}
+																onEnabledChange={(name, enabled) => onPluginToggle?.(name, enabled)}
+																onConfigChange={async (name, key, value) => {
+																	onPluginConfigChange && await onPluginConfigChange(name, key, value);
+																	onRenderArticle();
+																}}/>
+														)}
+													</div>
+												</div>
+											</TabsContent>
+										)}
+									</Tabs>
+								) : (
+									<div className="text-center py-8">
+										<Plug className="h-10 w-10 text-[#87867F] mx-auto mb-3"/>
+										<h4 className="font-medium text-[#181818] mb-1">暂无插件</h4>
+										<p className="text-sm text-[#87867F]">当前没有可用的 Markdown 处理插件</p>
+									</div>
+								)}
+							</SectionLayout>
 						)}
 
 						{/* 个人信息 */}
 						{activeSection === 'personal' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">个人信息</h3>
-								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
-									<PersonalInfoSettings
-										onClose={() => handleSectionChange('article')}
-										onPersonalInfoChange={onPersonalInfoChange}
-										onSaveSettings={onSaveSettings}
-									/>
-								</div>
-							</div>
+							<SectionLayout title="个人信息">
+								<PersonalInfoSettings
+									onClose={() => handleSectionChange('article')}
+									onPersonalInfoChange={onPersonalInfoChange}
+									onSaveSettings={onSaveSettings}
+								/>
+							</SectionLayout>
 						)}
 
 						{/* AI 设置 */}
 						{activeSection === 'ai' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">AI 设置</h3>
-								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
-									<AISettings
-										onClose={() => handleSectionChange('article')}
-										onSettingsChange={onSettingsChange}
-										onSaveSettings={onSaveSettings}
-									/>
-								</div>
-							</div>
+							<SectionLayout title="AI 设置">
+								<AISettings
+									onClose={() => handleSectionChange('article')}
+									onSettingsChange={onSettingsChange}
+									onSaveSettings={onSaveSettings}
+								/>
+							</SectionLayout>
 						)}
 
 						{/* 云存储 */}
 						{activeSection === 'cloud' && (
-							<CloudStoragePanel
-								cloudSettings={atomSettings.cloudStorage ?? defaultCloudStorageSettings}
-								onSettingsChange={(newCloudSettings) => {
-									updateSettings({cloudStorage: newCloudSettings});
-									saveSettings();
-								}}
-							/>
+							<SectionLayout title="云存储" withCard={false}>
+								<CloudStoragePanelContent
+									cloudSettings={atomSettings.cloudStorage ?? defaultCloudStorageSettings}
+									onSettingsChange={(newCloudSettings) => {
+										updateSettings({cloudStorage: newCloudSettings});
+										saveSettings();
+									}}
+								/>
+							</SectionLayout>
 						)}
 
 						{/* 通用设置 */}
 						{activeSection === 'general' && (
-							<div className="space-y-4">
-								<h3 className="text-lg font-semibold text-[#181818]">通用</h3>
-
+							<SectionLayout title="通用" withCard={false}>
 								{/* 设置卡片组 */}
 								<div className="bg-white rounded-xl border border-[#E8E6DC] overflow-hidden">
 									<div className="divide-y divide-[#E8E6DC]">
@@ -1372,7 +1366,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										</div>
 									</div>
 								</div>
-							</div>
+							</SectionLayout>
 						)}
 					</div>
 				</div>
