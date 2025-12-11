@@ -186,75 +186,82 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 
 	return (
 		<>
-			<Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} modal={false}>
 				<DrawerPortal container={toolbarPortalContainer}>
 							<DrawerOverlay className="absolute inset-0 bg-black/50"/>
 							<div
-								className="absolute bottom-0 left-0 right-0 z-50 bg-white flex flex-col h-[85vh] max-h-[85vh] min-h-0 overflow-hidden rounded-t-lg border-t shadow-lg transition-transform"
+								className="absolute bottom-0 left-0 right-0 z-50 bg-background flex flex-col h-2/3 max-h-2/3 min-h-0 overflow-hidden rounded-t-2xl border-t border-border shadow-lg transition-transform"
 								data-vaul-drawer-direction="bottom"
 								data-slot="drawer-content"
 							>
-								{/* 拖拽手柄 */}
-								<div className="mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-gray-300"/>
-
-								<DrawerHeader className="pb-4">
-									<DrawerTitle className="text-lg sm:text-xl">
-										选择封面图片 - 封面{coverNumber} ({aspectRatio})
-									</DrawerTitle>
-									<DrawerDescription className="text-sm text-gray-600">
-										选择图片来源，点击图片预览效果
-									</DrawerDescription>
-							</DrawerHeader>
+								{/* 顶部栏：手柄 + 标题 + 操作 */}
+								<div className="shrink-0 px-3 pt-2 pb-1">
+									<div className="mx-auto mb-2 h-1 w-10 rounded-full bg-muted-foreground/40"/>
+									<div className="flex items-center justify-between">
+										<span className="text-sm font-serif font-medium text-foreground">封面{coverNumber}</span>
+										<div className="flex items-center gap-2">
+											{selectedImageUrl && (
+												<img src={selectedImageUrl} alt="选中" className="w-8 h-8 object-cover rounded-lg border border-border"/>
+											)}
+											<Button variant="ghost" onClick={onClose} size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted">取消</Button>
+											<Button onClick={handleConfirm} disabled={!selectedImageUrl} size="sm" className="h-7 px-3 text-xs bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:bg-muted-foreground/50">确定</Button>
+										</div>
+									</div>
+								</div>
 
 						{/* 内容区域 */}
-						<div className="flex flex-col flex-1 px-4 sm:px-6 min-h-0 overflow-hidden">
+						<div className="flex flex-col flex-1 px-3 min-h-0 overflow-hidden">
 							<Tabs
 								value={activeTab}
 								onValueChange={(value) => setActiveTab(value as CoverImageSource)}
 								className="flex flex-col flex-1 min-h-0"
 							>
-								<TabsList className="grid w-full grid-cols-3 mb-4 shrink-0">
-									<TabsTrigger value="article" className="flex items-center gap-2">
-										<ImageIcon className="h-4 w-4"/>
+								<TabsList className="grid w-full grid-cols-3 mb-2 shrink-0 bg-muted rounded-xl p-1">
+									<TabsTrigger value="article" className="flex items-center gap-1.5 text-xs text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg">
+										<ImageIcon className="h-3.5 w-3.5"/>
 										文中图片
 									</TabsTrigger>
-									<TabsTrigger value="library" className="flex items-center gap-2">
-										<Palette className="h-4 w-4"/>
-										我的档案库
+									<TabsTrigger value="library" className="flex items-center gap-1.5 text-xs text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg">
+										<Palette className="h-3.5 w-3.5"/>
+										档案库
 									</TabsTrigger>
-									<TabsTrigger value="ai" className="flex items-center gap-2">
-										<Sparkles className="h-4 w-4"/>
+									<TabsTrigger value="ai" className="flex items-center gap-1.5 text-xs text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg">
+										<Sparkles className="h-3.5 w-3.5"/>
 										AI生成
 									</TabsTrigger>
 								</TabsList>
 
-								<TabsContent value="article" className="flex-1 min-h-0 overflow-y-auto">
-									<ImageGrid
-										images={selectedImages.map(img => img.src)}
-										selectedImage={selectedImageUrl}
-										onImageSelect={handleImageSelect}
-										emptyMessage="文章中没有找到图片"
-									/>
-								</TabsContent>
-
-								<TabsContent value="library" className="flex-1 min-h-0 overflow-y-auto">
-									{uploadedImages.length > 0 ? (
+								<TabsContent value="article" className="flex-1 min-h-0 relative">
+									<div className="absolute inset-0 overflow-y-auto" data-vaul-no-drag>
 										<ImageGrid
-											images={uploadedImages.map(img => img.url)}
+											images={selectedImages.map(img => img.src)}
 											selectedImage={selectedImageUrl}
 											onImageSelect={handleImageSelect}
-											emptyMessage="存储库中没有图片"
+											emptyMessage="文章中没有找到图片"
 										/>
-									) : (
-										<div className="text-center py-8 text-gray-500">
-											<Palette className="h-12 w-12 mx-auto mb-3 opacity-50"/>
-											<p className="text-sm">存储库中没有图片</p>
-											<p className="text-xs mt-1 text-gray-400">请先在"存储库"中上传图片</p>
-										</div>
-									)}
+									</div>
 								</TabsContent>
 
-								<TabsContent value="ai" className="flex-1 min-h-0 overflow-y-auto">
+								<TabsContent value="library" className="flex-1 min-h-0 relative">
+									<div className="absolute inset-0 overflow-y-auto" data-vaul-no-drag>
+										{uploadedImages.length > 0 ? (
+											<ImageGrid
+												images={uploadedImages.map(img => img.url)}
+												selectedImage={selectedImageUrl}
+												onImageSelect={handleImageSelect}
+												emptyMessage="存储库中没有图片"
+											/>
+										) : (
+											<div className="text-center py-8 text-gray-500">
+												<Palette className="h-12 w-12 mx-auto mb-3 opacity-50"/>
+												<p className="text-sm">存储库中没有图片</p>
+												<p className="text-xs mt-1 text-gray-400">请先在"存储库"中上传图片</p>
+											</div>
+										)}
+									</div>
+								</TabsContent>
+
+								<TabsContent value="ai" className="flex-1 min-h-0 overflow-y-auto" data-vaul-no-drag>
 									<div className="space-y-4">
 										{/* 未配置 ZenMux 时的提示 */}
 										{!isAIGenerationAvailable && (
@@ -374,46 +381,6 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 							</Tabs>
 						</div>
 
-						{/* 底部操作栏 */}
-						<div className="px-4 sm:px-6 py-4 border-t bg-gray-50 mt-auto shrink-0">
-							{/* 选中图片预览 */}
-							{selectedImageUrl && (
-								<div className="mb-4 p-3 bg-white rounded-lg border border-gray-200">
-									<div className="flex items-center gap-3">
-										<img
-											src={selectedImageUrl}
-											alt="选中的图片"
-											className="w-16 h-16 object-cover rounded-md border"
-										/>
-										<div className="flex-1">
-											<p className="text-sm font-medium text-gray-900">已选择并裁切完成</p>
-											<p className="text-xs text-gray-500">
-												{aspectRatio === '2.25:1' ? '公众号封面比例 (900×400)' : '正方形比例 (400×400)'}
-											</p>
-										</div>
-									</div>
-								</div>
-							)}
-
-							<div className="flex items-center justify-between">
-								<div className="text-sm text-gray-500">
-									{selectedImageUrl ? '已选择并裁切图片' : '请选择一张图片进行裁切'}
-								</div>
-								<div className="flex gap-3">
-									<Button variant="outline" onClick={onClose} size="sm">
-										取消
-									</Button>
-									<Button
-										onClick={handleConfirm}
-										disabled={!selectedImageUrl}
-										className="bg-blue-600 hover:bg-blue-700"
-										size="sm"
-									>
-										确定使用
-									</Button>
-								</div>
-							</div>
-						</div>
 					</div>
 				</DrawerPortal>
 			</Drawer>

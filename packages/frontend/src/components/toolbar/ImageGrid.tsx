@@ -34,7 +34,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 	}
 
 	return (
-		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 py-4 overflow-y-auto max-h-full">
+		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 py-4">
 			{images.map((imageUrl, index) => (
 				<div
 					key={index}
