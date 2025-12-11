@@ -3,12 +3,13 @@ import {Drawer, DrawerDescription, DrawerHeader, DrawerOverlay, DrawerPortal, Dr
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '../ui/tabs';
 import {Button} from '../ui/button';
 import {ImageGrid} from './ImageGrid';
-import {PersistentFileManager} from './PersistentFileManager';
 import {CropArea, ImageCropModal} from './ImageCropModal';
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from './cover/types';
-import {Image as ImageIcon, Palette, Sparkles} from 'lucide-react';
+import {Image as ImageIcon, Palette, Sparkles, Settings} from 'lucide-react';
 import {imageGenerationService} from '@/services/imageGenerationService';
 import {logger} from '../../../../shared/src/logger';
+import {ViteReactSettings, UploadedImage} from '../../types';
+import {useShadowRoot} from '../../providers/ShadowRootProvider';
 
 interface ImageSelectionModalProps {
 	isOpen: boolean;
@@ -18,6 +19,9 @@ interface ImageSelectionModalProps {
 	aspectRatio: CoverAspectRatio;
 	selectedImages: ExtractedImage[];
 	getDimensions: () => { width: number; height: number; aspectRatio: CoverAspectRatio };
+	settings?: ViteReactSettings;
+	onOpenAISettings?: () => void;
+	uploadedImages?: UploadedImage[];
 }
 
 export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
@@ -27,7 +31,10 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 																			coverNumber,
 																			aspectRatio,
 																			selectedImages,
-																			getDimensions
+																			getDimensions,
+																			settings,
+																			onOpenAISettings,
+																			uploadedImages = []
 																		}) => {
 	const [activeTab, setActiveTab] = useState<CoverImageSource>('article');
 	const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
@@ -82,6 +89,9 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 		}
 	};
 
+	// 检查 AI 生成是否可用（ZenMux 配置了密钥）
+	const isAIGenerationAvailable = settings?.aiProvider === 'zenmux' && !!settings?.zenmuxApiKey?.trim();
+
 	const generateAIImage = useCallback(async () => {
 		if (!aiPrompt.trim()) return;
 
@@ -91,16 +101,22 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 			message: '正在准备生成...'
 		});
 		setGenerationError('');
-		logger.info('[ImageSelectionModal] 开始生成AI图片', {prompt: aiPrompt, style: aiStyle});
+		logger.info('[ImageSelectionModal] 开始生成AI图片', {prompt: aiPrompt, style: aiStyle, provider: settings?.aiProvider});
 
 		try {
-			const progressUpdates = [
-				{progress: 20, message: '正在处理提示词...'},
-				{progress: 40, message: '正在生成图像...'},
-				{progress: 60, message: '正在优化细节...'},
-				{progress: 80, message: '正在后处理...'},
-				{progress: 100, message: '生成完成!'}
-			];
+			// 进度动画
+			const progressUpdates = isAIGenerationAvailable
+				? [
+					{progress: 10, message: '正在连接 ZenMux...'},
+					{progress: 30, message: '正在生成图像...'},
+				]
+				: [
+					{progress: 20, message: '正在处理提示词...'},
+					{progress: 40, message: '正在生成图像...'},
+					{progress: 60, message: '正在优化细节...'},
+					{progress: 80, message: '正在后处理...'},
+					{progress: 100, message: '生成完成!'}
+				];
 
 			for (const update of progressUpdates) {
 				setGenerationStatus({
@@ -108,7 +124,9 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 					progress: update.progress,
 					message: update.message
 				});
-				await new Promise(resolve => setTimeout(resolve, 500));
+				if (!isAIGenerationAvailable) {
+					await new Promise(resolve => setTimeout(resolve, 500));
+				}
 			}
 
 			const dimensions = getDimensions();
@@ -117,11 +135,17 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 				style: aiStyle,
 				aspectRatio: aspectRatio,
 				width: dimensions.width,
-				height: dimensions.height
+				height: dimensions.height,
+				settings
 			});
 
 			if (result.success && result.imageUrl) {
 				setGeneratedImages(prev => [...prev, result.imageUrl!]);
+				setGenerationStatus({
+					isGenerating: false,
+					progress: 100,
+					message: '生成完成!'
+				});
 				logger.info(`[ImageSelectionModal] 封面${coverNumber} AI图片生成成功`);
 			} else {
 				throw new Error(result.error || '生成失败');
@@ -136,42 +160,60 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 				message: ''
 			});
 		}
-	}, [aiPrompt, aiStyle, aspectRatio, getDimensions, coverNumber]);
+	}, [aiPrompt, aiStyle, aspectRatio, getDimensions, coverNumber, settings, isAIGenerationAvailable]);
 
-	const toolbarContainer = document.getElementById('lovpen-toolbar-container');
+	// 使用 Shadow DOM 感知的 portal 容器
+	const {portalContainer, isShadowDom} = useShadowRoot();
 
+	// 尝试获取 Drawer 的 Portal 容器：优先使用固定高度的 toolbar 容器，避免挂载在滚动区导致内容撑开
+	const getToolbarPortalContainer = (): HTMLElement | null => {
+		if (isShadowDom && portalContainer) {
+			const rootNode = portalContainer.getRootNode() as Document | ShadowRoot;
+			return rootNode.getElementById('lovpen-toolbar-container')
+				|| rootNode.getElementById('lovpen-toolbar-content')
+				|| null;
+		}
+		return document.getElementById('lovpen-toolbar-container')
+			|| document.getElementById('lovpen-toolbar-content');
+	};
 
-	if (!toolbarContainer) {
-		console.warn('[ImageSelectionModal] 找不到工具栏容器');
+	const toolbarPortalContainer = getToolbarPortalContainer();
+
+	if (!toolbarPortalContainer) {
+		console.warn('[ImageSelectionModal] 找不到工具栏内容容器');
 		return null;
 	}
 
 	return (
 		<>
 			<Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-				<DrawerPortal container={toolbarContainer}>
-					<DrawerOverlay className="absolute inset-0 bg-black/50"/>
-					<div
-						className="absolute bottom-0 left-0 right-0 z-50 bg-white flex flex-col max-h-[85vh] rounded-t-lg border-t shadow-lg transition-transform"
-						data-vaul-drawer-direction="bottom"
-						data-slot="drawer-content"
-					>
-						{/* 拖拽手柄 */}
-						<div className="mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-gray-300"/>
+				<DrawerPortal container={toolbarPortalContainer}>
+							<DrawerOverlay className="absolute inset-0 bg-black/50"/>
+							<div
+								className="absolute bottom-0 left-0 right-0 z-50 bg-white flex flex-col h-[85vh] max-h-[85vh] min-h-0 overflow-hidden rounded-t-lg border-t shadow-lg transition-transform"
+								data-vaul-drawer-direction="bottom"
+								data-slot="drawer-content"
+							>
+								{/* 拖拽手柄 */}
+								<div className="mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-gray-300"/>
 
-						<DrawerHeader className="pb-4">
-							<DrawerTitle className="text-lg sm:text-xl">
-								选择封面图片 - 封面{coverNumber} ({aspectRatio})
-							</DrawerTitle>
-							<DrawerDescription className="text-sm text-gray-600">
-								选择图片来源，点击图片预览效果
-							</DrawerDescription>
-						</DrawerHeader>
+								<DrawerHeader className="pb-4">
+									<DrawerTitle className="text-lg sm:text-xl">
+										选择封面图片 - 封面{coverNumber} ({aspectRatio})
+									</DrawerTitle>
+									<DrawerDescription className="text-sm text-gray-600">
+										选择图片来源，点击图片预览效果
+									</DrawerDescription>
+							</DrawerHeader>
 
 						{/* 内容区域 */}
-						<div className="flex-1 px-4 sm:px-6 overflow-y-auto min-h-0">
-							<Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as CoverImageSource)}>
-								<TabsList className="grid w-full grid-cols-3 mb-4">
+						<div className="flex flex-col flex-1 px-4 sm:px-6 min-h-0 overflow-hidden">
+							<Tabs
+								value={activeTab}
+								onValueChange={(value) => setActiveTab(value as CoverImageSource)}
+								className="flex flex-col flex-1 min-h-0"
+							>
+								<TabsList className="grid w-full grid-cols-3 mb-4 shrink-0">
 									<TabsTrigger value="article" className="flex items-center gap-2">
 										<ImageIcon className="h-4 w-4"/>
 										文中图片
@@ -186,7 +228,7 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 									</TabsTrigger>
 								</TabsList>
 
-								<TabsContent value="article">
+								<TabsContent value="article" className="flex-1 min-h-0 overflow-y-auto">
 									<ImageGrid
 										images={selectedImages.map(img => img.src)}
 										selectedImage={selectedImageUrl}
@@ -195,21 +237,62 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 									/>
 								</TabsContent>
 
-								<TabsContent value="library">
-									<PersistentFileManager
-										onFileSelect={(fileUrl) => handleImageSelect(fileUrl)}
-										acceptedTypes={['image/*']}
-										title="从档案库选择图片"
-										showAsGrid={true}
-										selectedFileUrl={selectedImageUrl}
-									/>
+								<TabsContent value="library" className="flex-1 min-h-0 overflow-y-auto">
+									{uploadedImages.length > 0 ? (
+										<ImageGrid
+											images={uploadedImages.map(img => img.url)}
+											selectedImage={selectedImageUrl}
+											onImageSelect={handleImageSelect}
+											emptyMessage="存储库中没有图片"
+										/>
+									) : (
+										<div className="text-center py-8 text-gray-500">
+											<Palette className="h-12 w-12 mx-auto mb-3 opacity-50"/>
+											<p className="text-sm">存储库中没有图片</p>
+											<p className="text-xs mt-1 text-gray-400">请先在"存储库"中上传图片</p>
+										</div>
+									)}
 								</TabsContent>
 
-								<TabsContent value="ai">
+								<TabsContent value="ai" className="flex-1 min-h-0 overflow-y-auto">
 									<div className="space-y-4">
+										{/* 未配置 ZenMux 时的提示 */}
+										{!isAIGenerationAvailable && (
+											<div className="border border-amber-200 rounded-lg p-4 bg-amber-50">
+												<div className="flex items-start gap-3">
+													<Sparkles className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0"/>
+													<div className="flex-1">
+														<p className="text-sm font-medium text-amber-800">AI 图片生成需要配置</p>
+														<p className="text-xs text-amber-700 mt-1">
+															请在 AI 设置中选择 ZenMux 作为提供商并配置 API 密钥，即可使用 Gemini 2.0 Flash 生成封面图片。
+														</p>
+														{onOpenAISettings && (
+															<button
+																onClick={() => {
+																	onClose();
+																	onOpenAISettings();
+																}}
+																className="mt-3 flex items-center gap-1.5 text-xs font-medium text-amber-700 hover:text-amber-900 transition-colors"
+															>
+																<Settings className="h-3.5 w-3.5"/>
+																前往 AI 设置
+															</button>
+														)}
+													</div>
+												</div>
+											</div>
+										)}
+
 										{/* AI 生成控制 */}
 										<div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
 											<div className="space-y-4">
+												{isAIGenerationAvailable && (
+													<div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+														<Sparkles className="h-3.5 w-3.5"/>
+														<span>使用 ZenMux Gemini 2.0 Flash 生成</span>
+													</div>
+												)}
+
 												<div>
 													<label className="block text-sm font-medium text-gray-700 mb-2">
 														描述你想要的封面
@@ -244,9 +327,13 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 														<button
 															onClick={generateAIImage}
 															disabled={generationStatus.isGenerating || !aiPrompt.trim()}
-															className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+															className={`w-full px-4 py-2 text-white rounded-lg transition-colors text-sm ${
+																isAIGenerationAvailable
+																	? 'bg-[#CC785C] hover:bg-[#B86A4E] disabled:bg-gray-400'
+																	: 'bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400'
+															} disabled:cursor-not-allowed`}
 														>
-															{generationStatus.isGenerating ? '生成中...' : '生成图片'}
+															{generationStatus.isGenerating ? '生成中...' : (isAIGenerationAvailable ? 'AI 生成' : '模拟生成')}
 														</button>
 													</div>
 												</div>
@@ -255,7 +342,7 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 													<div className="space-y-2">
 														<div className="w-full bg-gray-200 rounded-full h-2">
 															<div
-																className="bg-purple-500 h-2 rounded-full transition-all duration-300"
+																className={`h-2 rounded-full transition-all duration-300 ${isAIGenerationAvailable ? 'bg-[#CC785C]' : 'bg-purple-500'}`}
 																style={{width: `${generationStatus.progress}%`}}
 															/>
 														</div>

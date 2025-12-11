@@ -6,19 +6,36 @@ import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} fr
 import {logger} from "../../../../shared/src/logger";
 import {Download, RotateCcw} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
-import {PersistentFile} from '../../types';
+import {PersistentFile, ViteReactSettings, UploadedImage} from '../../types';
+
+// 本地存储键名（与 Toolbar 共用）
+const UPLOADED_IMAGES_STORAGE_KEY = 'lovpen-uploaded-images';
+
+// 获取已上传图片列表
+const getUploadedImages = (): UploadedImage[] => {
+	try {
+		const data = localStorage.getItem(UPLOADED_IMAGES_STORAGE_KEY);
+		return data ? JSON.parse(data) : [];
+	} catch {
+		return [];
+	}
+};
 
 interface CoverDesignerProps {
 	articleHTML: string;
 	onDownloadCovers: (covers: CoverData[]) => void;
 	onClose: () => void;
+	settings?: ViteReactSettings;
+	onOpenAISettings?: () => void;
 }
 
 
 export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 																articleHTML,
 																onDownloadCovers,
-																onClose
+																onClose,
+																settings,
+																onOpenAISettings
 															}) => {
 	// 封面预览状态
 	const [cover1Data, setCover1Data] = useState<CoverData | undefined>(undefined);
@@ -30,12 +47,26 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 	// 共享状态
 	const [selectedImages, setSelectedImages] = useState<ExtractedImage[]>([]);
+	const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(() => getUploadedImages());
 	const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({
 		isGenerating: false,
 		progress: 0,
 		message: ''
 	});
 	const [generationError, setGenerationError] = useState<string>('');
+
+	// 监听 storage 变化刷新上传图片列表
+	useEffect(() => {
+		const handleStorageChange = () => {
+			setUploadedImages(getUploadedImages());
+		};
+		window.addEventListener('storage', handleStorageChange);
+		window.addEventListener('lovpen-images-updated', handleStorageChange);
+		return () => {
+			window.removeEventListener('storage', handleStorageChange);
+			window.removeEventListener('lovpen-images-updated', handleStorageChange);
+		};
+	}, []);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -552,6 +583,9 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					aspectRatio={selectedCoverNumber === 1 ? '2.25:1' : '1:1'}
 					selectedImages={selectedImages}
 					getDimensions={() => getDimensions(selectedCoverNumber!)}
+					settings={settings}
+					onOpenAISettings={onOpenAISettings}
+					uploadedImages={uploadedImages}
 				/>
 			)}
 

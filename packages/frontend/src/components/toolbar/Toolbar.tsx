@@ -1094,7 +1094,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				</div>
 
 				{/* 右侧内容区 */}
-				<div className="flex-1 overflow-y-auto bg-[#F9F9F7]">
+				<div id="lovpen-toolbar-content" className="flex-1 overflow-y-auto bg-[#F9F9F7] relative">
 					<div className="p-4 sm:p-5">
 						{/* 文章信息 */}
 						{activeSection === 'article' && (
@@ -1117,6 +1117,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 									articleHTML={articleHTML}
 									onDownloadCovers={handleDownloadCovers}
 									onClose={() => {}}
+									settings={atomSettings}
+									onOpenAISettings={() => handleSectionChange('ai')}
 								/>
 							</SectionLayout>
 						)}

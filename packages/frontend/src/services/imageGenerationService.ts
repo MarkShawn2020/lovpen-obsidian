@@ -1,4 +1,5 @@
 import {logger} from "../../../shared/src/logger";
+import {ViteReactSettings} from "../types";
 
 export interface ImageGenerationParams {
 	prompt: string;
@@ -6,6 +7,7 @@ export interface ImageGenerationParams {
 	aspectRatio: string;
 	width: number;
 	height: number;
+	settings?: ViteReactSettings;
 }
 
 export interface ImageGenerationResult {
@@ -16,7 +18,6 @@ export interface ImageGenerationResult {
 
 export class ImageGenerationService {
 	private static instance: ImageGenerationService;
-	private baseUrl: string = '/api/image-generation';
 
 	private constructor() {
 	}
@@ -32,47 +33,105 @@ export class ImageGenerationService {
 		logger.info('[ImageGenerationService] 开始生成图像', params);
 
 		try {
-			// 首先尝试调用实际的API（如果配置了）
-			const apiResult = await this.tryApiGeneration(params);
-			if (apiResult.success) {
-				return apiResult;
+			// 检查是否配置了 ZenMux 并使用 ZenMux 作为 AI Provider
+			if (params.settings?.aiProvider === 'zenmux' && params.settings?.zenmuxApiKey) {
+				const zenmuxResult = await this.generateWithZenMux(params);
+				if (zenmuxResult.success) {
+					return zenmuxResult;
+				}
+				// ZenMux 失败时回退到 mock
+				logger.warn('[ImageGenerationService] ZenMux生成失败，回退到模拟生成');
 			}
 
-			// 如果API调用失败，使用本地模拟生成
+			// 使用本地模拟生成
 			return this.generateMockImage(params);
 		} catch (error) {
 			logger.error('[ImageGenerationService] 图像生成失败', error);
 			return {
 				success: false,
-				error: '图像生成服务暂时不可用'
+				error: error instanceof Error ? error.message : '图像生成服务暂时不可用'
 			};
 		}
 	}
 
-	private async tryApiGeneration(params: ImageGenerationParams): Promise<ImageGenerationResult> {
+	// 使用 ZenMux (Gemini) 生成图片
+	private async generateWithZenMux(params: ImageGenerationParams): Promise<ImageGenerationResult> {
+		const {prompt, style, aspectRatio, settings} = params;
+
+		if (!settings?.zenmuxApiKey) {
+			return {success: false, error: '请先配置 ZenMux API 密钥'};
+		}
+
+		if (!window.lovpenReactAPI?.requestUrl) {
+			return {success: false, error: '此功能仅在 Obsidian 环境中可用'};
+		}
+
 		try {
-			const response = await fetch(`${this.baseUrl}/generate`, {
+			// 构建增强 prompt
+			const stylePrompts: Record<string, string> = {
+				realistic: '写实风格，高清细腻',
+				illustration: '插画风格，色彩丰富',
+				minimalist: '简约风格，留白清新',
+				abstract: '抽象艺术风格',
+				vintage: '复古胶片风格',
+			};
+			const styleDesc = stylePrompts[style] || '';
+			const enhancedPrompt = `${prompt}。${styleDesc}。比例 ${aspectRatio}，适合用作文章封面图。`;
+
+			logger.info('[ImageGenerationService] 使用 ZenMux Gemini 生成图片', {prompt: enhancedPrompt});
+
+			const requestUrl = window.lovpenReactAPI.requestUrl;
+			const response = await requestUrl({
+				url: 'https://zenmux.ai/api/v1/images/generations',
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${settings.zenmuxApiKey}`,
+					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(params),
+				body: JSON.stringify({
+					model: 'gemini-2.0-flash-exp-image-generation',
+					prompt: enhancedPrompt,
+					n: 1,
+					response_format: 'b64_json'
+				})
 			});
 
-			if (!response.ok) {
-				throw new Error(`API调用失败: ${response.status}`);
+			if (response.status !== 200) {
+				const errorData = response.json;
+				throw new Error(errorData?.error?.message || `API调用失败: ${response.status}`);
 			}
 
-			const data = await response.json();
-			logger.info('[ImageGenerationService] API生成成功', {imageUrl: data.imageUrl});
+			const result = response.json;
 
-			return {
-				success: true,
-				imageUrl: data.imageUrl
-			};
+			// ZenMux 返回 OpenAI 兼容格式
+			if (result.data && result.data[0]) {
+				const imageData = result.data[0];
+				let imageUrl: string;
+
+				if (imageData.b64_json) {
+					// Base64 格式
+					imageUrl = `data:image/png;base64,${imageData.b64_json}`;
+				} else if (imageData.url) {
+					// URL 格式
+					imageUrl = imageData.url;
+				} else {
+					throw new Error('未获取到图片数据');
+				}
+
+				logger.info('[ImageGenerationService] ZenMux 生成成功');
+				return {
+					success: true,
+					imageUrl
+				};
+			}
+
+			throw new Error('API返回格式异常');
 		} catch (error) {
-			logger.warn('[ImageGenerationService] API调用失败，将使用模拟生成', error);
-			return {success: false, error: error instanceof Error ? error.message : 'Unknown error'};
+			logger.error('[ImageGenerationService] ZenMux生成失败:', error);
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'ZenMux图片生成失败'
+			};
 		}
 	}
 
