@@ -14,7 +14,7 @@ import {useShadowRoot} from '../../providers/ShadowRootProvider';
 interface ImageSelectionModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onImageSelect: (imageUrl: string, source: CoverImageSource) => void;
+	onImageSelect: (imageUrl: string, source: CoverImageSource, originalImageUrl?: string, originalFileName?: string) => void;
 	coverNumber: 1 | 2;
 	aspectRatio: CoverAspectRatio;
 	selectedImages: ExtractedImage[];
@@ -43,6 +43,7 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	const [showCropModal, setShowCropModal] = useState<boolean>(false);
 	const [imageToProcess, setImageToProcess] = useState<string>('');
 	const [croppedImageUrl, setCroppedImageUrl] = useState<string>('');
+	const [selectedFileName, setSelectedFileName] = useState<string>(''); // 档案库图片原始文件名
 
 	// AI 生成相关状态
 	const [aiPrompt, setAiPrompt] = useState<string>('');
@@ -63,11 +64,14 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 			setShowCropModal(false);
 			setImageToProcess('');
 			setCroppedImageUrl('');
+			setSelectedFileName('');
 		}
 	}, [isOpen]);
 
-	const handleImageSelect = (imageUrl: string) => {
+	const handleImageSelect = (imageUrl: string, fileName?: string) => {
+		logger.info('[ImageSelectionModal] handleImageSelect', {imageUrl: imageUrl.substring(0, 80), fileName});
 		setImageToProcess(imageUrl);
+		setSelectedFileName(fileName || '');
 		setShowCropModal(true);
 	};
 
@@ -84,7 +88,16 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 
 	const handleConfirm = () => {
 		if (selectedImageUrl) {
-			onImageSelect(selectedImageUrl, activeTab);
+			// 传递原始图片 URL 和文件名，用于持久化恢复
+			const fileNameToPass = activeTab === 'library' ? selectedFileName : undefined;
+			logger.info('[ImageSelectionModal] handleConfirm', {
+				activeTab,
+				selectedImageUrl: selectedImageUrl.substring(0, 80),
+				originalImageUrl: imageToProcess.substring(0, 80),
+				selectedFileName,
+				fileNameToPass
+			});
+			onImageSelect(selectedImageUrl, activeTab, imageToProcess, fileNameToPass);
 			onClose();
 		}
 	};
@@ -248,7 +261,11 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 											<ImageGrid
 												images={uploadedImages.map(img => img.url)}
 												selectedImage={selectedImageUrl}
-												onImageSelect={handleImageSelect}
+												onImageSelect={(url) => {
+													// 根据URL找到对应的文件名
+													const img = uploadedImages.find(i => i.url === url);
+													handleImageSelect(url, img?.name);
+												}}
 												emptyMessage="存储库中没有图片"
 											/>
 										) : (

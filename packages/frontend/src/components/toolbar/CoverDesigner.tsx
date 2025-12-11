@@ -6,7 +6,7 @@ import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} fr
 import {logger} from "../../../../shared/src/logger";
 import {Download, RotateCcw} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
-import {PersistentFile, ViteReactSettings, UploadedImage} from '../../types';
+import {ViteReactSettings, UploadedImage} from '../../types';
 
 // 本地存储键名（与 Toolbar 共用）
 const UPLOADED_IMAGES_STORAGE_KEY = 'lovpen-uploaded-images';
@@ -250,34 +250,54 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	}, []);
 
 	// 通用的封面恢复函数
-	const restoreCoverFromData = useCallback(async (cover: CoverData, data: any, coverNumber: number): Promise<CoverData> => {
+	// 返回 null 表示无法恢复，应清空该封面
+	const restoreCoverFromData = useCallback(async (cover: CoverData, data: any, coverNumber: number): Promise<CoverData | null> => {
 		try {
-			// 检查是否需要恢复图片URL
-			const needsRestore = cover.imageUrl.startsWith('blob:') ||
-				(data.source === 'upload' && data.originalFileName);
+			// 检查是否需要恢复图片URL（blob URL 在页面刷新后会失效）
+			const needsRestore = cover.imageUrl.startsWith('blob:');
 
 			if (!needsRestore) {
+				// 非 blob URL（如 http/https），直接返回
 				return cover;
 			}
 
-			if (!data.originalFileName) {
-				logger.warn(`[CoverDesigner] 封面${coverNumber}缺少原始文件名，无法恢复`);
-				return cover;
+			// blob URL 需要恢复，优先使用 originalImageUrl
+			if (cover.originalImageUrl && !cover.originalImageUrl.startsWith('blob:')) {
+				// 原始图片是可持久化的 URL（http/https/data:）
+				logger.info(`[CoverDesigner] 使用原始图片URL恢复封面${coverNumber}`, {
+					originalImageUrl: cover.originalImageUrl.substring(0, 80)
+				});
+				return {...cover, imageUrl: cover.originalImageUrl};
 			}
 
-			const matchedFile = await findMatchedFile(data.originalFileName, data.savedAt);
-			if (matchedFile) {
-				const newUrl = await persistentStorageService.getFileUrl(matchedFile);
-				logger.info(`[CoverDesigner] 恢复封面${coverNumber}图片: ${matchedFile.name}`);
-				return {...cover, imageUrl: newUrl};
-			} else {
-				logger.warn(`[CoverDesigner] 未找到匹配的档案库文件: ${data.originalFileName}`);
+			// 如果原始图片也是 blob URL，尝试通过文件名从档案库恢复
+			if (cover.originalFileName) {
+				const matchedFile = await findMatchedFile(cover.originalFileName, data.savedAt);
+				if (matchedFile) {
+					const newUrl = await persistentStorageService.getFileUrl(matchedFile);
+					logger.info(`[CoverDesigner] 从档案库恢复封面${coverNumber}: ${matchedFile.name}`);
+					return {...cover, imageUrl: newUrl};
+				} else {
+					logger.warn(`[CoverDesigner] 未找到匹配的档案库文件: ${cover.originalFileName}`);
+				}
 			}
+
+			// 兼容旧数据：尝试使用 data.originalFileName
+			if (data.originalFileName) {
+				const matchedFile = await findMatchedFile(data.originalFileName, data.savedAt);
+				if (matchedFile) {
+					const newUrl = await persistentStorageService.getFileUrl(matchedFile);
+					logger.info(`[CoverDesigner] 从档案库恢复封面${coverNumber}(旧数据): ${matchedFile.name}`);
+					return {...cover, imageUrl: newUrl};
+				}
+			}
+
+			logger.warn(`[CoverDesigner] 封面${coverNumber}无法恢复，清空`);
+			return null;
 		} catch (error) {
-			logger.error('[CoverDesigner] 恢复档案库图片失败:', error);
+			logger.error('[CoverDesigner] 恢复封面图片失败:', error);
+			return null;
 		}
-
-		return cover;
 	}, [findMatchedFile]);
 
 	// 通用的加载封面数据函数
@@ -291,16 +311,31 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			const data = JSON.parse(saved);
 			if (!data.covers || !Array.isArray(data.covers)) return;
 
+			// 调试：打印保存的数据
+			console.log(`[CoverDesigner] 加载封面${coverNumber}数据`, {
+				imageUrl: data.covers[0]?.imageUrl?.substring(0, 80),
+				originalImageUrl: data.covers[0]?.originalImageUrl?.substring(0, 80),
+				originalFileName: data.covers[0]?.originalFileName,
+				source: data.source
+			});
+
 			const restoredCovers = await Promise.all(
 				data.covers.map((cover: CoverData) => restoreCoverFromData(cover, data, coverNumber))
 			);
 
-			if (restoredCovers.length > 0) {
+			// 过滤掉 null（无法恢复的封面）
+			const validCovers = restoredCovers.filter((c): c is CoverData => c !== null);
+
+			if (validCovers.length > 0) {
 				if (coverNumber === 1) {
-					setCover1Data(restoredCovers[0]);
+					setCover1Data(validCovers[0]);
 				} else {
-					setCover2Data(restoredCovers[0]);
+					setCover2Data(validCovers[0]);
 				}
+			} else {
+				// 所有封面都无法恢复，清空持久化数据
+				localStorage.removeItem(storageKey);
+				logger.info(`[CoverDesigner] 清空封面${coverNumber}无效的持久化数据`);
 			}
 		} catch (error) {
 			logger.error(`[CoverDesigner] 加载封面${coverNumber}持久化数据失败:`, error);
@@ -343,60 +378,29 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 
 	// 通用的保存封面持久化数据函数
-	const saveCoverData = useCallback(async (coverNum: 1 | 2, coverData: CoverData, source: CoverImageSource, imageUrl: string) => {
+	const saveCoverData = useCallback(async (coverNum: 1 | 2, coverData: CoverData, source: CoverImageSource) => {
 		try {
 			const storageKey = `cover-designer-preview-${coverNum}`;
-			let originalFileName = '';
-
-			// 如果是档案库来源，尝试匹配文件信息
-			if (source === 'upload' || (source === 'library' && imageUrl.startsWith('blob:'))) {
-				try {
-					const files = await persistentStorageService.getFiles();
-					const imageFiles = files.filter(f => f.type.startsWith('image/'));
-
-					// 尝试通过URL匹配找到对应的文件
-					let matchedFile: PersistentFile | null = null;
-					for (const file of imageFiles) {
-						try {
-							const fileUrl = await persistentStorageService.getFileUrl(file);
-							if (fileUrl === imageUrl) {
-								matchedFile = file;
-								break;
-							}
-						} catch (error) {
-							// 忽略单个文件的错误
-
-						}
-					}
-
-					// 如果没找到匹配的，使用最近使用的文件作为备选
-					if (!matchedFile && imageFiles.length > 0) {
-						const sortedFiles = imageFiles.sort((a, b) =>
-							new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime()
-						);
-						matchedFile = sortedFiles[0];
-					}
-
-					if (matchedFile) {
-						originalFileName = matchedFile.name;
-						logger.info(`[CoverDesigner] 匹配到档案库文件: ${originalFileName}`);
-					}
-				} catch (error) {
-					logger.error('[CoverDesigner] 匹配档案库文件失败:', error);
-				}
-			}
 
 			const persistData = {
 				covers: [coverData],
 				source,
-				originalFileName,
 				savedAt: new Date().toISOString()
 			};
 
 			localStorage.setItem(storageKey, JSON.stringify(persistData));
-			logger.debug(`[CoverDesigner] 保存封面${coverNum}预览持久化数据`);
+
+			// 验证保存成功
+			const saved = localStorage.getItem(storageKey);
+			console.log(`[CoverDesigner] 保存封面${coverNum}`, {
+				storageKey,
+				imageUrl: coverData.imageUrl?.substring(0, 80),
+				originalImageUrl: coverData.originalImageUrl?.substring(0, 80),
+				originalFileName: coverData.originalFileName,
+				saved: !!saved
+			});
 		} catch (error) {
-			logger.error(`[CoverDesigner] 保存封面${coverNum}预览持久化数据失败:`, error);
+			logger.error(`[CoverDesigner] 保存封面${coverNum}持久化数据失败:`, error);
 		}
 	}, []);
 
@@ -409,7 +413,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		}
 	}, []);
 
-	const createCover = useCallback(async (imageUrl: string, source: CoverImageSource, coverNum: 1 | 2) => {
+	const createCover = useCallback(async (imageUrl: string, source: CoverImageSource, coverNum: 1 | 2, originalImageUrl?: string, originalFileName?: string) => {
 		// 验证图片URL
 		if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
 			logger.error('[CoverDesigner] 无效的图片URL:', imageUrl);
@@ -418,25 +422,43 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 
 		const dimensions = getDimensions(coverNum);
 
-		// 直接创建封面数据，使用原始图片URL进行预览
+		// 如果是 blob URL，需要保存到持久化存储
+		let persistedFileName = originalFileName;
+		if (imageUrl.startsWith('blob:')) {
+			try {
+				const fileName = `cover-${coverNum}-${Date.now()}.png`;
+				const savedFile = await persistentStorageService.saveFileFromUrl(imageUrl, fileName, 'image/png');
+				persistedFileName = savedFile.name;
+				logger.info(`[CoverDesigner] 封面${coverNum}图片已保存到持久化存储`, {fileName: savedFile.name});
+			} catch (error) {
+				logger.error(`[CoverDesigner] 保存封面${coverNum}图片到持久化存储失败:`, error);
+			}
+		}
+
+		// 直接创建封面数据，使用裁切后的图片URL进行预览
 		const coverData: CoverData = {
 			id: `cover${coverNum}-${Date.now()}-${Math.random()}`,
-			imageUrl: imageUrl.trim(), // 使用trim后的URL
+			imageUrl: imageUrl.trim(), // 裁切后的 blob URL（显示用）
 			aspectRatio: dimensions.aspectRatio,
 			width: dimensions.width,
 			height: dimensions.height,
 			title: '',
-			description: ''
+			description: '',
+			// 保存原始信息用于持久化恢复
+			originalImageUrl: originalImageUrl || imageUrl,
+			originalFileName: persistedFileName // 使用持久化后的文件名
 		};
 
-		logger.info(`[CoverDesigner] 封面${coverNum}创建成功（使用原始图片预览）`, {
-			originalUrl: imageUrl.substring(0, 100),
+		logger.info(`[CoverDesigner] 封面${coverNum}创建成功`, {
+			imageUrl: imageUrl.substring(0, 80),
+			originalImageUrl: originalImageUrl?.substring(0, 80),
 			aspectRatio: dimensions.aspectRatio,
-			dimensions: `${dimensions.width}x${dimensions.height}`
+			dimensions: `${dimensions.width}x${dimensions.height}`,
+			originalFileName: persistedFileName
 		});
 
 		setCoverPreview(coverNum, coverData);
-		await saveCoverData(coverNum, coverData, source, imageUrl);
+		await saveCoverData(coverNum, coverData, source);
 	}, [getDimensions, setCoverPreview, saveCoverData]);
 
 	// 处理封面卡片点击
@@ -451,11 +473,11 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	};
 
 	// 处理图片选择
-	const handleImageSelect = async (imageUrl: string, source: CoverImageSource) => {
+	const handleImageSelect = async (imageUrl: string, source: CoverImageSource, originalImageUrl?: string, originalFileName?: string) => {
 		if (!selectedCoverNumber) return;
 
 		try {
-			await createCover(imageUrl, source, selectedCoverNumber);
+			await createCover(imageUrl, source, selectedCoverNumber, originalImageUrl, originalFileName);
 			setShowImageSelection(false);
 			setSelectedCoverNumber(null);
 		} catch (error) {
