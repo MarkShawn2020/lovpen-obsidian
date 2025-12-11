@@ -15,6 +15,7 @@ interface AIAnalysisSplitButtonProps {
 	isDisabled: boolean;
 	onAnalyze: (style: AIStyle) => void;
 	onCustomize: () => void;
+	onOpenSettings?: () => void;
 	currentStyle?: AIStyle;
 }
 
@@ -231,6 +232,7 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 																				isDisabled,
 																				onAnalyze,
 																				onCustomize,
+																				onOpenSettings,
 																				currentStyle
 																			}) => {
 	const [selectedStyle, setSelectedStyle] = useState<AIStyle>(currentStyle || AI_STYLES[0]);
@@ -245,27 +247,35 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 			return;
 		}
 
+		if (value === 'open-settings') {
+			onOpenSettings?.();
+			return;
+		}
+
 		const style = AI_STYLES.find(s => s.id === value);
 		if (style) {
 			setSelectedStyle(style);
-			onAnalyze(style);
+			// 只有在 API 已配置且未在生成中时才自动触发分析
+			if (!isDisabled && !isGenerating) {
+				onAnalyze(style);
+			}
 		}
 	};
 
+	const baseButtonClass = isGenerating
+		? 'bg-primary/60 cursor-not-allowed'
+		: isDisabled
+			? 'bg-muted-foreground/60 hover:bg-muted-foreground/70'
+			: 'bg-primary hover:bg-primary/90';
+
 	return (
-		<div className="flex">
+		<div className="inline-flex rounded-xl overflow-hidden shadow-sm">
 			{/* 主分析按钮 */}
 			<Button
 				onClick={handleMainClick}
 				disabled={isDisabled || isGenerating}
 				size="sm"
-				className={`rounded-r-none border-r-0 text-white ${
-					isGenerating
-						? 'bg-blue-400 cursor-not-allowed'
-						: isDisabled
-							? 'bg-gray-400 hover:bg-gray-500'
-							: 'bg-blue-500 hover:bg-blue-600'
-				}`}
+				className={`rounded-none text-primary-foreground border-0 ${baseButtonClass}`}
 				title={
 					isGenerating
 						? 'AI正在分析中...'
@@ -276,12 +286,9 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 			>
 				{isGenerating ? (
 					<>
-						<svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none"
-							 viewBox="0 0 24 24">
-							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-									strokeWidth="4"></circle>
-							<path className="opacity-75" fill="currentColor"
-								  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						<svg className="animate-spin -ml-1 mr-2 h-4 w-4 inline" fill="none" viewBox="0 0 24 24">
+							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+							<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
 						</svg>
 						分析中...
 					</>
@@ -293,21 +300,18 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 				)}
 			</Button>
 
-			{/* shadcn Select 下拉菜单 */}
-			<Select value="" onValueChange={handleValueChange} disabled={isDisabled || isGenerating}>
+			{/* 分隔线 */}
+			<div className={`w-px ${isGenerating ? 'bg-primary-foreground/30' : 'bg-primary-foreground/20'}`}/>
+
+			{/* 下拉菜单触发器 */}
+			<Select value="" onValueChange={handleValueChange} disabled={isGenerating}>
 				<SelectTrigger
 					size="sm"
-					className={`w-8 rounded-l-none px-1 text-white border-l-0 ${
-						isGenerating
-							? 'bg-blue-400 cursor-not-allowed border-blue-400'
-							: isDisabled
-								? 'bg-gray-400 hover:bg-gray-500 border-gray-400'
-								: 'bg-blue-500 hover:bg-blue-600 border-blue-500'
-					}`}
+					className={`w-8 rounded-none px-1 text-primary-foreground border-0 ${baseButtonClass}`}
 				>
 					<SelectValue/>
 				</SelectTrigger>
-				<SelectContent align="end" className="w-80">
+				<SelectContent align="end" className="w-80 bg-popover border-border rounded-xl">
 					{/* 预设风格选项 */}
 					{AI_STYLES.map((style) => (
 						<SelectItem key={style.id} value={style.id}>
@@ -315,13 +319,12 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 								<span className="text-lg flex-shrink-0">{style.icon}</span>
 								<div className="flex-1 min-w-0">
 									<div className="flex items-center gap-2 mb-1">
-										<span className="font-medium text-gray-900 text-sm">{style.name}</span>
+										<span className="font-medium text-foreground text-sm">{style.name}</span>
 										{selectedStyle.id === style.id && (
-											<span
-												className="inline-block w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+											<span className="inline-block w-2 h-2 bg-primary rounded-full flex-shrink-0"/>
 										)}
 									</div>
-									<div className="text-xs text-gray-500 leading-relaxed">
+									<div className="text-xs text-muted-foreground leading-relaxed">
 										{style.description}
 									</div>
 								</div>
@@ -332,13 +335,26 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 					{/* 分隔线 */}
 					<SelectSeparator/>
 
+					{/* 未配置时显示配置入口 */}
+					{isDisabled && onOpenSettings && (
+						<SelectItem value="open-settings">
+							<div className="flex items-center gap-3 py-1">
+								<span className="text-lg">🔑</span>
+								<div>
+									<div className="font-medium text-primary text-sm">配置 API 密钥</div>
+									<div className="text-xs text-muted-foreground">需要先配置才能使用 AI 分析</div>
+								</div>
+							</div>
+						</SelectItem>
+					)}
+
 					{/* 自定义选项 */}
 					<SelectItem value="customize">
 						<div className="flex items-center gap-3 py-1">
 							<span className="text-lg">⚙️</span>
 							<div>
-								<div className="font-medium text-gray-900 text-sm">自定义prompt</div>
-								<div className="text-xs text-gray-500">编辑自定义分析模板</div>
+								<div className="font-medium text-foreground text-sm">自定义prompt</div>
+								<div className="text-xs text-muted-foreground">编辑自定义分析模板</div>
 							</div>
 						</div>
 					</SelectItem>

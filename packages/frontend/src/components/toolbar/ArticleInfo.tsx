@@ -13,6 +13,7 @@ interface ArticleInfoProps {
 	onInfoChange: (info: ArticleInfoData) => void;
 	onRenderArticle?: () => void;
 	onSettingsChange?: (settings: Partial<ViteReactSettings>) => void;
+	onOpenAISettings?: () => void;
 }
 
 export interface ArticleInfoData {
@@ -52,7 +53,8 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 															onSaveSettings,
 															onInfoChange,
 															onRenderArticle,
-															onSettingsChange
+															onSettingsChange,
+															onOpenAISettings
 														}) => {
 	const [isAIGenerating, setIsAIGenerating] = useState(false);
 	const [isCustomPromptModalOpen, setIsCustomPromptModalOpen] = useState(false);
@@ -251,14 +253,14 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 
 	return (
 		<div className="w-full space-y-6">
-			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
-				<h3 className="text-lg font-semibold text-[#181818] tracking-tight">基本信息</h3>
+			<div className="flex justify-end">
 				<div className="flex space-x-2">
 					<AIAnalysisSplitButton
 						isGenerating={isAIGenerating}
 						isDisabled={!settings.authKey || settings.authKey.trim() === ''}
 						onAnalyze={handleAIAnalyze}
 						onCustomize={() => setIsCustomPromptModalOpen(true)}
+						onOpenSettings={onOpenAISettings}
 					/>
 					<Button
 						onClick={handleClearAll}

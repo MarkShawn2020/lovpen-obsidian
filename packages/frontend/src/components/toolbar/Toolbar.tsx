@@ -1095,6 +1095,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										onInfoChange={onArticleInfoChange || (() => {})}
 										onRenderArticle={onRenderArticle}
 										onSettingsChange={onSettingsChange}
+										onOpenAISettings={() => handleSectionChange('ai')}
 									/>
 								</div>
 							</div>
