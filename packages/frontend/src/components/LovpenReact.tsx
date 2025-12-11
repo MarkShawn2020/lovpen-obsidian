@@ -62,8 +62,14 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		}
 	});
 
-	// Toolbar 自动隐藏状态（基于空间不足）
-	const [isToolbarAutoHidden, setIsToolbarAutoHidden] = useState(false);
+	// Toolbar 显示/隐藏状态（手动切换）
+	const [isToolbarHidden, setIsToolbarHidden] = useState<boolean>(() => {
+		try {
+			return localStorage.getItem('lovpen-toolbar-hidden') === 'true';
+		} catch {
+			return false;
+		}
+	});
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	// Toolbar 当前 tab 状态（用于头像点击切换到设置）
@@ -139,60 +145,41 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		};
 	}, [atomSettings.scaleCodeBlockInImage, settings.scaleCodeBlockInImage, articleHTML]); // 当设置或文章内容变化时重新计算
 
-	// 监听容器宽度变化，自动隐藏/显示 Toolbar（保证 Renderer 始终可见）
+	// 监听容器宽度变化，用于通知宽度改变
 	useEffect(() => {
 		const container = containerRef.current;
-		if (!container) {
-			console.warn('[LovpenReact] containerRef.current is null, cannot observe width');
-			return;
-		}
-
-		console.log('[LovpenReact] ResizeObserver 已设置, onWidthChange:', typeof onWidthChange);
+		if (!container || !onWidthChange) return;
 
 		let widthChangeTimer: NodeJS.Timeout | null = null;
 
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const containerWidth = entry.contentRect.width;
-				console.log('[LovpenReact] ResizeObserver fired, width:', containerWidth);
-
-				// 计算 A(渲染器) 的实际宽度
-				// A_width = C_width - B_width - resizer_width
-				const rendererMinWidth = 320; // A 的最小宽度要求
-				const toolbarWidthNum = parseInt(toolbarWidth) || 420; // B 的实际宽度
-				const resizerWidth = 6;
-				const calculatedRendererWidth = containerWidth - toolbarWidthNum - resizerWidth;
-
-				// 如果 A 的计算宽度 < 320px，则隐藏 B，让 A 占满整个 C
-				const shouldHideToolbar = calculatedRendererWidth < rendererMinWidth;
-
-				setIsToolbarAutoHidden(shouldHideToolbar);
-
-				// 调用 width change callback (with debouncing)
-				if (onWidthChange) {
-					if (widthChangeTimer) {
-						clearTimeout(widthChangeTimer);
-					}
-					widthChangeTimer = setTimeout(() => {
-						console.log(`[LovpenReact] 调用 onWidthChange: ${containerWidth}px`);
-						logger.info(`[LovpenReact] 容器宽度变化: ${containerWidth}px`);
-						onWidthChange(containerWidth);
-					}, 200); // 200ms debounce
-				} else {
-					console.warn('[LovpenReact] onWidthChange is undefined, skipping callback');
-				}
+				if (widthChangeTimer) clearTimeout(widthChangeTimer);
+				widthChangeTimer = setTimeout(() => {
+					onWidthChange(containerWidth);
+				}, 200);
 			}
 		});
 
 		resizeObserver.observe(container);
 
 		return () => {
-			if (widthChangeTimer) {
-				clearTimeout(widthChangeTimer);
-			}
+			if (widthChangeTimer) clearTimeout(widthChangeTimer);
 			resizeObserver.disconnect();
 		};
-	}, [toolbarWidth, onWidthChange]);
+	}, [onWidthChange]);
+
+	// 切换 Toolbar 显示/隐藏
+	const toggleToolbar = useCallback(() => {
+		setIsToolbarHidden(prev => {
+			const newVal = !prev;
+			try {
+				localStorage.setItem('lovpen-toolbar-hidden', String(newVal));
+			} catch {}
+			return newVal;
+		});
+	}, []);
 
 	// 提取 Toolbar props，避免重复代码
 	const toolbarProps = {
@@ -296,8 +283,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					flex: "1", // 占用剩余空间，宽度 = C - B - resizer（当B显示时）或 C（当B隐藏时）
 					overflow: "auto",
 					scrollbarGutter: "stable", // 预留滚动条空间，防止内容跳动
-					borderRight: !isToolbarAutoHidden && !isToolbarLeft ? "1px solid #e5e5e5" : "none",
-					borderLeft: !isToolbarAutoHidden && isToolbarLeft ? "1px solid #e5e5e5" : "none",
+					borderRight: !isToolbarHidden && !isToolbarLeft ? "1px solid #e5e5e5" : "none",
+					borderLeft: !isToolbarHidden && isToolbarLeft ? "1px solid #e5e5e5" : "none",
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
 					flexDirection: "column",
@@ -348,6 +335,50 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 								}}
 							/>
 
+							{/* 工具栏展开/收起切换按钮 */}
+							<button
+								onClick={toggleToolbar}
+								title={isToolbarHidden ? '展开工具栏' : '收起工具栏'}
+								style={{
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									width: '32px',
+									height: '32px',
+									borderRadius: '8px',
+									border: '1px solid #E8E6DC',
+									backgroundColor: '#fff',
+									cursor: 'pointer',
+									transition: 'all 0.2s ease'
+								}}
+								onMouseEnter={e => {
+									e.currentTarget.style.backgroundColor = '#F9F9F7';
+									e.currentTarget.style.borderColor = '#D97757';
+								}}
+								onMouseLeave={e => {
+									e.currentTarget.style.backgroundColor = '#fff';
+									e.currentTarget.style.borderColor = '#E8E6DC';
+								}}
+							>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="#87867F"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									style={{
+										transform: isToolbarHidden ? 'rotate(180deg)' : 'rotate(0deg)',
+										transition: 'transform 0.2s ease'
+									}}
+								>
+									<rect x="3" y="3" width="18" height="18" rx="2" />
+									<path d="M15 3v18" />
+								</svg>
+							</button>
+
 							{/* 头像 - 点击切换到设置 tab */}
 							<Avatar
 								onClick={() => setToolbarActiveTab('settings')}
@@ -375,8 +406,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				</div>
 			</ScrollContainer>
 
-			{/* 可拖动的分隔条 - 仅在工具栏未被自动隐藏时显示 */}
-			{!isToolbarAutoHidden && (
+			{/* 可拖动的分隔条 - 仅在工具栏显示时显示 */}
+			{!isToolbarHidden && (
 				<div
 					className="column-resizer"
 					style={{
@@ -403,8 +434,8 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				/>
 			)}
 
-			{/* 工具栏容器 - 仅在未被自动隐藏时显示 */}
-			{!isToolbarAutoHidden && (
+			{/* 工具栏容器 - 仅在显示时显示 */}
+			{!isToolbarHidden && (
 				<div
 					className="toolbar-container"
 					style={{
