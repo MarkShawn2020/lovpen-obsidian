@@ -553,7 +553,7 @@
 		background: rgba(200, 100, 66, 0.03);
 		border: 1px solid rgba(200, 100, 66, 0.15);
 		border-radius: 8px;
-		padding: 1em 0.5em;
+		padding: 1em 0.5em 1em calc(0.5em + 3px); /* 左边多 3px 补偿装饰条宽度 */
 		position: relative;
 	}
 
@@ -569,7 +569,7 @@
 	}
 
 	.claude-meta-content {
-		padding-left: 1em;
+		/* 无需左 padding，卡片本身已有内边距 */
 	}
 
 	.claude-meta-basic {
@@ -670,9 +670,7 @@
 			padding: 1em;
 		}
 
-		.claude-meta-content {
-			padding-left: 0.5em;
-		}
+		/* .claude-meta-content 移动端也无需左 padding */
 
 		.claude-meta-basic {
 			flex-direction: column;
