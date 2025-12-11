@@ -642,6 +642,11 @@
 		gap: 0.5em;
 	}
 
+	/* 移除最后一个子元素的 margin-bottom，保持 padding-y 对称 */
+	.claude-meta-content > *:last-child {
+		margin-bottom: 0 !important;
+	}
+
 	.claude-meta-tag {
 		display: inline-block;
 		background: rgba(200, 100, 66, 0.1);

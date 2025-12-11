@@ -570,6 +570,11 @@
 		transform: translateY(-1px);
 	}
 
+	/* 移除最后一个子元素的 margin-bottom，保持 padding-y 对称 */
+	.wabi-sabi-container .wabi-sabi-meta-content > *:last-child {
+		margin-bottom: 0 !important;
+	}
+
 	/* 响应式设计：保持在不同设备上的优雅 */
 	@media (max-width: 768px) {
 		.wabi-sabi-container .article-header {

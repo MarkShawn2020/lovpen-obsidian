@@ -290,6 +290,11 @@
   opacity: 0.7;
 }
 
+/* 移除最后一个子元素的 margin-bottom，保持 padding-y 对称 */
+.lovpen-meta-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
 /* 主要内容区域 */
 .lovpen-article-content {
   padding: 1rem;
