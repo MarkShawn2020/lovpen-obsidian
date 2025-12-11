@@ -4,12 +4,48 @@ import {CoverCard} from "@/components/toolbar/CoverCard";
 import {ImageSelectionModal} from "@/components/toolbar/ImageSelectionModal";
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from "@/components/toolbar/cover/types";
 import {logger} from "../../../../shared/src/logger";
-import {Download, RotateCcw} from "lucide-react";
+import {Download, RotateCcw, Sparkles, Wand2, Settings, ChevronDown, ChevronUp, Eye, X, Check} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
+import {imageGenerationService} from '../../services/imageGenerationService';
 import {ViteReactSettings, UploadedImage} from '../../types';
 
 // 本地存储键名（与 Toolbar 共用）
 const UPLOADED_IMAGES_STORAGE_KEY = 'lovpen-uploaded-images';
+const AI_GENERATION_STATE_KEY = 'lovpen-ai-generation-state';
+
+// AI 生成状态持久化接口
+interface AIGenerationState {
+	aiStyle: string;
+	aiPrompt: string;
+	aiNegativePrompt: string;
+	aiTargetCover: 1 | 2;
+	aiGeneratedImages: string[]; // 最多保存 3 张
+}
+
+// 获取 AI 生成状态
+const getAIGenerationState = (): Partial<AIGenerationState> => {
+	try {
+		const data = localStorage.getItem(AI_GENERATION_STATE_KEY);
+		return data ? JSON.parse(data) : {};
+	} catch {
+		return {};
+	}
+};
+
+// 保存 AI 生成状态
+const saveAIGenerationState = (state: Partial<AIGenerationState>) => {
+	try {
+		const existing = getAIGenerationState();
+		const merged = {...existing, ...state};
+		// 限制生成图片数量为 3 张
+		if (merged.aiGeneratedImages && merged.aiGeneratedImages.length > 3) {
+			merged.aiGeneratedImages = merged.aiGeneratedImages.slice(0, 3);
+		}
+		localStorage.setItem(AI_GENERATION_STATE_KEY, JSON.stringify(merged));
+	} catch (error) {
+		logger.error('[CoverDesigner] 保存 AI 生成状态失败:', error);
+	}
+};
 
 // 获取已上传图片列表
 const getUploadedImages = (): UploadedImage[] => {
@@ -55,6 +91,17 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	});
 	const [generationError, setGenerationError] = useState<string>('');
 
+	// AI 智能生成相关状态（从 localStorage 恢复）
+	const [aiStyle, setAiStyle] = useState<string>(() => getAIGenerationState().aiStyle || 'illustration');
+	const [aiPrompt, setAiPrompt] = useState<string>(() => getAIGenerationState().aiPrompt || '');
+	const [aiNegativePrompt, setAiNegativePrompt] = useState<string>(() => getAIGenerationState().aiNegativePrompt || '');
+	const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+	const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+	const [aiGeneratedImages, setAiGeneratedImages] = useState<string[]>(() => getAIGenerationState().aiGeneratedImages || []);
+	const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+	const [aiTargetCover, setAiTargetCover] = useState<1 | 2>(() => getAIGenerationState().aiTargetCover || 1);
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
+
 	// 监听 storage 变化刷新上传图片列表
 	useEffect(() => {
 		const handleStorageChange = () => {
@@ -67,6 +114,28 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			window.removeEventListener('lovpen-images-updated', handleStorageChange);
 		};
 	}, []);
+
+	// 持久化 AI 生成状态
+	useEffect(() => {
+		saveAIGenerationState({aiStyle});
+	}, [aiStyle]);
+
+	useEffect(() => {
+		saveAIGenerationState({aiPrompt});
+	}, [aiPrompt]);
+
+	useEffect(() => {
+		saveAIGenerationState({aiNegativePrompt});
+	}, [aiNegativePrompt]);
+
+	useEffect(() => {
+		saveAIGenerationState({aiTargetCover});
+	}, [aiTargetCover]);
+
+	useEffect(() => {
+		// 只保存最近 3 张生成的图片
+		saveAIGenerationState({aiGeneratedImages: aiGeneratedImages.slice(0, 3)});
+	}, [aiGeneratedImages]);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -534,6 +603,75 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 		logger.debug('[CoverDesigner] 清空全部封面持久化数据');
 	}, [clearCoverPreview]);
 
+	// AI 生成是否可用
+	const isAIAvailable = settings?.aiProvider === 'zenmux' && !!settings?.zenmuxApiKey?.trim();
+
+	// 智能生成提示词
+	const handleGeneratePrompt = useCallback(async () => {
+		if (!isAIAvailable) return;
+
+		setIsGeneratingPrompt(true);
+		setGenerationError('');
+
+		try {
+			const result = await imageGenerationService.generateCoverPrompt(articleHTML, aiStyle, settings);
+			if (result.success && result.positivePrompt) {
+				setAiPrompt(result.positivePrompt);
+				setAiNegativePrompt(result.negativePrompt || '');
+				logger.info('[CoverDesigner] 提示词生成成功');
+			} else {
+				throw new Error(result.error || '生成失败');
+			}
+		} catch (error) {
+			logger.error('[CoverDesigner] 提示词生成失败:', error);
+			setGenerationError(error instanceof Error ? error.message : '生成提示词失败');
+		} finally {
+			setIsGeneratingPrompt(false);
+		}
+	}, [articleHTML, aiStyle, settings, isAIAvailable]);
+
+	// AI 生成图片
+	const handleGenerateImage = useCallback(async () => {
+		if (!isAIAvailable || !aiPrompt.trim()) return;
+
+		setIsGeneratingImage(true);
+		setGenerationError('');
+		setGenerationStatus({isGenerating: true, progress: 30, message: '正在生成图片...'});
+
+		try {
+			const dimensions = getDimensions(aiTargetCover);
+			const result = await imageGenerationService.generateImage({
+				prompt: aiPrompt,
+				negativePrompt: aiNegativePrompt,
+				style: aiStyle,
+				aspectRatio: dimensions.aspectRatio,
+				width: dimensions.width,
+				height: dimensions.height,
+				settings,
+				useNanoBananaPro: true
+			});
+
+			if (result.success && result.imageUrl) {
+				setAiGeneratedImages(prev => [result.imageUrl!, ...prev]);
+				setGenerationStatus({isGenerating: false, progress: 100, message: '生成完成!'});
+				logger.info('[CoverDesigner] AI 图片生成成功');
+			} else {
+				throw new Error(result.error || '生成失败');
+			}
+		} catch (error) {
+			logger.error('[CoverDesigner] AI 图片生成失败:', error);
+			setGenerationError(error instanceof Error ? error.message : '生成图片失败');
+			setGenerationStatus({isGenerating: false, progress: 0, message: ''});
+		} finally {
+			setIsGeneratingImage(false);
+		}
+	}, [aiPrompt, aiNegativePrompt, aiStyle, aiTargetCover, settings, isAIAvailable, getDimensions]);
+
+	// 选择 AI 生成的图片作为封面
+	const handleSelectAiImage = useCallback(async (imageUrl: string) => {
+		await createCover(imageUrl, 'ai', aiTargetCover, imageUrl);
+	}, [createCover, aiTargetCover]);
+
 	return (
 		<div className="@container space-y-3 sm:space-y-4 relative">
 			{/* 头部和操作按钮 */}
@@ -592,6 +730,139 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				/>
 			</div>
 
+			{/* AI 智能生成区域 */}
+			<div className="border border-border rounded-xl p-4 bg-card">
+				<div className="flex items-center gap-2 mb-3">
+					<Sparkles className="h-4 w-4 text-primary"/>
+					<h4 className="text-sm font-serif font-medium text-foreground">AI 智能生成</h4>
+					<span className="text-xs text-muted-foreground ml-auto">Nano Banana Pro</span>
+				</div>
+
+				{!isAIAvailable ? (
+					<div className="text-center py-4">
+						<p className="text-sm text-muted-foreground mb-2">需要配置 ZenMux API 才能使用 AI 生成</p>
+						{onOpenAISettings && (
+							<button
+								onClick={onOpenAISettings}
+								className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80"
+							>
+								<Settings className="h-3.5 w-3.5"/>
+								前往 AI 设置
+							</button>
+						)}
+					</div>
+				) : (
+					<div className="space-y-3">
+						{/* 第一行：风格选择 + 目标封面 + 智能分析按钮 */}
+						<div className="flex flex-wrap gap-2 items-center">
+							<select
+								value={aiStyle}
+								onChange={(e) => setAiStyle(e.target.value)}
+								className="px-2 py-1.5 text-xs border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
+							>
+								<option value="illustration">插画风格</option>
+								<option value="realistic">写实风格</option>
+								<option value="minimalist">简约风格</option>
+								<option value="abstract">抽象风格</option>
+								<option value="vintage">复古风格</option>
+							</select>
+
+							<select
+								value={aiTargetCover}
+								onChange={(e) => setAiTargetCover(Number(e.target.value) as 1 | 2)}
+								className="px-2 py-1.5 text-xs border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
+							>
+								<option value={1}>封面1 (2.25:1)</option>
+								<option value={2}>封面2 (1:1)</option>
+							</select>
+
+							<button
+								onClick={handleGeneratePrompt}
+								disabled={isGeneratingPrompt}
+								className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary bg-accent hover:bg-accent/80 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<Wand2 className={`h-3.5 w-3.5 ${isGeneratingPrompt ? 'animate-spin' : ''}`}/>
+								{isGeneratingPrompt ? '分析中...' : '智能分析文章'}
+							</button>
+
+							<button
+								onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+								className="flex items-center gap-1 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+							>
+								{showAdvancedOptions ? <ChevronUp className="h-3 w-3"/> : <ChevronDown className="h-3 w-3"/>}
+								高级
+							</button>
+						</div>
+
+						{/* 提示词输入区域 */}
+						<div className="space-y-2">
+							<textarea
+								value={aiPrompt}
+								onChange={(e) => setAiPrompt(e.target.value)}
+								placeholder="点击「智能分析文章」自动生成提示词，或手动输入..."
+								className="w-full px-3 py-2 text-sm border border-input rounded-lg resize-none h-20 bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
+							/>
+
+							{showAdvancedOptions && (
+								<textarea
+									value={aiNegativePrompt}
+									onChange={(e) => setAiNegativePrompt(e.target.value)}
+									placeholder="负面提示词（可选）：排除不想要的元素..."
+									className="w-full px-3 py-2 text-xs border border-border rounded-lg resize-none h-12 bg-muted focus:ring-2 focus:ring-primary focus:border-transparent"
+								/>
+							)}
+						</div>
+
+						{/* 生成按钮 */}
+						<button
+							onClick={handleGenerateImage}
+							disabled={isGeneratingImage || !aiPrompt.trim()}
+							className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							<Sparkles className={`h-4 w-4 ${isGeneratingImage ? 'animate-pulse' : ''}`}/>
+							{isGeneratingImage ? '生成中...' : '生成封面图片'}
+						</button>
+
+						{/* 进度条 */}
+						{isGeneratingImage && (
+							<div className="w-full bg-muted rounded-full h-1.5">
+								<div
+									className="h-1.5 rounded-full bg-primary transition-all duration-300"
+									style={{width: `${generationStatus.progress}%`}}
+								/>
+							</div>
+						)}
+
+						{/* 错误提示 */}
+						{generationError && (
+							<p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{generationError}</p>
+						)}
+
+						{/* 生成的图片预览 */}
+						{aiGeneratedImages.length > 0 && (
+							<div className="space-y-2">
+								<p className="text-xs text-muted-foreground">点击预览，双击应用为封面{aiTargetCover}</p>
+								<div className="grid grid-cols-3 gap-2">
+									{aiGeneratedImages.slice(0, 6).map((url, index) => (
+										<button
+											key={index}
+											onClick={() => setPreviewImage(url)}
+											onDoubleClick={() => handleSelectAiImage(url)}
+											className="relative aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors group"
+										>
+											<img src={url} alt={`生成图片 ${index + 1}`} className="w-full h-full object-cover"/>
+											<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+												<Eye className="h-4 w-4 text-white"/>
+											</div>
+										</button>
+									))}
+								</div>
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+
 			{/* 图片选择模态框 */}
 			{showImageSelection && selectedCoverNumber && (
 				<ImageSelectionModal
@@ -609,6 +880,52 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					onOpenAISettings={onOpenAISettings}
 					uploadedImages={uploadedImages}
 				/>
+			)}
+
+			{/* AI 生成图片预览弹窗 */}
+			{previewImage && (
+				<div
+					className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+					onClick={() => setPreviewImage(null)}
+				>
+					<div
+						className="relative max-w-3xl max-h-[80vh] bg-card rounded-xl overflow-hidden shadow-2xl"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<img
+							src={previewImage}
+							alt="预览"
+							className="max-w-full max-h-[70vh] object-contain"
+						/>
+						<div className="absolute top-2 right-2 flex gap-2">
+							<button
+								onClick={() => setPreviewImage(null)}
+								className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+								title="关闭"
+							>
+								<X className="h-5 w-5"/>
+							</button>
+						</div>
+						<div className="p-3 bg-card border-t border-border flex justify-end gap-2">
+							<button
+								onClick={() => setPreviewImage(null)}
+								className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+							>
+								取消
+							</button>
+							<button
+								onClick={() => {
+									handleSelectAiImage(previewImage);
+									setPreviewImage(null);
+								}}
+								className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+							>
+								<Check className="h-4 w-4"/>
+								应用为封面{aiTargetCover}
+							</button>
+						</div>
+					</div>
+				</div>
 			)}
 
 			{/* 隐藏的 canvas 元素 */}
