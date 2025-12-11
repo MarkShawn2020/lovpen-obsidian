@@ -1,10 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from '../ui/button';
-import {FormInput} from '../ui/FormInput';
-import {PersonalInfo, AvatarConfig} from '../../types';
-import {logger} from '../../../../shared/src/logger';
-import {persistentStorageService} from '../../services/persistentStorage';
-import {AtSign, Globe, RotateCcw, Save, UserCircle} from 'lucide-react';
+import {PersonalInfo, AvatarConfig, SocialLinks} from '../../types';
+import {AtSign, Globe, RotateCcw, ChevronDown, ChevronUp} from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
 import {AvatarUpload} from '../ui/AvatarUpload';
 
@@ -16,102 +13,73 @@ interface PersonalInfoSettingsProps {
 
 const defaultPersonalInfo: PersonalInfo = {
 	name: '',
-	avatar: {
-		type: 'default'
-	},
+	avatar: { type: 'default' },
 	bio: '',
 	email: '',
-	website: ''
+	website: '',
+	socialLinks: {}
 };
 
-export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
-																			  onClose,
-																			  onPersonalInfoChange,
-																			  onSaveSettings
-																		  }) => {
-	console.log('[PersonalInfoSettings] Component rendered');
-	console.log('[PersonalInfoSettings] onPersonalInfoChange:', !!onPersonalInfoChange);
-	console.log('[PersonalInfoSettings] onSaveSettings:', !!onSaveSettings);
+// 社交平台配置
+const SOCIAL_PLATFORMS: { key: keyof SocialLinks; label: string; placeholder: string }[] = [
+	{ key: 'twitter', label: 'X/Twitter', placeholder: '@username' },
+	{ key: 'github', label: 'GitHub', placeholder: 'username' },
+	{ key: 'zhihu', label: '知乎', placeholder: '用户名或链接' },
+	{ key: 'xiaohongshu', label: '小红书', placeholder: '用户名或链接' },
+	{ key: 'weibo', label: '微博', placeholder: '@用户名' },
+	{ key: 'wechat', label: '公众号', placeholder: '公众号名称' },
+	{ key: 'linkedin', label: 'LinkedIn', placeholder: 'username' },
+];
 
+export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
+	onClose,
+	onPersonalInfoChange,
+	onSaveSettings
+}) => {
 	const {
 		personalInfo,
-		saveStatus,
-		updatePersonalInfo,
-		saveSettings
+		updatePersonalInfo
 	} = useSettings(onSaveSettings, onPersonalInfoChange);
 
-	console.log('[PersonalInfoSettings] personalInfo from useSettings:', personalInfo);
-	console.log('[PersonalInfoSettings] saveStatus:', saveStatus);
 	const [localInfo, setLocalInfo] = useState<PersonalInfo>(() => ({
 		...defaultPersonalInfo,
 		...personalInfo
 	}));
+	const [showSocial, setShowSocial] = useState(false);
+	const isUserEditing = React.useRef(false);
 
-	// 只在组件初始化时设置 localInfo，避免覆盖用户输入
+	// 监听外部 personalInfo 变化（如初始化后数据加载）
 	useEffect(() => {
-		console.log('[PersonalInfoSettings] Initial personalInfo:', personalInfo);
-		setLocalInfo({
-			...defaultPersonalInfo,
-			...personalInfo
-		});
-	}, []); // 空依赖数组，只在组件挂载时执行一次
+		// 如果用户正在编辑，不要覆盖
+		if (isUserEditing.current) return;
+		// 如果外部数据有值且与本地不同，更新本地
+		if (personalInfo.name && personalInfo.name !== localInfo.name) {
+			setLocalInfo({ ...defaultPersonalInfo, ...personalInfo });
+		}
+	}, [personalInfo]);
+
+	// 用户编辑时更新 localInfo 并同步到 jotai
+	const updateLocal = (newInfo: PersonalInfo) => {
+		isUserEditing.current = true;
+		setLocalInfo(newInfo);
+		updatePersonalInfo(newInfo);
+		// 短暂延迟后重置编辑状态
+		setTimeout(() => { isUserEditing.current = false; }, 500);
+	};
 
 	const handleInputChange = (field: keyof PersonalInfo, value: string) => {
-		console.log('[PersonalInfoSettings] handleInputChange called:', field, value);
-		setLocalInfo(prev => {
-			const newInfo = {
-				...prev,
-				[field]: value
-			};
-			console.log('[PersonalInfoSettings] localInfo updated to:', newInfo);
+		updateLocal({ ...localInfo, [field]: value });
+	};
 
-			// 实时更新 Jotai 状态，这样用户不需要点击保存按钮
-			console.log('[PersonalInfoSettings] Auto-updating Jotai state');
-			updatePersonalInfo(newInfo);
-
-			return newInfo;
+	const handleSocialChange = (key: keyof SocialLinks, value: string) => {
+		updateLocal({
+			...localInfo,
+			socialLinks: { ...localInfo.socialLinks, [key]: value }
 		});
 	};
 
-	const handleAvatarConfigChange = async (avatarConfig: AvatarConfig) => {
-		console.log('[PersonalInfoSettings] Avatar config changed:', avatarConfig);
-		
-		const newInfo = {
-			...localInfo,
-			avatar: avatarConfig
-		};
-		
-		setLocalInfo(newInfo);
-		
-		// 实时更新 Jotai 状态，确保头像持久化
-		console.log('[PersonalInfoSettings] Auto-updating avatar config to Jotai state');
-		updatePersonalInfo(newInfo);
-
-		// 持久化个人信息
-		try {
-			await persistentStorageService.savePersonalInfo(newInfo);
-			logger.info('[PersonalInfoSettings] Personal info with avatar config saved successfully');
-		} catch (error) {
-			logger.error('[PersonalInfoSettings] Failed to save personal info with avatar config:', error);
-		}
-	};
-
-	const handleSave = () => {
-		console.log('[PersonalInfoSettings] handleSave called with localInfo:', localInfo);
-
-		// 验证必填字段
-		if (!localInfo.name.trim()) {
-			console.log('[PersonalInfoSettings] Validation failed: name is empty');
-			alert('请输入姓名');
-			return;
-		}
-
-		console.log('[PersonalInfoSettings] Validation passed, updating personal info');
-		// 使用jotai更新个人信息
-		updatePersonalInfo(localInfo);
-		saveSettings();
-		logger.info('个人信息已保存:', localInfo);
-		onClose();
+	const handleAvatarConfigChange = (avatarConfig: AvatarConfig) => {
+		updateLocal({ ...localInfo, avatar: avatarConfig });
 	};
 
 	const handleReset = () => {
@@ -121,96 +89,108 @@ export const PersonalInfoSettings: React.FC<PersonalInfoSettingsProps> = ({
 		}
 	};
 
-	return (
-		<div className="space-y-6">
-			{/* 头部说明 */}
-			<div className="text-center">
-				<h3 className="text-lg font-semibold text-[#181818] mb-2 tracking-tight">个人信息设置</h3>
-				<p className="text-sm text-[#87867F]">配置您的个人资料，用于AI生成的内容中</p>
-			</div>
+	// 计算已填写的社交平台数量
+	const filledSocialCount = Object.values(localInfo.socialLinks || {}).filter(v => v?.trim()).length;
 
-			{/* 头像管理区域 */}
-			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
-				<h4 className="text-base font-semibold text-[#181818] mb-4 tracking-tight">头像设置</h4>
+	return (
+		<div className="space-y-3">
+			{/* 头像 + 姓名 */}
+			<div className="flex items-center gap-3">
 				<AvatarUpload
 					currentConfig={localInfo.avatar}
 					userName={localInfo.name}
 					onConfigChange={handleAvatarConfigChange}
-					size="lg"
+					size="sm"
 				/>
-			</div>
-
-			{/* 基本信息表单 */}
-			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6 shadow-sm">
-				<h4 className="text-base font-semibold text-[#181818] mb-4 tracking-tight">基本资料</h4>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-					{/* 姓名 */}
-					<FormInput
-						label="姓名"
-						value={localInfo.name || ''}
-						onChange={(value) => handleInputChange('name', value)}
-						placeholder="请输入您的姓名"
+				<div className="flex-1">
+					<input
 						type="text"
-						required={true}
-						icon={UserCircle}
+						value={localInfo.name || ''}
+						onChange={(e) => handleInputChange('name', e.target.value)}
+						placeholder="姓名 *"
+						className="w-full px-3 py-2 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm"
 					/>
-
-					{/*邮箱 */}
-					<FormInput
-						label="邮箱地址"
-						value={localInfo.email || ''}
-						onChange={(value) => handleInputChange('email', value)}
-						placeholder="your@email.com"
-						type="email"
-						icon={AtSign}
-					/>
-
-					{/* 个人网站 */}
-					<FormInput
-						label="个人网站"
-						value={localInfo.website || ''}
-						onChange={(value) => handleInputChange('website', value)}
-						placeholder="https://your-website.com"
-						type="url"
-						icon={Globe}
-						containerClassName="md:col-span-2"
-					/>
-
-					{/* 个人简介 */}
-					<div className="space-y-2 md:col-span-2">
-						<label className="block text-sm font-medium text-[#181818]">个人简介</label>
-						<textarea
-							value={localInfo.bio}
-							onChange={(e) => handleInputChange('bio', e.target.value)}
-							placeholder="介绍一下您自己..."
-							rows={3}
-							className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] resize-none transition-all text-sm"
-						/>
-						<p className="text-xs text-[#87867F]">简介信息将会在AI生成的内容中作为作者介绍使用</p>
-					</div>
 				</div>
 			</div>
 
-			{/* 操作按钮 */}
-			<div className="flex justify-between items-center pt-2">
+			{/* 邮箱 + 网站 */}
+			<div className="grid grid-cols-2 gap-2">
+				<div className="relative">
+					<AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#87867F]" />
+					<input
+						type="email"
+						value={localInfo.email || ''}
+						onChange={(e) => handleInputChange('email', e.target.value)}
+						placeholder="邮箱"
+						className="w-full pl-9 pr-3 py-2 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm"
+					/>
+				</div>
+				<div className="relative">
+					<Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#87867F]" />
+					<input
+						type="url"
+						value={localInfo.website || ''}
+						onChange={(e) => handleInputChange('website', e.target.value)}
+						placeholder="网站"
+						className="w-full pl-9 pr-3 py-2 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm"
+					/>
+				</div>
+			</div>
+
+			{/* 简介 */}
+			<textarea
+				value={localInfo.bio}
+				onChange={(e) => handleInputChange('bio', e.target.value)}
+				placeholder="简介..."
+				rows={2}
+				className="w-full px-3 py-2 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] resize-none text-sm"
+			/>
+
+			{/* 社交平台 - 可展开 */}
+			<div className="border border-[#E8E6DC] rounded-xl overflow-hidden">
+				<button
+					type="button"
+					onClick={() => setShowSocial(!showSocial)}
+					className="w-full flex items-center justify-between px-3 py-2 text-sm text-[#181818] hover:bg-[#F7F4EC] transition-colors"
+				>
+					<span>
+						社交平台
+						{filledSocialCount > 0 && (
+							<span className="ml-2 text-xs text-[#87867F]">({filledSocialCount})</span>
+						)}
+					</span>
+					{showSocial ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+				</button>
+				{showSocial && (
+					<div className="px-3 pb-3 pt-1 grid grid-cols-2 gap-2">
+						{SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
+							<div key={key} className="relative">
+								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#87867F] font-medium">
+									{label}
+								</span>
+								<input
+									type="text"
+									value={localInfo.socialLinks?.[key] || ''}
+									onChange={(e) => handleSocialChange(key, e.target.value)}
+									placeholder={placeholder}
+									className="w-full pl-16 pr-2 py-1.5 border border-[#E8E6DC] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#D97757] text-xs"
+								/>
+							</div>
+						))}
+					</div>
+				)}
+			</div>
+
+			{/* 重置按钮 */}
+			<div className="flex justify-end">
 				<Button
 					onClick={handleReset}
 					variant="outline"
-					className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl font-medium"
+					size="sm"
+					className="border-[#E8E6DC] text-[#87867F] hover:bg-[#F0EEE6] hover:text-[#181818] rounded-xl"
 				>
-					<RotateCcw className="w-4 h-4 mr-2"/>
-					重置信息
-				</Button>
-				<Button
-					onClick={() => {
-						console.log('[PersonalInfoSettings] Save button clicked!');
-						handleSave();
-					}}
-					className="bg-[#D97757] hover:bg-[#CC785C] text-white shadow-sm rounded-xl font-medium px-6 py-2"
-				>
-					<Save className="w-4 h-4 mr-2"/>
-					保存设置
+					<RotateCcw className="w-3.5 h-3.5 mr-1"/>
+					重置
 				</Button>
 			</div>
 		</div>

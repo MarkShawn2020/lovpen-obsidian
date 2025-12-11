@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from 'react';
+import {useAtom} from 'jotai';
 import {Button} from '../ui/button';
-import {ViteReactSettings} from '../../types';
+import {AvatarConfig, ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
-import {persistentStorageService} from '../../services/persistentStorage';
 import {AIAnalysisSplitButton, AIStyle} from '../ui/ai-analysis-split-button';
 import {CustomPromptModal} from '../ui/custom-prompt-modal';
-import { analyzeContentWithAI } from '../../services/aiService';
+import {analyzeContentWithAI} from '../../services/aiService';
+import {articleInfoAtom} from '../../store/atoms';
+import {AvatarUpload} from '../ui/AvatarUpload';
 
 interface ArticleInfoProps {
 	settings: ViteReactSettings;
@@ -18,6 +20,7 @@ interface ArticleInfoProps {
 
 export interface ArticleInfoData {
 	author: string;
+	authorAvatar?: AvatarConfig;
 	publishDate: string;
 	articleTitle: string;
 	articleSubtitle: string;
@@ -36,10 +39,11 @@ const getDefaultAuthor = (settings: ViteReactSettings): string => {
 	return '南川同学'; // 最终默认值
 };
 
-const getDefaultArticleInfo = (settings: ViteReactSettings): ArticleInfoData => ({
-	author: getDefaultAuthor(settings), // 使用新的作者逻辑
-	publishDate: new Date().toISOString().split('T')[0], // 默认今天
-	articleTitle: '', // 将由文件名填充
+const getDefaultArticleInfo = (): ArticleInfoData => ({
+	author: '',
+	authorAvatar: undefined,
+	publishDate: '',
+	articleTitle: '',
 	articleSubtitle: '',
 	episodeNum: '',
 	seriesName: '',
@@ -58,70 +62,10 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 														}) => {
 	const [isAIGenerating, setIsAIGenerating] = useState(false);
 	const [isCustomPromptModalOpen, setIsCustomPromptModalOpen] = useState(false);
-	const [articleInfo, setArticleInfo] = useState<ArticleInfoData>(() => {
-		// 从localStorage读取保存的文章信息
-		const saved = localStorage.getItem('lovpen-article-info');
-		const defaultInfo = getDefaultArticleInfo(settings);
+	const [articleInfo, setArticleInfo] = useAtom(articleInfoAtom);
 
-		if (saved) {
-			try {
-				const savedInfo = JSON.parse(saved);
-				// 合并保存的信息和默认信息，但要更新作者字段以使用最新的个人信息设置
-				return {
-					...defaultInfo,
-					...savedInfo,
-					// 如果保存的作者为空或为旧的默认值，则使用新的默认作者
-					author: savedInfo.author && savedInfo.author.trim() !== '' && savedInfo.author !== '南川同学'
-						? savedInfo.author
-						: defaultInfo.author
-				};
-			} catch (error) {
-				logger.warn('解析保存的文章信息失败:', error);
-				return defaultInfo;
-			}
-		}
-		return defaultInfo;
-	});
-
-	// 初始化时设置文章标题为文件名（如果标题为空），确保作者不为空
+	// 当文章信息变化时通知父组件
 	useEffect(() => {
-		let needsUpdate = false;
-		const updates: Partial<ArticleInfoData> = {};
-
-		// 设置默认文章标题为文件名
-		if (!articleInfo.articleTitle) {
-			const currentFileName = getCurrentFileName();
-			if (currentFileName) {
-				updates.articleTitle = currentFileName;
-				needsUpdate = true;
-			}
-		}
-
-		// 确保作者不为空
-		if (!articleInfo.author) {
-			updates.author = getDefaultAuthor(settings);
-			needsUpdate = true;
-		}
-
-		if (needsUpdate) {
-			setArticleInfo(prev => ({
-				...prev,
-				...updates
-			}));
-		}
-	}, []); // 只在组件挂载时执行一次
-
-	// 当文章信息变化时，持久化存储并通知父组件
-	useEffect(() => {
-		// 保存到持久化存储
-		persistentStorageService.saveArticleInfo(articleInfo).catch(error => {
-			logger.error('[ArticleInfo] Failed to save article info:', error);
-		});
-
-		// 保存到localStorage作为备份
-		localStorage.setItem('lovpen-article-info', JSON.stringify(articleInfo));
-
-		// 通知父组件
 		onInfoChange(articleInfo);
 	}, [articleInfo, onInfoChange]);
 
@@ -240,7 +184,8 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 		// 完全清空，所有字段都变成空值，显示为placeholder
 		setArticleInfo({
 			author: '',
-			publishDate: '', // 日期也清空
+			authorAvatar: undefined,
+			publishDate: '',
 			articleTitle: '',
 			articleSubtitle: '',
 			episodeNum: '',
@@ -249,6 +194,16 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 			summary: '',
 			recommendation: ''
 		});
+	};
+
+	const handlePrefillAll = () => {
+		setArticleInfo(prev => ({
+			...prev,
+			author: settings.personalInfo?.name?.trim() || prev.author,
+			authorAvatar: settings.personalInfo?.avatar || prev.authorAvatar,
+			publishDate: new Date().toISOString().split('T')[0],
+			articleTitle: getCurrentFileName() || prev.articleTitle
+		}));
 	};
 
 	return (
@@ -263,36 +218,80 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 						onOpenSettings={onOpenAISettings}
 					/>
 					<Button
+						onClick={handlePrefillAll}
+						size="sm"
+						variant="outline"
+						className="text-[#87867F] hover:text-[#181818] hover:bg-[#F0EEE6] border-[#E8E6DC] text-sm px-3 py-2 rounded-xl font-medium transition-all"
+					>
+						预填
+					</Button>
+					<Button
 						onClick={handleClearAll}
 						size="sm"
 						variant="outline"
 						className="text-[#87867F] hover:text-[#181818] hover:bg-[#F0EEE6] border-[#E8E6DC] text-sm px-3 py-2 rounded-xl font-medium transition-all"
 					>
-						🗑️ 清空
+						清空
 					</Button>
 				</div>
 			</div>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				{/* 作者 */}
-				<div>
-					<label className="block text-sm font-medium text-[#181818] mb-2">
-						作者
-					</label>
-					<input
-						type="text"
-						value={articleInfo.author}
-						onChange={(e) => handleInputChange('author', e.target.value)}
-						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
-						placeholder="输入作者名称"
-					/>
+				<div className="sm:col-span-2">
+					<div className="flex items-center justify-between mb-2">
+						<label className="text-sm font-medium text-[#181818]">
+							作者
+						</label>
+						{settings.personalInfo?.name && settings.personalInfo.name.trim() !== '' &&
+						 (articleInfo.author !== settings.personalInfo.name || !articleInfo.authorAvatar) && (
+							<button
+								type="button"
+								onClick={() => setArticleInfo(prev => ({
+									...prev,
+									author: settings.personalInfo!.name,
+									authorAvatar: settings.personalInfo!.avatar
+								}))}
+								className="text-xs text-[#D97757] hover:text-[#c5654a] transition-colors"
+							>
+								使用预设
+							</button>
+						)}
+					</div>
+					<div className="flex items-center gap-3">
+						{/* 头像 - 可点击上传 */}
+						<AvatarUpload
+							currentConfig={articleInfo.authorAvatar}
+							userName={articleInfo.author}
+							onConfigChange={(config) => setArticleInfo(prev => ({ ...prev, authorAvatar: config }))}
+							size="xs"
+						/>
+						<input
+							type="text"
+							value={articleInfo.author}
+							onChange={(e) => handleInputChange('author', e.target.value)}
+							className="flex-1 px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
+							placeholder="输入作者名称"
+						/>
+					</div>
 				</div>
 
 				{/* 发布日期 */}
-				<div>
-					<label className="block text-sm font-medium text-[#181818] mb-2">
-						发布日期
-					</label>
+				<div className="sm:col-span-2">
+					<div className="flex items-center justify-between mb-2">
+						<label className="text-sm font-medium text-[#181818]">
+							发布日期
+						</label>
+						{articleInfo.publishDate !== new Date().toISOString().split('T')[0] && (
+							<button
+								type="button"
+								onClick={() => handleInputChange('publishDate', new Date().toISOString().split('T')[0])}
+								className="text-xs text-[#D97757] hover:text-[#c5654a] transition-colors"
+							>
+								使用今天
+							</button>
+						)}
+					</div>
 					<input
 						type="date"
 						value={articleInfo.publishDate}
@@ -303,9 +302,20 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 
 				{/* 文章标题 */}
 				<div className="sm:col-span-2">
-					<label className="block text-sm font-medium text-[#181818] mb-2">
-						文章标题
-					</label>
+					<div className="flex items-center justify-between mb-2">
+						<label className="text-sm font-medium text-[#181818]">
+							文章标题
+						</label>
+						{getCurrentFileName() && articleInfo.articleTitle !== getCurrentFileName() && (
+							<button
+								type="button"
+								onClick={() => handleInputChange('articleTitle', getCurrentFileName())}
+								className="text-xs text-[#D97757] hover:text-[#c5654a] transition-colors"
+							>
+								使用文件名: {getCurrentFileName()}
+							</button>
+						)}
+					</div>
 					<input
 						type="text"
 						value={articleInfo.articleTitle}

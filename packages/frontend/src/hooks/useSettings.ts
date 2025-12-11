@@ -76,17 +76,13 @@ export const useSettings = (
 	}, [onSaveSettings, setSaveStatus]);
 
 	const initializeSettings = useCallback((settingsData: ViteReactSettings, personalInfoData: PersonalInfo) => {
-		setSettings(settingsData);
-		setPersonalInfo(personalInfoData);
-	}, [setSettings, setPersonalInfo]);
+		// 注意：实际初始化由 initializeSettingsAtom 处理
+		// 这里保留接口兼容性，但不直接覆盖数据
+		// initializeSettingsAtom 会从 localStorage 读取并优先使用
+	}, []);
 
-	// 确保设置和个人信息保持同步
-	useEffect(() => {
-		if (settings.personalInfo &&
-			JSON.stringify(settings.personalInfo) !== JSON.stringify(personalInfo)) {
-			setPersonalInfo(settings.personalInfo);
-		}
-	}, [settings.personalInfo, personalInfo, setPersonalInfo]);
+	// 注意：移除了 settings.personalInfo 同步逻辑
+	// 初始化由 initializeSettingsAtom 处理，会优先使用 localStorage 数据
 
 	return {
 		personalInfo,

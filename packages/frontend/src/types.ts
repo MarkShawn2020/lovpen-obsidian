@@ -11,13 +11,25 @@ export interface AvatarConfig {
 	backgroundColor?: string; // background color for initials
 }
 
+// Social links interface
+export interface SocialLinks {
+	twitter?: string;
+	github?: string;
+	zhihu?: string;
+	xiaohongshu?: string;
+	weibo?: string;
+	wechat?: string; // 微信公众号
+	linkedin?: string;
+}
+
 // Personal info interface
 export interface PersonalInfo {
 	name: string;
-	avatar?: AvatarConfig; // 改为可选的 AvatarConfig 对象
+	avatar?: AvatarConfig;
 	bio: string;
 	email?: string;
 	website?: string;
+	socialLinks?: SocialLinks;
 }
 
 // AI Model interface

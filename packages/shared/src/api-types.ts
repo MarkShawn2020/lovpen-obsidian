@@ -40,12 +40,30 @@ export interface BasicTemplateKitInfo {
 	tags?: string[];
 }
 
+export interface AvatarConfig {
+	type: 'default' | 'uploaded' | 'initials';
+	data?: string;
+	initials?: string;
+	backgroundColor?: string;
+}
+
+export interface SocialLinks {
+	twitter?: string;
+	github?: string;
+	zhihu?: string;
+	xiaohongshu?: string;
+	weibo?: string;
+	wechat?: string;
+	linkedin?: string;
+}
+
 export interface BasicPersonalInfo {
 	name: string;
-	avatar: string;
+	avatar?: AvatarConfig;
 	bio: string;
 	email?: string;
 	website?: string;
+	socialLinks?: SocialLinks;
 }
 
 export interface BasicArticleInfo {

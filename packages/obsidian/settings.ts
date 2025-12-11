@@ -76,10 +76,24 @@ interface SettingsData {
 	/** 个人信息 */
 	personalInfo?: {
 		name: string;
-		avatar: string;
+		avatar?: {
+			type: 'default' | 'uploaded' | 'initials';
+			data?: string;
+			initials?: string;
+			backgroundColor?: string;
+		};
 		bio: string;
 		email?: string;
 		website?: string;
+		socialLinks?: {
+			twitter?: string;
+			github?: string;
+			zhihu?: string;
+			xiaohongshu?: string;
+			weibo?: string;
+			wechat?: string;
+			linkedin?: string;
+		};
 	};
 
 	// ===== AI设置 =====
@@ -149,12 +163,13 @@ export class NMPSettings implements SettingsData {
 	lastSelectedTemplate: string = "";
 	expireat: Date | null = null;
 	pluginsConfig: Record<string, Record<string, any>> = {};
-	personalInfo = {
+	personalInfo: SettingsData['personalInfo'] = {
 		name: '',
-		avatar: '',
+		avatar: undefined,
 		bio: '',
 		email: '',
-		website: ''
+		website: '',
+		socialLinks: undefined
 	};
 	aiPromptTemplate: string = '';
 	aiModel: string = 'claude-3-5-haiku-latest';

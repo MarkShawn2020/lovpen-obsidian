@@ -1687,10 +1687,11 @@ ${customCSS}`;
 			showStyleUI: this.settings.showStyleUI !== false, // 默认显示
 			personalInfo: {
 				name: this.settings.personalInfo?.name || '',
-				avatar: this.settings.personalInfo?.avatar || '',
+				avatar: this.settings.personalInfo?.avatar,
 				bio: this.settings.personalInfo?.bio || '',
 				email: this.settings.personalInfo?.email || '',
-				website: this.settings.personalInfo?.website || ''
+				website: this.settings.personalInfo?.website || '',
+				socialLinks: this.settings.personalInfo?.socialLinks
 			},
 			aiPromptTemplate: this.settings.aiPromptTemplate || '',
 			aiModel: this.settings.aiModel || 'claude-3-5-haiku-latest',

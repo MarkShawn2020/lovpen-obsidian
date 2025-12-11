@@ -52,14 +52,38 @@ export interface ReactSettings {
 }
 
 /**
+ * 头像配置接口
+ */
+export interface AvatarConfig {
+	type: 'default' | 'uploaded' | 'initials';
+	data?: string;
+	initials?: string;
+	backgroundColor?: string;
+}
+
+/**
+ * 社交链接接口
+ */
+export interface SocialLinks {
+	twitter?: string;
+	github?: string;
+	zhihu?: string;
+	xiaohongshu?: string;
+	weibo?: string;
+	wechat?: string;
+	linkedin?: string;
+}
+
+/**
  * 个人信息接口
  */
 export interface PersonalInfo {
 	name: string;
-	avatar: string;
+	avatar?: AvatarConfig;
 	bio: string;
-	email: string;
-	website: string;
+	email?: string;
+	website?: string;
+	socialLinks?: SocialLinks;
 }
 
 /**
@@ -188,7 +212,6 @@ export interface GlobalReactAPI {
 export function isValidPersonalInfo(obj: any): obj is PersonalInfo {
 	return obj &&
 		typeof obj.name === 'string' &&
-		typeof obj.avatar === 'string' &&
 		typeof obj.bio === 'string';
 }
 
