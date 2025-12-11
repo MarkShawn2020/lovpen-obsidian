@@ -70,8 +70,8 @@ const LovpenReactLib: ExternalReactLib = {
         --card-foreground: #1a1a1a;
         --popover: #ffffff;
         --popover-foreground: #1a1a1a;
-        --primary: #2d2d2d;
-        --primary-foreground: #fafafa;
+        --primary: #CC785C;
+        --primary-foreground: #ffffff;
         --secondary: #f5f5f5;
         --secondary-foreground: #2d2d2d;
         --muted: #f5f5f5;

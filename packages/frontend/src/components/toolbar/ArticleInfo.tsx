@@ -212,7 +212,19 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 				<div className="flex space-x-2">
 					<AIAnalysisSplitButton
 						isGenerating={isAIGenerating}
-						isDisabled={!settings.authKey || settings.authKey.trim() === ''}
+						isDisabled={(() => {
+							const provider = settings.aiProvider || 'claude';
+							if (provider === 'claude') {
+								return !settings.authKey?.trim() || !settings.aiModel?.trim();
+							}
+							if (provider === 'openrouter') {
+								return !settings.openRouterApiKey?.trim() || !settings.openRouterModel?.trim();
+							}
+							if (provider === 'zenmux') {
+								return !settings.zenmuxApiKey?.trim() || !settings.zenmuxModel?.trim();
+							}
+							return true;
+						})()}
 						onAnalyze={handleAIAnalyze}
 						onCustomize={() => setIsCustomPromptModalOpen(true)}
 						onOpenSettings={onOpenAISettings}
@@ -300,30 +312,32 @@ export const ArticleInfo: React.FC<ArticleInfoProps> = ({
 					/>
 				</div>
 
-				{/* 文章标题 */}
-				<div className="sm:col-span-2">
-					<div className="flex items-center justify-between mb-2">
-						<label className="text-sm font-medium text-[#181818]">
-							文章标题
-						</label>
-						{getCurrentFileName() && articleInfo.articleTitle !== getCurrentFileName() && (
-							<button
-								type="button"
-								onClick={() => handleInputChange('articleTitle', getCurrentFileName())}
-								className="text-xs text-[#D97757] hover:text-[#c5654a] transition-colors"
-							>
-								使用文件名: {getCurrentFileName()}
-							</button>
-						)}
+				{/* 文章标题 - 当隐藏一级标题时不显示 */}
+				{!settings.hideFirstHeading && (
+					<div className="sm:col-span-2">
+						<div className="flex items-center justify-between mb-2">
+							<label className="text-sm font-medium text-[#181818]">
+								文章标题
+							</label>
+							{getCurrentFileName() && articleInfo.articleTitle !== getCurrentFileName() && (
+								<button
+									type="button"
+									onClick={() => handleInputChange('articleTitle', getCurrentFileName())}
+									className="text-xs text-[#D97757] hover:text-[#c5654a] transition-colors"
+								>
+									使用文件名: {getCurrentFileName()}
+								</button>
+							)}
+						</div>
+						<input
+							type="text"
+							value={articleInfo.articleTitle}
+							onChange={(e) => handleInputChange('articleTitle', e.target.value)}
+							className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
+							placeholder="输入文章标题"
+						/>
 					</div>
-					<input
-						type="text"
-						value={articleInfo.articleTitle}
-						onChange={(e) => handleInputChange('articleTitle', e.target.value)}
-						className="w-full px-3 py-3 border border-[#E8E6DC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D97757] focus:border-[#D97757] text-sm transition-all"
-						placeholder="输入文章标题"
-					/>
-				</div>
+				)}
 
 				{/* 副标题 */}
 				<div className="sm:col-span-2">

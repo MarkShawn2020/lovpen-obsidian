@@ -262,11 +262,15 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 		}
 	};
 
-	const baseButtonClass = isGenerating
-		? 'bg-primary/60 cursor-not-allowed'
-		: isDisabled
-			? 'bg-muted-foreground/60 hover:bg-muted-foreground/70'
-			: 'bg-primary hover:bg-primary/90';
+	const getButtonStyle = () => {
+		if (isGenerating) {
+			return 'bg-primary/60 text-primary-foreground cursor-not-allowed';
+		}
+		if (isDisabled) {
+			return 'bg-muted-foreground/60 text-primary-foreground hover:bg-muted-foreground/70';
+		}
+		return 'bg-primary text-primary-foreground hover:bg-primary/90';
+	};
 
 	return (
 		<div className="inline-flex rounded-xl overflow-hidden shadow-sm">
@@ -275,12 +279,12 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 				onClick={handleMainClick}
 				disabled={isDisabled || isGenerating}
 				size="sm"
-				className={`rounded-none text-primary-foreground border-0 ${baseButtonClass}`}
+				className={`rounded-none border-0 ${getButtonStyle()}`}
 				title={
 					isGenerating
 						? 'AI正在分析中...'
 						: isDisabled
-							? '请先配置Claude API密钥'
+							? '请先配置 AI 服务'
 							: `使用 ${selectedStyle.name} 分析文章内容`
 				}
 			>
@@ -293,25 +297,21 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 						分析中...
 					</>
 				) : (
-					<>
-						<span className="mr-1.5">{selectedStyle.icon}</span>
-						AI 分析
-					</>
+					'AI 分析'
 				)}
 			</Button>
 
 			{/* 分隔线 */}
-			<div className={`w-px ${isGenerating ? 'bg-primary-foreground/30' : 'bg-primary-foreground/20'}`}/>
+			<div className="w-px bg-white/20"/>
 
 			{/* 下拉菜单触发器 */}
 			<Select value="" onValueChange={handleValueChange} disabled={isGenerating}>
 				<SelectTrigger
 					size="sm"
-					className={`w-8 rounded-none px-1 text-primary-foreground border-0 ${baseButtonClass}`}
+					className={`w-8 rounded-none px-0 border-0 justify-center [&_svg]:!text-primary-foreground [&_svg]:!opacity-80 ${getButtonStyle()}`}
 				>
-					<SelectValue/>
 				</SelectTrigger>
-				<SelectContent align="end" className="w-80 bg-popover border-border rounded-xl">
+				<SelectContent align="end" className="w-80 bg-popover border-border rounded-xl shadow-lg">
 					{/* 预设风格选项 */}
 					{AI_STYLES.map((style) => (
 						<SelectItem key={style.id} value={style.id}>
@@ -333,7 +333,7 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 					))}
 
 					{/* 分隔线 */}
-					<SelectSeparator/>
+					<SelectSeparator className="bg-border"/>
 
 					{/* 未配置时显示配置入口 */}
 					{isDisabled && onOpenSettings && (
@@ -341,7 +341,7 @@ export const AIAnalysisSplitButton: React.FC<AIAnalysisSplitButtonProps> = ({
 							<div className="flex items-center gap-3 py-1">
 								<span className="text-lg">🔑</span>
 								<div>
-									<div className="font-medium text-primary text-sm">配置 API 密钥</div>
+									<div className="font-medium text-primary text-sm">配置 AI 服务</div>
 									<div className="text-xs text-muted-foreground">需要先配置才能使用 AI 分析</div>
 								</div>
 							</div>

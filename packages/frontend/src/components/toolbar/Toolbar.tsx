@@ -1090,7 +1090,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								<h3 className="text-lg font-semibold text-[#181818]">文章信息</h3>
 								<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
 									<ArticleInfo
-										settings={settings}
+										settings={atomSettings}
 										onSaveSettings={onSaveSettings}
 										onInfoChange={onArticleInfoChange || (() => {})}
 										onRenderArticle={onRenderArticle}

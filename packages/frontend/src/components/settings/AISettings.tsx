@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {Button} from '../ui/button';
 import {FormInput} from '../ui/FormInput';
+import { ModelCombobox } from '../ui/model-combobox';
+import {Collapsible, CollapsibleContent, CollapsibleTrigger} from '../ui/collapsible';
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-	SelectGroup,
-	SelectLabel,
 } from '../ui/select';
 import {AIModel, ViteReactSettings} from '../../types';
 import {logger} from '../../../../shared/src/logger';
@@ -16,67 +16,27 @@ import {
 	Bot,
 	CheckCircle,
 	Code,
+	ChevronDown,
 	ExternalLink,
-	FileText,
-	Info,
 	Key,
 	RefreshCw,
 	RotateCcw,
 	Save,
-	Sparkles,
-	Tag,
-	User,
 	XCircle,
 	Zap,
 	Brain,
-	Target,
-	ChevronRight,
-	Settings,
-	Shield,
-	Wand2
 } from 'lucide-react';
 import {useSettings} from '../../hooks/useSettings';
-import { OPENROUTER_MODELS, testAIConnection } from '../../services/aiService';
-
-// 可用的AI模型定义
-const AVAILABLE_MODELS: AIModel[] = [
-	{
-		id: 'claude-3-5-haiku-latest',
-		name: 'Claude 3.5 Haiku',
-		description: '快速响应，成本最低',
-		category: 'fast',
-		pricing: 'low',
-		recommended: true
-	},
-	{
-		id: 'claude-3-5-sonnet-latest',
-		name: 'Claude 3.5 Sonnet',
-		description: '平衡性能与成本',
-		category: 'balanced',
-		pricing: 'medium'
-	},
-	{
-		id: 'claude-3-7-sonnet-latest',
-		name: 'Claude 3.7 Sonnet',
-		description: '更强推理能力',
-		category: 'balanced',
-		pricing: 'medium'
-	},
-	{
-		id: 'claude-sonnet-4-0',
-		name: 'Claude Sonnet 4',
-		description: '高性能模型',
-		category: 'powerful',
-		pricing: 'medium'
-	},
-	{
-		id: 'claude-opus-4-0',
-		name: 'Claude Opus 4',
-		description: '最强大的模型',
-		category: 'powerful',
-		pricing: 'high'
-	}
-];
+import {
+	CLAUDE_MODELS,
+	OPENROUTER_MODELS,
+	ZENMUX_MODELS,
+	testAIConnection,
+	fetchClaudeModels,
+	fetchOpenRouterModels,
+	fetchZenMuxModels,
+	clearModelCache
+} from '../../services/aiService';
 
 interface AISettingsProps {
 	onClose: () => void;
@@ -96,31 +56,105 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		saveSettings
 	} = useSettings(onSaveSettings, undefined, onSettingsChange);
 	
-	const [aiProvider, setAiProvider] = useState<'claude' | 'openrouter'>(settings.aiProvider || 'claude');
+	const [aiProvider, setAiProvider] = useState<'claude' | 'openrouter' | 'zenmux'>(settings.aiProvider || 'claude');
 	const [claudeApiKey, setClaudeApiKey] = useState<string>(settings.authKey || '');
 	const [openRouterApiKey, setOpenRouterApiKey] = useState<string>(settings.openRouterApiKey || '');
+	const [zenmuxApiKey, setZenmuxApiKey] = useState<string>(settings.zenmuxApiKey || '');
 	const [aiPromptTemplate, setAiPromptTemplate] = useState<string>(settings.aiPromptTemplate || '');
-	const [selectedModel, setSelectedModel] = useState<string>(settings.aiModel || 'claude-3-5-haiku-latest');
-	const [openRouterModel, setOpenRouterModel] = useState<string>(settings.openRouterModel || 'openai/gpt-4o-mini');
+	const [selectedModel, setSelectedModel] = useState<string>(settings.aiModel || '');
+	const [openRouterModel, setOpenRouterModel] = useState<string>(settings.openRouterModel || '');
+	const [zenmuxModel, setZenmuxModel] = useState<string>(settings.zenmuxModel || '');
 	const [isTestingConnection, setIsTestingConnection] = useState(false);
 	const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
 	const [errorMessage, setErrorMessage] = useState<string>('');
+	const [promptExpanded, setPromptExpanded] = useState(false);
 
+	// 动态模型列表
+	const [claudeModels, setClaudeModels] = useState<AIModel[]>(CLAUDE_MODELS as AIModel[]);
+	const [openRouterModels, setOpenRouterModels] = useState<AIModel[]>(OPENROUTER_MODELS as AIModel[]);
+	const [zenmuxModels, setZenmuxModels] = useState<AIModel[]>(ZENMUX_MODELS as AIModel[]);
+	const [isLoadingModels, setIsLoadingModels] = useState(false);
 
 	useEffect(() => {
 		setAiProvider(settings.aiProvider || 'claude');
 		setClaudeApiKey(settings.authKey || '');
 		setOpenRouterApiKey(settings.openRouterApiKey || '');
+		setZenmuxApiKey(settings.zenmuxApiKey || '');
 		setAiPromptTemplate(settings.aiPromptTemplate || '');
-		setSelectedModel(settings.aiModel || 'claude-3-5-haiku-latest');
-		setOpenRouterModel(settings.openRouterModel || 'openai/gpt-4o-mini');
-	}, [settings.aiProvider, settings.authKey, settings.openRouterApiKey, settings.aiPromptTemplate, settings.aiModel, settings.openRouterModel]);
+		setSelectedModel(settings.aiModel || '');
+		setOpenRouterModel(settings.openRouterModel || '');
+		setZenmuxModel(settings.zenmuxModel || '');
+	}, [settings.aiProvider, settings.authKey, settings.openRouterApiKey, settings.zenmuxApiKey, settings.aiPromptTemplate, settings.aiModel, settings.openRouterModel, settings.zenmuxModel]);
+
+	// 组件挂载时自动加载缓存的模型列表
+	useEffect(() => {
+		const provider = settings.aiProvider || 'claude';
+		const apiKey = provider === 'claude' ? settings.authKey :
+			provider === 'openrouter' ? settings.openRouterApiKey : settings.zenmuxApiKey;
+		// 尝试加载（会优先使用 localStorage 缓存）
+		if (apiKey?.trim() || provider === 'zenmux') {
+			loadModels(provider, apiKey || '');
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); // 只在挂载时执行一次
+
+	// 动态获取模型列表
+	const [modelLoadError, setModelLoadError] = useState<string>('');
+	const loadModels = async (provider: 'claude' | 'openrouter' | 'zenmux', apiKey: string) => {
+		if (!apiKey.trim() && provider !== 'zenmux') return;
+		setIsLoadingModels(true);
+		setModelLoadError('');
+		try {
+			if (provider === 'claude') {
+				const models = await fetchClaudeModels(apiKey);
+				setClaudeModels(models);
+				// 如果未选择模型，默认选第一个
+				if (!selectedModel && models.length > 0) {
+					setSelectedModel(models[0].id);
+					updateSettings({aiModel: models[0].id});
+				}
+			} else if (provider === 'openrouter') {
+				const models = await fetchOpenRouterModels(apiKey);
+				setOpenRouterModels(models);
+				if (!openRouterModel && models.length > 0) {
+					setOpenRouterModel(models[0].id);
+					updateSettings({openRouterModel: models[0].id});
+				}
+			} else if (provider === 'zenmux') {
+				const models = await fetchZenMuxModels(apiKey);
+				setZenmuxModels(models);
+				// ZenMux 默认选第一个模型
+				if (!zenmuxModel && models.length > 0) {
+					setZenmuxModel(models[0].id);
+					updateSettings({zenmuxModel: models[0].id});
+				}
+			}
+		} catch (e: any) {
+			const msg = e?.message || '获取模型列表失败';
+			setModelLoadError(msg.includes('502') || msg.includes('503') ? 'API 暂时不可用，请稍后重试' : msg);
+			logger.warn('Failed to load models:', e);
+		} finally {
+			setIsLoadingModels(false);
+		}
+	};
+
+	// 刷新当前provider的模型列表
+	const refreshModels = () => {
+		clearModelCache(aiProvider);
+		const apiKey = aiProvider === 'claude' ? claudeApiKey :
+			aiProvider === 'openrouter' ? openRouterApiKey : zenmuxApiKey;
+		loadModels(aiProvider, apiKey);
+	};
 
 	const handleApiKeyChange = (value: string) => {
 		setClaudeApiKey(value);
 		setConnectionStatus('idle');
 		setErrorMessage('');
 		updateSettings({authKey: value.trim()});
+		// 延迟加载模型列表（防止频繁请求）
+		if (value.trim().length > 10) {
+			loadModels('claude', value.trim());
+		}
 	};
 
 	const handlePromptTemplateChange = (value: string) => {
@@ -146,11 +180,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 				aiProvider,
 				authKey: claudeApiKey,
 				openRouterApiKey,
+				zenmuxApiKey,
 				aiModel: selectedModel,
-				openRouterModel
+				openRouterModel,
+				zenmuxModel
 			});
 			setConnectionStatus('success');
-			logger.info(`${aiProvider === 'openrouter' ? 'OpenRouter' : 'Claude'} API连接测试成功`);
+			const providerName = aiProvider === 'openrouter' ? 'OpenRouter' : aiProvider === 'zenmux' ? 'ZenMux' : 'Claude';
+			logger.info(`${providerName} API连接测试成功`);
 		} catch (error) {
 			setConnectionStatus('error');
 			setErrorMessage(error instanceof Error ? error.message : '连接测试失败');
@@ -165,9 +202,11 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			aiProvider,
 			authKey: claudeApiKey.trim(),
 			openRouterApiKey: openRouterApiKey.trim(),
+			zenmuxApiKey: zenmuxApiKey.trim(),
 			aiPromptTemplate: aiPromptTemplate.trim(),
 			aiModel: selectedModel,
-			openRouterModel
+			openRouterModel,
+			zenmuxModel
 		});
 		saveSettings();
 		logger.info('AI设置已保存');
@@ -179,9 +218,14 @@ export const AISettings: React.FC<AISettingsProps> = ({
 			setAiProvider('claude');
 			setClaudeApiKey('');
 			setOpenRouterApiKey('');
+			setZenmuxApiKey('');
 			setAiPromptTemplate('');
-			setSelectedModel('claude-3-5-haiku-latest');
-			setOpenRouterModel('openai/gpt-4o-mini');
+			setSelectedModel('');
+			setOpenRouterModel('');
+			setZenmuxModel('');
+			setClaudeModels([]);
+			setOpenRouterModels([]);
+			setZenmuxModels([]);
 			setConnectionStatus('idle');
 			setErrorMessage('');
 		}
@@ -239,534 +283,309 @@ export const AISettings: React.FC<AISettingsProps> = ({
 		setAiPromptTemplate(getDefaultPromptTemplate());
 	};
 
-	// Claude配置组件 - 温暖学术风格
-	const ClaudeConfiguration = () => (
-		<div className="space-y-4">
-			<FormInput
-				label="Claude API 密钥"
-				value={claudeApiKey}
-				onChange={handleApiKeyChange}
-				placeholder="sk-ant-api03-..."
-				type="password"
-				required={true}
-				icon={Key}
-				className="font-mono text-sm"
-			/>
+	// 获取当前平台的模型列表
+	const getCurrentModels = (): AIModel[] => {
+		switch (aiProvider) {
+			case 'claude': return claudeModels;
+			case 'openrouter': return openRouterModels;
+			case 'zenmux': return zenmuxModels;
+		}
+	};
 
-			<div className="space-y-2">
-				<label className="text-sm font-medium text-[#181818] flex items-center gap-2">
-					<Brain className="w-4 h-4 text-[#CC785C]"/>
-					AI 模型选择
-				</label>
-				<Select value={selectedModel} onValueChange={handleModelChange}>
-					<SelectTrigger className="w-full">
-						<SelectValue placeholder="选择 AI 模型" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel className="flex items-center gap-2">
-								<Zap className="w-3 h-3"/>
-								快速响应
-							</SelectLabel>
-							{AVAILABLE_MODELS.filter(m => m.category === 'fast').map(model => (
-								<SelectItem key={model.id} value={model.id}>
-									<div className="flex items-center justify-between w-full">
-										<div>
-											<span className="font-medium">{model.name}</span>
-											{model.recommended && (
-												<span className="ml-2 text-xs bg-[#7C9A5E]/10 text-[#7C9A5E] px-2 py-0.5 rounded-full">推荐</span>
-											)}
-											<div className="text-xs text-[#87867F]">{model.description}</div>
-										</div>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
+	// 获取当前选择的模型ID
+	const getCurrentModelId = (): string => {
+		switch (aiProvider) {
+			case 'claude': return selectedModel;
+			case 'openrouter': return openRouterModel;
+			case 'zenmux': return zenmuxModel;
+		}
+	};
 
-						<SelectGroup>
-							<SelectLabel className="flex items-center gap-2">
-								<Target className="w-3 h-3"/>
-								平衡性能
-							</SelectLabel>
-							{AVAILABLE_MODELS.filter(m => m.category === 'balanced').map(model => (
-								<SelectItem key={model.id} value={model.id}>
-									<div className="flex items-center justify-between w-full">
-										<div>
-											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-[#87867F]">{model.description}</div>
-										</div>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
+	// 设置当前平台的模型
+	const setCurrentModel = (modelId: string) => {
+		switch (aiProvider) {
+			case 'claude':
+				setSelectedModel(modelId);
+				updateSettings({aiModel: modelId});
+				break;
+			case 'openrouter':
+				setOpenRouterModel(modelId);
+				updateSettings({openRouterModel: modelId});
+				break;
+			case 'zenmux':
+				setZenmuxModel(modelId);
+				updateSettings({zenmuxModel: modelId});
+				break;
+		}
+		setConnectionStatus('idle');
+		setErrorMessage('');
+	};
 
-						<SelectGroup>
-							<SelectLabel className="flex items-center gap-2">
-								<Brain className="w-3 h-3"/>
-								强大推理
-							</SelectLabel>
-							{AVAILABLE_MODELS.filter(m => m.category === 'powerful').map(model => (
-								<SelectItem key={model.id} value={model.id}>
-									<div className="flex items-center justify-between w-full">
-										<div>
-											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-[#87867F]">{model.description}</div>
-										</div>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
-					</SelectContent>
-				</Select>
+	// 获取当前平台的 API Key
+	const getCurrentApiKey = (): string => {
+		switch (aiProvider) {
+			case 'claude': return claudeApiKey;
+			case 'openrouter': return openRouterApiKey;
+			case 'zenmux': return zenmuxApiKey;
+		}
+	};
 
-				{/* 显示当前选择模型的详细信息 */}
-				{(() => {
-					const currentModel = AVAILABLE_MODELS.find(m => m.id === selectedModel);
-					if (currentModel) {
-						const priceColor = currentModel.pricing === 'low' ? 'text-[#7C9A5E]' :
-							currentModel.pricing === 'medium' ? 'text-[#CC785C]' : 'text-[#B85450]';
-						const priceText = currentModel.pricing === 'low' ? '低成本' :
-							currentModel.pricing === 'medium' ? '中等成本' : '高成本';
+	// 获取当前选择的显示文本
+	const getCurrentSelectionDisplay = (): string => {
+		const model = getCurrentModels().find(m => m.id === getCurrentModelId());
+		if (!model) return '未选择模型';
+		const platformName = aiProvider === 'claude' ? 'Claude' : aiProvider === 'openrouter' ? 'OpenRouter' : 'ZenMux';
+		return `${platformName} - ${model.name}`;
+	};
 
-						return (
-							<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl p-3">
-								<div className="flex items-center justify-between">
-									<div className="text-sm text-[#181818]">
-										<span className="font-medium">当前选择：</span> {currentModel.name}
-									</div>
-									<div className={`text-xs px-2 py-1 rounded-full bg-white border border-[#E8E6DC] ${priceColor}`}>
-										{priceText}
-									</div>
-								</div>
-								<div className="text-xs text-[#87867F] mt-1">{currentModel.description}</div>
-							</div>
-						);
-					}
-					return null;
-				})()}
-			</div>
+	// 获取平台对应的获取密钥链接
+	const getApiKeyLink = () => {
+		switch (aiProvider) {
+			case 'claude': return { url: 'https://console.anthropic.com/', text: '获取 Claude API 密钥' };
+			case 'openrouter': return { url: 'https://openrouter.ai/keys', text: '获取 OpenRouter API 密钥' };
+			case 'zenmux': return { url: 'https://zenmux.ai/', text: '获取 ZenMux API 密钥' };
+		}
+	};
 
-			<div className="flex items-center justify-between">
-				<Button
-					onClick={testConnection}
-					disabled={isTestingConnection || !claudeApiKey.trim()}
-					size="sm"
-					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl"
-				>
-					{isTestingConnection ? (
-						<>
-							<RefreshCw className="w-4 h-4 mr-2 animate-spin"/>
-							测试连接中...
-						</>
-					) : (
-						<>
-							<Zap className="w-4 h-4 mr-2"/>
-							测试连接
-						</>
-					)}
-				</Button>
-
-				{connectionStatus === 'success' && (
-					<div className="flex items-center gap-2 text-[#7C9A5E] bg-[#7C9A5E]/10 px-3 py-2 rounded-xl">
-						<CheckCircle className="w-4 h-4"/>
-						<span className="text-sm font-medium">连接成功</span>
-					</div>
-				)}
-
-				{connectionStatus === 'error' && (
-					<div className="flex items-center gap-2 text-[#B85450] bg-[#B85450]/10 px-3 py-2 rounded-xl">
-						<XCircle className="w-4 h-4"/>
-						<span className="text-sm font-medium">连接失败</span>
-					</div>
-				)}
-			</div>
-
-			{errorMessage && (
-				<div className="bg-[#B85450]/10 border border-[#B85450]/20 rounded-xl p-3">
-					<p className="text-[#B85450] text-sm flex items-center gap-2">
-						<XCircle className="w-4 h-4"/>
-						{errorMessage}
-					</p>
-				</div>
-			)}
-
-			{/* API密钥安全说明 */}
-			<div className="bg-[#CC785C]/10 border border-[#CC785C]/20 rounded-xl p-3">
-				<div className="flex items-start gap-2">
-					<Info className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-[#181818]">
-						<p className="font-medium">安全提醒</p>
-						<p className="mt-1 text-[#87867F]">API密钥仅在本地存储，不会上传到任何服务器。</p>
-					</div>
-				</div>
-			</div>
-
-			{/* 获取密钥指南 */}
-			<div className="mt-4 p-4 bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl">
-				<div className="flex items-start gap-2">
-					<Info className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-[#181818]">
-						<p className="font-medium mb-1">如何获取Claude API密钥？</p>
-						<a
-							href="https://console.anthropic.com/"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#CC785C] hover:text-[#B86A4E] underline"
-						>
-							访问Anthropic Console
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-
-	// OpenRouter配置组件 - 温暖学术风格
-	const OpenRouterConfiguration = () => (
-		<div className="space-y-4">
-			<FormInput
-				label="OpenRouter API 密钥"
-				value={openRouterApiKey}
-				onChange={(value) => {
-					setOpenRouterApiKey(value);
-					setConnectionStatus('idle');
-					setErrorMessage('');
-					updateSettings({openRouterApiKey: value.trim()});
-				}}
-				placeholder="sk-or-v1-..."
-				type="password"
-				required={true}
-				icon={Key}
-				className="font-mono text-sm"
-			/>
-
-			<div className="space-y-2">
-				<label className="text-sm font-medium text-[#181818] flex items-center gap-2">
-					<Brain className="w-4 h-4 text-[#CC785C]"/>
-					模型选择
-				</label>
-				<Select value={openRouterModel} onValueChange={(value) => {
-					setOpenRouterModel(value);
-					setConnectionStatus('idle');
-					setErrorMessage('');
-					updateSettings({openRouterModel: value});
-				}}>
-					<SelectTrigger className="w-full">
-						<SelectValue placeholder="选择模型" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel className="flex items-center gap-2">
-								<Zap className="w-3 h-3"/>
-								快速响应
-							</SelectLabel>
-							{OPENROUTER_MODELS.filter(m => m.category === 'fast').map(model => (
-								<SelectItem key={model.id} value={model.id}>
-									<div className="flex items-center justify-between w-full">
-										<div>
-											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-[#87867F]">{model.description}</div>
-										</div>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
-
-						<SelectGroup>
-							<SelectLabel className="flex items-center gap-2">
-								<Target className="w-3 h-3"/>
-								平衡性能
-							</SelectLabel>
-							{OPENROUTER_MODELS.filter(m => m.category === 'balanced').map(model => (
-								<SelectItem key={model.id} value={model.id}>
-									<div className="flex items-center justify-between w-full">
-										<div>
-											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-[#87867F]">{model.description}</div>
-										</div>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
-
-						<SelectGroup>
-							<SelectLabel className="flex items-center gap-2">
-								<Brain className="w-3 h-3"/>
-								强大推理
-							</SelectLabel>
-							{OPENROUTER_MODELS.filter(m => m.category === 'powerful').map(model => (
-								<SelectItem key={model.id} value={model.id}>
-									<div className="flex items-center justify-between w-full">
-										<div>
-											<span className="font-medium">{model.name}</span>
-											<div className="text-xs text-[#87867F]">{model.description}</div>
-										</div>
-									</div>
-								</SelectItem>
-							))}
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-
-				{/* 显示当前选择模型的详细信息 */}
-				{(() => {
-					const currentModel = OPENROUTER_MODELS.find(m => m.id === openRouterModel);
-					if (currentModel) {
-						const priceColor = currentModel.pricing === 'low' ? 'text-[#7C9A5E]' :
-							currentModel.pricing === 'medium' ? 'text-[#CC785C]' : 'text-[#B85450]';
-						const priceText = currentModel.pricing === 'low' ? '低成本' :
-							currentModel.pricing === 'medium' ? '中等成本' : '高成本';
-
-						return (
-							<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl p-3">
-								<div className="flex items-center justify-between">
-									<div className="text-sm text-[#181818]">
-										<span className="font-medium">当前选择：</span> {currentModel.name}
-									</div>
-									<div className={`text-xs px-2 py-1 rounded-full bg-white border border-[#E8E6DC] ${priceColor}`}>
-										{priceText}
-									</div>
-								</div>
-								<div className="text-xs text-[#87867F] mt-1">{currentModel.description}</div>
-							</div>
-						);
-					}
-					return null;
-				})()}
-			</div>
-
-			<div className="flex items-center justify-between">
-				<Button
-					onClick={testConnection}
-					disabled={isTestingConnection || !openRouterApiKey.trim()}
-					size="sm"
-					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl"
-				>
-					{isTestingConnection ? (
-						<>
-							<RefreshCw className="w-4 h-4 mr-2 animate-spin"/>
-							测试连接中...
-						</>
-					) : (
-						<>
-							<Zap className="w-4 h-4 mr-2"/>
-							测试连接
-						</>
-					)}
-				</Button>
-
-				{connectionStatus === 'success' && (
-					<div className="flex items-center gap-2 text-[#7C9A5E] bg-[#7C9A5E]/10 px-3 py-2 rounded-xl">
-						<CheckCircle className="w-4 h-4"/>
-						<span className="text-sm font-medium">连接成功</span>
-					</div>
-				)}
-
-				{connectionStatus === 'error' && (
-					<div className="flex items-center gap-2 text-[#B85450] bg-[#B85450]/10 px-3 py-2 rounded-xl">
-						<XCircle className="w-4 h-4"/>
-						<span className="text-sm font-medium">连接失败</span>
-					</div>
-				)}
-			</div>
-
-			{errorMessage && (
-				<div className="bg-[#B85450]/10 border border-[#B85450]/20 rounded-xl p-3">
-					<p className="text-[#B85450] text-sm flex items-center gap-2">
-						<XCircle className="w-4 h-4"/>
-						{errorMessage}
-					</p>
-				</div>
-			)}
-
-			{/* OpenRouter优势说明 */}
-			<div className="bg-[#CC785C]/10 border border-[#CC785C]/20 rounded-xl p-3">
-				<div className="flex items-start gap-2">
-					<Sparkles className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-[#181818]">
-						<p className="font-medium">OpenRouter优势</p>
-						<ul className="mt-1 space-y-1 text-xs text-[#87867F]">
-							<li>• 支持多种AI模型（GPT、Claude、Gemini等）</li>
-							<li>• 结构化输出确保返回格式正确</li>
-							<li>• 统一的API接口，切换模型更方便</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-
-			{/* 获取密钥指南 */}
-			<div className="mt-4 p-4 bg-[#F0EEE6] border border-[#E8E6DC] rounded-xl">
-				<div className="flex items-start gap-2">
-					<Info className="w-4 h-4 text-[#CC785C] mt-0.5 flex-shrink-0"/>
-					<div className="text-sm text-[#181818]">
-						<p className="font-medium mb-1">如何获取OpenRouter API密钥？</p>
-						<a
-							href="https://openrouter.ai/keys"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#CC785C] hover:text-[#B86A4E] underline"
-						>
-							访问OpenRouter Keys
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-
-	// 公共提示词模板配置组件 - 温暖学术风格
-	const CommonPromptConfiguration = () => (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
-					<div className="p-2 bg-[#CC785C]/10 rounded-xl">
-						<Code className="h-5 w-5 text-[#CC785C]"/>
-					</div>
-					<div>
-						<h4 className="font-semibold text-[#181818]">提示词模板</h4>
-						<p className="text-sm text-[#87867F]">自定义AI分析的指令模板（支持Handlebars语法）</p>
-					</div>
-				</div>
-				<Button
-					onClick={handleUseDefaultTemplate}
-					size="sm"
-					variant="outline"
-					className="text-[#CC785C] border-[#CC785C]/30 hover:bg-[#CC785C]/5 rounded-xl"
-				>
-					<RefreshCw className="w-4 h-4 mr-2"/>
-					恢复默认
-				</Button>
-			</div>
-
-			<textarea
-				value={aiPromptTemplate}
-				onChange={(e) => handlePromptTemplateChange(e.target.value)}
-				placeholder="输入自定义的AI提示词模板..."
-				className="w-full px-4 py-3 border-2 border-[#E8E6DC] rounded-xl focus:outline-none focus:border-[#CC785C] focus:ring-0 h-40 resize-y font-mono text-sm transition-colors bg-white text-[#181818] placeholder:text-[#87867F]"
-			/>
-
-			{/* 模板变量说明 */}
-			<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-4">
-				<div className="flex items-center gap-2 mb-3">
-					<Code className="h-4 w-4 text-[#CC785C]"/>
-					<h5 className="text-sm font-medium text-[#181818]">可用的模板变量</h5>
-				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-					{[
-						{var: '{{content}}', desc: '文章正文内容（已移除frontmatter）'},
-						{var: '{{filename}}', desc: '当前文件名（不含扩展名）'},
-						{var: '{{personalInfo.name}}', desc: '个人信息中的姓名'},
-						{var: '{{personalInfo.bio}}', desc: '个人信息中的简介'},
-						{var: '{{frontmatter}}', desc: '当前文档的frontmatter对象'},
-						{var: '{{today}}', desc: '当前日期（YYYY-MM-DD格式）'}
-					].map((item, index) => (
-						<div key={index} className="bg-white border border-[#E8E6DC] rounded-xl p-2">
-							<code className="text-[#CC785C] font-medium">{item.var}</code>
-							<p className="text-[#87867F] mt-1">{item.desc}</p>
-						</div>
-					))}
-				</div>
-			</div>
-		</div>
-	);
+	const apiKeyLink = getApiKeyLink();
 
 	return (
-		<div className="space-y-6">
-			{/* 头部说明 - 温暖学术风格 */}
-			<div className="text-center">
-				<div className="flex items-center justify-center gap-2 mb-2">
-					<Bot className="h-6 w-6 text-[#CC785C]"/>
-					<h3 className="text-lg font-serif font-semibold text-[#181818]">AI 智能设置</h3>
+		<div className="space-y-4 sm:space-y-5">
+			{/* 简洁头部 */}
+			<div className="flex items-center gap-3">
+				<div className="p-2 bg-[#CC785C]/10 rounded-xl">
+					<Bot className="h-5 w-5 text-[#CC785C]"/>
 				</div>
-				<p className="text-[#87867F]">配置AI服务，解锁智能内容分析功能</p>
-			</div>
-
-			{/* AI功能介绍 - 温暖学术风格 */}
-			<div className="bg-[#F0EEE6] border border-[#E8E6DC] rounded-2xl p-4">
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-					<div className="bg-white border border-[#E8E6DC] rounded-xl p-3">
-						<div className="flex items-center gap-2 mb-2">
-							<Sparkles className="h-4 w-4 text-[#CC785C]"/>
-							<h5 className="text-sm font-medium text-[#181818]">智能分析</h5>
-						</div>
-						<p className="text-xs text-[#87867F]">自动分析文章内容，提取关键信息</p>
-					</div>
-					<div className="bg-white border border-[#E8E6DC] rounded-xl p-3">
-						<div className="flex items-center gap-2 mb-2">
-							<FileText className="h-4 w-4 text-[#CC785C]"/>
-							<h5 className="text-sm font-medium text-[#181818]">内容建议</h5>
-						</div>
-						<p className="text-xs text-[#87867F]">智能建议标题、副标题等元数据</p>
-					</div>
-					<div className="bg-white border border-[#E8E6DC] rounded-xl p-3">
-						<div className="flex items-center gap-2 mb-2">
-							<Tag className="h-4 w-4 text-[#CC785C]"/>
-							<h5 className="text-sm font-medium text-[#181818]">自动标签</h5>
-						</div>
-						<p className="text-xs text-[#87867F]">基于内容主题生成相关标签</p>
-					</div>
+				<div>
+					<h3 className="text-base font-semibold text-[#181818]">AI 智能设置</h3>
+					<p className="text-xs text-[#87867F]">配置AI服务以启用智能分析</p>
 				</div>
 			</div>
 
-			{/* AI Provider 选择 - 简单 Tab 布局 */}
-			<div className="bg-white border border-[#E8E6DC] rounded-2xl overflow-hidden">
-				{/* Tab 切换按钮 */}
-				<div className="flex border-b border-[#E8E6DC]">
-					<button
-						onClick={() => setAiProvider('claude')}
-						className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors ${
-							aiProvider === 'claude'
-								? 'bg-[#CC785C]/10 text-[#CC785C] border-b-2 border-[#CC785C]'
-								: 'text-[#87867F] hover:bg-[#F9F9F7]'
-						}`}
+			{/* 双重百叶窗：平台 - 模型选择 */}
+			<div className="bg-white border border-[#E8E6DC] rounded-xl p-4 sm:p-5 space-y-4">
+				{/* 当前选择显示 */}
+				<div className="flex items-center justify-between gap-2 min-w-0">
+					<span className="text-sm font-medium text-[#181818] flex items-center gap-2 shrink-0">
+						<Brain className="w-4 h-4 text-[#CC785C]"/>
+						当前模型
+					</span>
+					<span className="text-xs text-[#87867F] bg-[#F9F9F7] px-2 py-1 rounded truncate">
+						{getCurrentSelectionDisplay()}
+					</span>
+				</div>
+
+				{/* 第一级：平台选择 */}
+				<div className="space-y-2">
+					<label className="text-xs text-[#87867F]">AI 平台</label>
+					<Select
+						value={aiProvider}
+						onValueChange={(value: 'claude' | 'openrouter' | 'zenmux') => {
+							setAiProvider(value);
+							updateSettings({aiProvider: value});
+							setConnectionStatus('idle');
+							setErrorMessage('');
+							setModelLoadError('');
+						}}
 					>
-						<Bot className="h-4 w-4"/>
-						<span className="font-medium">Claude</span>
-						{claudeApiKey && (
-							<span className="text-xs bg-[#7C9A5E]/20 text-[#7C9A5E] px-1.5 py-0.5 rounded">已配置</span>
-						)}
-					</button>
-					<button
-						onClick={() => setAiProvider('openrouter')}
-						className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors ${
-							aiProvider === 'openrouter'
-								? 'bg-[#CC785C]/10 text-[#CC785C] border-b-2 border-[#CC785C]'
-								: 'text-[#87867F] hover:bg-[#F9F9F7]'
-						}`}
+						<SelectTrigger className="w-full h-10">
+							<SelectValue placeholder="选择 AI 平台" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="claude">
+								<span className="flex items-center gap-2">
+									<Bot className="w-4 h-4"/>
+									Claude (Anthropic)
+									{claudeApiKey && <span className="text-[10px] bg-[#7C9A5E]/20 text-[#7C9A5E] px-1 py-0.5 rounded">✓</span>}
+								</span>
+							</SelectItem>
+							<SelectItem value="openrouter">
+								<span className="flex items-center gap-2">
+									<Zap className="w-4 h-4"/>
+									OpenRouter
+									{openRouterApiKey && <span className="text-[10px] bg-[#7C9A5E]/20 text-[#7C9A5E] px-1 py-0.5 rounded">✓</span>}
+								</span>
+							</SelectItem>
+							<SelectItem value="zenmux">
+								<span className="flex items-center gap-2">
+									<Brain className="w-4 h-4"/>
+									ZenMux
+									{zenmuxApiKey && <span className="text-[10px] bg-[#7C9A5E]/20 text-[#7C9A5E] px-1 py-0.5 rounded">✓</span>}
+								</span>
+							</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+
+				{/* API 密钥输入 */}
+				<FormInput
+					label={`${aiProvider === 'claude' ? 'Claude' : aiProvider === 'openrouter' ? 'OpenRouter' : 'ZenMux'} API 密钥`}
+					value={getCurrentApiKey()}
+					onChange={(value) => {
+						if (aiProvider === 'claude') {
+							setClaudeApiKey(value);
+							updateSettings({authKey: value.trim()});
+						} else if (aiProvider === 'openrouter') {
+							setOpenRouterApiKey(value);
+							updateSettings({openRouterApiKey: value.trim()});
+						} else {
+							setZenmuxApiKey(value);
+							updateSettings({zenmuxApiKey: value.trim()});
+						}
+						setConnectionStatus('idle');
+						setErrorMessage('');
+						// 延迟加载模型列表
+						if (value.trim().length > 10 || aiProvider === 'zenmux') {
+							loadModels(aiProvider, value.trim());
+						}
+					}}
+					placeholder={aiProvider === 'claude' ? 'sk-ant-api03-...' : aiProvider === 'openrouter' ? 'sk-or-v1-...' : 'your-zenmux-key...'}
+					type="password"
+					required={aiProvider !== 'zenmux'}
+					icon={Key}
+					className="font-mono text-xs sm:text-sm"
+				/>
+
+				{/* 第二级：模型选择 */}
+				<div className="space-y-2">
+					<div className="flex items-center justify-between">
+						<label className="text-xs text-[#87867F]">AI 模型</label>
+						<Button
+							onClick={refreshModels}
+							disabled={isLoadingModels}
+							size="sm"
+							variant="ghost"
+							className="h-6 px-2 text-[#87867F] hover:text-[#CC785C]"
+						>
+							<RefreshCw className={`w-3 h-3 ${isLoadingModels ? 'animate-spin' : ''}`}/>
+						</Button>
+					</div>
+					{getCurrentModels().length > 0 ? (
+						<ModelCombobox
+							models={getCurrentModels()}
+							value={getCurrentModelId()}
+							onValueChange={setCurrentModel}
+							placeholder="选择 AI 模型"
+							groupByVendor={aiProvider !== 'claude'}
+						/>
+					) : (
+						<p className={`text-xs py-2 ${modelLoadError ? 'text-[#B85450]' : 'text-[#87867F]'}`}>
+							{modelLoadError || (aiProvider === 'zenmux' ? '点击刷新按钮获取模型列表' : getCurrentApiKey().trim() ? '点击刷新按钮获取模型列表' : '请先输入 API Key')}
+						</p>
+					)}
+				</div>
+
+				{/* 测试连接 */}
+				<div className="flex flex-wrap items-center gap-2">
+					<Button
+						onClick={testConnection}
+						disabled={isTestingConnection || (aiProvider !== 'zenmux' && !getCurrentApiKey().trim())}
+						size="sm"
+						className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-lg h-9"
 					>
-						<Zap className="h-4 w-4"/>
-						<span className="font-medium">OpenRouter</span>
-						{openRouterApiKey && (
-							<span className="text-xs bg-[#7C9A5E]/20 text-[#7C9A5E] px-1.5 py-0.5 rounded">已配置</span>
+						{isTestingConnection ? (
+							<RefreshCw className="w-4 h-4 animate-spin"/>
+						) : (
+							<>
+								<Zap className="w-4 h-4 mr-1.5"/>
+								<span className="text-xs">测试连接</span>
+							</>
 						)}
-					</button>
+					</Button>
+					{connectionStatus === 'success' && (
+						<span className="flex items-center gap-1 text-xs text-[#7C9A5E]">
+							<CheckCircle className="w-3.5 h-3.5"/>
+							连接成功
+						</span>
+					)}
+					{connectionStatus === 'error' && (
+						<span className="flex items-center gap-1 text-xs text-[#B85450]">
+							<XCircle className="w-3.5 h-3.5"/>
+							失败
+						</span>
+					)}
 				</div>
 
-				{/* 配置内容区域 */}
-				<div className="p-6">
-					{aiProvider === 'claude' && <ClaudeConfiguration />}
-					{aiProvider === 'openrouter' && <OpenRouterConfiguration />}
+				{errorMessage && (
+					<p className="text-[#B85450] text-xs flex items-start gap-1.5 bg-[#B85450]/5 p-2 rounded-lg">
+						<XCircle className="w-3.5 h-3.5 mt-0.5 shrink-0"/>
+						{errorMessage}
+					</p>
+				)}
+
+				{/* 获取密钥链接 */}
+				<a
+					href={apiKeyLink.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="flex items-center gap-1.5 text-xs text-[#CC785C] hover:underline"
+				>
+					<ExternalLink className="w-3 h-3"/>
+					{apiKeyLink.text}
+				</a>
+			</div>
+
+			{/* 提示词模板 - 可折叠的高级设置 */}
+			<Collapsible open={promptExpanded} onOpenChange={setPromptExpanded}>
+				<div className="bg-white border border-[#E8E6DC] rounded-xl overflow-hidden">
+					<CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-[#F9F9F7] transition-colors">
+						<div className="flex items-center gap-3">
+							<Code className="h-4 w-4 text-[#CC785C]"/>
+							<div className="text-left">
+								<span className="font-medium text-sm text-[#181818]">提示词模板</span>
+								<p className="text-xs text-[#87867F]">自定义AI分析指令</p>
+							</div>
+						</div>
+						<ChevronDown className={`h-4 w-4 text-[#87867F] transition-transform ${promptExpanded ? 'rotate-180' : ''}`}/>
+					</CollapsibleTrigger>
+					<CollapsibleContent>
+						<div className="px-4 pb-4 sm:px-5 sm:pb-5 space-y-3">
+							<div className="flex items-center justify-end">
+								<Button
+									onClick={handleUseDefaultTemplate}
+									size="sm"
+									variant="outline"
+									className="text-[#CC785C] border-[#CC785C]/30 hover:bg-[#CC785C]/5 rounded-lg text-xs h-8"
+								>
+									<RefreshCw className="w-3.5 h-3.5 mr-1.5"/>
+									恢复默认
+								</Button>
+							</div>
+							<textarea
+								value={aiPromptTemplate}
+								onChange={(e) => handlePromptTemplateChange(e.target.value)}
+								placeholder="输入自定义的AI提示词模板..."
+								className="w-full px-3 py-2.5 border border-[#E8E6DC] rounded-lg focus:outline-none focus:border-[#CC785C] focus:ring-1 focus:ring-[#CC785C]/20 h-32 sm:h-40 resize-y font-mono text-xs sm:text-sm transition-colors bg-white text-[#181818] placeholder:text-[#87867F]"
+							/>
+							{/* 模板变量 - 可滚动的水平列表 */}
+							<div className="bg-[#F9F9F7] border border-[#E8E6DC] rounded-lg p-3">
+								<p className="text-xs font-medium text-[#87867F] mb-2">可用变量</p>
+								<div className="flex flex-wrap gap-1.5">
+									{['{{content}}', '{{filename}}', '{{personalInfo.name}}', '{{today}}', '{{frontmatter}}'].map((v) => (
+										<code key={v} className="text-[10px] sm:text-xs bg-white px-2 py-1 rounded border border-[#E8E6DC] text-[#CC785C]">{v}</code>
+									))}
+								</div>
+							</div>
+						</div>
+					</CollapsibleContent>
 				</div>
-			</div>
+			</Collapsible>
 
-			{/* 公共配置部分 - 提示词模板 - 温暖学术风格 */}
-			<div className="bg-white border border-[#E8E6DC] rounded-2xl p-6">
-				<CommonPromptConfiguration />
-			</div>
-
-			{/* 操作按钮 - 温暖学术风格 */}
-			<div className="flex justify-between items-center pt-2">
+			{/* 操作按钮 - 移动端垂直堆叠 */}
+			<div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-1">
 				<Button
 					onClick={handleReset}
 					variant="outline"
-					className="text-[#B85450] border-[#B85450]/30 hover:bg-[#B85450]/5 rounded-xl"
+					size="sm"
+					className="text-[#B85450] border-[#B85450]/30 hover:bg-[#B85450]/5 rounded-lg h-10 sm:h-9"
 				>
 					<RotateCcw className="w-4 h-4 mr-2"/>
 					清空设置
 				</Button>
 				<Button
 					onClick={handleSave}
-					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-xl shadow-sm"
+					size="sm"
+					className="bg-[#CC785C] hover:bg-[#B86A4E] text-white rounded-lg shadow-sm h-10 sm:h-9"
 				>
 					<Save className="w-4 h-4 mr-2"/>
 					保存设置

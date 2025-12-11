@@ -128,9 +128,11 @@ export interface ViteReactSettings {
 	aiPromptTemplate?: string;
 	aiModel?: string; // 用户选择的AI模型ID
 	// AI Provider settings
-	aiProvider?: 'claude' | 'openrouter'; // AI提供商选择
+	aiProvider?: 'claude' | 'openrouter' | 'zenmux'; // AI提供商选择
 	openRouterApiKey?: string; // OpenRouter API密钥
 	openRouterModel?: string; // OpenRouter模型选择
+	zenmuxApiKey?: string; // ZenMux API密钥
+	zenmuxModel?: string; // ZenMux模型选择
 	toolbarPosition?: 'left' | 'right'; // 工具栏位置
 	scaleCodeBlockInImage?: boolean; // 复制为图片时是否缩放溢出的代码块
 	hideFirstHeading?: boolean; // 是否隐藏一级标题

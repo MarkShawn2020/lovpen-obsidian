@@ -44,8 +44,15 @@ export const defaultSettings: ViteReactSettings = {
 	expandedAccordionSections: [],
 	showStyleUI: true,
 	personalInfo: defaultPersonalInfo,
+	// AI settings
 	aiPromptTemplate: '',
-	aiModel: 'claude-3-5-haiku-latest',
+	aiModel: '',
+	aiProvider: 'claude',
+	openRouterApiKey: '',
+	openRouterModel: '',
+	zenmuxApiKey: '',
+	zenmuxModel: '',
+	// Other settings
 	cloudStorage: defaultCloudStorageSettings
 };
 
@@ -77,6 +84,11 @@ export const updateSettingsAtom = atom(
 	(get, set, update: Partial<ViteReactSettings>) => {
 		const currentSettings = get(settingsAtom);
 		const newSettings = {...currentSettings, ...update};
+		console.log('[updateSettingsAtom] Updating settings:', {
+			update,
+			before: currentSettings.hideFirstHeading,
+			after: newSettings.hideFirstHeading
+		});
 		set(settingsAtom, newSettings);
 
 		// 同步更新个人信息
