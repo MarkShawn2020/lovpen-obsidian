@@ -343,7 +343,7 @@ function createUploadAsImageButton(preElement: HTMLElement, codeElement: HTMLEle
 
       // 克隆元素截图
       const clone = preElement.cloneNode(true) as HTMLElement;
-      clone.querySelectorAll('.lovpen-code-copy-btn, .lovpen-code-copy-img-btn, .lovpen-code-upload-btn').forEach(el => el.remove());
+      clone.querySelectorAll('.lovpen-code-copy-btn, .lovpen-code-copy-img-btn, .lovpen-code-upload-btn, .lovpen-code-info-btn, .lovpen-code-info-tooltip').forEach(el => el.remove());
 
       // 处理 zoom
       const zoomValue = preElement.style.getPropertyValue('zoom');
@@ -468,10 +468,12 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
         // 设置 pre 为 relative 定位
         (pre as HTMLElement).style.position = 'relative';
 
-        // 创建并添加按钮（从右到左：复制代码、复制为图片、上传为图片）
+        // 创建并添加按钮（从右到左：复制代码、复制为图片、上传为图片、查看信息）
         const copyBtn = createCopyButton(code as HTMLElement);
         const imgBtn = createCopyAsImageButton(pre as HTMLElement);
         const uploadBtn = createUploadAsImageButton(pre as HTMLElement, code as HTMLElement);
+        const infoBtn = createInfoButton(code as HTMLElement);
+        pre.appendChild(infoBtn);
         pre.appendChild(uploadBtn);
         pre.appendChild(imgBtn);
         pre.appendChild(copyBtn);
