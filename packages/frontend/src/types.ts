@@ -133,6 +133,7 @@ export interface ViteReactSettings {
 	openRouterModel?: string; // OpenRouter模型选择
 	toolbarPosition?: 'left' | 'right'; // 工具栏位置
 	scaleCodeBlockInImage?: boolean; // 复制为图片时是否缩放溢出的代码块
+	hideFirstHeading?: boolean; // 是否隐藏一级标题
 	// Cloud Storage settings
 	cloudStorage?: CloudStorageSettings;
 }

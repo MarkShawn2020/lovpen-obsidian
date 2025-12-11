@@ -677,7 +677,14 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 
 	wrapArticleContent(article: string): string {
 		let className = "lovpen";
-		let html = `<section class="${className}" id="article-section">${article}</section>`;
+
+		// 如果设置了隐藏一级标题，移除第一个 h1 标签
+		let processedArticle = article;
+		if (this.settings.hideFirstHeading) {
+			processedArticle = article.replace(/<h1[^>]*>[\s\S]*?<\/h1>/, '');
+		}
+
+		let html = `<section class="${className}" id="article-section">${processedArticle}</section>`;
 
 		if (this.settings.useTemplate) {
 			try {
@@ -692,18 +699,23 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				}
 
 				// 设置文章标题的优先级：基本信息 > frontmatter
-				let finalTitle = '';
-				if (this.toolbarArticleInfo?.articleTitle && this.toolbarArticleInfo.articleTitle.trim() !== '') {
-					// 优先级1: 基本信息中的标题
-					finalTitle = this.toolbarArticleInfo.articleTitle.trim();
-				} else if (meta.articleTitle && String(meta.articleTitle).trim() !== '') {
-					// 优先级2: frontmatter中的标题
-					finalTitle = String(meta.articleTitle).trim();
-				}
+				// 如果隐藏一级标题，则不设置 articleTitle（模板也不渲染）
+				if (this.settings.hideFirstHeading) {
+					meta.articleTitle = '';
+				} else {
+					let finalTitle = '';
+					if (this.toolbarArticleInfo?.articleTitle && this.toolbarArticleInfo.articleTitle.trim() !== '') {
+						// 优先级1: 基本信息中的标题
+						finalTitle = this.toolbarArticleInfo.articleTitle.trim();
+					} else if (meta.articleTitle && String(meta.articleTitle).trim() !== '') {
+						// 优先级2: frontmatter中的标题
+						finalTitle = String(meta.articleTitle).trim();
+					}
 
-				// 设置最终的标题
-				if (finalTitle) {
-					meta.articleTitle = finalTitle;
+					// 设置最终的标题
+					if (finalTitle) {
+						meta.articleTitle = finalTitle;
+					}
 				}
 
 				// 设置作者的优先级：基本信息 > frontmatter

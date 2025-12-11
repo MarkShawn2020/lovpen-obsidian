@@ -9,7 +9,7 @@ import {AISettings} from "../settings/AISettings";
 import {PersonalInfo, UnifiedPluginData, ViteReactSettings, CloudStorageSettings, defaultCloudStorageSettings, UploadedImage} from "../../types";
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
-import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft, Cloud, Eye, EyeOff, AlertCircle, ChevronDown, CheckCircle2, XCircle, Loader2, Upload, Trash2, Copy, ExternalLink, ImagePlus} from "lucide-react";
+import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft, Cloud, Eye, EyeOff, AlertCircle, ChevronDown, CheckCircle2, XCircle, Loader2, Upload, Trash2, Copy, ExternalLink, ImagePlus, Heading1} from "lucide-react";
 
 const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
 	<svg viewBox="-127 -80 1240 1240" className={className} fill="currentColor">
@@ -1323,6 +1323,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 												onCheckedChange={(checked) => {
 													updateSettings({scaleCodeBlockInImage: checked});
 													saveSettings();
+												}}
+											/>
+										</div>
+
+										{/* 隐藏一级标题 */}
+										<div className="flex items-center justify-between px-4 py-3">
+											<div className="flex items-center gap-3">
+												<div className="w-7 h-7 bg-gradient-to-br from-[#8B7CB8] to-[#6B5C98] rounded-md flex items-center justify-center">
+													<Heading1 className="h-4 w-4 text-white"/>
+												</div>
+												<div>
+													<span className="text-[#181818] text-sm block">隐藏一级标题</span>
+													<span className="text-[#87867F] text-xs">渲染时移除首个 H1</span>
+												</div>
+											</div>
+											<Switch
+												checked={atomSettings.hideFirstHeading ?? false}
+												onCheckedChange={(checked) => {
+													updateSettings({hideFirstHeading: checked});
+													saveSettings();
+													onRenderArticle?.();
 												}}
 											/>
 										</div>
