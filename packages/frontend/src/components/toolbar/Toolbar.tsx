@@ -977,18 +977,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					{/* 顶部品牌区域 */}
 					<div className="p-2 border-b border-[#E8E6DC]">
 						{sidebarExpanded ? (
-							<div className="flex items-center justify-between px-1">
+							<div
+								onClick={toggleSidebar}
+								className="flex items-center justify-between px-1 cursor-pointer rounded-md hover:bg-[#E8E6DC]/80 transition-all"
+								title="收起菜单"
+							>
 								<div className="flex items-center gap-2">
 									<LovpenLogo className="w-6 h-6 text-[#D97757]"/>
 									<span className="text-sm font-semibold text-[#3d3d3d]">Lovpen</span>
 								</div>
-								<button
-									onClick={toggleSidebar}
-									className="p-1.5 rounded-md text-[#87867F] hover:bg-[#E8E6DC]/80 hover:text-[#3d3d3d] transition-all"
-									title="收起菜单"
-								>
+								<div className="p-1.5 text-[#87867F]">
 									<ChevronsLeft className="h-4 w-4"/>
-								</button>
+								</div>
 							</div>
 						) : (
 							<button
