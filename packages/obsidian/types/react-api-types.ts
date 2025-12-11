@@ -1,5 +1,5 @@
 import {TemplateKit, TemplateKitBasicInfo} from "../template-kit-types";
-import {PersistentStorageAPI, RequestUrlFunction, SettingsAPI, TemplateKitAPI} from "@lovpen/shared";
+import {PersistentStorageAPI, RequestUrlFunction, SettingsAPI, TemplateKitAPI, CodeBlockImageResult} from "@lovpen/shared";
 import {CloudStorageSettings} from "../settings";
 
 /**
@@ -177,6 +177,9 @@ export interface GlobalReactAPI {
 	// 全局API特有的功能
 	persistentStorage: PersistentStorageAPI;
 	requestUrl: RequestUrlFunction;
+
+	// 代码块操作API
+	uploadCodeBlockAsImage: (codeContent: string, imageDataUrl: string) => Promise<CodeBlockImageResult>;
 }
 
 /**

@@ -164,8 +164,25 @@ export interface SettingsAPI {
 	onSaveSettings: () => void;
 }
 
+// 代码块图片化结果
+export interface CodeBlockImageResult {
+	success: boolean;
+	imageUrl?: string;
+	error?: string;
+}
+
+// 代码块操作API
+export interface CodeBlockAPI {
+	/**
+	 * 将代码块截图上传并替换源Markdown
+	 * @param codeContent 代码块内容（用于匹配源Markdown）
+	 * @param imageDataUrl 截图的data URL
+	 */
+	uploadCodeBlockAsImage: (codeContent: string, imageDataUrl: string) => Promise<CodeBlockImageResult>;
+}
+
 // 完整的全局API接口
-export interface LovpenReactAPI extends TemplateKitAPI, SettingsAPI {
+export interface LovpenReactAPI extends TemplateKitAPI, SettingsAPI, CodeBlockAPI {
 	persistentStorage: PersistentStorageAPI;
 	requestUrl: RequestUrlFunction;
 }

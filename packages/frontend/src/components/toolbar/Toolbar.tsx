@@ -375,6 +375,21 @@ const CloudStoragePanel: React.FC<{
 	const [dragOver, setDragOver] = useState(false);
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+	// 监听 storage 变化刷新列表
+	useEffect(() => {
+		const handleStorageChange = () => {
+			setUploadedImages(getUploadedImages());
+		};
+		// 监听 localStorage 变化（跨 tab）
+		window.addEventListener('storage', handleStorageChange);
+		// 监听自定义事件（同 tab）
+		window.addEventListener('lovpen-images-updated', handleStorageChange);
+		return () => {
+			window.removeEventListener('storage', handleStorageChange);
+			window.removeEventListener('lovpen-images-updated', handleStorageChange);
+		};
+	}, []);
+
 	const isConfigComplete = cloudSettings.enabled &&
 		cloudSettings.qiniu.accessKey &&
 		cloudSettings.qiniu.secretKey &&

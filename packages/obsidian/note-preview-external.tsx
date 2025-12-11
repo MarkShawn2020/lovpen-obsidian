@@ -1394,6 +1394,145 @@ ${customCSS}`;
 	}
 
 	/**
+	 * 上传代码块为图片并替换源Markdown
+	 */
+	private async uploadCodeBlockAsImage(codeContent: string, imageDataUrl: string): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
+		try {
+			const cloudStorage = this.settings.cloudStorage;
+
+			// 检查云存储配置
+			if (!cloudStorage?.enabled || cloudStorage.provider !== 'qiniu') {
+				return { success: false, error: '请先在设置中启用七牛云存储' };
+			}
+
+			const { qiniu } = cloudStorage;
+			if (!qiniu.accessKey || !qiniu.secretKey || !qiniu.bucket || !qiniu.domain) {
+				return { success: false, error: '七牛云配置不完整，请检查设置' };
+			}
+
+			// 将 dataUrl 转换为 Blob
+			const response = await fetch(imageDataUrl);
+			const blob = await response.blob();
+
+			// 生成唯一文件名
+			const timestamp = Date.now();
+			const randomStr = Math.random().toString(36).substring(2, 8);
+			const fileKey = `lovpen/codeblock-${timestamp}-${randomStr}.png`;
+
+			// 生成七牛云上传凭证
+			const putPolicy = JSON.stringify({
+				scope: `${qiniu.bucket}:${fileKey}`,
+				deadline: Math.floor(Date.now() / 1000) + 3600 // 1小时有效
+			});
+			const encodedPutPolicy = btoa(putPolicy);
+
+			// 使用 Web Crypto API 计算 HMAC-SHA1
+			const encoder = new TextEncoder();
+			const keyData = encoder.encode(qiniu.secretKey);
+			const messageData = encoder.encode(encodedPutPolicy);
+
+			const cryptoKey = await crypto.subtle.importKey(
+				'raw', keyData, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+			);
+			const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+			const encodedSign = btoa(String.fromCharCode(...new Uint8Array(signature)))
+				.replace(/\+/g, '-').replace(/\//g, '_');
+
+			const uploadToken = `${qiniu.accessKey}:${encodedSign}:${encodedPutPolicy}`;
+
+			// 上传到七牛云
+			const formData = new FormData();
+			formData.append('file', blob, fileKey);
+			formData.append('token', uploadToken);
+			formData.append('key', fileKey);
+
+			// 根据区域选择上传域名
+			const uploadHosts: Record<string, string> = {
+				'z0': 'https://up.qiniup.com',
+				'z1': 'https://up-z1.qiniup.com',
+				'z2': 'https://up-z2.qiniup.com',
+				'na0': 'https://up-na0.qiniup.com',
+				'as0': 'https://up-as0.qiniup.com'
+			};
+			const uploadHost = uploadHosts[qiniu.region] || uploadHosts['z0'];
+
+			const uploadResponse = await fetch(`${uploadHost}`, {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!uploadResponse.ok) {
+				const errorText = await uploadResponse.text();
+				return { success: false, error: `上传失败: ${errorText}` };
+			}
+
+			const uploadResult = await uploadResponse.json();
+			const imageUrl = `${qiniu.domain.replace(/\/$/, '')}/${uploadResult.key}`;
+
+			// 保存到云存储列表（localStorage）
+			const UPLOADED_IMAGES_KEY = 'lovpen-uploaded-images';
+			const existingImages = JSON.parse(localStorage.getItem(UPLOADED_IMAGES_KEY) || '[]');
+			existingImages.unshift({
+				id: `${timestamp}-${randomStr}`,
+				name: `codeblock-${timestamp}-${randomStr}.png`,
+				url: imageUrl,
+				key: fileKey,
+				size: blob.size,
+				type: 'image/png',
+				uploadedAt: new Date().toISOString()
+			});
+			localStorage.setItem(UPLOADED_IMAGES_KEY, JSON.stringify(existingImages));
+			// 触发自定义事件通知 React 刷新
+			window.dispatchEvent(new CustomEvent('lovpen-images-updated'));
+
+			// 替换源Markdown中的代码块 - 使用 vault.modify
+			const activeFile = this.app.workspace.getActiveFile();
+			if (!activeFile) {
+				return { success: true, imageUrl, error: '图片已上传，但无法修改源文件（未找到活动文件）' };
+			}
+
+			const currentContent = await this.app.vault.read(activeFile);
+
+			// 标准化代码内容：去掉行尾空格，统一换行符
+			const normalizeCode = (code: string) => code.split('\n').map(l => l.trimEnd()).join('\n').trim();
+			const normalizedInput = normalizeCode(codeContent);
+
+			// 查找所有代码块并比较内容
+			const codeBlockPattern = /```(\w*)\n([\s\S]*?)\n```/g;
+			let match;
+			let newContent = currentContent;
+			let replaced = false;
+
+			while ((match = codeBlockPattern.exec(currentContent)) !== null) {
+				const blockContent = normalizeCode(match[2]);
+				if (blockContent === normalizedInput) {
+					// 找到匹配的代码块，替换它
+					newContent = currentContent.slice(0, match.index) +
+						`![](${imageUrl})` +
+						currentContent.slice(match.index + match[0].length);
+					replaced = true;
+					break;
+				}
+			}
+
+			if (!replaced) {
+				return { success: true, imageUrl, error: '图片已上传，但未找到匹配的代码块进行替换' };
+			}
+
+			await this.app.vault.modify(activeFile, newContent);
+			new Notice('代码块已替换为图片');
+
+			// 触发重新渲染预览
+			await this.renderMarkdown();
+
+			return { success: true, imageUrl };
+		} catch (error) {
+			logger.error('uploadCodeBlockAsImage 失败:', error);
+			return { success: false, error: (error as Error).message };
+		}
+	}
+
+	/**
 	 * 设置全局API，供React组件调用
 	 */
 	private setupGlobalAPI(): void {
@@ -1410,7 +1549,8 @@ ${customCSS}`;
 				onArticleInfoChange: this.handleArticleInfoChange.bind(this),
 				onSaveSettings: this.saveSettingsToPlugin.bind(this),
 				persistentStorage: this.buildPersistentStorageAPI(),
-				requestUrl: requestUrl
+				requestUrl: requestUrl,
+				uploadCodeBlockAsImage: this.uploadCodeBlockAsImage.bind(this)
 			};
 
 			(window as any).lovpenReactAPI = globalAPI;
