@@ -2,14 +2,14 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {LovpenReactProps} from "../types";
 import {Toolbar} from "./toolbar/Toolbar";
 import {useSetAtom, useAtomValue} from "jotai";
-import {initializeSettingsAtom, settingsAtom} from "../store/atoms";
+import {initializeSettingsAtom, settingsAtom, articleInfoAtom} from "../store/atoms";
 import {articleHTMLAtom, cssContentAtom} from "../store/contentAtoms";
 import {HMRTest} from "./HMRTest";
 import {ArticleRenderer} from "./ArticleRenderer";
 import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
-import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
+import {AvatarPreview} from "./ui/AvatarPreview";
 import packageJson from "../../package.json";
 import {applyCodeBlockScale, findScreenshotElement} from "@lovpen/shared";
 
@@ -45,6 +45,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	const atomArticleHTML = useAtomValue(articleHTMLAtom);
 	const atomCssContent = useAtomValue(cssContentAtom);
 	const atomSettings = useAtomValue(settingsAtom);
+	const articleInfo = useAtomValue(articleInfoAtom);
 
 	// 使用atom值或props值作为fallback
 	const articleHTML = atomArticleHTML || propsArticleHTML;
@@ -380,15 +381,16 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 							</button>
 
 							{/* 头像 - 点击切换到设置 tab */}
-							<Avatar
+							<div
 								onClick={() => setToolbarActiveTab('settings')}
-								className="cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D97757] shadow-sm"
+								className="cursor-pointer transition-all hover:scale-105"
 							>
-								<AvatarImage />
-								<AvatarFallback className="transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 text-[#D97757] shadow-sm">
-									{settings?.personalInfo?.name?.[0] ?? "L"}
-								</AvatarFallback>
-							</Avatar>
+								<AvatarPreview
+									config={articleInfo.authorAvatar}
+									userName={articleInfo.author || settings?.personalInfo?.name}
+									size="xs"
+								/>
+							</div>
 						</div>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}

@@ -754,9 +754,16 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				}
 
 				// Add personalInfo to template data
+				// 优先使用 toolbarArticleInfo.authorAvatar，其次使用 settings.personalInfo.avatar
+				const avatarConfig = this.toolbarArticleInfo?.authorAvatar || this.settings.personalInfo?.avatar;
+				// 将 AvatarConfig 对象转换为字符串 URL（模板期望的格式）
+				const avatarUrl = avatarConfig?.type === 'uploaded' && avatarConfig?.data
+					? avatarConfig.data
+					: '';
+
 				meta.personalInfo = {
 					name: this.settings.personalInfo?.name || '',
-					avatar: this.settings.personalInfo?.avatar || '',
+					avatar: avatarUrl,
 					bio: this.settings.personalInfo?.bio || '',
 					email: this.settings.personalInfo?.email || '',
 					website: this.settings.personalInfo?.website || ''
