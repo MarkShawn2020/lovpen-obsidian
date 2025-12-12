@@ -4,7 +4,7 @@ import {CoverCard} from "@/components/toolbar/CoverCard";
 import {ImageSelectionModal} from "@/components/toolbar/ImageSelectionModal";
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from "@/components/toolbar/cover/types";
 import {logger} from "../../../../shared/src/logger";
-import {Download, RotateCcw, Sparkles, Settings, Eye, X, Check} from "lucide-react";
+import {Download, RotateCcw, Sparkles, Settings, Eye, X, Check, Copy} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
 import {imageGenerationService} from '../../services/imageGenerationService';
 import {ViteReactSettings, UploadedImage} from '../../types';
@@ -870,6 +870,23 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 								className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
 							>
 								取消
+							</button>
+							<button
+								onClick={async () => {
+									try {
+										const response = await fetch(previewImage);
+										const blob = await response.blob();
+										await navigator.clipboard.write([
+											new ClipboardItem({[blob.type]: blob})
+										]);
+									} catch (err) {
+										logger.error('复制图片失败:', err);
+									}
+								}}
+								className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+							>
+								<Copy className="h-4 w-4"/>
+								复制
 							</button>
 							<button
 								onClick={() => {
