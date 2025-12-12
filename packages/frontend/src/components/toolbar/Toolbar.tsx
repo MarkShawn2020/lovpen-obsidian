@@ -1105,7 +1105,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 						{/* 封面设计 */}
 						{activeSection === 'cover' && (
-							<SectionLayout title="封面设计">
+							<SectionLayout title="封面设计" withCard={false}>
 								<CoverDesigner
 									articleHTML={articleHTML}
 									onDownloadCovers={handleDownloadCovers}

@@ -8,6 +8,7 @@ import {Download, RotateCcw, Sparkles, Settings, Eye, X, Check, Copy} from "luci
 import {persistentStorageService} from '../../services/persistentStorage';
 import {imageGenerationService} from '../../services/imageGenerationService';
 import {ViteReactSettings, UploadedImage} from '../../types';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select';
 
 // 本地存储键名（与 Toolbar 共用）
 const UPLOADED_IMAGES_STORAGE_KEY = 'lovpen-uploaded-images';
@@ -19,12 +20,25 @@ const AI_IMAGE_MODELS = [
 	{value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', description: '快速生成'},
 ] as const;
 
+// AI 生成图片元数据
+interface AIImageMeta {
+	style: string;
+	model: string;
+	targetCover: 1 | 2;
+	aspectRatio: string;
+	width: number;
+	height: number;
+	createdAt: string;
+}
+
 // AI 生成状态持久化接口
 interface AIGenerationState {
 	aiStyle: string;
 	aiTargetCover: 1 | 2;
 	aiModel: string;
-	aiGeneratedImages: string[]; // 最多保存 3 张
+	aiBatchCount: number; // 一次生成数量
+	aiGeneratedImageIds: string[]; // 存储文件 ID，最多 10 张
+	aiImageMetas: Record<string, AIImageMeta>; // fileId -> 生成参数
 }
 
 // 获取 AI 生成状态
@@ -42,9 +56,9 @@ const saveAIGenerationState = (state: Partial<AIGenerationState>) => {
 	try {
 		const existing = getAIGenerationState();
 		const merged = {...existing, ...state};
-		// 限制生成图片数量为 3 张
-		if (merged.aiGeneratedImages && merged.aiGeneratedImages.length > 3) {
-			merged.aiGeneratedImages = merged.aiGeneratedImages.slice(0, 3);
+		// 限制生成图片数量为 10 张
+		if (merged.aiGeneratedImageIds && merged.aiGeneratedImageIds.length > 10) {
+			merged.aiGeneratedImageIds = merged.aiGeneratedImageIds.slice(0, 10);
 		}
 		localStorage.setItem(AI_GENERATION_STATE_KEY, JSON.stringify(merged));
 	} catch (error) {
@@ -99,10 +113,19 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// AI 智能生成相关状态（从 localStorage 恢复）
 	const [aiStyle, setAiStyle] = useState<string>(() => getAIGenerationState().aiStyle || 'illustration');
 	const [aiModel, setAiModel] = useState<string>(() => getAIGenerationState().aiModel || 'nano-banana-pro');
+	const [aiBatchCount, setAiBatchCount] = useState<number>(() => getAIGenerationState().aiBatchCount || 1);
 	const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-	const [aiGeneratedImages, setAiGeneratedImages] = useState<string[]>(() => getAIGenerationState().aiGeneratedImages || []);
+	// 正在生成中的骨架屏数量
+	const [pendingSkeletons, setPendingSkeletons] = useState(0);
+	// 存储文件 ID 列表（持久化）
+	const [aiGeneratedImageIds, setAiGeneratedImageIds] = useState<string[]>(() => getAIGenerationState().aiGeneratedImageIds || []);
+	// 存储 ID -> URL 的映射（运行时）
+	const [aiImageUrlMap, setAiImageUrlMap] = useState<Map<string, string>>(new Map());
+	// 存储 ID -> 生成参数的映射（持久化）
+	const [aiImageMetas, setAiImageMetas] = useState<Record<string, AIImageMeta>>(() => getAIGenerationState().aiImageMetas || {});
 	const [aiTargetCover, setAiTargetCover] = useState<1 | 2>(() => getAIGenerationState().aiTargetCover || 1);
-	const [previewImage, setPreviewImage] = useState<string | null>(null);
+	// 预览的图片 ID（改为存 fileId 以便获取元数据）
+	const [previewImageId, setPreviewImageId] = useState<string | null>(null);
 
 	// 监听 storage 变化刷新上传图片列表
 	useEffect(() => {
@@ -131,9 +154,49 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	}, [aiTargetCover]);
 
 	useEffect(() => {
-		// 只保存最近 3 张生成的图片
-		saveAIGenerationState({aiGeneratedImages: aiGeneratedImages.slice(0, 3)});
-	}, [aiGeneratedImages]);
+		saveAIGenerationState({aiBatchCount});
+	}, [aiBatchCount]);
+
+	useEffect(() => {
+		// 只保存最近 10 张生成的图片 ID
+		saveAIGenerationState({aiGeneratedImageIds: aiGeneratedImageIds.slice(0, 10)});
+	}, [aiGeneratedImageIds]);
+
+	useEffect(() => {
+		saveAIGenerationState({aiImageMetas});
+	}, [aiImageMetas]);
+
+	// 初始化时从持久化存储恢复图片 URL
+	useEffect(() => {
+		const restoreImageUrls = async () => {
+			if (aiGeneratedImageIds.length === 0) return;
+
+			const files = await persistentStorageService.getFiles();
+			const newUrlMap = new Map<string, string>();
+
+			for (const id of aiGeneratedImageIds) {
+				const file = files.find(f => f.id === id);
+				if (file) {
+					try {
+						const url = await persistentStorageService.getFileUrl(file);
+						newUrlMap.set(id, url);
+					} catch (error) {
+						logger.warn(`[CoverDesigner] 恢复 AI 生成图片失败: ${id}`, error);
+					}
+				}
+			}
+
+			setAiImageUrlMap(newUrlMap);
+
+			// 清理无效的 ID
+			const validIds = aiGeneratedImageIds.filter(id => newUrlMap.has(id));
+			if (validIds.length !== aiGeneratedImageIds.length) {
+				setAiGeneratedImageIds(validIds);
+			}
+		};
+
+		restoreImageUrls();
+	}, []); // 只在初始化时运行一次
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -604,44 +667,74 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	// AI 生成是否可用
 	const isAIAvailable = settings?.aiProvider === 'zenmux' && !!settings?.zenmuxApiKey?.trim();
 
-	// AI 一键生成封面（整合 prompt 生成 + 图片生成）
+	// AI 一键生成封面（整合 prompt 生成 + 图片生成，支持批量）
 	const handleOneClickGenerate = useCallback(async () => {
 		if (!isAIAvailable) return;
 
 		setIsGeneratingImage(true);
 		setGenerationError('');
-		setGenerationStatus({isGenerating: true, progress: 10, message: '正在分析文章...'});
+		setPendingSkeletons(aiBatchCount); // 显示骨架屏
+		setGenerationStatus({isGenerating: true, progress: 5, message: '正在分析文章...'});
 
 		try {
-			// Step 1: 生成 prompt
-			logger.info('[CoverDesigner] 开始一键生成封面 - 分析文章');
+			// Step 1: 生成 prompt（只需一次）
+			logger.info('[CoverDesigner] 开始一键生成封面 - 分析文章', {batchCount: aiBatchCount});
 			const promptResult = await imageGenerationService.generateCoverPrompt(articleHTML, aiStyle, settings);
 			if (!promptResult.success || !promptResult.positivePrompt) {
 				throw new Error(promptResult.error || '分析文章失败');
 			}
 			logger.info('[CoverDesigner] 提示词生成成功', {prompt: promptResult.positivePrompt.substring(0, 100)});
 
-			setGenerationStatus({isGenerating: true, progress: 40, message: '正在生成图片...'});
-
-			// Step 2: 生成图片
 			const dimensions = getDimensions(aiTargetCover);
-			const result = await imageGenerationService.generateImage({
-				prompt: promptResult.positivePrompt,
-				negativePrompt: promptResult.negativePrompt,
-				style: aiStyle,
-				aspectRatio: dimensions.aspectRatio,
-				width: dimensions.width,
-				height: dimensions.height,
-				settings,
-				useNanoBananaPro: aiModel === 'nano-banana-pro'
-			});
+			let successCount = 0;
 
-			if (result.success && result.imageUrl) {
-				setAiGeneratedImages(prev => [result.imageUrl!, ...prev]);
-				setGenerationStatus({isGenerating: false, progress: 100, message: '生成完成!'});
-				logger.info('[CoverDesigner] AI 封面生成成功');
+			// Step 2: 批量生成图片，每张实时更新
+			for (let i = 0; i < aiBatchCount; i++) {
+				const progressBase = 20 + (i / aiBatchCount) * 70;
+				setGenerationStatus({isGenerating: true, progress: progressBase, message: `正在生成第 ${i + 1}/${aiBatchCount} 张...`});
+
+				const result = await imageGenerationService.generateImage({
+					prompt: promptResult.positivePrompt,
+					negativePrompt: promptResult.negativePrompt,
+					style: aiStyle,
+					aspectRatio: dimensions.aspectRatio,
+					width: dimensions.width,
+					height: dimensions.height,
+					settings,
+					useNanoBananaPro: aiModel === 'nano-banana-pro'
+				});
+
+				if (result.success && result.imageUrl) {
+					const fileName = `ai-cover-${Date.now()}-${i}.png`;
+					const savedFile = await persistentStorageService.saveFileFromUrl(result.imageUrl, fileName, 'image/png');
+					const meta: AIImageMeta = {
+						style: aiStyle,
+						model: aiModel,
+						targetCover: aiTargetCover,
+						aspectRatio: dimensions.aspectRatio,
+						width: dimensions.width,
+						height: dimensions.height,
+						createdAt: new Date().toISOString()
+					};
+
+					// 实时更新状态
+					setAiGeneratedImageIds(prev => [savedFile.id, ...prev].slice(0, 10));
+					setAiImageUrlMap(prev => new Map(prev).set(savedFile.id, result.imageUrl!));
+					setAiImageMetas(prev => ({...prev, [savedFile.id]: meta}));
+					setPendingSkeletons(prev => Math.max(0, prev - 1)); // 减少骨架屏
+
+					successCount++;
+					logger.info(`[CoverDesigner] AI 封面 ${i + 1}/${aiBatchCount} 生成成功`, {fileId: savedFile.id});
+				} else {
+					setPendingSkeletons(prev => Math.max(0, prev - 1)); // 失败也减少
+					logger.warn(`[CoverDesigner] AI 封面 ${i + 1}/${aiBatchCount} 生成失败:`, result.error);
+				}
+			}
+
+			if (successCount > 0) {
+				setGenerationStatus({isGenerating: false, progress: 100, message: `生成完成! (${successCount}/${aiBatchCount})`});
 			} else {
-				throw new Error(result.error || '生成失败');
+				throw new Error('所有图片生成失败');
 			}
 		} catch (error) {
 			logger.error('[CoverDesigner] AI 封面生成失败:', error);
@@ -649,20 +742,25 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			setGenerationStatus({isGenerating: false, progress: 0, message: ''});
 		} finally {
 			setIsGeneratingImage(false);
+			setPendingSkeletons(0); // 确保清空骨架屏
 		}
-	}, [articleHTML, aiStyle, aiModel, aiTargetCover, settings, isAIAvailable, getDimensions]);
+	}, [articleHTML, aiStyle, aiModel, aiTargetCover, aiBatchCount, settings, isAIAvailable, getDimensions]);
 
 	// 选择 AI 生成的图片作为封面
-	const handleSelectAiImage = useCallback(async (imageUrl: string) => {
-		await createCover(imageUrl, 'ai', aiTargetCover, imageUrl);
-	}, [createCover, aiTargetCover]);
+	const handleSelectAiImage = useCallback(async (fileId: string) => {
+		const url = aiImageUrlMap.get(fileId);
+		if (url) {
+			await createCover(url, 'ai', aiTargetCover, url);
+		}
+	}, [createCover, aiTargetCover, aiImageUrlMap]);
 
 	return (
-		<div className="@container space-y-3 sm:space-y-4 relative">
-			{/* 头部和操作按钮 */}
-			<div className="w-full space-y-3 sm:space-y-4">
+		<div className="@container space-y-4 relative">
+			{/* 卡片1: 封面设计 */}
+			<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm space-y-3">
+				{/* 头部和操作按钮 */}
 				<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-					<h3 className="text-base sm:text-lg font-semibold">封面设计</h3>
+					<h4 className="text-sm font-medium text-foreground">封面预览</h4>
 					<div className="flex space-x-1 sm:space-x-2">
 						<button
 							onClick={handleDownloadCovers}
@@ -689,34 +787,34 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 						</button>
 					</div>
 				</div>
+
+				{/* 封面卡片区域 - Grid 布局，宽度比例 2.25:1 使高度自然相等 */}
+				<div className="grid grid-cols-1 sm:grid-cols-[2.25fr_1fr] gap-2 sm:gap-3 w-full [&>*]:min-w-0">
+					<CoverCard
+						coverData={cover1Data}
+						aspectRatio={2.25}
+						label="封面1 (2.25:1)"
+						placeholder="点击添加封面1"
+						isGenerating={generationStatus.isGenerating && selectedCoverNumber === 1}
+						generationProgress={generationStatus.progress}
+						onClick={() => handleCoverCardClick(1)}
+						onClear={() => handleClearCover(1)}
+					/>
+					<CoverCard
+						coverData={cover2Data}
+						aspectRatio={1}
+						label="封面2 (1:1)"
+						placeholder="点击添加封面2"
+						isGenerating={generationStatus.isGenerating && selectedCoverNumber === 2}
+						generationProgress={generationStatus.progress}
+						onClick={() => handleCoverCardClick(2)}
+						onClear={() => handleClearCover(2)}
+					/>
+				</div>
 			</div>
 
-			{/* 封面卡片区域 - Grid 布局，宽度比例 2.25:1 使高度自然相等 */}
-			<div className="grid grid-cols-1 sm:grid-cols-[2.25fr_1fr] gap-2 sm:gap-3 w-full [&>*]:min-w-0">
-				<CoverCard
-					coverData={cover1Data}
-					aspectRatio={2.25}
-					label="封面1 (2.25:1)"
-					placeholder="点击添加封面1"
-					isGenerating={generationStatus.isGenerating && selectedCoverNumber === 1}
-					generationProgress={generationStatus.progress}
-					onClick={() => handleCoverCardClick(1)}
-					onClear={() => handleClearCover(1)}
-				/>
-				<CoverCard
-					coverData={cover2Data}
-					aspectRatio={1}
-					label="封面2 (1:1)"
-					placeholder="点击添加封面2"
-					isGenerating={generationStatus.isGenerating && selectedCoverNumber === 2}
-					generationProgress={generationStatus.progress}
-					onClick={() => handleCoverCardClick(2)}
-					onClear={() => handleClearCover(2)}
-				/>
-			</div>
-
-			{/* AI 智能生成区域 */}
-			<div className="border border-border rounded-xl p-4 bg-card">
+			{/* 卡片2: AI 智能生成区域 */}
+			<div className="bg-white rounded-xl border border-[#E8E6DC] p-4 shadow-sm">
 				<div className="flex items-center gap-2 mb-3">
 					<Sparkles className="h-4 w-4 text-primary"/>
 					<h4 className="text-sm font-serif font-medium text-foreground">AI 智能生成</h4>
@@ -769,6 +867,18 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 								<option value={1}>封面1 (2.25:1)</option>
 								<option value={2}>封面2 (1:1)</option>
 							</select>
+
+							<Select value={String(aiBatchCount)} onValueChange={(v) => setAiBatchCount(Number(v))}>
+								<SelectTrigger size="sm" className="w-auto text-xs">
+									<SelectValue placeholder="数量"/>
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="1">1张</SelectItem>
+									<SelectItem value="2">2张</SelectItem>
+									<SelectItem value="3">3张</SelectItem>
+									<SelectItem value="4">4张</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						{/* 一键生成按钮 */}
@@ -797,23 +907,39 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 						)}
 
 						{/* 生成的图片预览 */}
-						{aiGeneratedImages.length > 0 && (
+						{(aiGeneratedImageIds.length > 0 || pendingSkeletons > 0) && (
 							<div className="space-y-2">
-								<p className="text-xs text-muted-foreground">点击预览，双击应用为封面{aiTargetCover}</p>
+								<p className="text-xs text-muted-foreground">生成历史，单击预览</p>
 								<div className="grid grid-cols-3 gap-2">
-									{aiGeneratedImages.slice(0, 6).map((url, index) => (
-										<button
-											key={index}
-											onClick={() => setPreviewImage(url)}
-											onDoubleClick={() => handleSelectAiImage(url)}
-											className="relative aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors group"
+									{/* 骨架屏 - 显示在最前面 */}
+									{Array.from({length: pendingSkeletons}).map((_, index) => (
+										<div
+											key={`skeleton-${index}`}
+											className="relative aspect-video rounded-lg overflow-hidden border-2 border-dashed border-primary/30 bg-muted animate-pulse"
 										>
-											<img src={url} alt={`生成图片 ${index + 1}`} className="w-full h-full object-cover"/>
-											<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-												<Eye className="h-4 w-4 text-white"/>
+											<div className="absolute inset-0 flex items-center justify-center">
+												<Sparkles className="h-5 w-5 text-primary/50 animate-spin"/>
 											</div>
-										</button>
+										</div>
 									))}
+									{/* 已生成的图片 */}
+									{aiGeneratedImageIds.map((fileId) => {
+										const url = aiImageUrlMap.get(fileId);
+										if (!url) return null;
+										return (
+											<button
+												key={fileId}
+												onClick={() => setPreviewImageId(fileId)}
+												onDoubleClick={() => handleSelectAiImage(fileId)}
+												className="relative aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors group"
+											>
+												<img src={url} alt="AI 生成图片" className="w-full h-full object-cover"/>
+												<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+													<Eye className="h-4 w-4 text-white"/>
+												</div>
+											</button>
+										);
+									})}
 								</div>
 							</div>
 						)}
@@ -841,67 +967,115 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			)}
 
 			{/* AI 生成图片预览弹窗 */}
-			{previewImage && (
-				<div
-					className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-					onClick={() => setPreviewImage(null)}
-				>
+			{previewImageId && (() => {
+				const previewUrl = aiImageUrlMap.get(previewImageId);
+				const previewMeta = aiImageMetas[previewImageId];
+				if (!previewUrl) return null;
+
+				// 风格标签映射
+				const styleLabels: Record<string, string> = {
+					illustration: '插画',
+					realistic: '写实',
+					minimalist: '简约',
+					abstract: '抽象',
+					vintage: '复古'
+				};
+
+				return (
 					<div
-						className="relative max-w-3xl max-h-[80vh] bg-card rounded-xl overflow-hidden shadow-2xl"
-						onClick={(e) => e.stopPropagation()}
+						className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+						onClick={() => setPreviewImageId(null)}
 					>
-						<img
-							src={previewImage}
-							alt="预览"
-							className="max-w-full max-h-[70vh] object-contain"
-						/>
-						<div className="absolute top-2 right-2 flex gap-2">
-							<button
-								onClick={() => setPreviewImage(null)}
-								className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
-								title="关闭"
-							>
-								<X className="h-5 w-5"/>
-							</button>
-						</div>
-						<div className="p-3 bg-card border-t border-border flex justify-end gap-2">
-							<button
-								onClick={() => setPreviewImage(null)}
-								className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-							>
-								取消
-							</button>
-							<button
-								onClick={async () => {
-									try {
-										const response = await fetch(previewImage);
-										const blob = await response.blob();
-										await navigator.clipboard.write([
-											new ClipboardItem({[blob.type]: blob})
-										]);
-									} catch (err) {
-										logger.error('复制图片失败:', err);
-									}
-								}}
-								className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
-							>
-								<Copy className="h-4 w-4"/>
-								复制
-							</button>
-							<button
-								onClick={() => {
-									handleSelectAiImage(previewImage);
-									setPreviewImage(null);
-								}}
-								className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
-							>
-								<Check className="h-4 w-4"/>
-								应用为封面{aiTargetCover}
-							</button>
+						<div
+							className="relative max-w-3xl max-h-[80vh] bg-card rounded-xl overflow-hidden shadow-2xl"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<img
+								src={previewUrl}
+								alt="预览"
+								className="max-w-full max-h-[60vh] object-contain"
+							/>
+							{/* 参数信息 */}
+							{previewMeta && (
+								<div className="absolute top-2 left-2 flex flex-wrap gap-1.5">
+									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
+										{AI_IMAGE_MODELS.find(m => m.value === previewMeta.model)?.label || previewMeta.model}
+									</span>
+									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
+										{styleLabels[previewMeta.style] || previewMeta.style}
+									</span>
+									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
+										{previewMeta.aspectRatio}
+									</span>
+									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
+										{previewMeta.width}×{previewMeta.height}
+									</span>
+								</div>
+							)}
+							<div className="absolute top-2 right-2 flex gap-2">
+								<button
+									onClick={() => setPreviewImageId(null)}
+									className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+									title="关闭"
+								>
+									<X className="h-5 w-5"/>
+								</button>
+							</div>
+							<div className="p-3 bg-card border-t border-border flex justify-between items-center gap-2">
+								{/* 时间信息 */}
+								<span className="text-xs text-muted-foreground">
+									{previewMeta?.createdAt ? new Date(previewMeta.createdAt).toLocaleString() : ''}
+								</span>
+								<div className="flex gap-2">
+									<button
+										onClick={() => setPreviewImageId(null)}
+										className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+									>
+										取消
+									</button>
+									<button
+										onClick={async () => {
+											try {
+												const response = await fetch(previewUrl);
+												const blob = await response.blob();
+												await navigator.clipboard.write([
+													new ClipboardItem({[blob.type]: blob})
+												]);
+											} catch (err) {
+												logger.error('复制图片失败:', err);
+											}
+										}}
+										className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+									>
+										<Copy className="h-4 w-4"/>
+										复制
+									</button>
+									<button
+										onClick={async () => {
+											await createCover(previewUrl, 'ai', 1, previewUrl);
+											setPreviewImageId(null);
+										}}
+										className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+									>
+										<Check className="h-4 w-4"/>
+										封面1
+									</button>
+									<button
+										onClick={async () => {
+											await createCover(previewUrl, 'ai', 2, previewUrl);
+											setPreviewImageId(null);
+										}}
+										className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+									>
+										<Check className="h-4 w-4"/>
+										封面2
+									</button>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				);
+			})()}
 
 			{/* 隐藏的 canvas 元素 */}
 			<canvas ref={canvasRef} style={{display: 'none'}}/>
