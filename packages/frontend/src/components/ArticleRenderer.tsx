@@ -1,6 +1,8 @@
-import React, { useRef, useEffect, memo } from 'react';
+import React, { useRef, useEffect, memo, useMemo } from 'react';
 import { domToPng } from 'modern-screenshot';
 import { domUpdater } from '../utils/domUpdater';
+import { useAtomValue } from 'jotai';
+import { settingsAtom } from '../store/atoms';
 
 interface ArticleRendererProps {
   html: string;
@@ -427,6 +429,29 @@ function createUploadAsImageButton(preElement: HTMLElement, codeElement: HTMLEle
 export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialized = useRef(false);
+  const settings = useAtomValue(settingsAtom);
+
+  // 根据设置决定是否在文章开头显示封面
+  const finalHtml = useMemo(() => {
+    if (settings.showCoverInArticle === false) {
+      return html;
+    }
+    try {
+      const coverData = localStorage.getItem('cover-designer-preview-1');
+      if (coverData) {
+        const parsed = JSON.parse(coverData);
+        const cover = parsed?.covers?.[0];
+        if (cover?.imageUrl) {
+          // 使用 p>img 结构，与 markdown 渲染的图片一致
+          const coverHtml = `<p><img src="${cover.imageUrl}" alt="封面" /></p>`;
+          return coverHtml + html;
+        }
+      }
+    } catch {
+      // 忽略解析错误
+    }
+    return html;
+  }, [html, settings.showCoverInArticle]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -492,7 +517,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
     };
   }, [html]);
 
-  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: finalHtml }} />;
 });
 
 ArticleRenderer.displayName = 'ArticleRenderer';

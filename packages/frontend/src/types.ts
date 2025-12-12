@@ -136,6 +136,7 @@ export interface ViteReactSettings {
 	toolbarPosition?: 'left' | 'right'; // 工具栏位置
 	scaleCodeBlockInImage?: boolean; // 复制为图片时是否缩放溢出的代码块
 	hideFirstHeading?: boolean; // 是否隐藏一级标题
+	showCoverInArticle?: boolean; // 封面（若有）是否显示在文章开头
 	// Cloud Storage settings
 	cloudStorage?: CloudStorageSettings;
 }

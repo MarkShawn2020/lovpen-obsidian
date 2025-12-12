@@ -110,6 +110,10 @@ interface SettingsData {
 	/** 是否隐藏一级标题 */
 	hideFirstHeading?: boolean;
 
+	// ===== 封面显示设置 =====
+	/** 封面（若有）是否显示在文章开头 */
+	showCoverInArticle?: boolean;
+
 	// ===== 工具栏设置 =====
 	/** 工具栏位置 */
 	toolbarPosition?: 'left' | 'right';
@@ -179,6 +183,7 @@ export class NMPSettings implements SettingsData {
 	aiModel: string = 'claude-3-5-haiku-latest';
 	scaleCodeBlockInImage: boolean = true;
 	hideFirstHeading: boolean = false;
+	showCoverInArticle: boolean = true;
 	toolbarPosition: 'left' | 'right' = 'right';
 	cloudStorage: CloudStorageSettings = {
 		enabled: false,

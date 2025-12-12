@@ -681,7 +681,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		// 如果设置了隐藏一级标题，移除第一个 h1 标签
 		let processedArticle = article;
 		if (this.settings.hideFirstHeading) {
-			processedArticle = article.replace(/<h1[^>]*>[\s\S]*?<\/h1>/, '');
+			processedArticle = processedArticle.replace(/<h1[^>]*>[\s\S]*?<\/h1>/, '');
 		}
 
 		let html = `<section class="${className}" id="article-section">${processedArticle}</section>`;
@@ -780,7 +780,6 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					email: this.settings.personalInfo?.email || '',
 					website: this.settings.personalInfo?.website || ''
 				};
-
 
 				html = templateManager.applyTemplate(html, this.settings.defaultTemplate, meta);
 			} catch (error) {

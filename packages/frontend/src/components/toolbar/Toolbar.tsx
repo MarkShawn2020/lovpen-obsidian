@@ -1345,6 +1345,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 												}}
 											/>
 										</div>
+
+										{/* 显示封面 */}
+										<div className="flex items-center justify-between px-4 py-3">
+											<div className="flex items-center gap-3">
+												<div className="w-7 h-7 bg-gradient-to-br from-[#B49FD8] to-[#8B7CB8] rounded-md flex items-center justify-center">
+													<Image className="h-4 w-4 text-white"/>
+												</div>
+												<div>
+													<span className="text-[#181818] text-sm block">显示封面</span>
+													<span className="text-[#87867F] text-xs">在文章开头显示封面图</span>
+												</div>
+											</div>
+											<Switch
+												checked={atomSettings.showCoverInArticle ?? true}
+												onCheckedChange={(checked) => {
+													updateSettings({showCoverInArticle: checked});
+													saveSettings();
+													onRenderArticle?.();
+												}}
+											/>
+										</div>
 									</div>
 								</div>
 
