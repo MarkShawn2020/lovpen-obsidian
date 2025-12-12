@@ -986,75 +986,59 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				}}>
 				{/* 左侧导航栏 - macOS 系统偏好设置风格 */}
 				<div
-					className={`bg-[#F0EEE6]/80 backdrop-blur-xl border-r border-[#E8E6DC] flex flex-col flex-shrink-0 transition-all duration-200 ${
-						sidebarExpanded ? 'w-[180px]' : 'w-[52px]'
-					}`}
+					className="bg-[#F0EEE6]/80 backdrop-blur-xl border-r border-[#E8E6DC] flex flex-col flex-shrink-0 transition-[width] duration-200 overflow-hidden"
+					style={{ width: sidebarExpanded ? 160 : 44 }}
 				>
 					{/* 顶部品牌区域 */}
-					<div className="p-2 border-b border-[#E8E6DC]">
-						{sidebarExpanded ? (
-							<div
-								onClick={toggleSidebar}
-								className="flex items-center justify-between px-1 cursor-pointer rounded-md hover:bg-[#E8E6DC]/80 transition-all"
-								title="收起菜单"
-							>
-								<div className="flex items-center gap-2">
-									<LovpenLogo className="w-6 h-6 text-[#D97757]"/>
-									<span className="text-sm font-semibold text-[#3d3d3d]">Lovpen</span>
-								</div>
-								<div className="p-1.5 text-[#87867F]">
-									<ChevronsLeft className="h-4 w-4"/>
-								</div>
+					<div
+						onClick={toggleSidebar}
+						className="h-10 border-b border-[#E8E6DC] flex items-center cursor-pointer hover:bg-[#E8E6DC]/80"
+						title={sidebarExpanded ? "收起菜单" : "展开菜单"}
+					>
+						<div className="w-[44px] h-10 flex items-center justify-center flex-shrink-0">
+							<LovpenLogo className="w-6 h-6 text-[#D97757] hover:scale-105 transition-transform"/>
+						</div>
+						<div className="flex-1 flex items-center justify-between pr-2 overflow-hidden">
+							<span className="text-sm font-semibold text-[#3d3d3d] whitespace-nowrap">Lovpen</span>
+							<div className="p-1 text-[#87867F]">
+								<ChevronsLeft className="h-4 w-4"/>
 							</div>
-						) : (
-							<button
-								onClick={toggleSidebar}
-								className="w-full flex items-center justify-center p-1"
-								title="展开菜单"
-							>
-								<LovpenLogo className="w-7 h-7 text-[#D97757] hover:scale-105 transition-transform"/>
-							</button>
-						)}
+						</div>
 					</div>
 
-					<div className="flex-1 overflow-y-auto py-3 px-2">
+					<div className="flex-1 overflow-y-auto py-2 px-1.5">
 						{/* 内容分组 */}
-						<div className="mb-4">
-							{sidebarExpanded && (
-								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium px-2 mb-2">内容</p>
-							)}
-							<nav className={sidebarExpanded ? 'space-y-1' : 'space-y-2'}>
+						<div className="mb-3">
+							<div className="h-4 mb-1.5 overflow-hidden">
+								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium whitespace-nowrap px-1.5">内容</p>
+							</div>
+							<nav className="space-y-1">
 								{navItems.filter(item => item.group === 'content').map(({key, label, icon: Icon, color}) => (
 									<button
 										key={key}
 										onClick={() => handleSectionChange(key)}
 										title={!sidebarExpanded ? label : undefined}
-										className={`w-full flex items-center transition-all ${
+										className={`w-full flex items-center h-9 gap-2 px-1.5 rounded-md transition-colors ${
 											sidebarExpanded
-												? `gap-3 px-2 py-2 rounded-lg ${activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'}`
-												: 'justify-center py-1'
+												? activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'
+												: 'text-[#3d3d3d]'
 										}`}
-										style={!sidebarExpanded ? { background: 'none', border: 'none', boxShadow: 'none' } : undefined}
 									>
 										<div
-											className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} transition-transform ${
+											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} ${
 												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
 											}`}
-											style={{ boxShadow: activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
+											style={{ boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
 										>
-											<Icon className="h-4 w-4 text-white"/>
+											<Icon className="h-3.5 w-3.5 text-white"/>
 										</div>
-										{sidebarExpanded && (
-											<>
-												<span className="text-sm font-medium text-left flex-1">{label}</span>
-												{key === 'plugins' && plugins.length > 0 && (
-													<span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-														activeSection === key ? 'bg-white/25 text-white' : 'bg-[#E8E6DC] text-[#87867F]'
-													}`}>
-														{plugins.length}
-													</span>
-												)}
-											</>
+										<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
+										{key === 'plugins' && plugins.length > 0 && (
+											<span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+												activeSection === key ? 'bg-white/25 text-white' : 'bg-[#E8E6DC] text-[#87867F]'
+											}`}>
+												{plugins.length}
+											</span>
 										)}
 									</button>
 								))}
@@ -1063,33 +1047,30 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 						{/* 设置分组 */}
 						<div>
-							{sidebarExpanded && (
-								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium px-2 mb-2">设置</p>
-							)}
-							<nav className={sidebarExpanded ? 'space-y-1' : 'space-y-2'}>
+							<div className="h-4 mb-1.5 overflow-hidden">
+								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium whitespace-nowrap px-1.5">设置</p>
+							</div>
+							<nav className="space-y-1">
 								{navItems.filter(item => item.group === 'settings').map(({key, label, icon: Icon, color}) => (
 									<button
 										key={key}
 										onClick={() => handleSectionChange(key)}
 										title={!sidebarExpanded ? label : undefined}
-										className={`w-full flex items-center transition-all ${
+										className={`w-full flex items-center h-9 gap-2 px-1.5 rounded-md transition-colors ${
 											sidebarExpanded
-												? `gap-3 px-2 py-2 rounded-lg ${activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'}`
-												: 'justify-center py-1'
+												? activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'
+												: 'text-[#3d3d3d]'
 										}`}
-										style={!sidebarExpanded ? { background: 'none', border: 'none', boxShadow: 'none' } : undefined}
 									>
 										<div
-											className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} transition-transform ${
+											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} ${
 												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
 											}`}
-											style={{ boxShadow: activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
+											style={{ boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
 										>
-											<Icon className="h-4 w-4 text-white"/>
+											<Icon className="h-3.5 w-3.5 text-white"/>
 										</div>
-										{sidebarExpanded && (
-											<span className="text-sm font-medium text-left flex-1">{label}</span>
-										)}
+										<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
 									</button>
 								))}
 							</nav>
