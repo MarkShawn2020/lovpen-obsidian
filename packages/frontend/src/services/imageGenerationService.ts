@@ -1,15 +1,20 @@
 import {logger} from "../../../shared/src/logger";
 import {ViteReactSettings} from "../types";
+import {aiLogService} from "./aiLogService";
 
 export interface ImageGenerationParams {
 	prompt: string;
 	negativePrompt?: string;
-	style: string;
-	aspectRatio: string;
-	width: number;
-	height: number;
+	style?: string;  // 仅用于封面设计的 prompt 增强
+	aspectRatio?: string;  // 仅用于封面设计
+	width?: number;
+	height?: number;
 	settings?: ViteReactSettings;
 	useNanoBananaPro?: boolean; // 使用 Nano Banana Pro 模型
+	// Vertex AI generationConfig 参数
+	temperature?: number;
+	topP?: number;
+	seed?: number;
 }
 
 export interface ImageGenerationResult {
@@ -77,24 +82,23 @@ export class ImageGenerationService {
 			return {success: false, error: '此功能仅在 Obsidian 环境中可用'};
 		}
 
-		try {
-			// 从 HTML 提取纯文本
-			const parser = new DOMParser();
-			const doc = parser.parseFromString(articleHTML, 'text/html');
-			const textContent = doc.body.textContent || '';
-			// 截取前 2000 字符作为分析内容
-			const truncatedContent = textContent.substring(0, 2000);
+		// 从 HTML 提取纯文本
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(articleHTML, 'text/html');
+		const textContent = doc.body.textContent || '';
+		// 截取前 2000 字符作为分析内容
+		const truncatedContent = textContent.substring(0, 2000);
 
-			const styleDescMap: Record<string, string> = {
-				realistic: 'photorealistic, 8k, highly detailed',
-				illustration: 'digital illustration, vibrant colors, artistic',
-				minimalist: 'minimalist, clean, modern design, simple composition',
-				abstract: 'abstract art, geometric shapes, creative',
-				vintage: 'vintage, retro, film grain, nostalgic'
-			};
-			const styleDesc = styleDescMap[style] || 'best quality, masterpiece';
+		const styleDescMap: Record<string, string> = {
+			realistic: 'photorealistic, 8k, highly detailed',
+			illustration: 'digital illustration, vibrant colors, artistic',
+			minimalist: 'minimalist, clean, modern design, simple composition',
+			abstract: 'abstract art, geometric shapes, creative',
+			vintage: 'vintage, retro, film grain, nostalgic'
+		};
+		const styleDesc = styleDescMap[style] || 'best quality, masterpiece';
 
-			const systemPrompt = `You are an expert prompt engineer for image generation. Analyze the article content and generate an optimized prompt for creating a cover image.
+		const systemPrompt = `You are an expert prompt engineer for image generation. Analyze the article content and generate an optimized prompt for creating a cover image.
 
 Output format (respond with ONLY the JSON, no extra text):
 {
@@ -110,8 +114,19 @@ Guidelines:
 5. Keep the prompt concise but descriptive (under 200 words)
 6. The negative prompt should exclude: nsfw, lowres, bad anatomy, text, watermark, blurry`;
 
-			const userPrompt = `Generate a cover image prompt for this article:\n\n${truncatedContent}`;
+		const userPrompt = `Generate a cover image prompt for this article:\n\n${truncatedContent}`;
 
+		// 记录日志，包含完整的输入 prompt
+		const logId = aiLogService.addLog({
+			type: 'prompt_generation',
+			status: 'started',
+			message: '分析文章生成提示词',
+			model: settings.zenmuxModel,
+			style,
+			prompt: `[System]\n${systemPrompt}\n\n[User]\n${userPrompt}`
+		});
+
+		try {
 			logger.info('[ImageGenerationService] 生成封面提示词', {
 				contentLength: truncatedContent.length,
 				style,
@@ -148,6 +163,12 @@ Guidelines:
 			const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
 			if (jsonMatch) {
 				const parsed = JSON.parse(jsonMatch[0]);
+				aiLogService.updateLog(logId, {
+					status: 'completed',
+					message: '提示词生成成功',
+					generatedPrompt: parsed.positivePrompt,
+					negativePrompt: parsed.negativePrompt
+				});
 				return {
 					success: true,
 					positivePrompt: parsed.positivePrompt,
@@ -158,6 +179,11 @@ Guidelines:
 			throw new Error('无法解析 AI 响应');
 		} catch (error) {
 			logger.error('[ImageGenerationService] 生成提示词失败:', error);
+			aiLogService.updateLog(logId, {
+				status: 'failed',
+				message: '提示词生成失败',
+				error: error instanceof Error ? error.message : '未知错误'
+			});
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : '生成提示词失败'
@@ -167,7 +193,7 @@ Guidelines:
 
 	// 使用 ZenMux (Gemini) 生成图片
 	private async generateWithZenMux(params: ImageGenerationParams): Promise<ImageGenerationResult> {
-		const {prompt, negativePrompt, style, aspectRatio, settings, useNanoBananaPro} = params;
+		const {prompt, negativePrompt, style, aspectRatio, settings, useNanoBananaPro, temperature, topP, seed} = params;
 
 		if (!settings?.zenmuxApiKey) {
 			return {success: false, error: '请先配置 ZenMux API 密钥'};
@@ -182,7 +208,7 @@ Guidelines:
 
 			// Nano Banana Pro 使用 VertexAI 格式
 			if (useNanoBananaPro) {
-				return await this.generateWithNanoBananaPro(prompt, negativePrompt, settings, requestUrl);
+				return await this.generateWithNanoBananaPro(prompt, negativePrompt, settings, requestUrl, {temperature, topP, seed, aspectRatio});
 			}
 
 			// 旧模型使用 OpenAI 兼容格式
@@ -193,8 +219,9 @@ Guidelines:
 				abstract: '抽象艺术风格',
 				vintage: '复古胶片风格',
 			};
-			const styleDesc = stylePrompts[style] || '';
-			const enhancedPrompt = `${prompt}。${styleDesc}。比例 ${aspectRatio}，适合用作文章封面图。`;
+			const styleDesc = style ? (stylePrompts[style] || '') : '';
+			const ratioDesc = aspectRatio ? `比例 ${aspectRatio}，` : '';
+			const enhancedPrompt = `${prompt}。${styleDesc}。${ratioDesc}适合用作文章封面图。`;
 
 			logger.info('[ImageGenerationService] 使用 Gemini 2.0 Flash 生成图片', {prompt: enhancedPrompt.substring(0, 100)});
 
@@ -255,12 +282,44 @@ Guidelines:
 		prompt: string,
 		negativePrompt: string | undefined,
 		settings: ViteReactSettings,
-		requestUrl: typeof window.lovpenReactAPI.requestUrl
+		requestUrl: typeof window.lovpenReactAPI.requestUrl,
+		config?: {temperature?: number; topP?: number; seed?: number; aspectRatio?: string}
 	): Promise<ImageGenerationResult> {
 		const negPrompt = negativePrompt || 'nsfw, lowres, bad anatomy, text, watermark, blurry';
-		const fullPrompt = `${prompt}\n\nNegative: ${negPrompt}`;
+		// 在 prompt 中加入比例要求
+		const aspectDesc = config?.aspectRatio ? `\n\nAspect ratio: ${config.aspectRatio}` : '';
+		const fullPrompt = `${prompt}${aspectDesc}\n\nNegative: ${negPrompt}`;
 
-		logger.info('[ImageGenerationService] 使用 Nano Banana Pro 生成图片', {prompt: fullPrompt.substring(0, 100)});
+		const temperature = config?.temperature ?? 1.0;
+		const topP = config?.topP ?? 0.95;
+
+		logger.info('[ImageGenerationService] 使用 Nano Banana Pro 生成图片', {
+			prompt: fullPrompt.substring(0, 100),
+			aspectRatio: config?.aspectRatio,
+			temperature,
+			topP,
+			seed: config?.seed
+		});
+
+		const logId = aiLogService.addLog({
+			type: 'image_generation',
+			status: 'started',
+			message: '开始生成图片 (Nano Banana Pro)',
+			prompt: fullPrompt,
+			negativePrompt: negPrompt,
+			aspectRatio: config?.aspectRatio,
+			model: 'gemini-3-pro-image-preview'
+		});
+
+		// 构建 generationConfig
+		const generationConfig: Record<string, unknown> = {
+			responseModalities: ['TEXT', 'IMAGE'],
+			temperature,
+			topP
+		};
+		if (config?.seed !== undefined) {
+			generationConfig.seed = config.seed;
+		}
 
 		// 使用 Vertex AI 协议 (ZenMux 官方文档要求)
 		const response = await requestUrl({
@@ -277,9 +336,7 @@ Guidelines:
 						parts: [{text: fullPrompt}]
 					}
 				],
-				generationConfig: {
-					responseModalities: ['TEXT', 'IMAGE']
-				}
+				generationConfig
 			})
 		});
 
@@ -302,19 +359,29 @@ Guidelines:
 					const mimeType = part.inlineData.mimeType || 'image/png';
 					const imageUrl = `data:${mimeType};base64,${part.inlineData.data}`;
 					logger.info('[ImageGenerationService] Nano Banana Pro 生成成功');
+					aiLogService.updateLog(logId, {
+						status: 'completed',
+						message: '图片生成成功',
+						imageUrl
+					});
 					return {success: true, imageUrl};
 				}
 			}
 		}
 
 		logger.error('[ImageGenerationService] Nano Banana Pro 响应格式异常', {result: JSON.stringify(result).substring(0, 500)});
+		aiLogService.updateLog(logId, {
+			status: 'failed',
+			message: '图片生成失败',
+			error: '响应格式异常'
+		});
 		throw new Error('Nano Banana Pro 未返回图片数据');
 	}
 
 	private generateMockImage(params: ImageGenerationParams): ImageGenerationResult {
 		logger.info('[ImageGenerationService] 使用模拟生成');
 
-		const {prompt, style, width, height} = params;
+		const {prompt, style = 'illustration', width = 1024, height = 1024} = params;
 
 		// 根据风格选择背景颜色
 		const styleColors: Record<string, string> = {
@@ -340,28 +407,28 @@ Guidelines:
 						<path d="M 40 0 L 0 0 0 40" fill="none" stroke="${textColor}" stroke-width="0.5" opacity="0.1"/>
 					</pattern>
 				</defs>
-				
+
 				<rect width="100%" height="100%" fill="url(#bgGradient)"/>
 				<rect width="100%" height="100%" fill="url(#gridPattern)"/>
-				
+
 				<!-- 装饰性图形 -->
 				<circle cx="${width * 0.2}" cy="${height * 0.3}" r="30" fill="${textColor}" opacity="0.1"/>
 				<circle cx="${width * 0.8}" cy="${height * 0.7}" r="20" fill="${textColor}" opacity="0.1"/>
-				
+
 				<!-- 主要文本 -->
-				<text x="50%" y="45%" text-anchor="middle" dominant-baseline="middle" 
+				<text x="50%" y="45%" text-anchor="middle" dominant-baseline="middle"
 					  fill="${textColor}" font-family="Arial, sans-serif" font-size="16" font-weight="bold">
 					${this.truncateText(prompt, 40)}
 				</text>
-				
+
 				<!-- 风格标签 -->
-				<text x="50%" y="60%" text-anchor="middle" dominant-baseline="middle" 
+				<text x="50%" y="60%" text-anchor="middle" dominant-baseline="middle"
 					  fill="${textColor}" font-family="Arial, sans-serif" font-size="12" opacity="0.8">
 					${style.charAt(0).toUpperCase() + style.slice(1)} Style
 				</text>
-				
+
 				<!-- 尺寸信息 -->
-				<text x="50%" y="85%" text-anchor="middle" dominant-baseline="middle" 
+				<text x="50%" y="85%" text-anchor="middle" dominant-baseline="middle"
 					  fill="${textColor}" font-family="Arial, sans-serif" font-size="10" opacity="0.6">
 					${width} × ${height}
 				</text>

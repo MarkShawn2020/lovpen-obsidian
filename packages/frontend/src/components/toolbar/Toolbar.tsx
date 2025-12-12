@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {TemplateKitSelector} from "./TemplateKitSelector";
 import {CoverDesigner} from "./CoverDesigner";
+import {LogsPanel} from "./LogsPanel";
+import {PlaygroundPanel} from "./PlaygroundPanel";
 import {ArticleInfo, ArticleInfoData} from "./ArticleInfo";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
 import {ConfigComponent} from "./PluginConfigComponent";
@@ -703,7 +705,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 	const {settings: atomSettings, updateSettings, saveSettings} = useSettings(onSaveSettings, onPersonalInfoChange, onSettingsChange);
 
 	// 统一的导航状态 - 苹果风格侧边栏
-	type NavSection = 'article' | 'cover' | 'kits' | 'plugins' | 'cloud' | 'personal' | 'ai' | 'general';
+	type NavSection = 'article' | 'cover' | 'kits' | 'plugins' | 'playground' | 'logs' | 'cloud' | 'personal' | 'ai' | 'general';
 	const [activeSection, setActiveSection] = useState<NavSection>(() => {
 		try {
 			const saved = localStorage.getItem('lovpen-toolbar-section') as NavSection;
@@ -962,6 +964,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		{key: 'cover', label: '封面设计', icon: Palette, color: 'from-[#B49FD8] to-[#8B7CB8]', group: 'content'},
 		{key: 'kits', label: '模板套装', icon: Package, color: 'from-[#629A90] to-[#4A7A70]', group: 'content'},
 		{key: 'plugins', label: '插件管理', icon: Plug, color: 'from-[#97B5D5] to-[#7095B5]', group: 'content'},
+		{key: 'playground', label: '实验室', icon: ImagePlus, color: 'from-[#E8A87C] to-[#C8885C]', group: 'content'},
+		{key: 'logs', label: 'AI 日志', icon: FileText, color: 'from-[#87867F] to-[#6A6A63]', group: 'content'},
 		{key: 'cloud', label: '云存储', icon: Cloud, color: 'from-[#97B5D5] to-[#7095B5]', group: 'settings'},
 		{key: 'personal', label: '个人信息', icon: User, color: 'from-[#C2C07D] to-[#A2A05D]', group: 'settings'},
 		{key: 'ai', label: 'AI 设置', icon: Bot, color: 'from-[#CC785C] to-[#AC583C]', group: 'settings'},
@@ -1270,6 +1274,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										saveSettings();
 									}}
 								/>
+							</SectionLayout>
+						)}
+
+						{/* 实验室 Playground */}
+						{activeSection === 'playground' && (
+							<SectionLayout title="实验室">
+								<PlaygroundPanel
+									settings={atomSettings}
+									onOpenAISettings={() => handleSectionChange('ai')}
+								/>
+							</SectionLayout>
+						)}
+
+						{/* AI 日志 */}
+						{activeSection === 'logs' && (
+							<SectionLayout title="AI 日志">
+								<LogsPanel/>
 							</SectionLayout>
 						)}
 

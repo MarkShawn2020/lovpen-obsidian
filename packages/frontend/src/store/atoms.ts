@@ -3,6 +3,20 @@ import {atomWithStorage} from 'jotai/utils';
 import {PersonalInfo, ViteReactSettings, defaultCloudStorageSettings} from '../types';
 import {ArticleInfoData} from '../components/toolbar/ArticleInfo';
 
+// Playground 状态类型
+export interface PlaygroundState {
+	prompt: string;
+	negativePrompt: string;
+	style: string;
+	aspectRatio: string;
+	generatedImages: string[];
+	isGenerating: boolean;
+	// Vertex AI generationConfig 参数
+	temperature: number;
+	topP: number;
+	seed?: number;
+}
+
 // 默认的个人信息
 export const defaultPersonalInfo: PersonalInfo = {
 	name: '',
@@ -167,4 +181,24 @@ export const initializeSettingsAtom = atom(
 		set(articleInfoAtom, storedArticleInfo);
 		set(settingsInitializedAtom, true);
 	}
+);
+
+// Playground 默认状态
+export const defaultPlaygroundState: PlaygroundState = {
+	prompt: '',
+	negativePrompt: '',
+	style: 'illustration',
+	aspectRatio: '1:1',
+	generatedImages: [],
+	isGenerating: false,
+	// Vertex AI 默认值
+	temperature: 1.0,
+	topP: 0.95,
+	seed: undefined
+};
+
+// Playground 状态 atom（持久化）
+export const playgroundAtom = atomWithStorage<PlaygroundState>(
+	'lovpen-playground',
+	defaultPlaygroundState
 );
