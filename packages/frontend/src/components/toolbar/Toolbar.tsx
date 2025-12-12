@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import packageJson from "../../../package.json";
 import {TemplateKitSelector} from "./TemplateKitSelector";
 import {CoverDesigner} from "./CoverDesigner";
 import {LogsPanel} from "./LogsPanel";
@@ -1075,6 +1076,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								))}
 							</nav>
 						</div>
+					</div>
+
+					{/* 底部版本号 */}
+					<div className="border-t border-[#E8E6DC] px-2 py-2 overflow-hidden text-center">
+						<span className={`text-[10px] text-[#87867F] whitespace-nowrap ${sidebarExpanded ? '' : 'hidden'}`}>
+							Lovpen@{packageJson.version}
+						</span>
 					</div>
 				</div>
 

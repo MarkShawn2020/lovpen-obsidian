@@ -10,7 +10,6 @@ import {ScrollContainer} from "./ScrollContainer";
 import {domUpdater} from "../utils/domUpdater";
 import {CopySplitButton, CopyOption} from "./ui/copy-split-button";
 import {AvatarPreview} from "./ui/AvatarPreview";
-import packageJson from "../../package.json";
 import {applyCodeBlockScale, findScreenshotElement} from "@lovpen/shared";
 
 import {logger} from "../../../shared/src/logger";
@@ -311,21 +310,49 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						borderBottom: '1px solid #E8E6DC',
 						backdropFilter: 'blur(8px)'
 					}}>
-						{/* Logo 和版本号 */}
-						<div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-							<div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
-								<svg viewBox="0 0 986.05 1080" style={{ width: '100%', height: '100%' }} xmlns="http://www.w3.org/2000/svg">
-									<g fill="#D97757">
-										<path d="M281.73,892.18V281.73C281.73,126.13,155.6,0,0,0l0,0v610.44C0,766.04,126.13,892.18,281.73,892.18z"/>
-										<path d="M633.91,1080V469.56c0-155.6-126.13-281.73-281.73-281.73l0,0v610.44C352.14,953.87,478.31,1080,633.91,1080L633.91,1080z"/>
-										<path d="M704.32,91.16L704.32,91.16v563.47l0,0c155.6,0,281.73-126.13,281.73-281.73S859.92,91.16,704.32,91.16z"/>
-									</g>
-								</svg>
-							</div>
-							<span className="bg-[#F0EEE6] text-[#87867F] text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0">
-								v{packageJson.version}
-							</span>
-						</div>
+						{/* 工具栏展开/收起切换按钮 */}
+						<button
+							onClick={toggleToolbar}
+							title={isToolbarHidden ? '展开工具栏' : '收起工具栏'}
+							style={{
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								width: '32px',
+								height: '32px',
+								borderRadius: '8px',
+								border: '1px solid #E8E6DC',
+								backgroundColor: '#fff',
+								cursor: 'pointer',
+								transition: 'all 0.2s ease'
+							}}
+							onMouseEnter={e => {
+								e.currentTarget.style.backgroundColor = '#F9F9F7';
+								e.currentTarget.style.borderColor = '#D97757';
+							}}
+							onMouseLeave={e => {
+								e.currentTarget.style.backgroundColor = '#fff';
+								e.currentTarget.style.borderColor = '#E8E6DC';
+							}}
+						>
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="#87867F"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								style={{
+									transform: isToolbarHidden ? 'rotate(180deg)' : 'rotate(0deg)',
+									transition: 'transform 0.2s ease'
+								}}
+							>
+								<rect x="3" y="3" width="18" height="18" rx="2" />
+								<path d="M15 3v18" />
+							</svg>
+						</button>
 
 						{/* 右侧按钮组 */}
 						<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -335,50 +362,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 									onCopy(option.id);
 								}}
 							/>
-
-							{/* 工具栏展开/收起切换按钮 */}
-							<button
-								onClick={toggleToolbar}
-								title={isToolbarHidden ? '展开工具栏' : '收起工具栏'}
-								style={{
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									width: '32px',
-									height: '32px',
-									borderRadius: '8px',
-									border: '1px solid #E8E6DC',
-									backgroundColor: '#fff',
-									cursor: 'pointer',
-									transition: 'all 0.2s ease'
-								}}
-								onMouseEnter={e => {
-									e.currentTarget.style.backgroundColor = '#F9F9F7';
-									e.currentTarget.style.borderColor = '#D97757';
-								}}
-								onMouseLeave={e => {
-									e.currentTarget.style.backgroundColor = '#fff';
-									e.currentTarget.style.borderColor = '#E8E6DC';
-								}}
-							>
-								<svg
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="#87867F"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									style={{
-										transform: isToolbarHidden ? 'rotate(180deg)' : 'rotate(0deg)',
-										transition: 'transform 0.2s ease'
-									}}
-								>
-									<rect x="3" y="3" width="18" height="18" rx="2" />
-									<path d="M15 3v18" />
-								</svg>
-							</button>
 
 							{/* 头像 - 点击切换到设置 tab */}
 							<div
