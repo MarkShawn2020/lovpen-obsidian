@@ -1551,6 +1551,246 @@ ${customCSS}`;
 	}
 
 	/**
+	 * 上传表格为图片并替换源Markdown
+	 */
+	private async uploadTableAsImage(tableMarkdown: string, imageDataUrl: string): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
+		try {
+			const cloudStorage = this.settings.cloudStorage;
+
+			// 检查云存储配置
+			if (!cloudStorage?.enabled || cloudStorage.provider !== 'qiniu') {
+				return { success: false, error: '请先在设置中启用七牛云存储' };
+			}
+
+			const { qiniu } = cloudStorage;
+			if (!qiniu.accessKey || !qiniu.secretKey || !qiniu.bucket || !qiniu.domain) {
+				return { success: false, error: '七牛云配置不完整，请检查设置' };
+			}
+
+			// 将 dataUrl 转换为 Blob
+			const response = await fetch(imageDataUrl);
+			const blob = await response.blob();
+
+			// 生成唯一文件名
+			const timestamp = Date.now();
+			const randomStr = Math.random().toString(36).substring(2, 8);
+			const fileKey = `lovpen/table-${timestamp}-${randomStr}.png`;
+
+			// 生成七牛云上传凭证
+			const putPolicy = JSON.stringify({
+				scope: `${qiniu.bucket}:${fileKey}`,
+				deadline: Math.floor(Date.now() / 1000) + 3600 // 1小时有效
+			});
+			const encodedPutPolicy = btoa(putPolicy);
+
+			// 使用 Web Crypto API 计算 HMAC-SHA1
+			const encoder = new TextEncoder();
+			const keyData = encoder.encode(qiniu.secretKey);
+			const messageData = encoder.encode(encodedPutPolicy);
+
+			const cryptoKey = await crypto.subtle.importKey(
+				'raw', keyData, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+			);
+			const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+			const encodedSign = btoa(String.fromCharCode(...new Uint8Array(signature)))
+				.replace(/\+/g, '-').replace(/\//g, '_');
+
+			const uploadToken = `${qiniu.accessKey}:${encodedSign}:${encodedPutPolicy}`;
+
+			// 上传到七牛云
+			const formData = new FormData();
+			formData.append('file', blob, fileKey);
+			formData.append('token', uploadToken);
+			formData.append('key', fileKey);
+
+			// 根据区域选择上传域名
+			const uploadHosts: Record<string, string> = {
+				'z0': 'https://up.qiniup.com',
+				'z1': 'https://up-z1.qiniup.com',
+				'z2': 'https://up-z2.qiniup.com',
+				'na0': 'https://up-na0.qiniup.com',
+				'as0': 'https://up-as0.qiniup.com'
+			};
+			const uploadHost = uploadHosts[qiniu.region] || uploadHosts['z0'];
+
+			const uploadResponse = await fetch(`${uploadHost}`, {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!uploadResponse.ok) {
+				const errorText = await uploadResponse.text();
+				return { success: false, error: `上传失败: ${errorText}` };
+			}
+
+			const uploadResult = await uploadResponse.json();
+			const imageUrl = `${qiniu.domain.replace(/\/$/, '')}/${uploadResult.key}`;
+
+			// 保存到云存储列表（localStorage）
+			const UPLOADED_IMAGES_KEY = 'lovpen-uploaded-images';
+			const existingImages = JSON.parse(localStorage.getItem(UPLOADED_IMAGES_KEY) || '[]');
+			existingImages.unshift({
+				id: `${timestamp}-${randomStr}`,
+				name: `table-${timestamp}-${randomStr}.png`,
+				url: imageUrl,
+				key: fileKey,
+				size: blob.size,
+				type: 'image/png',
+				uploadedAt: new Date().toISOString()
+			});
+			localStorage.setItem(UPLOADED_IMAGES_KEY, JSON.stringify(existingImages));
+			// 触发自定义事件通知 React 刷新
+			window.dispatchEvent(new CustomEvent('lovpen-images-updated'));
+
+			// 替换源Markdown中的表格 - 使用 vault.modify
+			const activeFile = this.app.workspace.getActiveFile();
+			if (!activeFile) {
+				return { success: true, imageUrl, error: '图片已上传，但无法修改源文件（未找到活动文件）' };
+			}
+
+			const currentContent = await this.app.vault.read(activeFile);
+
+			// 从表格Markdown中提取表头单元格（第一行）用于匹配
+			const extractHeaderCells = (tableText: string): string[] => {
+				const lines = tableText.split('\n').filter(l => l.trim());
+				if (lines.length === 0) return [];
+
+				// 第一行是表头
+				const headerLine = lines[0];
+				const cells: string[] = [];
+				const cellMatches = headerLine.split('|').filter(s => s.trim());
+				for (const cell of cellMatches) {
+					const content = cell.trim();
+					if (content && !/^[-:]+$/.test(content)) {
+						cells.push(content);
+					}
+				}
+				return cells;
+			};
+
+			const inputHeaders = extractHeaderCells(tableMarkdown);
+			logger.debug('表格匹配 - 输入表头:', inputHeaders);
+
+			if (inputHeaders.length === 0) {
+				return { success: true, imageUrl, error: '图片已上传，但无法解析表格表头' };
+			}
+
+			// 查找所有表格并比较表头
+			// Markdown 表格: 以 | 开头的连续行块
+			const lines = currentContent.split('\n');
+			let tableStart = -1;
+			let tableEnd = -1;
+			let newContent = currentContent;
+			let replaced = false;
+
+			for (let i = 0; i < lines.length; i++) {
+				const line = lines[i];
+
+				// 检测表格开始（以 | 开头的行）
+				if (line.trim().startsWith('|')) {
+					if (tableStart === -1) {
+						tableStart = i;
+					}
+					tableEnd = i;
+				} else if (tableStart !== -1) {
+					// 表格结束，检查是否匹配
+					const tableLines = lines.slice(tableStart, tableEnd + 1);
+					const tableText = tableLines.join('\n');
+					const tableHeaders = extractHeaderCells(tableText);
+
+					logger.debug('表格匹配 - 源文件表头:', tableHeaders);
+
+					// 比较表头是否一致
+					if (tableHeaders.length === inputHeaders.length) {
+						let allMatch = true;
+						for (let j = 0; j < inputHeaders.length; j++) {
+							const input = inputHeaders[j].replace(/\s+/g, '').toLowerCase();
+							const source = tableHeaders[j].replace(/\s+/g, '').toLowerCase();
+							if (input !== source) {
+								allMatch = false;
+								break;
+							}
+						}
+
+						if (allMatch) {
+							logger.debug('表格匹配成功!');
+							// 计算字符位置
+							let startCharPos = 0;
+							for (let k = 0; k < tableStart; k++) {
+								startCharPos += lines[k].length + 1; // +1 for newline
+							}
+							let endCharPos = startCharPos;
+							for (let k = tableStart; k <= tableEnd; k++) {
+								endCharPos += lines[k].length + 1;
+							}
+
+							newContent = currentContent.slice(0, startCharPos) +
+								`![](${imageUrl})\n` +
+								currentContent.slice(endCharPos);
+							replaced = true;
+							break;
+						}
+					}
+
+					// 重置，继续查找下一个表格
+					tableStart = -1;
+					tableEnd = -1;
+				}
+			}
+
+			// 检查文件末尾的表格
+			if (!replaced && tableStart !== -1) {
+				const tableLines = lines.slice(tableStart, tableEnd + 1);
+				const tableText = tableLines.join('\n');
+				const tableHeaders = extractHeaderCells(tableText);
+
+				if (tableHeaders.length === inputHeaders.length) {
+					let allMatch = true;
+					for (let j = 0; j < inputHeaders.length; j++) {
+						const input = inputHeaders[j].replace(/\s+/g, '').toLowerCase();
+						const source = tableHeaders[j].replace(/\s+/g, '').toLowerCase();
+						if (input !== source) {
+							allMatch = false;
+							break;
+						}
+					}
+
+					if (allMatch) {
+						let startCharPos = 0;
+						for (let k = 0; k < tableStart; k++) {
+							startCharPos += lines[k].length + 1;
+						}
+						let endCharPos = startCharPos;
+						for (let k = tableStart; k <= tableEnd; k++) {
+							endCharPos += lines[k].length + 1;
+						}
+
+						newContent = currentContent.slice(0, startCharPos) +
+							`![](${imageUrl})\n` +
+							currentContent.slice(endCharPos);
+						replaced = true;
+					}
+				}
+			}
+
+			if (!replaced) {
+				return { success: true, imageUrl, error: '图片已上传，但未找到匹配的表格进行替换' };
+			}
+
+			await this.app.vault.modify(activeFile, newContent);
+			new Notice('表格已替换为图片');
+
+			// 触发重新渲染预览
+			await this.renderMarkdown();
+
+			return { success: true, imageUrl };
+		} catch (error) {
+			logger.error('uploadTableAsImage 失败:', error);
+			return { success: false, error: (error as Error).message };
+		}
+	}
+
+	/**
 	 * 设置全局API，供React组件调用
 	 */
 	private setupGlobalAPI(): void {
@@ -1568,7 +1808,8 @@ ${customCSS}`;
 				onSaveSettings: this.saveSettingsToPlugin.bind(this),
 				persistentStorage: this.buildPersistentStorageAPI(),
 				requestUrl: requestUrl,
-				uploadCodeBlockAsImage: this.uploadCodeBlockAsImage.bind(this)
+				uploadCodeBlockAsImage: this.uploadCodeBlockAsImage.bind(this),
+				uploadTableAsImage: this.uploadTableAsImage.bind(this)
 			};
 
 			(window as any).lovpenReactAPI = globalAPI;

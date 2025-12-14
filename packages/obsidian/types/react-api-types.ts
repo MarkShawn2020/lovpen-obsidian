@@ -204,6 +204,9 @@ export interface GlobalReactAPI {
 
 	// 代码块操作API
 	uploadCodeBlockAsImage: (codeContent: string, imageDataUrl: string) => Promise<CodeBlockImageResult>;
+
+	// 表格操作API
+	uploadTableAsImage: (tableMarkdown: string, imageDataUrl: string) => Promise<CodeBlockImageResult>;
 }
 
 /**

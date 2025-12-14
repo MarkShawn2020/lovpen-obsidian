@@ -197,6 +197,204 @@ function createCopyAsImageButton(preElement: HTMLElement): HTMLButtonElement {
 }
 
 /**
+ * 从 HTML 表格元素提取 Markdown 格式的表格内容
+ */
+function extractTableMarkdown(tableElement: HTMLElement): string {
+  const rows: string[] = [];
+  const tableRows = tableElement.querySelectorAll('tr');
+
+  tableRows.forEach((tr, rowIndex) => {
+    const cells = tr.querySelectorAll('th, td');
+    const cellContents: string[] = [];
+
+    cells.forEach((cell) => {
+      // 获取单元格文本内容，处理内部的格式
+      let text = cell.textContent?.trim() || '';
+      // 转义 | 字符
+      text = text.replace(/\|/g, '\\|');
+      cellContents.push(text);
+    });
+
+    rows.push(`| ${cellContents.join(' | ')} |`);
+
+    // 在表头行后添加分隔行
+    if (rowIndex === 0 && tr.querySelector('th')) {
+      const separators = Array(cells.length).fill('---');
+      rows.push(`| ${separators.join(' | ')} |`);
+    }
+  });
+
+  return rows.join('\n');
+}
+
+/**
+ * 创建表格上传为图片按钮（原生 DOM）
+ * 截图表格并上传到云存储，替换源Markdown
+ */
+function createTableUploadAsImageButton(tableElement: HTMLElement): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.className = 'lovpen-table-upload-btn';
+  btn.title = '上传为图片';
+  // 上传图标
+  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+
+  Object.assign(btn.style, {
+    position: 'absolute',
+    top: '8px',
+    right: '40px', // 在复制为图片按钮左边
+    padding: '6px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    color: 'rgba(255,255,255,0.8)',
+    transition: 'all 0.2s',
+    zIndex: '20',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  });
+
+  btn.addEventListener('mouseenter', () => {
+    btn.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    btn.style.color = '#fff';
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    btn.style.backgroundColor = 'rgba(0,0,0,0.3)';
+    btn.style.color = 'rgba(255,255,255,0.8)';
+  });
+
+  btn.addEventListener('click', async () => {
+    try {
+      // 检查API是否可用
+      const api = (window as any).lovpenReactAPI;
+      if (!api?.uploadTableAsImage) {
+        console.error('uploadTableAsImage API not available');
+        return;
+      }
+
+      // 显示加载状态
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>`;
+      btn.title = '上传中...';
+
+      // 临时隐藏按钮
+      const btns = tableElement.parentElement?.querySelectorAll('.lovpen-table-copy-img-btn, .lovpen-table-upload-btn');
+      btns?.forEach(b => (b as HTMLElement).style.display = 'none');
+
+      // 直接截图原始表格（避免克隆导致的样式丢失问题）
+      const dataUrl = await domToPng(tableElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+
+      // 恢复按钮显示
+      btns?.forEach(b => (b as HTMLElement).style.display = 'flex');
+
+      // 提取表格的Markdown内容用于匹配
+      const tableMarkdown = extractTableMarkdown(tableElement);
+
+      // 调用API上传并替换
+      const result = await api.uploadTableAsImage(tableMarkdown, dataUrl);
+
+      if (result.success) {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        btn.title = result.error || '已上传';
+      } else {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+        btn.title = result.error || '上传失败';
+      }
+
+      setTimeout(() => {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+        btn.title = '上传为图片';
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to upload table as image:', err);
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+      btn.title = '上传失败';
+    }
+  });
+
+  return btn;
+}
+
+/**
+ * 创建表格复制为图片按钮（原生 DOM）
+ */
+function createTableCopyAsImageButton(tableElement: HTMLElement): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.className = 'lovpen-table-copy-img-btn';
+  btn.title = '复制为图片';
+  // 图片图标
+  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+
+  Object.assign(btn.style, {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    padding: '6px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    color: 'rgba(255,255,255,0.8)',
+    transition: 'all 0.2s',
+    zIndex: '20',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  });
+
+  btn.addEventListener('mouseenter', () => {
+    btn.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    btn.style.color = '#fff';
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    btn.style.backgroundColor = 'rgba(0,0,0,0.3)';
+    btn.style.color = 'rgba(255,255,255,0.8)';
+  });
+
+  btn.addEventListener('click', async () => {
+    try {
+      // 临时隐藏按钮
+      const btns = tableElement.parentElement?.querySelectorAll('.lovpen-table-copy-img-btn, .lovpen-table-upload-btn');
+      btns?.forEach(b => (b as HTMLElement).style.display = 'none');
+
+      // 直接截图原始表格（避免克隆导致的样式丢失问题）
+      const dataUrl = await domToPng(tableElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+
+      // 恢复按钮显示
+      btns?.forEach(b => (b as HTMLElement).style.display = 'flex');
+
+      // 转换为 Blob 并复制到剪贴板
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+
+      // 成功反馈
+      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      btn.title = '已复制';
+      setTimeout(() => {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+        btn.title = '复制为图片';
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy table as image:', err);
+    }
+  });
+
+  return btn;
+}
+
+/**
  * 创建信息查看按钮（原生 DOM）
  * 显示代码块的语言、行数、字符数等信息
  */
@@ -482,8 +680,9 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
       if (!container) return;
 
       // 清理旧按钮和 tooltip
-      container.querySelectorAll('.lovpen-code-copy-btn, .lovpen-code-copy-img-btn, .lovpen-code-upload-btn, .lovpen-code-info-btn, .lovpen-code-info-tooltip').forEach(el => el.remove());
+      container.querySelectorAll('.lovpen-code-copy-btn, .lovpen-code-copy-img-btn, .lovpen-code-upload-btn, .lovpen-code-info-btn, .lovpen-code-info-tooltip, .lovpen-table-copy-img-btn, .lovpen-table-upload-btn').forEach(el => el.remove());
 
+      // 处理代码块
       const preElements = container.querySelectorAll('pre');
 
       preElements.forEach((pre) => {
@@ -502,6 +701,33 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
         pre.appendChild(uploadBtn);
         pre.appendChild(imgBtn);
         pre.appendChild(copyBtn);
+      });
+
+      // 处理表格 - 添加复制为图片按钮
+      const tableElements = container.querySelectorAll('table');
+
+      tableElements.forEach((table) => {
+        // 表格需要包裹在一个 relative 容器中，以便定位按钮
+        let wrapper = table.parentElement;
+
+        // 检查是否已经有包裹容器
+        if (!wrapper || !wrapper.classList.contains('lovpen-table-wrapper')) {
+          wrapper = document.createElement('div');
+          wrapper.className = 'lovpen-table-wrapper';
+          Object.assign(wrapper.style, {
+            position: 'relative',
+            display: 'inline-block',
+            width: '100%',
+          });
+          table.parentNode?.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        }
+
+        // 创建并添加按钮（从右到左：复制为图片、上传为图片）
+        const imgBtn = createTableCopyAsImageButton(table as HTMLElement);
+        const uploadBtn = createTableUploadAsImageButton(table as HTMLElement);
+        wrapper.appendChild(uploadBtn);
+        wrapper.appendChild(imgBtn);
       });
     };
 
