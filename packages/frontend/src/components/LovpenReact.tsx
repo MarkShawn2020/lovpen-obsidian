@@ -53,15 +53,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	const initializeSettings = useSetAtom(initializeSettingsAtom);
 	const isInitializedRef = useRef(false);
 
-	// 工具栏宽度状态 - 从localStorage恢复或使用默认宽度
-	const [toolbarWidth, setToolbarWidth] = useState<string>(() => {
-		try {
-			return localStorage.getItem('lovpen-toolbar-width') || "420px";
-		} catch {
-			return "420px";
-		}
-	});
-
 	// Toolbar 显示/隐藏状态（手动切换）
 	const [isToolbarHidden, setIsToolbarHidden] = useState<boolean>(() => {
 		try {
@@ -211,52 +202,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	const toolbarPosition = atomSettings.toolbarPosition ?? settings.toolbarPosition ?? 'right';
 	const isToolbarLeft = toolbarPosition === 'left';
 
-	// 拖拽调整工具栏宽度的处理
-	const handleMouseDown = useCallback((e: React.MouseEvent) => {
-		const container = containerRef.current;
-		if (!container) return;
-		// 使用 containerRef 而非 document，以支持 Shadow DOM
-		const toolbarContainer = container.querySelector('.toolbar-container') as HTMLElement;
-		if (!toolbarContainer) return;
-
-		const startX = e.clientX;
-		const startWidth = toolbarContainer.getBoundingClientRect().width;
-		const containerWidth = container.getBoundingClientRect().width;
-
-		// 动态计算最大宽度：确保渲染器至少有 320px 空间
-		const rendererMinWidth = 320;
-		const resizerWidth = 6;
-		const minWidth = 420; // 工具栏最小宽度（内容区372px + sidebar 44px）
-		const maxWidth = Math.min(800, containerWidth - rendererMinWidth - resizerWidth);
-
-		const handleMouseMove = (e: MouseEvent) => {
-			// 根据工具栏位置决定拖拽方向
-			// 工具栏在右边：向左拖拽增加宽度
-			// 工具栏在左边：向右拖拽增加宽度
-			const delta = e.clientX - startX;
-			const newWidth = isToolbarLeft ? startWidth + delta : startWidth - delta;
-
-			if (newWidth >= minWidth && newWidth <= maxWidth) {
-				const widthPx = `${newWidth}px`;
-				setToolbarWidth(widthPx);
-				// 持久化保存宽度
-				try {
-					localStorage.setItem('lovpen-toolbar-width', widthPx);
-				} catch (error) {
-					console.warn('Failed to save toolbar width to localStorage:', error);
-				}
-			}
-		};
-
-		const handleMouseUp = () => {
-			document.removeEventListener("mousemove", handleMouseMove);
-			document.removeEventListener("mouseup", handleMouseUp);
-		};
-
-		document.addEventListener("mousemove", handleMouseMove);
-		document.addEventListener("mouseup", handleMouseUp);
-	}, [isToolbarLeft]);
-
 	return (
 		<div
 			ref={containerRef}
@@ -391,47 +336,17 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 				</div>
 			</ScrollContainer>
 
-			{/* 可拖动的分隔条 - 仅在工具栏显示时显示 */}
-			{!isToolbarHidden && (
-				<div
-					className="column-resizer"
-					style={{
-						width: "6px",
-						backgroundColor: "var(--background-modifier-border)",
-						cursor: "col-resize",
-						opacity: 0.5,
-						transition: "all 0.2s ease",
-						zIndex: 10,
-						flexShrink: 0, // 防止被压缩
-						borderRadius: "2px"
-					}}
-					onMouseDown={handleMouseDown}
-					onMouseEnter={(e) => {
-						e.currentTarget.style.opacity = "1";
-						e.currentTarget.style.backgroundColor = "var(--interactive-accent)";
-						e.currentTarget.style.width = "8px";
-					}}
-					onMouseLeave={(e) => {
-						e.currentTarget.style.opacity = "0.5";
-						e.currentTarget.style.backgroundColor = "var(--background-modifier-border)";
-						e.currentTarget.style.width = "6px";
-					}}
-				/>
-			)}
 
-			{/* 工具栏容器 - 仅在显示时显示 */}
+			{/* 工具栏容器 - 仅在显示时显示，宽度由内部内容决定 */}
 			{!isToolbarHidden && (
 				<div
 					className="toolbar-container"
 					style={{
-						width: toolbarWidth, // 用户可调整的宽度（通过拖拽），ResizeObserver确保不会使A<320px
+						width: "fit-content",
 						height: "100%",
 						overflowY: "auto",
 						overflowX: "hidden",
-						backgroundColor: "var(--background-secondary-alt)",
-						borderLeft: !isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
-						borderRight: isToolbarLeft ? "1px solid var(--background-modifier-border)" : "none",
-						flexShrink: 0 // 防止被压缩
+						flexShrink: 0
 					}}
 				>
 					<Toolbar {...toolbarProps} />

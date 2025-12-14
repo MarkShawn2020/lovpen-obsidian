@@ -741,6 +741,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 		} catch {}
 	};
 
+	// 内容区显示/隐藏状态
+	const [contentHidden, setContentHidden] = useState<boolean>(() => {
+		try {
+			return localStorage.getItem('lovpen-content-hidden') === 'true';
+		} catch {
+			return false;
+		}
+	});
+
+	const toggleContent = () => {
+		const newValue = !contentHidden;
+		setContentHidden(newValue);
+		try {
+			localStorage.setItem('lovpen-content-hidden', String(newValue));
+		} catch {}
+	};
+
 	// 插件管理中的子tab状态
 	const [pluginTab, setPluginTab] = useState<string>(() => {
 		try {
@@ -1086,9 +1103,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					</div>
 				</div>
 
-				{/* 右侧内容区 */}
-				<div id="lovpen-toolbar-content" className="flex-1 overflow-y-auto bg-[#F9F9F7] relative">
-					<div className="p-4 sm:p-5 min-w-[372px]">
+				{/* 右侧内容区 - 固定宽度，菜单切换时不变 */}
+				<div id="lovpen-toolbar-content" className="overflow-y-auto bg-[#F9F9F7] relative" style={{ width: 372 }}>
+					<div className="p-4 sm:p-5">
 						{/* 文章信息 */}
 						{activeSection === 'article' && (
 							<SectionLayout title="文章信息">
