@@ -226,7 +226,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		// 动态计算最大宽度：确保渲染器至少有 320px 空间
 		const rendererMinWidth = 320;
 		const resizerWidth = 6;
-		const minWidth = 320; // 工具栏最小宽度
+		const minWidth = 420; // 工具栏最小宽度（内容区372px + sidebar 44px）
 		const maxWidth = Math.min(800, containerWidth - rendererMinWidth - resizerWidth);
 
 		const handleMouseMove = (e: MouseEvent) => {

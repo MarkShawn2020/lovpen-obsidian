@@ -979,7 +979,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				id="lovpen-toolbar-container"
 				className="h-full flex bg-[#F9F9F7] relative"
 				style={{
-					minWidth: '320px',
+					minWidth: '328px',
 					width: '100%',
 					maxWidth: '100%',
 					overflow: 'hidden',
@@ -1088,7 +1088,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
 				{/* 右侧内容区 */}
 				<div id="lovpen-toolbar-content" className="flex-1 overflow-y-auto bg-[#F9F9F7] relative">
-					<div className="p-4 sm:p-5">
+					<div className="p-4 sm:p-5 min-w-[372px]">
 						{/* 文章信息 */}
 						{activeSection === 'article' && (
 							<SectionLayout title="文章信息">
