@@ -29,7 +29,8 @@ export class Images extends UnifiedHtmlPlugin {
 		return {
 			showImageCaption: {
 				type: "switch",
-				title: "显示图片说明"
+				title: "显示图片说明",
+				description: "将图片的 alt 文本显示为图注"
 			}
 		};
 	}

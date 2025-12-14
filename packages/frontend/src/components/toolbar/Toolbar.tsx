@@ -1144,21 +1144,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 											localStorage.setItem('lovpen-toolbar-plugin-tab', value);
 										} catch {}
 									}}>
-										<TabsList className="bg-[#F0EEE6] rounded-lg p-0.5 mb-4">
+										<TabsList className="bg-muted rounded-xl p-0.5 mb-4 w-full sm:w-auto">
 											{remarkPlugins.length > 0 && (
 												<TabsTrigger value="remark"
-													className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
-													<Plug className="h-3.5 w-3.5"/>
-													<span>Remark</span>
-													<span className="bg-[#C2C07D] text-white text-[10px] px-1.5 py-0.5 rounded-full">{remarkPlugins.length}</span>
+													className="flex items-center gap-1 sm:gap-1.5 text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-muted-foreground px-2 sm:px-3 py-1.5 rounded-lg flex-1 sm:flex-none">
+													<Plug className="h-3.5 w-3.5 shrink-0"/>
+													<span className="hidden sm:inline">Remark</span>
+													<span className="bg-accent text-accent-foreground text-[10px] px-1.5 py-0.5 rounded-full">{remarkPlugins.length}</span>
 												</TabsTrigger>
 											)}
 											{rehypePlugins.length > 0 && (
 												<TabsTrigger value="rehype"
-													className="flex items-center gap-1.5 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#CC785C] text-[#87867F] px-3 py-1.5 rounded-md">
-													<Zap className="h-3.5 w-3.5"/>
-													<span>Rehype</span>
-													<span className="bg-[#B49FD8] text-white text-[10px] px-1.5 py-0.5 rounded-full">{rehypePlugins.length}</span>
+													className="flex items-center gap-1 sm:gap-1.5 text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-muted-foreground px-2 sm:px-3 py-1.5 rounded-lg flex-1 sm:flex-none">
+													<Zap className="h-3.5 w-3.5 shrink-0"/>
+													<span className="hidden sm:inline">Rehype</span>
+													<span className="bg-secondary text-secondary-foreground text-[10px] px-1.5 py-0.5 rounded-full">{rehypePlugins.length}</span>
 												</TabsTrigger>
 											)}
 										</TabsList>
@@ -1166,15 +1166,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{remarkPlugins.length > 0 && (
 											<TabsContent value="remark" className="mt-0">
 												<div className="space-y-3">
-													<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
+													<div className="flex items-center p-2.5 sm:p-3 bg-muted border border-border rounded-lg gap-2 sm:gap-2.5">
 														<Checkbox
 															checked={getPluginsCheckState(remarkPlugins)}
 															onCheckedChange={() => handleSelectAllToggle('remark')}
-															className="border-[#629A90] data-[state=checked]:bg-[#629A90]"
+															className="border-primary data-[state=checked]:bg-primary shrink-0"
 														/>
-														<div>
-															<h4 className="font-medium text-[#181818] text-sm">全选 Remark</h4>
-															<p className="text-xs text-[#87867F]">Markdown 语法解析插件</p>
+														<div className="min-w-0">
+															<h4 className="font-medium text-foreground text-sm truncate">全选 Remark</h4>
+															<p className="text-xs text-muted-foreground truncate">Markdown 语法解析插件</p>
 														</div>
 													</div>
 													<div className="space-y-1">
@@ -1195,15 +1195,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{rehypePlugins.length > 0 && (
 											<TabsContent value="rehype" className="mt-0">
 												<div className="space-y-3">
-													<div className="flex items-center p-3 bg-[#F7F4EC] border border-[#E8E6DC] rounded-lg gap-2.5">
+													<div className="flex items-center p-2.5 sm:p-3 bg-muted border border-border rounded-lg gap-2 sm:gap-2.5">
 														<Checkbox
 															checked={getPluginsCheckState(rehypePlugins)}
 															onCheckedChange={() => handleSelectAllToggle('rehype')}
-															className="border-[#97B5D5] data-[state=checked]:bg-[#97B5D5]"
+															className="border-primary data-[state=checked]:bg-primary shrink-0"
 														/>
-														<div>
-															<h4 className="font-medium text-[#181818] text-sm">全选 Rehype</h4>
-															<p className="text-xs text-[#87867F]">HTML 处理和转换插件</p>
+														<div className="min-w-0">
+															<h4 className="font-medium text-foreground text-sm truncate">全选 Rehype</h4>
+															<p className="text-xs text-muted-foreground truncate">HTML 处理和转换插件</p>
 														</div>
 													</div>
 													<div className="space-y-1">
@@ -1223,9 +1223,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 									</Tabs>
 								) : (
 									<div className="text-center py-8">
-										<Plug className="h-10 w-10 text-[#87867F] mx-auto mb-3"/>
-										<h4 className="font-medium text-[#181818] mb-1">暂无插件</h4>
-										<p className="text-sm text-[#87867F]">当前没有可用的 Markdown 处理插件</p>
+										<Plug className="h-10 w-10 text-muted-foreground mx-auto mb-3"/>
+										<h4 className="font-medium text-foreground mb-1">暂无插件</h4>
+										<p className="text-sm text-muted-foreground">当前没有可用的 Markdown 处理插件</p>
 									</div>
 								)}
 							</SectionLayout>

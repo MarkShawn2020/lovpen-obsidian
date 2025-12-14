@@ -81,11 +81,13 @@ export class Headings extends UnifiedHtmlPlugin {
 		return {
 			enableHeadingNumber: {
 				type: "switch",
-				title: "启用编号"
+				title: "启用编号",
+				description: "为二级标题自动添加序号"
 			},
 			headingNumberStyle: {
 				type: "select",
 				title: "编号样式",
+				description: "选择序号的显示格式",
 				options: [
 					{ value: "index", text: "普通数字 (1, 2, 3)" },
 					{ value: "number", text: "带前导零 (01, 02, 03)" },
@@ -103,20 +105,24 @@ export class Headings extends UnifiedHtmlPlugin {
 			},
 			headingNumberFormat: {
 				type: "text",
-				title: "编号格式 ({} 表示编号位置，如: 第{}章、Part {}、{}.)",
+				title: "编号格式",
+				description: "{} 代表编号位置，如: 第{}章、Part {}、{}.",
 				placeholder: "{}"
 			},
 			enableHeadingDelimiterBreak: {
 				type: "switch",
-				title: "启用分隔符自动换行"
+				title: "分隔符换行",
+				description: "遇到逗号等分隔符时自动换行"
 			},
 			headingDelimiters: {
 				type: "text",
-				title: "自定义分隔符 (如: ,，、；： 空格)"
+				title: "分隔符",
+				description: "触发换行的字符，如: ,，、；：空格"
 			},
 			keepDelimiterInOutput: {
 				type: "switch",
-				title: "保留分隔符"
+				title: "保留分隔符",
+				description: "换行后是否保留原分隔符"
 			}
 		};
 	}

@@ -1,11 +1,12 @@
 import React, {useEffect, useRef, useState} from "react";
 import {ToggleSwitch} from "../ui/ToggleSwitch";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select";
+import {Tooltip, TooltipContent, TooltipTrigger} from "../ui/tooltip";
 import {PluginData} from "../../types";
 import {persistentStorageService} from "../../services/persistentStorage";
 
 import {logger} from "../../../../shared/src/logger";
-import {ChevronDown, Bug, Plug, Settings} from "lucide-react";
+import {ChevronDown, Info, Plug, Settings} from "lucide-react";
 
 const STORAGE_KEY_PREFIX = 'lovpen-config';
 
@@ -160,10 +161,10 @@ export const ConfigComponent = <T extends PluginData>({
 	return (
 		<div
 			id={itemId}
-			className="bg-white border border-gray-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden mb-2 sm:mb-3 transition-all duration-200 hover:shadow-md"
+			className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden mb-2 sm:mb-3 transition-all duration-200 hover:shadow-sm"
 		>
 			<div
-				className={`p-3 sm:p-4 cursor-pointer transition-colors ${hasConfigOptions ? 'hover:bg-gray-50' : ''}`}
+				className={`p-2.5 sm:p-3.5 cursor-pointer transition-colors ${hasConfigOptions ? 'hover:bg-muted/50' : ''}`}
 				onClick={handleToggle}
 			>
 				<div className="flex items-center justify-between">
@@ -171,7 +172,7 @@ export const ConfigComponent = <T extends PluginData>({
 						<div onClick={(e) => {
 							e.stopPropagation();
 							e.preventDefault();
-						}}>
+						}} className="shrink-0">
 							<ToggleSwitch
 								checked={item.enabled}
 								onChange={handleEnabledChange}
@@ -180,15 +181,15 @@ export const ConfigComponent = <T extends PluginData>({
 						</div>
 
 						<div className="flex items-center gap-2 flex-1 min-w-0">
-							<div className={`p-1 sm:p-1.5 rounded-lg ${item.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
+							<div className={`p-1 sm:p-1.5 rounded-lg shrink-0 ${item.enabled ? 'bg-primary/10' : 'bg-muted'}`}>
 								<Plug
-									className={`h-3 w-3 sm:h-4 sm:w-4 ${item.enabled ? 'text-green-600' : 'text-gray-400'}`}/>
+									className={`h-3 w-3 sm:h-4 sm:w-4 ${item.enabled ? 'text-primary' : 'text-muted-foreground'}`}/>
 							</div>
 							<div className="flex-1 min-w-0">
 								<div
-									className="text-sm sm:text-base font-medium text-gray-900 truncate">{item.name}</div>
+									className="text-sm sm:text-base font-medium text-foreground truncate">{item.name}</div>
 								{item.description && (
-									<div className="text-xs text-gray-500 mt-0.5 truncate"
+									<div className="text-xs text-muted-foreground mt-0.5 line-clamp-1"
 										 title={item.description}>
 										{item.description}
 									</div>
@@ -201,7 +202,7 @@ export const ConfigComponent = <T extends PluginData>({
 						{hasConfigOptions && (
 							<div
 								className={`p-1 rounded-lg transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-								<ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
+								<ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground"/>
 							</div>
 						)}
 					</div>
@@ -209,21 +210,30 @@ export const ConfigComponent = <T extends PluginData>({
 			</div>
 
 			{hasConfigOptions && isExpanded && (
-				<div className="border-t border-gray-100 bg-gray-50/50 p-3 sm:p-4">
-					<div className="flex items-center gap-2 mb-3 sm:mb-4">
-						<Settings className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600"/>
-						<span className="text-xs sm:text-sm font-medium text-gray-900">插件配置</span>
+				<div className="border-t border-border bg-muted/30 p-2.5 sm:p-3.5">
+					<div className="flex items-center gap-2 mb-2.5 sm:mb-3">
+						<Settings className="h-3 w-3 sm:h-4 sm:w-4 text-primary"/>
+						<span className="text-xs sm:text-sm font-medium text-foreground">插件配置</span>
 					</div>
 
-					<div className="space-y-3 sm:space-y-4">
+					<div className="space-y-2 sm:space-y-3">
 						{configEntries.map(([key, meta]) => (
 							<div key={key}
-								 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 p-2 sm:p-3 bg-white border border-gray-200 rounded-lg">
-								<div className="flex items-center gap-2">
-									<Bug className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400"/>
-									<span className="text-xs sm:text-sm font-medium text-gray-700">{meta.title}</span>
+								 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2 sm:p-2.5 bg-card border border-border rounded-lg">
+								<div className="flex items-center gap-1.5">
+									<span className="text-xs sm:text-sm font-medium text-foreground">{meta.title}</span>
+									{meta.description && (
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Info className="h-3 w-3 text-muted-foreground/70 hover:text-muted-foreground cursor-help shrink-0"/>
+											</TooltipTrigger>
+											<TooltipContent side="top" className="max-w-48">
+												{meta.description}
+											</TooltipContent>
+										</Tooltip>
+									)}
 								</div>
-								<div className="w-full sm:w-auto" onClick={(e) => e.stopPropagation()}>
+								<div className="w-full sm:w-auto sm:shrink-0" onClick={(e) => e.stopPropagation()}>
 									{meta.type === "switch" ? (
 										<ToggleSwitch
 											checked={!!localConfig[key]}
@@ -251,7 +261,7 @@ export const ConfigComponent = <T extends PluginData>({
 											type="text"
 											value={String(localConfig[key] || "")}
 											onChange={(e) => handleConfigChange(key, e.target.value)}
-											className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-40"
+											className="px-2 sm:px-3 py-2 border border-input rounded-lg text-xs sm:text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary w-full sm:w-40"
 											placeholder={meta.title || "输入值..."}
 										/>
 									) : null}

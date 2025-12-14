@@ -26,6 +26,7 @@ export interface UniversalPluginMetaConfigOption {
 export interface UniversalPluginMetaConfigItem {
 	type: "switch" | "select" | "text" | "number";
 	title: string;
+	description?: string;
 	options?: UniversalPluginMetaConfigOption[];
 	placeholder?: string;
 }
