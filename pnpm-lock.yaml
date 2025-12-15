@@ -20,9 +20,6 @@ importers:
       '@zip.js/zip.js':
         specifier: ^2.7.43
         version: 2.7.63
-      code-inspector-plugin:
-        specifier: https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz
-        version: https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz
       colors:
         specifier: ^1.4.0
         version: 1.4.0
@@ -271,9 +268,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.0.0
         version: 4.6.0(vite@5.4.19(@types/node@16.18.126)(lightningcss@1.30.1)(terser@5.43.1))
-      code-inspector-plugin:
-        specifier: https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz
-        version: https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz
+      lovinsp:
+        specifier: ^1.4.8
+        version: 1.4.8
       postcss-prefix-selector:
         specifier: ^2.1.1
         version: 2.1.1(postcss@8.5.6)
@@ -422,24 +419,6 @@ packages:
   '@babel/types@7.28.5':
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
-
-  '@code-inspector/core@1.4.3':
-    resolution: {integrity: sha512-0TKLPrOdI/3XwXkSDmTIeGPXZLVupEoyM+y+JWgw+eoci+atwkdBsRhsiwqjH2whtJ5wxf+wbWuN+Mpf+rLsZg==}
-
-  '@code-inspector/esbuild@1.4.3':
-    resolution: {integrity: sha512-d51qjyPN3eCxF8ly8HNMO5X50bo2p3bstSR8ZkZUbmgN3ljig/tDqxp3A/PX9li8mlb2LN85fDN8XYHqgqChSg==}
-
-  '@code-inspector/mako@1.4.3':
-    resolution: {integrity: sha512-DtHfhr4IlENj9WJadJttXTHXwuOxZTU4leUxWrRFmyqBYCde9p5O0PYU+52jjjMRlcArFvkWmbXqzQlEPFmBiQ==}
-
-  '@code-inspector/turbopack@1.4.3':
-    resolution: {integrity: sha512-kPGnYh/rXowwAXp76uQVkPUMMI1JtWA+0UPHz8MMMeAiRsZS9pqYm0VNl/4mDotVr2CUtKr60qqNO5BibibUXQ==}
-
-  '@code-inspector/vite@1.4.3':
-    resolution: {integrity: sha512-jJlqH1dK9lf7K5CI4E9Q3mAAmbJKbeIwfhju0Qiz2VAaV7qhYtBOJbw6ZkmCzwt3jXmlbbB+wswjEUlAnl9anA==}
-
-  '@code-inspector/webpack@1.4.3':
-    resolution: {integrity: sha512-ckjC2+abyYxm6ZCCb1X1gnwpjHCnDbg6iiZ/AM0wX+ds7skLr+yAGBwtRSeR5Q43tDr0amQeYBmXTXvaOPir8w==}
 
   '@codemirror/state@6.5.2':
     resolution: {integrity: sha512-FVqsPqtPWKVVL3dPSxy8wEF/ymIEuVzF1PK3VbUgrxXpJUSHQWWZz4JMToquRxnkw+36LTamCZG2iua2Ptq0fA==}
@@ -849,6 +828,24 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.29':
     resolution: {integrity: sha512-uw6guiW/gcAGPDhLmd77/6lW8QLeiV5RUTsAX46Db6oLhGaVj4lhnPwb184s1bkc8kdVg/+h988dro8GRDpmYQ==}
+
+  '@lovinsp/core@1.4.8':
+    resolution: {integrity: sha512-SzIz7E/w96EhQmNPLhy3zl8A5XxtZI7lo/hIer/DZBERcoMpUGcBVz9JAlDSCBLcQv0ZsfCDAhcoUKO6eS7yvA==}
+
+  '@lovinsp/esbuild@1.4.8':
+    resolution: {integrity: sha512-QFE3neyq1MS8hUqK6twRLz1EFUbw1hED0WYyBbQrrsNDbUIGX0ADaBlOCIgiZ8faCWFs2Qq/Y+zftpft0HCDfQ==}
+
+  '@lovinsp/mako@1.4.8':
+    resolution: {integrity: sha512-raDDiuYbz+3R4IN+2FH4//SlSy81j9MYd4yzSCi59J/lb0aptfXKRdcrnS6hDSvYuUkj00QwKhW6lBRydLPAvg==}
+
+  '@lovinsp/turbopack@1.4.8':
+    resolution: {integrity: sha512-scvbcMA0kLuiG1I5VAYrXL0E/2PmLIfpAAKD9H1g22gtE3dgCIOZ9eFvoBzBv9Nk/jMD8DNhOSrg0IXf9k/5gg==}
+
+  '@lovinsp/vite@1.4.8':
+    resolution: {integrity: sha512-6JZfSBCBT53iZ+Ml3kx9d345tOg6Un8OFeg0Hnh1Pyx2tq0R92RW+AjJ2hKdZlXBo1TT9htEFCpLg44RjmXkPQ==}
+
+  '@lovinsp/webpack@1.4.8':
+    resolution: {integrity: sha512-P+B6Hm0vxsmWp26CErxBTlQnBRSXKGD7pHCQUOgMulGvdS1Of4iDgH77NIONSSSIOyM3lQKrDYd6zLYPaKgICw==}
 
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
@@ -2084,10 +2081,6 @@ packages:
       react: ^18 || ^19 || ^19.0.0-rc
       react-dom: ^18 || ^19 || ^19.0.0-rc
 
-  code-inspector-plugin@https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz:
-    resolution: {tarball: https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz}
-    version: 1.4.3
-
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
     engines: {node: '>=7.0.0'}
@@ -2794,6 +2787,9 @@ packages:
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
+
+  lovinsp@1.4.8:
+    resolution: {integrity: sha512-75ljxx+aq69E9gPVcn5pUqXky/XFf5vu6anrD1kcEuENEnvLJWjV3EKxUyXG8bIVqZujhdGeBXgqsau3VrVqkQ==}
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
@@ -3690,48 +3686,6 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@code-inspector/core@1.4.3':
-    dependencies:
-      '@vue/compiler-dom': 3.5.24
-      chalk: 4.1.2
-      dotenv: 16.6.1
-      launch-ide: 1.2.0
-      portfinder: 1.0.38
-    transitivePeerDependencies:
-      - supports-color
-
-  '@code-inspector/esbuild@1.4.3':
-    dependencies:
-      '@code-inspector/core': 1.4.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@code-inspector/mako@1.4.3':
-    dependencies:
-      '@code-inspector/core': 1.4.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@code-inspector/turbopack@1.4.3':
-    dependencies:
-      '@code-inspector/core': 1.4.3
-      '@code-inspector/webpack': 1.4.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@code-inspector/vite@1.4.3':
-    dependencies:
-      '@code-inspector/core': 1.4.3
-      chalk: 4.1.1
-    transitivePeerDependencies:
-      - supports-color
-
-  '@code-inspector/webpack@1.4.3':
-    dependencies:
-      '@code-inspector/core': 1.4.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@codemirror/state@6.5.2':
     dependencies:
       '@marijn/find-cluster-break': 1.0.2
@@ -4001,6 +3955,48 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
+
+  '@lovinsp/core@1.4.8':
+    dependencies:
+      '@vue/compiler-dom': 3.5.24
+      chalk: 4.1.2
+      dotenv: 16.6.1
+      launch-ide: 1.2.0
+      portfinder: 1.0.38
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lovinsp/esbuild@1.4.8':
+    dependencies:
+      '@lovinsp/core': 1.4.8
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lovinsp/mako@1.4.8':
+    dependencies:
+      '@lovinsp/core': 1.4.8
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lovinsp/turbopack@1.4.8':
+    dependencies:
+      '@lovinsp/core': 1.4.8
+      '@lovinsp/webpack': 1.4.8
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lovinsp/vite@1.4.8':
+    dependencies:
+      '@lovinsp/core': 1.4.8
+      chalk: 4.1.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lovinsp/webpack@1.4.8':
+    dependencies:
+      '@lovinsp/core': 1.4.8
+    transitivePeerDependencies:
+      - supports-color
 
   '@marijn/find-cluster-break@1.0.2': {}
 
@@ -5302,18 +5298,6 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  code-inspector-plugin@https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz:
-    dependencies:
-      '@code-inspector/core': 1.4.3
-      '@code-inspector/esbuild': 1.4.3
-      '@code-inspector/mako': 1.4.3
-      '@code-inspector/turbopack': 1.4.3
-      '@code-inspector/vite': 1.4.3
-      '@code-inspector/webpack': 1.4.3
-      chalk: 4.1.1
-    transitivePeerDependencies:
-      - supports-color
-
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -6062,6 +6046,18 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
+
+  lovinsp@1.4.8:
+    dependencies:
+      '@lovinsp/core': 1.4.8
+      '@lovinsp/esbuild': 1.4.8
+      '@lovinsp/mako': 1.4.8
+      '@lovinsp/turbopack': 1.4.8
+      '@lovinsp/vite': 1.4.8
+      '@lovinsp/webpack': 1.4.8
+      chalk: 4.1.1
+    transitivePeerDependencies:
+      - supports-color
 
   lru-cache@5.1.1:
     dependencies:

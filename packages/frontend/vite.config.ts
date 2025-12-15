@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from "path"
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite"
-import { codeInspectorPlugin } from 'code-inspector-plugin'
+import { lovinspPlugin } from 'lovinsp'
 
 export default defineConfig(({ mode }) => {
 	const isDev = mode === 'development';
@@ -16,10 +16,7 @@ export default defineConfig(({ mode }) => {
 			'__STANDALONE_MODE__': isStandalone
 		},
 		plugins: [
-			// Code Inspector - Enhanced version with copy mode
-			// Activate: Shift + Alt/Option
-			// Toggle mode: Press 'C' to switch between IDE mode (📝) and Copy mode (📋)
-			codeInspectorPlugin({
+			lovinspPlugin({
 				bundler: 'vite',
 			}),
 			react({

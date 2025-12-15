@@ -35,7 +35,6 @@
 		"@types/react": "^19.1.7",
 		"@types/react-dom": "^19.1.6",
 		"@zip.js/zip.js": "^2.7.43",
-		"code-inspector-plugin": "https://npm.cloudsmith.io/mark/code-inspector/code-inspector-plugin/-/code-inspector-plugin-1.4.3.tgz",
 		"colors": "^1.4.0",
 		"handlebars": "^4.7.8",
 		"highlight.js": "^11.9.0",
