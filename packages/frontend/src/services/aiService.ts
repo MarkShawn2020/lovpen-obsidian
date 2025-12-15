@@ -179,27 +179,37 @@ export async function fetchZenMuxModels(_apiKey: string): Promise<AIModel[]> {
 	}
 
 	if (!window.lovpenReactAPI?.requestUrl) {
+		logger.warn('[ZenMux] requestUrl not available');
 		return ZENMUX_MODELS as AIModel[];
 	}
 
+	const apiUrl = 'https://zenmux.ai/api/frontend/model/listByFilter';
+	logger.info(`[ZenMux] Fetching models from: ${apiUrl}`);
+
 	try {
 		// ZenMux 使用前端 API 获取模型列表，不需要认证
+		// 注意：Obsidian requestUrl 可能对某些 headers 敏感，尝试最小化 headers
 		const response = await window.lovpenReactAPI.requestUrl({
-			url: 'https://zenmux.ai/api/frontend/model/listByFilter',
+			url: apiUrl,
 			method: 'GET',
 			headers: {
-				'Accept': 'application/json',
-				'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+				'Accept': 'application/json'
 			}
 		});
 
+		logger.info(`[ZenMux] Response status: ${response.status}`);
+
 		if (response.status !== 200) {
+			logger.error(`[ZenMux] API returned non-200 status: ${response.status}, text: ${response.text?.slice(0, 200)}`);
 			throw new Error(`API error: ${response.status}`);
 		}
 
 		const data = response.json;
-		// ZenMux 前端 API 返回格式可能是 { data: { list: [...] } } 或 { list: [...] }
-		const allModels = data?.data?.list || data?.list || data?.data || [];
+		logger.debug('[ZenMux] Response data keys:', Object.keys(data || {}));
+
+		// ZenMux 前端 API 返回格式: { success: true, data: [...] }
+		const allModels = data?.data || data?.data?.list || data?.list || [];
+		logger.info(`[ZenMux] Found ${allModels.length} models`);
 
 		const models: AIModel[] = allModels.map((m: any) => ({
 			id: m.slug || m.id,
@@ -212,11 +222,23 @@ export async function fetchZenMuxModels(_apiKey: string): Promise<AIModel[]> {
 
 		// 持久化到 localStorage
 		setCachedModels('zenmux', models);
-		logger.info(`Fetched ${models.length} ZenMux models from API`);
+		logger.info(`[ZenMux] Cached ${models.length} models to localStorage`);
 		return models;
-	} catch (error) {
-		logger.error('Failed to fetch ZenMux models:', error);
-		return ZENMUX_MODELS as AIModel[];
+	} catch (error: any) {
+		// 提取更详细的错误信息
+		const errorMsg = error?.message || String(error);
+		const errorName = error?.name || 'Unknown';
+		const errorStack = error?.stack?.split('\n').slice(0, 3).join('\n') || '';
+
+		logger.error(`[ZenMux] Failed to fetch models:`, {
+			name: errorName,
+			message: errorMsg,
+			url: apiUrl,
+			stack: errorStack
+		});
+
+		// 重新抛出错误，让上层能感知到具体问题
+		throw new Error(`ZenMux API 请求失败: ${errorMsg}`);
 	}
 }
 
