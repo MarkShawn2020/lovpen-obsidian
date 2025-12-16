@@ -253,7 +253,7 @@ export class PersistentStorageService {
 				binaryData = new Uint8Array(data);
 			}
 
-			const blob = new Blob([binaryData], {type: file.type || 'application/octet-stream'});
+			const blob = new Blob([binaryData as BlobPart], {type: file.type || 'application/octet-stream'});
 			console.log(`[PersistentStorage] 创建 blob:`, {size: blob.size, type: blob.type});
 
 			if (blob.size === 0) {
