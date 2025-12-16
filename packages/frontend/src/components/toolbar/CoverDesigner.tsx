@@ -1052,6 +1052,26 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 									</button>
 									<button
 										onClick={async () => {
+											try {
+												const response = await fetch(previewUrl);
+												const blob = await response.blob();
+												const url = URL.createObjectURL(blob);
+												const a = document.createElement('a');
+												a.href = url;
+												a.download = `cover-${Date.now()}.png`;
+												a.click();
+												URL.revokeObjectURL(url);
+											} catch (err) {
+												logger.error('下载图片失败:', err);
+											}
+										}}
+										className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+									>
+										<Download className="h-4 w-4"/>
+										下载
+									</button>
+									<button
+										onClick={async () => {
 											await createCover(previewUrl, 'ai', 1, previewUrl);
 											setPreviewImageId(null);
 										}}
