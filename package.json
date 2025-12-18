@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-lovpen",
-	"version": "0.22.2",
+	"version": "0.23.0",
 	"description": "This is a plugin for Obsidian (https://obsidian.md)",
 	"main": "dist/main.js",
 	"packageManager": "pnpm@10.12.1",
@@ -25,7 +25,7 @@
 		"concurrently": "^9.1.0",
 		"esbuild": "0.17.3",
 		"esbuild-plugin-copy": "^2.1.1",
-		"lovinsp": "1.4.11",
+		"lovinsp": "1.4.12",
 		"obsidian": "^1.8.7",
 		"tslib": "2.4.0",
 		"turbo": "^2.5.4",
