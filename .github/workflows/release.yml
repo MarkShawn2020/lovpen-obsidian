@@ -81,9 +81,10 @@ jobs:
           mkdir -p obsidian-lovpen
           cp -r packages/obsidian/dist/* obsidian-lovpen/
 
-          # 创建完整插件压缩包（带版本号）
+          # 创建两个压缩包：带版本号 + 固定名（供 curl 使用）
           mkdir -p release-files
           zip -r release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip obsidian-lovpen/
+          cp release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip release-files/obsidian-lovpen.zip
 
       - name: Generate changelog
         id: changelog
@@ -129,6 +130,7 @@ jobs:
             - 📝 模板系统，自定义内容渲染
           files: |
             release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip
+            release-files/obsidian-lovpen.zip
           draft: false
           prerelease: false
         env:
