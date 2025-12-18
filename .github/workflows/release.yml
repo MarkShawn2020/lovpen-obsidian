@@ -73,19 +73,19 @@ jobs:
       - name: Prepare release files
         run: |
           # 创建完整插件包
-          mkdir -p lovpen-plugin
-          cp packages/obsidian/dist/main.js lovpen-plugin/
-          cp packages/obsidian/dist/manifest.json lovpen-plugin/
-          cp packages/assets/styles.css lovpen-plugin/
-          
+          mkdir -p obsidian-lovpen
+          cp packages/obsidian/dist/main.js obsidian-lovpen/
+          cp packages/obsidian/dist/manifest.json obsidian-lovpen/
+          cp packages/assets/styles.css obsidian-lovpen/
+
           # 解压 assets 到插件目录
-          cd lovpen-plugin
+          cd obsidian-lovpen
           unzip -q ../assets.zip
           cd ..
-          
+
           # 创建完整插件压缩包
           mkdir -p release-files
-          zip -r release-files/lovpen-plugin.zip lovpen-plugin/
+          zip -r release-files/obsidian-lovpen.zip obsidian-lovpen/
 
       - name: Get version from tag or input
         id: get_version
@@ -125,9 +125,9 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
             
             ## 安装方法
-            
+
             ### 方法一：一键安装（推荐）
-            1. 下载 `lovpen-plugin.zip` 完整插件包
+            1. 下载 `obsidian-lovpen.zip` 完整插件包
             2. 解压到你的 Obsidian 仓库的 `.obsidian/plugins/` 目录下
             3. 在 Obsidian 设置中启用 LovPen 插件
             
@@ -141,7 +141,7 @@ jobs:
             - 🔗 智能链接处理，针对微信公众号优化
             - 📝 模板系统，自定义内容渲染
           files: |
-            release-files/lovpen-plugin.zip
+            release-files/obsidian-lovpen.zip
           draft: false
           prerelease: false
         env:
