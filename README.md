@@ -22,7 +22,7 @@
 
 LovPen transforms your Obsidian markdown notes into professionally formatted content for multi-platform distribution.
 
-![LovPen Preview](packages/assets/images/screenshot.png)
+![LovPen Preview](packages/assets/images/screenshot.jpg)
 
 ## Features
 
