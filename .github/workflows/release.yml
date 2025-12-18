@@ -64,24 +64,11 @@ jobs:
       - name: Download highlights
         run: pnpm download-highlights
 
-      - name: Create assets package
-        run: |
-          cd packages/assets
-          zip -r ../../assets.zip themes/ highlights/ themes.json highlights.json
-          cd ../..
-
       - name: Prepare release files
         run: |
-          # 创建完整插件包
+          # 创建完整插件包，直接复制 dist 目录内容
           mkdir -p obsidian-lovpen
-          cp packages/obsidian/dist/main.js obsidian-lovpen/
-          cp packages/obsidian/dist/manifest.json obsidian-lovpen/
-          cp packages/assets/styles.css obsidian-lovpen/
-
-          # 解压 assets 到插件目录
-          cd obsidian-lovpen
-          unzip -q ../assets.zip
-          cd ..
+          cp -r packages/obsidian/dist/* obsidian-lovpen/
 
           # 创建完整插件压缩包
           mkdir -p release-files
