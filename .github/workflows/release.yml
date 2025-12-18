@@ -81,10 +81,9 @@ jobs:
           mkdir -p obsidian-lovpen
           cp -r packages/obsidian/dist/* obsidian-lovpen/
 
-          # 创建两个压缩包：带版本号 + 固定名（供 curl 使用）
+          # 创建压缩包（固定文件名，便于 curl 安装）
           mkdir -p release-files
-          zip -r release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip obsidian-lovpen/
-          cp release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip release-files/obsidian-lovpen.zip
+          zip -r release-files/obsidian-lovpen.zip obsidian-lovpen/
 
       - name: Generate changelog
         id: changelog
@@ -129,7 +128,6 @@ jobs:
             - 🔗 智能链接处理，针对微信公众号优化
             - 📝 模板系统，自定义内容渲染
           files: |
-            release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip
             release-files/obsidian-lovpen.zip
           draft: false
           prerelease: false
