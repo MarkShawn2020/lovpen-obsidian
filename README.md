@@ -51,8 +51,8 @@ LovPen transforms your Obsidian markdown notes into professionally formatted con
 
 ### Manual Installation
 ```bash
-curl -L https://github.com/markshawn2020/lovpen/releases/latest/download/lovpen-plugin.zip -o lovpen.zip
-unzip lovpen.zip -d /path/to/vault/.obsidian/plugins/lovpen
+curl -L https://github.com/markshawn2020/lovpen-obsidian/releases/latest/download/obsidian-lovpen.zip -o obsidian-lovpen.zip
+unzip obsidian-lovpen.zip -d /path/to/vault/.obsidian/plugins/
 ```
 
 ### Development
