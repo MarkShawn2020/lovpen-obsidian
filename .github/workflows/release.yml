@@ -64,16 +64,6 @@ jobs:
       - name: Download highlights
         run: pnpm download-highlights
 
-      - name: Prepare release files
-        run: |
-          # 创建完整插件包，直接复制 dist 目录内容
-          mkdir -p obsidian-lovpen
-          cp -r packages/obsidian/dist/* obsidian-lovpen/
-
-          # 创建完整插件压缩包
-          mkdir -p release-files
-          zip -r release-files/obsidian-lovpen.zip obsidian-lovpen/
-
       - name: Get version from tag or input
         id: get_version
         run: |
@@ -84,6 +74,16 @@ jobs:
             echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
             echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Prepare release files
+        run: |
+          # 创建完整插件包，直接复制 dist 目录内容
+          mkdir -p obsidian-lovpen
+          cp -r packages/obsidian/dist/* obsidian-lovpen/
+
+          # 创建完整插件压缩包（带版本号）
+          mkdir -p release-files
+          zip -r release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip obsidian-lovpen/
 
       - name: Generate changelog
         id: changelog
@@ -128,7 +128,7 @@ jobs:
             - 🔗 智能链接处理，针对微信公众号优化
             - 📝 模板系统，自定义内容渲染
           files: |
-            release-files/obsidian-lovpen.zip
+            release-files/obsidian-lovpen-${{ steps.get_version.outputs.tag }}.zip
           draft: false
           prerelease: false
         env:
