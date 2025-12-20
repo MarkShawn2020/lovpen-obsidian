@@ -46,11 +46,11 @@ export interface FindElementResult {
 
 /**
  * 查找截图目标元素
- * @param container - 搜索容器（Obsidian 中是 reactContainer，Web 中是 document）
+ * @param container - 搜索容器（Obsidian 中是 shadowRoot/reactContainer，Web 中是 document）
  * @returns 找到的元素及其元数据，未找到则返回 null
  */
 export function findScreenshotElement(
-	container: HTMLElement | Document
+	container: HTMLElement | Document | ShadowRoot
 ): FindElementResult | null {
 	logger.debug('🎯 [截图工具] 开始查找截图元素...');
 

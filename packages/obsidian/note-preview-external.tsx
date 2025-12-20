@@ -338,7 +338,8 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 					new Notice(`正在生成图片...`);
 
 					// 使用共享的截图元素查找逻辑
-					const result = findScreenshotElement(this.reactContainer || document);
+					// 当启用 Shadow DOM 时，元素在 shadowRoot 内部
+					const result = findScreenshotElement(this.shadowRoot || this.reactContainer || document);
 					if (!result) {
 						logger.error('未找到任何可截图的元素');
 						new Notice(`未找到文章内容，无法生成图片`);
