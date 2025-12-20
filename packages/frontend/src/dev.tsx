@@ -83,6 +83,7 @@ const LovpenReactLib: ExternalReactLib = {
         --input: #e5e5e5;
         --ring: #a3a3a3;
         --radius: 0.625rem;
+        --tw-border-style: solid;
       `;
 
       options.shadowRoot.appendChild(shadowContainer);
@@ -126,21 +127,33 @@ const LovpenReactLib: ExternalReactLib = {
     }
   },
 
-  update: async (container: HTMLElement, props: any) => {
+  update: (container: HTMLElement, props: any) => {
     logger.debug('Updating React component');
 
-    // Store new props
-    (container as any).__lovpenProps = props;
+    return new Promise<void>((resolve) => {
+      // Store new props
+      (container as any).__lovpenProps = props;
 
-    const root = mountedRoots.get(container);
-    if (root && (container as any).__updateProps) {
-      // Update props without remounting JotaiProvider
-      (container as any).__updateProps(props);
-    } else if (!root) {
-      // If no root exists, mount it with stored options
-      const storedOptions = (container as any).__shadowOptions;
-      await LovpenReactLib.mount(container, props, storedOptions);
-    }
+      const root = mountedRoots.get(container);
+      if (root && (container as any).__updateProps) {
+        // Update props without remounting JotaiProvider
+        (container as any).__updateProps(props);
+        // Mirror production update flow to keep CSS variables in sync.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (typeof props.onUpdateCSSVariables === 'function') {
+              props.onUpdateCSSVariables();
+            }
+            resolve();
+          });
+        });
+      } else {
+        // If no root exists, mount it with stored options
+        const storedOptions = (container as any).__shadowOptions;
+        LovpenReactLib.mount(container, props, storedOptions);
+        resolve();
+      }
+    });
   },
 
   unmount: (container: HTMLElement) => {
@@ -464,6 +477,12 @@ if (rootElement) {
 
 // Enable HMR
 if ((import.meta as any).hot) {
+  (import.meta as any).hot.accept('./index.css?inline', (mod: { default: string }) => {
+    (window as any).__LOVPEN_COMPILED_CSS__ = mod.default;
+    if ((window as any).__lovpenRefresh) {
+      (window as any).__lovpenRefresh();
+    }
+  });
   (import.meta as any).hot.accept(() => {
     logger.debug('Module updated, re-rendering components');
     

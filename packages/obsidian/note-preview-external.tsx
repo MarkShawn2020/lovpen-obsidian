@@ -945,7 +945,13 @@ ${customCSS}`;
 		if ((window as any).__LOVPEN_HMR_MODE__) {
 			// HMR 模式：从 Vite dev server 获取 CSS
 			const viteDevServerUrl = (window as any).__LOVPEN_HMR_URL__ || 'http://localhost:5173';
-			await this.loadHMRCSSToShadowRoot(viteDevServerUrl);
+			const ok = await this.loadHMRCSSToShadowRoot(viteDevServerUrl);
+			if (!ok) {
+				const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
+				if (pluginDir) {
+					await this.loadExternalCSS(pluginDir);
+				}
+			}
 		} else {
 			// 生产模式：从插件目录加载打包的 CSS
 			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
@@ -1045,6 +1051,13 @@ ${customCSS}`;
 			} catch (devError) {
 			}
 			
+			// Ensure HMR flags are cleared when dev server is unavailable
+			if (typeof window !== 'undefined') {
+				(window as any).__LOVPEN_HMR_MODE__ = false;
+				delete (window as any).__LOVPEN_HMR_URL__;
+				delete (window as any).__LOVPEN_COMPILED_CSS__;
+			}
+			
 			// Fall back to bundled version (production mode or dev server not available)
 			const adapter = this.app.vault.adapter;
 			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
@@ -1097,11 +1110,11 @@ ${customCSS}`;
 	 * 🔑 从 window.__LOVPEN_COMPILED_CSS__ 获取 Vite 编译后的 CSS
 	 * 这样可以获取到完整的 TailwindCSS 编译结果，而不是原始的 @tailwind 指令
 	 */
-	private async loadHMRCSSToShadowRoot(_viteDevServerUrl: string): Promise<void> {
+	private async loadHMRCSSToShadowRoot(_viteDevServerUrl: string): Promise<boolean> {
 		if (!this.shadowRoot) {
 			console.warn("[LovPen][HMR] Shadow Root 不存在，无法注入 CSS");
 			logger.warn("[HMR] Shadow Root 不存在，无法注入 CSS");
-			return;
+			return false;
 		}
 
 		try {
@@ -1121,7 +1134,7 @@ ${customCSS}`;
 				if (!css) {
 					console.error("[LovPen][HMR] CSS 加载超时");
 					logger.error("[HMR] CSS 加载超时");
-					return;
+					return false;
 				}
 			}
 
@@ -1143,9 +1156,11 @@ ${customCSS}`;
 
 			console.log("[LovPen][HMR] ✅ CSS 注入完成");
 			logger.info("[HMR] ✅ CSS 已注入到 Shadow Root");
+			return true;
 		} catch (error) {
 			console.error("[LovPen][HMR] 加载 CSS 失败:", error);
 			logger.warn("[HMR] 加载 CSS 失败:", error);
+			return false;
 		}
 	}
 
@@ -1244,6 +1259,9 @@ ${customCSS}`;
 		// Listen for manual refresh events
 		(window as any).__lovpenRefresh = async () => {
 			logger.debug("[HMR] Manual refresh triggered");
+			if (this.USE_SHADOW_DOM && this.shadowRoot) {
+				await this.injectCSSToShadowRoot();
+			}
 			if (this.externalReactLib && this.reactContainer) {
 				await this.updateExternalReactComponent();
 			}

@@ -89,6 +89,50 @@
 	--sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Shadow DOM host defaults so portal content inherits the same variables. */
+:host {
+	--radius: 0.625rem;
+	--background: #ffffff;
+	--foreground: #1a1a1a;
+	--card: #ffffff;
+	--card-foreground: #1a1a1a;
+	--popover: #ffffff;
+	--popover-foreground: #1a1a1a;
+	--primary: #CC785C;
+	--primary-foreground: #ffffff;
+	--secondary: #f5f5f5;
+	--secondary-foreground: #2d2d2d;
+	--muted: #f5f5f5;
+	--muted-foreground: #737373;
+	--accent: #f5f5f5;
+	--accent-foreground: #2d2d2d;
+	--destructive: #dc2626;
+	--border: #e5e5e5;
+	--input: #e5e5e5;
+	--ring: #a3a3a3;
+	--tw-border-style: solid;
+	--color-primary: #CC785C;
+	--color-input: #e5e5e5;
+	--chart-1: #f97316;
+	--chart-2: #14b8a6;
+	--chart-3: #3b82f6;
+	--chart-4: #eab308;
+	--chart-5: #f59e0b;
+	--sidebar: #fafafa;
+	--sidebar-foreground: #1a1a1a;
+	--sidebar-primary: #2d2d2d;
+	--sidebar-primary-foreground: #fafafa;
+	--sidebar-accent: #f5f5f5;
+	--sidebar-accent-foreground: #2d2d2d;
+	--sidebar-border: #e5e5e5;
+	--sidebar-ring: #a3a3a3;
+	--background-primary: #ffffff;
+	--background-secondary: #fafafa;
+	--text-normal: #1a1a1a;
+	--text-muted: #737373;
+	--interactive-accent: #2d2d2d;
+}
+
 /* ===================================
    Shadow DOM 内部默认变量
    由于 CSS 变量会穿透 Shadow DOM 边界（继承特性），需要显式覆盖
@@ -115,6 +159,7 @@
 	--border: #e5e5e5;
 	--input: #e5e5e5;
 	--ring: #a3a3a3;
+	--tw-border-style: solid;
 	/* 🔑 Tailwind v4 主题色映射 */
 	--color-primary: #CC785C;
 	--color-input: #e5e5e5;

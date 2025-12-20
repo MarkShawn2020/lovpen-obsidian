@@ -80,6 +80,7 @@ const LovpenReactLib: LovpenReactLib = {
 				--input: #e5e5e5;
 				--ring: #a3a3a3;
 				--radius: 0.625rem;
+				--tw-border-style: solid;
 			`;
 
 			options.shadowRoot.appendChild(shadowContainer);

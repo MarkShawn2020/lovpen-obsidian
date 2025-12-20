@@ -22,6 +22,11 @@ const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
 	</svg>
 );
 
+const gradientStyle = (from: string, to: string) => ({
+	backgroundImage: `linear-gradient(135deg, ${from}, ${to})`,
+	backgroundColor: from,
+});
+
 // 七牛云区域配置
 const QINIU_REGIONS: Array<{
 	value: CloudStorageSettings['qiniu']['region'];
@@ -122,8 +127,11 @@ const CloudStorageSettingsSection: React.FC<{
 					onClick={() => setExpanded(!expanded)}
 				>
 					<div className="flex items-center gap-3">
-						<div className="w-7 h-7 bg-gradient-to-br from-[#97B5D5] to-[#7095B5] rounded-md flex items-center justify-center">
-							<Cloud className="h-4 w-4 text-white"/>
+						<div
+							className="w-7 h-7 rounded-md flex items-center justify-center"
+							style={gradientStyle('#97B5D5', '#7095B5')}
+						>
+							<Cloud className="h-4 w-4" style={{ color: '#fff' }}/>
 						</div>
 						<div>
 							<span className="text-[#181818] text-sm block">七牛云存储</span>
@@ -977,17 +985,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 	};
 
 	// 导航菜单配置
-	const navItems: {key: typeof activeSection; label: string; icon: React.ElementType; color: string; group: 'content' | 'settings'}[] = [
-		{key: 'article', label: '文章信息', icon: FileText, color: 'from-[#CC785C] to-[#B86A4E]', group: 'content'},
-		{key: 'cover', label: '封面设计', icon: Palette, color: 'from-[#B49FD8] to-[#8B7CB8]', group: 'content'},
-		{key: 'kits', label: '模板套装', icon: Package, color: 'from-[#629A90] to-[#4A7A70]', group: 'content'},
-		{key: 'plugins', label: '插件管理', icon: Plug, color: 'from-[#97B5D5] to-[#7095B5]', group: 'content'},
-		{key: 'playground', label: '实验室', icon: ImagePlus, color: 'from-[#E8A87C] to-[#C8885C]', group: 'content'},
-		{key: 'logs', label: 'AI 日志', icon: FileText, color: 'from-[#87867F] to-[#6A6A63]', group: 'content'},
-		{key: 'cloud', label: '云存储', icon: Cloud, color: 'from-[#97B5D5] to-[#7095B5]', group: 'settings'},
-		{key: 'personal', label: '个人信息', icon: User, color: 'from-[#C2C07D] to-[#A2A05D]', group: 'settings'},
-		{key: 'ai', label: 'AI 设置', icon: Bot, color: 'from-[#CC785C] to-[#AC583C]', group: 'settings'},
-		{key: 'general', label: '通用', icon: Globe, color: 'from-[#87867F] to-[#6A6A63]', group: 'settings'},
+	const navItems: {key: typeof activeSection; label: string; icon: React.ElementType; colorFrom: string; colorTo: string; group: 'content' | 'settings'}[] = [
+		{key: 'article', label: '文章信息', icon: FileText, colorFrom: '#CC785C', colorTo: '#B86A4E', group: 'content'},
+		{key: 'cover', label: '封面设计', icon: Palette, colorFrom: '#B49FD8', colorTo: '#8B7CB8', group: 'content'},
+		{key: 'kits', label: '模板套装', icon: Package, colorFrom: '#629A90', colorTo: '#4A7A70', group: 'content'},
+		{key: 'plugins', label: '插件管理', icon: Plug, colorFrom: '#97B5D5', colorTo: '#7095B5', group: 'content'},
+		{key: 'playground', label: '实验室', icon: ImagePlus, colorFrom: '#E8A87C', colorTo: '#C8885C', group: 'content'},
+		{key: 'logs', label: 'AI 日志', icon: FileText, colorFrom: '#87867F', colorTo: '#6A6A63', group: 'content'},
+		{key: 'cloud', label: '云存储', icon: Cloud, colorFrom: '#97B5D5', colorTo: '#7095B5', group: 'settings'},
+		{key: 'personal', label: '个人信息', icon: User, colorFrom: '#C2C07D', colorTo: '#A2A05D', group: 'settings'},
+		{key: 'ai', label: 'AI 设置', icon: Bot, colorFrom: '#CC785C', colorTo: '#AC583C', group: 'settings'},
+		{key: 'general', label: '通用', icon: Globe, colorFrom: '#87867F', colorTo: '#6A6A63', group: 'settings'},
 	];
 
 	try {
@@ -1031,7 +1039,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium whitespace-nowrap px-1.5">内容</p>
 							</div>
 							<nav className="space-y-1">
-								{navItems.filter(item => item.group === 'content').map(({key, label, icon: Icon, color}) => (
+								{navItems.filter(item => item.group === 'content').map(({key, label, icon: Icon, colorFrom, colorTo}) => (
 									<button
 										key={key}
 										onClick={() => handleSectionChange(key)}
@@ -1043,12 +1051,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										}`}
 									>
 										<div
-											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} ${
+											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
 												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
 											}`}
-											style={{ boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
+											style={{
+												...gradientStyle(colorFrom, colorTo),
+												boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none'
+											}}
 										>
-											<Icon className="h-3.5 w-3.5 text-white"/>
+											<Icon className="h-3.5 w-3.5" style={{ color: '#fff' }}/>
 										</div>
 										<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
 										{key === 'plugins' && plugins.length > 0 && (
@@ -1069,7 +1080,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium whitespace-nowrap px-1.5">设置</p>
 							</div>
 							<nav className="space-y-1">
-								{navItems.filter(item => item.group === 'settings').map(({key, label, icon: Icon, color}) => (
+								{navItems.filter(item => item.group === 'settings').map(({key, label, icon: Icon, colorFrom, colorTo}) => (
 									<button
 										key={key}
 										onClick={() => handleSectionChange(key)}
@@ -1081,12 +1092,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										}`}
 									>
 										<div
-											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${color} ${
+											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
 												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
 											}`}
-											style={{ boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none' }}
+											style={{
+												...gradientStyle(colorFrom, colorTo),
+												boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none'
+											}}
 										>
-											<Icon className="h-3.5 w-3.5 text-white"/>
+											<Icon className="h-3.5 w-3.5" style={{ color: '#fff' }}/>
 										</div>
 										<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
 									</button>
@@ -1309,8 +1323,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{/* 工具栏位置 */}
 										<div className="flex items-center justify-between px-4 py-3">
 											<div className="flex items-center gap-3">
-												<div className="w-7 h-7 bg-gradient-to-br from-[#CC785C] to-[#B86A4E] rounded-md flex items-center justify-center">
-													<PanelLeft className="h-4 w-4 text-white"/>
+												<div
+													className="w-7 h-7 rounded-md flex items-center justify-center"
+													style={gradientStyle('#CC785C', '#B86A4E')}
+												>
+													<PanelLeft className="h-4 w-4" style={{ color: '#fff' }}/>
 												</div>
 												<span className="text-[#181818] text-sm">工具栏位置</span>
 											</div>
@@ -1333,8 +1350,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{/* 代码块缩放 */}
 										<div className="flex items-center justify-between px-4 py-3">
 											<div className="flex items-center gap-3">
-												<div className="w-7 h-7 bg-gradient-to-br from-[#629A90] to-[#4A7A70] rounded-md flex items-center justify-center">
-													<Image className="h-4 w-4 text-white"/>
+												<div
+													className="w-7 h-7 rounded-md flex items-center justify-center"
+													style={gradientStyle('#629A90', '#4A7A70')}
+												>
+													<Image className="h-4 w-4" style={{ color: '#fff' }}/>
 												</div>
 												<div>
 													<span className="text-[#181818] text-sm block">代码块自动缩放</span>
@@ -1353,8 +1373,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{/* 隐藏一级标题 */}
 										<div className="flex items-center justify-between px-4 py-3">
 											<div className="flex items-center gap-3">
-												<div className="w-7 h-7 bg-gradient-to-br from-[#8B7CB8] to-[#6B5C98] rounded-md flex items-center justify-center">
-													<Heading1 className="h-4 w-4 text-white"/>
+												<div
+													className="w-7 h-7 rounded-md flex items-center justify-center"
+													style={gradientStyle('#8B7CB8', '#6B5C98')}
+												>
+													<Heading1 className="h-4 w-4" style={{ color: '#fff' }}/>
 												</div>
 												<div>
 													<span className="text-[#181818] text-sm block">隐藏一级标题</span>
@@ -1374,8 +1397,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										{/* 显示封面 */}
 										<div className="flex items-center justify-between px-4 py-3">
 											<div className="flex items-center gap-3">
-												<div className="w-7 h-7 bg-gradient-to-br from-[#B49FD8] to-[#8B7CB8] rounded-md flex items-center justify-center">
-													<Image className="h-4 w-4 text-white"/>
+												<div
+													className="w-7 h-7 rounded-md flex items-center justify-center"
+													style={gradientStyle('#B49FD8', '#8B7CB8')}
+												>
+													<Image className="h-4 w-4" style={{ color: '#fff' }}/>
 												</div>
 												<div>
 													<span className="text-[#181818] text-sm block">显示封面</span>
@@ -1400,14 +1426,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 									<div className="bg-white/60 rounded-xl border border-[#E8E6DC] overflow-hidden">
 										<div className="divide-y divide-[#E8E6DC]">
 											{[
-												{label: '主题', desc: '明亮 / 暗色', color: 'from-[#B49FD8] to-[#8B7CB8]'},
-												{label: '语言', desc: '简体中文', color: 'from-[#97B5D5] to-[#7095B5]'},
-												{label: '快捷键', desc: '自定义', color: 'from-[#C2C07D] to-[#A2A05D]'},
-												{label: '数据', desc: '导入 / 导出', color: 'from-[#CC785C] to-[#AC583C]'}
+												{label: '主题', desc: '明亮 / 暗色', colorFrom: '#B49FD8', colorTo: '#8B7CB8'},
+												{label: '语言', desc: '简体中文', colorFrom: '#97B5D5', colorTo: '#7095B5'},
+												{label: '快捷键', desc: '自定义', colorFrom: '#C2C07D', colorTo: '#A2A05D'},
+												{label: '数据', desc: '导入 / 导出', colorFrom: '#CC785C', colorTo: '#AC583C'}
 											].map((item, i) => (
 												<div key={i} className="flex items-center justify-between px-4 py-3 opacity-50">
 													<div className="flex items-center gap-3">
-														<div className={`w-7 h-7 bg-gradient-to-br ${item.color} rounded-md`}/>
+														<div
+															className="w-7 h-7 rounded-md"
+															style={gradientStyle(item.colorFrom, item.colorTo)}
+														/>
 														<span className="text-[#181818] text-sm">{item.label}</span>
 													</div>
 													<span className="text-[#87867F] text-xs">{item.desc}</span>

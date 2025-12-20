@@ -263,7 +263,11 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 							<div className="flex items-start gap-4">
 								{/* 小预览缩略图 */}
 								<div
-									className="flex-shrink-0 w-16 h-12 bg-gradient-to-br from-[#F7F4EC] to-[#E8E6DC] rounded-xl border border-[#E8E6DC] overflow-hidden">
+									className="flex-shrink-0 w-16 h-12 rounded-xl border border-[#E8E6DC] overflow-hidden"
+									style={{
+										backgroundImage: 'linear-gradient(135deg, #F7F4EC, #E8E6DC)',
+										backgroundColor: '#F7F4EC',
+									}}>
 									<div className="w-full h-full p-1">
 										<div className="w-full h-2 bg-white rounded-sm mb-1"></div>
 										<div className="w-3/4 h-1 bg-[#87867F] rounded-sm mb-1"></div>

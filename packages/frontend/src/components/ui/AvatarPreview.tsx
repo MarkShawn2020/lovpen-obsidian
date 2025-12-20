@@ -39,6 +39,13 @@ export const AvatarPreview: React.FC<AvatarPreviewProps> = ({
 	const sizeClass = sizeClasses[size];
 	const iconSize = iconSizes[size];
 	const textSize = textSizes[size];
+	const parseGradientColors = (value?: string) => {
+		const match = value?.match(/from-\[#([0-9A-Fa-f]{6})\]\s+to-\[#([0-9A-Fa-f]{6})\]/);
+		if (match) {
+			return {from: `#${match[1]}`, to: `#${match[2]}`};
+		}
+		return {from: '#D97757', to: '#CC785C'};
+	};
 
 	// 上传的图片
 	if (config?.type === 'uploaded' && config.data) {
@@ -53,10 +60,16 @@ export const AvatarPreview: React.FC<AvatarPreviewProps> = ({
 
 	// 首字母头像
 	if (config?.type === 'initials' && config.initials) {
-		const bgColor = config.backgroundColor || 'from-[#D97757] to-[#CC785C]';
+		const {from, to} = parseGradientColors(config.backgroundColor);
 		return (
-			<div className={`${sizeClass} bg-gradient-to-br ${bgColor} rounded-full flex items-center justify-center ${className}`}>
-				<span className={`text-white font-semibold ${textSize}`}>
+			<div
+				className={`${sizeClass} rounded-full flex items-center justify-center ${className}`}
+				style={{
+					backgroundImage: `linear-gradient(135deg, ${from}, ${to})`,
+					backgroundColor: from,
+				}}
+			>
+				<span className={`font-semibold ${textSize}`} style={{color: '#fff'}}>
 					{config.initials}
 				</span>
 			</div>
@@ -73,9 +86,16 @@ export const AvatarPreview: React.FC<AvatarPreviewProps> = ({
 			.join('');
 
 		if (initials) {
+			const {from, to} = parseGradientColors();
 			return (
-				<div className={`${sizeClass} bg-gradient-to-br from-[#D97757] to-[#CC785C] rounded-full flex items-center justify-center ${className}`}>
-					<span className={`text-white font-semibold ${textSize}`}>
+				<div
+					className={`${sizeClass} rounded-full flex items-center justify-center ${className}`}
+					style={{
+						backgroundImage: `linear-gradient(135deg, ${from}, ${to})`,
+						backgroundColor: from,
+					}}
+				>
+					<span className={`font-semibold ${textSize}`} style={{color: '#fff'}}>
 						{initials}
 					</span>
 				</div>
