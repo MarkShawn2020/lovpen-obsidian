@@ -47,6 +47,12 @@ export const COPY_OPTIONS: CopyOption[] = [
 		description: '复制为适合小红书的格式',
 		icon: '📕',
 	},
+	{
+		id: 'pdf',
+		name: 'PDF',
+		description: '导出为 PDF 文件',
+		icon: '📑',
+	},
 ];
 
 export const CopySplitButton: React.FC<CopySplitButtonProps> = ({
@@ -78,10 +84,10 @@ export const CopySplitButton: React.FC<CopySplitButtonProps> = ({
 				onClick={handleMainClick}
 				size="sm"
 				className="rounded-r-none border-r-0 bg-white/60 backdrop-blur-sm border border-[#E8E6DC]/50 text-[#87867F]/70 transition-all hover:bg-[#D97757] hover:text-white hover:scale-105 hover:shadow-md hover:border-[#D97757] focus:outline-none focus:ring-2 focus:ring-[#D97757]/50 focus:ring-offset-2"
-				title={`复制到${selectedOption.name}`}
+				title={selectedOption.id === 'pdf' ? `导出为${selectedOption.name}` : `复制到${selectedOption.name}`}
 			>
 				<span className="mr-1.5">{selectedOption.icon}</span>
-				复制
+				{selectedOption.id === 'pdf' ? '导出' : '复制'}
 			</Button>
 
 			{/* Select 下拉菜单 */}

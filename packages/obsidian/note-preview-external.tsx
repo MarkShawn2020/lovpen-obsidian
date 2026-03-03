@@ -491,6 +491,11 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 				new Notice(`已复制到剪贴板（小红书格式）！`);
 				break;
 
+			case 'pdf':
+				// PDF 导出 - 直接对当前预览视图调用打印
+				window.print();
+				break;
+
 			default:
 				// 默认使用微信格式
 				await navigator.clipboard.write([new ClipboardItem({

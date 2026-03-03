@@ -376,6 +376,9 @@ if (rootElement) {
           logger.debug('🖼️ [图片复制] 写入剪贴板成功');
 
           new webAdapter.Notice('已复制图片到剪贴板！');
+        } else if (mode === 'pdf') {
+          // PDF 导出 - 直接对当前预览视图调用打印
+          window.print();
         } else {
           // HTML 复制模式
           const articleElement = document.querySelector('.lovpen');
