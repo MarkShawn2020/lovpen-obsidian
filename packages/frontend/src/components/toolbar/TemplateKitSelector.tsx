@@ -247,72 +247,54 @@ export const TemplateKitSelector: React.FC<TemplateKitSelectorProps> = ({
 
 
 			{/* 套装列表 */}
-			<div className="space-y-4">
+			<div className="space-y-3">
 				<h4 className="text-sm font-medium text-[#181818]">可用套装</h4>
-				<div className="grid grid-cols-1 gap-4">
+				<div className="grid grid-cols-1 gap-3">
 					{kits.map((kit) => (
 						<div
 							key={kit.basicInfo.id}
-							className={`p-4 border rounded-2xl cursor-pointer transition-all ${
+							className={`group p-3 border rounded-xl cursor-pointer transition-all ${
 								selectedKitId === kit.basicInfo.id
-									? 'border-[#D97757] bg-[#F7F4EC]'
-									: 'border-[#E8E6DC] bg-white hover:border-[#D97757] hover:bg-[#F7F4EC]'
+									? 'border-[#D97757] bg-[#F7F4EC] shadow-sm'
+									: 'border-[#E8E6DC] bg-white hover:border-[#D97757]/50 hover:shadow-sm'
 							}`}
 							onClick={() => handleKitSelect(kit.basicInfo.id)}
 						>
-							<div className="flex items-start gap-4">
-								{/* 小预览缩略图 */}
-								<div
-									className="flex-shrink-0 w-16 h-12 rounded-xl border border-[#E8E6DC] overflow-hidden"
-									style={{
-										backgroundImage: 'linear-gradient(135deg, #F7F4EC, #E8E6DC)',
-										backgroundColor: '#F7F4EC',
-									}}>
-									<div className="w-full h-full p-1">
-										<div className="w-full h-2 bg-white rounded-sm mb-1"></div>
-										<div className="w-3/4 h-1 bg-[#87867F] rounded-sm mb-1"></div>
-										<div className="w-full h-1 bg-[#E8E6DC] rounded-sm mb-1"></div>
-										<div className="w-1/2 h-1 bg-[#E8E6DC] rounded-sm"></div>
-									</div>
+							{/* 顶行：名称 + 状态 + 操作 */}
+							<div className="flex items-center justify-between mb-1.5">
+								<div className="flex items-center gap-2 min-w-0">
+									<h5 className="text-sm font-semibold text-[#181818] truncate">{kit.basicInfo.name}</h5>
+									{getKitStatusBadge(kit)}
 								</div>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#F0EEE6] rounded-lg shrink-0"
+									onClick={(e) => {
+										e.stopPropagation();
+										setPreviewKit(kit);
+										setShowPreviewModal(true);
+									}}
+								>
+									<Eye className="w-3.5 h-3.5 text-[#87867F]"/>
+								</Button>
+							</div>
 
-								<div className="flex-1">
-									<div className="flex items-center gap-2 mb-2">
-										<h5 className="text-sm font-medium text-[#181818]">{kit.basicInfo.name}</h5>
-										{getKitStatusBadge(kit)}
-									</div>
-									<p className="text-xs text-[#87867F] mb-3">{kit.basicInfo.description}</p>
-									<div className="flex items-center gap-2 text-xs text-[#87867F] mb-3">
-										<span>主题: {kit.styleConfig.theme}</span>
-										<span>•</span>
-										<span>高亮: {kit.styleConfig.codeHighlight}</span>
-									</div>
-									<div className="flex flex-wrap gap-2">
-										{kit.basicInfo.tags.slice(0, 3).map((tag, index) => (
-											<Badge key={index} variant="outline" className="text-xs border-[#E8E6DC] text-[#87867F]">
-												{tag}
-											</Badge>
-										))}
-										{kit.basicInfo.tags.length > 3 && (
-											<span
-												className="text-xs text-[#87867F]">+{kit.basicInfo.tags.length - 3}</span>
-										)}
-									</div>
+							{/* 描述（限制单行） */}
+							<p className="text-xs text-[#87867F] mb-2 line-clamp-1">{kit.basicInfo.description}</p>
+
+							{/* 底行：配置信息 + 标签（单行，渐变遮罩） */}
+							<div className="relative overflow-hidden">
+								<div className="flex items-center gap-1.5">
+									<span className="text-[11px] px-1.5 py-0.5 rounded bg-[#F7F4EC] text-[#87867F] shrink-0">{kit.styleConfig.theme || '默认'}</span>
+									<span className="text-[11px] px-1.5 py-0.5 rounded bg-[#F7F4EC] text-[#87867F] shrink-0">{kit.styleConfig.codeHighlight || '默认'}</span>
+									{kit.basicInfo.tags.map((tag, index) => (
+										<span key={index} className="text-[11px] px-1.5 py-0.5 rounded bg-[#F0EEE6] text-[#A09F97] shrink-0">
+											{tag}
+										</span>
+									))}
 								</div>
-								<div className="flex gap-1 ml-2">
-									<Button
-										variant="ghost"
-										size="sm"
-										className="h-8 w-8 p-0 hover:bg-[#F0EEE6] rounded-lg"
-										onClick={(e) => {
-											e.stopPropagation();
-											setPreviewKit(kit);
-											setShowPreviewModal(true);
-										}}
-									>
-										<Eye className="w-4 h-4 text-[#87867F]"/>
-									</Button>
-								</div>
+								<div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none" style={{background: `linear-gradient(to right, transparent, ${selectedKitId === kit.basicInfo.id ? '#F7F4EC' : 'white'})`}} />
 							</div>
 						</div>
 					))}
