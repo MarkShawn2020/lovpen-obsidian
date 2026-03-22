@@ -43,27 +43,29 @@ export abstract class HtmlPlugin extends UnifiedPlugin implements IHtmlPlugin {
 
 		if (settings.enableThemeColor) {
 			themeAccentColor = settings.themeColor || "#7852ee";
-			logger.debug("使用自定义主题色：", themeAccentColor);
 		} else {
 			try {
-				const testElement = document.createElement("div");
-				testElement.style.display = "none";
-				testElement.className = "lovpen";
-				document.body.appendChild(testElement);
-
-				const computedStyle = window.getComputedStyle(testElement);
-				const primaryColor = computedStyle
-					.getPropertyValue("--primary-color")
-					.trim();
-
-				logger.debug("获取到的主题色：", primaryColor);
-				if (primaryColor) {
-					themeAccentColor = primaryColor;
-				} else {
-					themeAccentColor = "#7852ee";
+				// 查找已有的 .lovpen-renderer 元素（可能在 Shadow DOM 内）
+				let rendererEl = document.querySelector(".lovpen-renderer");
+				if (!rendererEl) {
+					// 搜索 Shadow DOM 内的元素
+					const shadowHosts = document.querySelectorAll("*");
+					for (const host of shadowHosts) {
+						if (host.shadowRoot) {
+							rendererEl = host.shadowRoot.querySelector(".lovpen-renderer");
+							if (rendererEl) break;
+						}
+					}
 				}
 
-				document.body.removeChild(testElement);
+				let primaryColor = "";
+				if (rendererEl) {
+					primaryColor = window.getComputedStyle(rendererEl)
+						.getPropertyValue("--primary-color")
+						.trim();
+				}
+
+				themeAccentColor = primaryColor || "#7852ee";
 			} catch (e) {
 				themeAccentColor = "#7852ee";
 				logger.error("无法获取主题色变量，使用默认值", e);

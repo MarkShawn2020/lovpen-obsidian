@@ -46,17 +46,17 @@ export class Tables extends UnifiedHtmlPlugin {
 					display: table;
 				`);
 				
-				// 设置表头单元格的内联样式 - 使用柔和的灰色背景，让主题 CSS 可以覆盖
+				// 设置表头单元格的内联样式 - 统一padding确保对称
 				const headerCells = table.querySelectorAll("th");
 				headerCells.forEach((cell) => {
 					cell.setAttribute("style", `
 						padding: 12px 16px;
 						text-align: left;
-						background: #f0efeb;
-						color: rgb(51, 51, 51) !important;
+						background: ${themeColor};
+						color: rgb(255, 255, 255) !important;
 						font-weight: 600;
 						font-size: 13px;
-						border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+						border-bottom: 1px solid rgba(200, 100, 66, 0.3);
 					`);
 				});
 

@@ -5,6 +5,7 @@
  */
 
 .lovpen-renderer {
+	--primary-color: #8b6914;
 	font-family: 'Noto Serif SC', 'Source Han Serif CN', 'STSongti-SC', 'Songti SC', 'SimSun', 'PT Serif', 'Times New Roman', Times, serif;
 	font-size: 16px;
 	color: #1f0909;
