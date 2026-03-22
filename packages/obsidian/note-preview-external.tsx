@@ -306,13 +306,10 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 			case 'wechat':
 				console.log('🎯 [NotePreview] Entered wechat case');
 				logger.debug('🔥 [DEBUG] 进入 wechat case');
-				// 微信公众号格式 - 处理代码块横向滚动问题
-				// 微信会强制覆盖 white-space: pre 为 pre-wrap，需要用 HTML 结构处理
 				{
-					const tempContainer = document.createElement('div');
-					tempContainer.innerHTML = content;
-					this.preserveCodeSpacing(tempContainer);
-					const processedContent = tempContainer.innerHTML;
+					// 从已渲染的 DOM 中提取带 computed styles 的 HTML
+					// 微信编辑器只认 inline style，不认 <style> 标签
+					const processedContent = this.extractInlinedHTML(content);
 					console.log('[Lovpen] Copied HTML for WeChat:', processedContent.substring(0, 500) + '...');
 					await navigator.clipboard.write([new ClipboardItem({
 						"text/html": new Blob([processedContent], {type: "text/html"}),
@@ -510,6 +507,96 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 	 * 微信会强制覆盖 white-space: pre 为 pre-wrap，导致代码自动换行
 	 * 解决方案：用 HTML 结构代替 CSS 行为
 	 */
+	/**
+	 * 从 Shadow DOM 渲染结果中提取 HTML，将 computed styles 内联到元素上
+	 * 确保粘贴到微信公众号时样式不丢失
+	 */
+	private extractInlinedHTML(fallbackContent: string): string {
+		// 需要内联的 CSS 属性
+		const INLINE_PROPS = [
+			'font-family', 'font-size', 'font-weight', 'font-style',
+			'line-height', 'letter-spacing', 'text-align', 'text-indent', 'text-decoration',
+			'color', 'background-color', 'background',
+			'margin', 'margin-top', 'margin-bottom', 'margin-left', 'margin-right',
+			'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right',
+			'border', 'border-left', 'border-right', 'border-top', 'border-bottom',
+			'border-radius', 'border-collapse',
+			'list-style-type', 'list-style-position',
+			'display', 'white-space', 'overflow-wrap', 'word-break',
+			'box-shadow',
+		];
+
+		try {
+			// 从 Shadow DOM 中找到已渲染的文章元素
+			const root = this.shadowRoot || this.reactContainer || document;
+			const articleEl = root.querySelector('#article-section') || root.querySelector('.lovpen');
+			if (!articleEl) {
+				logger.warn('未找到文章元素，使用原始内容');
+				return fallbackContent;
+			}
+
+			// deep clone（保持与原始DOM一一对应）
+			const clone = articleEl.cloneNode(true) as HTMLElement;
+
+			// 获取 article 容器自身的 computed style 作为基准
+			const articleComputed = window.getComputedStyle(articleEl);
+			const baseFont = articleComputed.fontFamily;
+			const baseSize = articleComputed.fontSize;
+			const baseColor = articleComputed.color;
+			const baseBg = articleComputed.backgroundColor;
+			const baseLineHeight = articleComputed.lineHeight;
+
+			// 给容器本身设置基础样式
+			clone.style.cssText = `font-family: ${baseFont}; font-size: ${baseSize}; color: ${baseColor}; background-color: ${baseBg}; line-height: ${baseLineHeight}; letter-spacing: ${articleComputed.letterSpacing};`;
+
+			// 遍历所有子元素，内联 computed styles（此时clone和orig元素数量一致）
+			const origElements = articleEl.querySelectorAll('*');
+			const cloneElements = clone.querySelectorAll('*');
+
+			origElements.forEach((origEl, i) => {
+				const cloneEl = cloneElements[i] as HTMLElement;
+				if (!cloneEl || !cloneEl.style) return;
+
+				const computed = window.getComputedStyle(origEl);
+				const styles: string[] = [];
+
+				for (const prop of INLINE_PROPS) {
+					const val = computed.getPropertyValue(prop);
+					if (!val || val === 'none' || val === 'normal' || val === '0px') continue;
+
+					if (prop === 'font-family' && val === baseFont) continue;
+					if (prop === 'font-size' && val === baseSize) continue;
+					if (prop === 'color' && val === baseColor) continue;
+					if (prop === 'line-height' && val === baseLineHeight) continue;
+
+					styles.push(`${prop}: ${val}`);
+				}
+
+				if (styles.length > 0) {
+					const existing = cloneEl.getAttribute('style') || '';
+					cloneEl.setAttribute('style', existing + styles.join('; ') + ';');
+				}
+			});
+
+			// style inlining 完成后，再移除 UI 交互按钮
+			clone.querySelectorAll(
+				'.lovpen-code-copy-btn, .lovpen-code-copy-img-btn, .lovpen-code-upload-btn, .lovpen-code-info-btn, .lovpen-code-info-tooltip, .lovpen-table-copy-img-btn, .lovpen-table-upload-btn'
+			).forEach(el => el.remove());
+
+			// 处理代码块空格保持
+			this.preserveCodeSpacing(clone);
+
+			return clone.outerHTML;
+		} catch (error) {
+			logger.error('extractInlinedHTML 失败:', error);
+			// fallback: 用原始方式
+			const tempContainer = document.createElement('div');
+			tempContainer.innerHTML = fallbackContent;
+			this.preserveCodeSpacing(tempContainer);
+			return tempContainer.innerHTML;
+		}
+	}
+
 	private preserveCodeSpacing(container: HTMLElement): void {
 		container.querySelectorAll('pre').forEach((pre) => {
 			const preEl = pre as HTMLElement;
@@ -1899,20 +1986,19 @@ ${customCSS}`;
 				);
 				if (plugin && plugin.setEnabled) {
 					plugin.setEnabled(enabled);
-					
+
 					// 清除插件缓存
 					this.pluginCache.clear();
-					
+
 					// 清理缓存管理器状态，确保UI正确更新
 					LocalImageManager.getInstance().cleanup();
 					CardDataManager.getInstance().cleanup();
-					
+
 					this.saveSettingsToPlugin();
-					this.renderMarkdown();
-					
+
 					// 强制更新React组件以反映插件状态变化
-					this.cachedProps = null; // 清除缓存的props，强制重新构建
-					await this.updateExternalReactComponent();
+					this.cachedProps = null;
+					await this.renderMarkdown();
 					
 					logger.debug(`已${enabled ? '启用' : '禁用'}插件: ${pluginName}`);
 				}
@@ -1931,16 +2017,15 @@ ${customCSS}`;
 				);
 				if (plugin && plugin.updateConfig) {
 					plugin.updateConfig({[key]: value});
-					
+
 					// 清除插件缓存
 					this.pluginCache.clear();
-					
+
 					this.saveSettingsToPlugin();
-					this.renderMarkdown();
-					
+
 					// 强制更新React组件以反映配置变化
-					this.cachedProps = null; // 清除缓存的props，强制重新构建
-					await this.updateExternalReactComponent();
+					this.cachedProps = null;
+					await this.renderMarkdown();
 					
 					logger.debug(`已更新插件 ${pluginName} 的配置: ${key} = ${value}`);
 				}
