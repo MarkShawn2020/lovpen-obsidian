@@ -1,0 +1,316 @@
+/*
+ * Typora Newsprint Theme - adapted for Lovpen
+ * Original: https://github.com/typora/typora-default-themes
+ * 经典报纸印刷风格，衬线字体，温暖纸张色调
+ */
+
+.lovpen-renderer {
+	font-family: 'Noto Serif SC', 'Source Han Serif CN', 'STSongti-SC', 'Songti SC', 'SimSun', 'PT Serif', 'Times New Roman', Times, serif;
+	font-size: 16px;
+	color: #1f0909;
+	background-color: #f3f2ee;
+	line-height: 1.6em;
+	-webkit-text-size-adjust: 100%;
+	-webkit-font-smoothing: antialiased;
+	margin: 0;
+	padding: 1em;
+}
+
+.lovpen-renderer * {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.lovpen-renderer > *:first-child {
+	margin-top: 0 !important;
+}
+
+.lovpen-renderer > *:last-child {
+	margin-bottom: 0 !important;
+}
+
+/* headings */
+.lovpen-renderer h1,
+.lovpen-renderer h2,
+.lovpen-renderer h3,
+.lovpen-renderer h4,
+.lovpen-renderer h5,
+.lovpen-renderer h6 {
+	font-weight: bold;
+	color: #1f0909;
+}
+
+.lovpen-renderer h1 {
+	font-size: 1.875em;
+	line-height: 1.3em;
+	font-weight: normal;
+	margin-top: 2em;
+	margin-bottom: 0.5em;
+	padding-bottom: 0.8125em;
+	border-bottom: 1px solid #c5c5c5;
+}
+
+.lovpen-renderer h2,
+.lovpen-renderer h3 {
+	font-size: 1.3125em;
+	line-height: 1.15;
+	margin-top: 2.285714em;
+	margin-bottom: 0.75em;
+}
+
+.lovpen-renderer h3 {
+	font-weight: normal;
+}
+
+.lovpen-renderer h4 {
+	font-size: 1.125em;
+	margin-top: 2.67em;
+	margin-bottom: 1.5em;
+}
+
+.lovpen-renderer h5,
+.lovpen-renderer h6 {
+	font-size: 1em;
+	margin-top: 1.5em;
+	margin-bottom: 1.5em;
+}
+
+/* paragraphs & block spacing */
+.lovpen-renderer p {
+	margin-bottom: 1.5em;
+}
+
+/* links */
+.lovpen-renderer a {
+	text-decoration: none;
+	color: #065588;
+}
+
+.lovpen-renderer a:hover,
+.lovpen-renderer a:active {
+	text-decoration: underline;
+}
+
+/* blockquote */
+.lovpen-renderer blockquote {
+	font-style: italic;
+	border-left: 5px solid #bababa;
+	margin-left: 2em;
+	margin-bottom: 1.5em;
+	padding-left: 1em;
+	color: #656565;
+}
+
+.lovpen-renderer blockquote ul,
+.lovpen-renderer blockquote ol {
+	margin-left: 0;
+}
+
+/* lists */
+.lovpen-renderer ul,
+.lovpen-renderer ol {
+	margin: 0 0 1.5em 1.5em;
+}
+
+.lovpen-renderer ol li {
+	list-style-type: decimal;
+	list-style-position: outside;
+}
+
+.lovpen-renderer ul li {
+	list-style-type: disc;
+	list-style-position: outside;
+}
+
+.lovpen-renderer li > ul,
+.lovpen-renderer li > ol {
+	margin-top: inherit;
+	margin-bottom: 0;
+}
+
+.lovpen-renderer li ol > li {
+	list-style-type: lower-alpha;
+}
+
+.lovpen-renderer li li ol > li {
+	list-style-type: lower-roman;
+}
+
+.lovpen-renderer p + ul,
+.lovpen-renderer p + ol {
+	margin-top: 0.5em;
+}
+
+/* code */
+.lovpen-renderer code {
+	background-color: #dadada;
+	padding-left: 2px;
+	padding-right: 2px;
+	font-size: 0.875em;
+	line-height: 1.714285em;
+}
+
+.lovpen-renderer pre {
+	margin-bottom: 1.5em;
+	margin-left: 2em;
+	padding: 0.5em 1ch;
+	background-color: #dadada;
+	overflow-x: auto;
+}
+
+.lovpen-renderer pre code {
+	background-color: transparent;
+	padding: 0;
+}
+
+/* tables */
+.lovpen-renderer table {
+	margin-bottom: 1.5em;
+	font-size: 0.95em;
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%;
+	border: 1px solid #d6d3cc;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.lovpen-renderer thead {
+	background-color: #e8e4db;
+}
+
+.lovpen-renderer thead th {
+	padding: 0.5em 0.75em;
+	text-align: left;
+	font-weight: 600;
+	color: #3c3c3c;
+	border-bottom: 2px solid #cdc8be;
+	font-size: 0.9em;
+}
+
+.lovpen-renderer td {
+	vertical-align: top;
+	padding: 0.5em 0.75em;
+	border-bottom: 1px solid #e8e4db;
+}
+
+.lovpen-renderer tr:nth-child(even) {
+	background: #f5f3ee;
+}
+
+.lovpen-renderer tr:last-child td {
+	border-bottom: none;
+}
+
+/* hr */
+.lovpen-renderer hr {
+	border: none;
+	border-bottom: 1px solid #c5c5c5;
+	margin: 1.5em 0;
+}
+
+/* images */
+.lovpen-renderer img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* strong & em */
+.lovpen-renderer strong {
+	font-weight: bold;
+}
+
+.lovpen-renderer em {
+	font-style: italic;
+}
+
+/* mark */
+.lovpen-renderer mark {
+	background-color: rgba(6, 85, 136, 0.1);
+}
+
+/* admonition */
+.lovpen-renderer [data-component="admonition"] {
+	border-radius: 4px;
+	background: #f3f2ee;
+	border-left-color: #bababa;
+	color: #1f0909;
+}
+
+.lovpen-renderer [data-element="admonition-content"] {
+	color: #656565;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="note"],
+.lovpen-renderer [data-component="admonition"][data-type="info"],
+.lovpen-renderer [data-component="admonition"][data-type="todo"] {
+	border-left-color: #065588;
+	background: rgba(6, 85, 136, 0.05);
+	color: #065588;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="tip"],
+.lovpen-renderer [data-component="admonition"][data-type="abstract"],
+.lovpen-renderer [data-component="admonition"][data-type="summary"],
+.lovpen-renderer [data-component="admonition"][data-type="tldr"],
+.lovpen-renderer [data-component="admonition"][data-type="hint"],
+.lovpen-renderer [data-component="admonition"][data-type="important"] {
+	border-left-color: #2a7a6b;
+	background: rgba(42, 122, 107, 0.05);
+	color: #2a7a6b;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="success"],
+.lovpen-renderer [data-component="admonition"][data-type="check"],
+.lovpen-renderer [data-component="admonition"][data-type="done"] {
+	border-left-color: #3a7a3a;
+	background: rgba(58, 122, 58, 0.05);
+	color: #3a7a3a;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="question"],
+.lovpen-renderer [data-component="admonition"][data-type="help"],
+.lovpen-renderer [data-component="admonition"][data-type="faq"],
+.lovpen-renderer [data-component="admonition"][data-type="warning"],
+.lovpen-renderer [data-component="admonition"][data-type="caution"],
+.lovpen-renderer [data-component="admonition"][data-type="attention"] {
+	border-left-color: #b87a00;
+	background: rgba(184, 122, 0, 0.05);
+	color: #b87a00;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="failure"],
+.lovpen-renderer [data-component="admonition"][data-type="fail"],
+.lovpen-renderer [data-component="admonition"][data-type="missing"],
+.lovpen-renderer [data-component="admonition"][data-type="danger"],
+.lovpen-renderer [data-component="admonition"][data-type="error"],
+.lovpen-renderer [data-component="admonition"][data-type="bug"] {
+	border-left-color: #a03030;
+	background: rgba(160, 48, 48, 0.05);
+	color: #a03030;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="example"] {
+	border-left-color: #5a4a8a;
+	background: rgba(90, 74, 138, 0.05);
+	color: #5a4a8a;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="quote"],
+.lovpen-renderer [data-component="admonition"][data-type="cite"] {
+	border-left-color: #bababa;
+	background: rgba(186, 186, 186, 0.05);
+	color: #656565;
+}
+
+/* task list */
+.lovpen-renderer .task-list-item {
+	list-style-type: none;
+	padding-left: 1.5rem;
+}
+
+.lovpen-renderer .task-list-item input[type="checkbox"] {
+	margin-left: -1.5rem;
+	margin-right: 0.5rem;
+}
