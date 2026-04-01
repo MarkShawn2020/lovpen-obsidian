@@ -752,7 +752,7 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		}
 
 		if (this.settings.enableThemeColor) {
-			noteContainer.style.setProperty("--primary-color", this.settings.themeColor || "#7852ee");
+			noteContainer.style.setProperty("--primary-color", this.settings.themeColor || "#5B7083");
 		} else {
 			noteContainer.style.removeProperty("--primary-color");
 		}
@@ -923,8 +923,8 @@ export class NotePreviewExternal extends ItemView implements MDRendererCallback 
 		if (this.settings.enableThemeColor) {
 			themeColorCSS = `
 :root {
-  --primary-color: ${this.settings.themeColor || "#7852ee"};
-  --theme-color-light: ${this.settings.themeColor || "#7852ee"}aa;
+  --primary-color: ${this.settings.themeColor || "#5B7083"};
+  --theme-color-light: ${this.settings.themeColor || "#5B7083"}aa;
 }
 `;
 		}
@@ -1811,12 +1811,12 @@ ${customCSS}`;
 
 					logger.debug('表格匹配 - 源文件表头:', tableHeaders);
 
-					// 比较表头是否一致
+					// 比较表头是否一致（去除 Markdown 格式标记后比较）
 					if (tableHeaders.length === inputHeaders.length) {
 						let allMatch = true;
 						for (let j = 0; j < inputHeaders.length; j++) {
-							const input = inputHeaders[j].replace(/\s+/g, '').toLowerCase();
-							const source = tableHeaders[j].replace(/\s+/g, '').toLowerCase();
+							const input = inputHeaders[j].replace(/[*_~`]/g, '').replace(/\s+/g, '').toLowerCase();
+							const source = tableHeaders[j].replace(/[*_~`]/g, '').replace(/\s+/g, '').toLowerCase();
 							if (input !== source) {
 								allMatch = false;
 								break;
@@ -1858,8 +1858,8 @@ ${customCSS}`;
 				if (tableHeaders.length === inputHeaders.length) {
 					let allMatch = true;
 					for (let j = 0; j < inputHeaders.length; j++) {
-						const input = inputHeaders[j].replace(/\s+/g, '').toLowerCase();
-						const source = tableHeaders[j].replace(/\s+/g, '').toLowerCase();
+						const input = inputHeaders[j].replace(/[*_~`]/g, '').replace(/\s+/g, '').toLowerCase();
+						const source = tableHeaders[j].replace(/[*_~`]/g, '').replace(/\s+/g, '').toLowerCase();
 						if (input !== source) {
 							allMatch = false;
 							break;
@@ -1920,7 +1920,13 @@ ${customCSS}`;
 				persistentStorage: this.buildPersistentStorageAPI(),
 				requestUrl: requestUrl,
 				uploadCodeBlockAsImage: this.uploadCodeBlockAsImage.bind(this),
-				uploadTableAsImage: this.uploadTableAsImage.bind(this)
+				uploadTableAsImage: this.uploadTableAsImage.bind(this),
+				onKitExport: this.reactAPIService.exportTemplate.bind(this.reactAPIService),
+				onKitImport: async (template: any) => {
+					await this.reactAPIService.importTemplate(template);
+					await this.renderMarkdown();
+					await this.updateExternalReactComponent();
+				}
 			};
 
 			(window as any).lovpenReactAPI = globalAPI;

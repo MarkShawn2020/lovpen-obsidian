@@ -227,21 +227,25 @@ function extractTableMarkdown(tableElement: HTMLElement): string {
   return rows.join('\n');
 }
 
+const UPLOAD_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+const LOADING_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>`;
+const SUCCESS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const ERROR_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+
 /**
- * 创建表格上传为图片按钮（原生 DOM）
- * 截图表格并上传到云存储，替换源Markdown
+ * 创建表格上传为图片按钮（原生 DOM，不绑定 click — 由事件委托处理）
  */
-function createTableUploadAsImageButton(tableElement: HTMLElement): HTMLButtonElement {
+function createTableUploadAsImageButton(tableIndex: number): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.className = 'lovpen-table-upload-btn';
+  btn.dataset.tableIndex = String(tableIndex);
   btn.title = '上传为图片';
-  // 上传图标
-  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+  btn.innerHTML = UPLOAD_ICON;
 
   Object.assign(btn.style, {
     position: 'absolute',
     top: '8px',
-    right: '40px', // 在复制为图片按钮左边
+    right: '40px',
     padding: '6px',
     borderRadius: '4px',
     border: 'none',
@@ -265,58 +269,107 @@ function createTableUploadAsImageButton(tableElement: HTMLElement): HTMLButtonEl
     btn.style.color = 'rgba(255,255,255,0.8)';
   });
 
-  btn.addEventListener('click', async () => {
-    try {
-      // 检查API是否可用
-      const api = (window as any).lovpenReactAPI;
-      if (!api?.uploadTableAsImage) {
-        console.error('uploadTableAsImage API not available');
-        return;
-      }
-
-      // 显示加载状态
-      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>`;
-      btn.title = '上传中...';
-
-      // 临时隐藏按钮
-      const btns = tableElement.parentElement?.querySelectorAll('.lovpen-table-copy-img-btn, .lovpen-table-upload-btn');
-      btns?.forEach(b => (b as HTMLElement).style.display = 'none');
-
-      // 直接截图原始表格（避免克隆导致的样式丢失问题）
-      const dataUrl = await domToPng(tableElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-      });
-
-      // 恢复按钮显示
-      btns?.forEach(b => (b as HTMLElement).style.display = 'flex');
-
-      // 提取表格的Markdown内容用于匹配
-      const tableMarkdown = extractTableMarkdown(tableElement);
-
-      // 调用API上传并替换
-      const result = await api.uploadTableAsImage(tableMarkdown, dataUrl);
-
-      if (result.success) {
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-        btn.title = result.error || '已上传';
-      } else {
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-        btn.title = result.error || '上传失败';
-      }
-
-      setTimeout(() => {
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
-        btn.title = '上传为图片';
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to upload table as image:', err);
-      btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-      btn.title = '上传失败';
-    }
-  });
-
   return btn;
+}
+
+/**
+ * 表格上传点击处理（由事件委托调用，从当前 live DOM 中查找表格）
+ */
+async function handleTableUploadClick(btn: HTMLButtonElement, container: HTMLElement) {
+  const tableIndex = parseInt(btn.dataset.tableIndex || '', 10);
+  // 从当前 live DOM 查找表格，避免引用已脱离 DOM 的旧节点
+  const liveTable = container.querySelectorAll('table')[tableIndex] as HTMLElement | undefined;
+  console.log('[DEBUG][TableUpload] click, tableIndex:', tableIndex, 'liveTable found:', !!liveTable);
+
+  if (!liveTable) {
+    console.error('[DEBUG][TableUpload] table not found in live DOM at index', tableIndex);
+    return;
+  }
+
+  try {
+    const api = (window as any).lovpenReactAPI;
+    if (!api?.uploadTableAsImage) {
+      console.error('[DEBUG][TableUpload] uploadTableAsImage API not available');
+      return;
+    }
+
+    btn.innerHTML = LOADING_ICON;
+    btn.title = '上传中...';
+
+    // 临时隐藏按钮
+    const wrapper = liveTable.closest('.lovpen-table-wrapper');
+    const allBtns = wrapper?.querySelectorAll('.lovpen-table-copy-img-btn, .lovpen-table-upload-btn');
+    allBtns?.forEach(b => (b as HTMLElement).style.display = 'none');
+
+    // 临时移除高度限制，确保截图完整（直接截图 live table 保留样式）
+    const savedStyles = {
+      maxHeight: liveTable.style.maxHeight,
+      overflow: liveTable.style.overflow,
+      height: liveTable.style.height,
+      wrapperMaxHeight: (wrapper as HTMLElement)?.style.maxHeight || '',
+      wrapperOverflow: (wrapper as HTMLElement)?.style.overflow || '',
+    };
+    liveTable.style.maxHeight = 'none';
+    liveTable.style.overflow = 'visible';
+    liveTable.style.height = 'auto';
+    if (wrapper) {
+      (wrapper as HTMLElement).style.maxHeight = 'none';
+      (wrapper as HTMLElement).style.overflow = 'visible';
+    }
+
+    // 显式传入宽高，防止 modern-screenshot 内部克隆后脱离布局上下文导致宽度变窄
+    const captureWidth = liveTable.offsetWidth;
+    const captureHeight = liveTable.scrollHeight;
+    console.log('[DEBUG][TableUpload] starting domToPng, size:', captureWidth, 'x', captureHeight);
+    const dataUrl = await domToPng(liveTable, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      width: captureWidth,
+      height: captureHeight,
+      style: {
+        width: `${captureWidth}px`,
+        minWidth: `${captureWidth}px`,
+        maxHeight: 'none',
+        overflow: 'visible',
+        height: 'auto',
+      },
+    });
+    console.log('[DEBUG][TableUpload] domToPng done, dataUrl length:', dataUrl?.length);
+
+    // 恢复样式
+    liveTable.style.maxHeight = savedStyles.maxHeight;
+    liveTable.style.overflow = savedStyles.overflow;
+    liveTable.style.height = savedStyles.height;
+    if (wrapper) {
+      (wrapper as HTMLElement).style.maxHeight = savedStyles.wrapperMaxHeight;
+      (wrapper as HTMLElement).style.overflow = savedStyles.wrapperOverflow;
+    }
+    allBtns?.forEach(b => (b as HTMLElement).style.display = 'flex');
+
+    const tableMarkdown = extractTableMarkdown(liveTable);
+    console.log('[DEBUG][TableUpload] tableMarkdown length:', tableMarkdown?.length);
+
+    console.log('[DEBUG][TableUpload] calling api.uploadTableAsImage');
+    const result = await api.uploadTableAsImage(tableMarkdown, dataUrl);
+    console.log('[DEBUG][TableUpload] api result:', JSON.stringify(result));
+
+    if (result.success) {
+      btn.innerHTML = SUCCESS_ICON;
+      btn.title = result.error || '已上传';
+    } else {
+      btn.innerHTML = ERROR_ICON;
+      btn.title = result.error || '上传失败';
+    }
+
+    setTimeout(() => {
+      btn.innerHTML = UPLOAD_ICON;
+      btn.title = '上传为图片';
+    }, 3000);
+  } catch (err) {
+    console.error('[DEBUG][TableUpload] Failed:', err);
+    btn.innerHTML = ERROR_ICON;
+    btn.title = '上传失败';
+  }
 }
 
 /**
@@ -706,7 +759,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
       // 处理表格 - 添加复制为图片按钮
       const tableElements = container.querySelectorAll('table');
 
-      tableElements.forEach((table) => {
+      tableElements.forEach((table, tableIndex) => {
         // 表格需要包裹在一个 relative 容器中，以便定位按钮
         let wrapper = table.parentElement;
 
@@ -725,11 +778,23 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
 
         // 创建并添加按钮（从右到左：复制为图片、上传为图片）
         const imgBtn = createTableCopyAsImageButton(table as HTMLElement);
-        const uploadBtn = createTableUploadAsImageButton(table as HTMLElement);
+        const uploadBtn = createTableUploadAsImageButton(tableIndex);
         wrapper.appendChild(uploadBtn);
         wrapper.appendChild(imgBtn);
       });
     };
+
+    // 事件委托：在稳定的 container 上监听表格上传按钮点击
+    // 即使 React 重渲染替换了 innerHTML，事件委托仍能从 live DOM 中找到正确的表格
+    const handleClick = (e: Event) => {
+      const target = (e.target as HTMLElement).closest('.lovpen-table-upload-btn') as HTMLButtonElement | null;
+      if (!target || !containerRef.current) return;
+      e.stopPropagation();
+      e.preventDefault();
+      handleTableUploadClick(target, containerRef.current);
+    };
+    const container = containerRef.current;
+    container.addEventListener('click', handleClick, true);
 
     // 初始注入（使用 rAF 确保 DOM 已渲染）
     const rafId = requestAnimationFrame(injectCopyButtons);
@@ -738,6 +803,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = memo(({ html }) =
     const unsubscribe = domUpdater.onUpdate(injectCopyButtons);
 
     return () => {
+      container.removeEventListener('click', handleClick, true);
       cancelAnimationFrame(rafId);
       unsubscribe();
     };
