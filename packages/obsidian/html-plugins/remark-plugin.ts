@@ -156,7 +156,7 @@ export abstract class RemarkPlugin implements IRemarkPlugin {
 
 		// 如果启用了自定义主题色，使用用户设置的颜色
 		if (settings.enableThemeColor) {
-			themeAccentColor = settings.themeColor || "#7852ee";
+			themeAccentColor = settings.themeColor || "#5B7083";
 			logger.debug("使用自定义主题色：", themeAccentColor);
 		} else {
 			// 从当前激活的DOM中获取实际使用的主题颜色
@@ -178,14 +178,14 @@ export abstract class RemarkPlugin implements IRemarkPlugin {
 					themeAccentColor = primaryColor;
 				} else {
 					// 如果无法获取，默认使用紫色
-					themeAccentColor = "#7852ee";
+					themeAccentColor = "#5B7083";
 				}
 
 				// 清理测试元素
 				document.body.removeChild(testElement);
 			} catch (e) {
 				// 如果出错，回退到默认值
-				themeAccentColor = "#7852ee";
+				themeAccentColor = "#5B7083";
 				logger.error("无法获取主题色变量，使用默认值", e);
 			}
 		}

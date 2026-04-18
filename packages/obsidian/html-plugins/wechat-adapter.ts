@@ -275,8 +275,11 @@ export class WechatAdapterPlugin extends UnifiedHtmlPlugin {
 					}
 				});
 
-				container.appendChild(hr);
-				container.appendChild(footnoteSection);
+				// 必须将脚注添加到 #article-section 内部，而非 container（wrapper div）
+				// 否则 extractInlinedHTML 通过 querySelector('#article-section') 克隆时会丢失脚注
+				const articleSection = container.querySelector('#article-section') || container.querySelector('.lovpen') || container;
+				articleSection.appendChild(hr);
+				articleSection.appendChild(footnoteSection);
 			} else {
 				logger.debug("=== 没有脚注需要添加 ===");
 			}

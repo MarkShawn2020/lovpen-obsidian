@@ -290,9 +290,9 @@
 		scrollbar-gutter: stable;
 	}
 
-	/* 渲染区域背景色 - 确保不继承深色 */
-	.lovpen-renderer {
-		@apply bg-background;
+	/* 渲染区域背景色 - 默认白色，主题CSS通过.lovpen-renderer选择器覆盖 */
+	:where(.lovpen-renderer) {
+		background-color: #ffffff;
 	}
 
 	/* Web 独立运行时的 body 样式（非 Obsidian 环境） */
@@ -316,7 +316,6 @@
 	   移除组件内的硬编码样式
 	   =================================== */
 	.lovpen {
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 		line-height: 1.6;
 		color: #333;
 	}

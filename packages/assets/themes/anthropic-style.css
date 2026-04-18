@@ -537,6 +537,55 @@
 	}
 }
 
+/* === Admonition 组件 - Anthropic 特定样式 === */
+.lovpen-renderer [data-component="admonition"] {
+  border-radius: 12px;
+  padding: 1.5em;
+  box-shadow: 0 2px 8px rgba(200, 100, 66, 0.08);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 249, 245, 0.9) 100%);
+}
+
+.lovpen-renderer [data-element="admonition-icon"] svg {
+  opacity: 0.6;
+  stroke-width: 1.5;
+  transform: scale(0.9);
+  transition: opacity 0.2s ease;
+}
+
+.lovpen-renderer [data-component="admonition"]:hover [data-element="admonition-icon"] svg {
+  opacity: 0.8;
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="note"],
+.lovpen-renderer [data-component="admonition"][data-type="info"],
+.lovpen-renderer [data-component="admonition"][data-type="todo"] {
+  color: rgb(200, 100, 66);
+  background: linear-gradient(135deg, rgba(200, 100, 66, 0.05) 0%, rgba(250, 249, 245, 0.9) 100%);
+  border-left-color: rgb(200, 100, 66);
+}
+
+.lovpen-renderer [data-component="admonition"][data-type="tip"],
+.lovpen-renderer [data-component="admonition"][data-type="abstract"],
+.lovpen-renderer [data-component="admonition"][data-type="summary"],
+.lovpen-renderer [data-component="admonition"][data-type="tldr"],
+.lovpen-renderer [data-component="admonition"][data-type="hint"],
+.lovpen-renderer [data-component="admonition"][data-type="important"] {
+  color: rgb(180, 85, 50);
+  background: linear-gradient(135deg, rgba(200, 100, 66, 0.08) 0%, rgba(250, 249, 245, 0.95) 100%);
+  border-left-color: rgb(180, 85, 50);
+}
+
+/* === Blockquote - Anthropic 特定样式 === */
+.lovpen-renderer blockquote:not([data-component="admonition"]) {
+  border-left: 4px solid rgb(200, 100, 66);
+  background: rgba(200, 100, 66, 0.05);
+  padding: 1em;
+  margin: 1.5em 0.5em;
+  border-radius: 6px;
+  font-style: italic;
+  color: rgb(63, 63, 63);
+}
+
 /* === Admonition 组件内部元素样式覆盖 === */
 /* 确保 admonition 内部的段落使用小字体，不受全局 p 样式影响 */
 .lovpen-renderer [data-component="admonition"] [data-element="admonition-content"] p {

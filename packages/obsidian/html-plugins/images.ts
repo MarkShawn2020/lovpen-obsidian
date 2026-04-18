@@ -125,8 +125,8 @@ export class Images extends UnifiedHtmlPlugin {
 								"text-align: center !important; " +
 								"color: #666666 !important; " +
 								"font-size: 14px !important; " +
-								"margin-top: 8px !important; " +
-								"margin-bottom: 8px !important; " +
+								"margin-top: -1.5em !important; " +
+								"margin-bottom: 1.5em !important; " +
 								"font-style: italic !important; " +
 								"line-height: 1.5 !important; " +
 								"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;"

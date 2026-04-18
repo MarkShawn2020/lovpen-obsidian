@@ -161,7 +161,7 @@ export class NMPSettings implements SettingsData {
 	math: string = 'latex';
 	useTemplate: boolean = false;
 	defaultTemplate: string = 'default';
-	themeColor: string = '#7852ee';
+	themeColor: string = '#5B7083';
 	enableThemeColor: boolean = false;
 	distributionConfig: DistributionConfig | null = null;
 	enableHeadingNumber: boolean = true;

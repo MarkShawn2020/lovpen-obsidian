@@ -42,7 +42,7 @@ export abstract class HtmlPlugin extends UnifiedPlugin implements IHtmlPlugin {
 		let themeAccentColor: string;
 
 		if (settings.enableThemeColor) {
-			themeAccentColor = settings.themeColor || "#7852ee";
+			themeAccentColor = settings.themeColor || "#5B7083";
 		} else {
 			try {
 				// 查找已有的 .lovpen-renderer 元素（可能在 Shadow DOM 内）
@@ -65,9 +65,9 @@ export abstract class HtmlPlugin extends UnifiedPlugin implements IHtmlPlugin {
 						.trim();
 				}
 
-				themeAccentColor = primaryColor || "#7852ee";
+				themeAccentColor = primaryColor || "#5B7083";
 			} catch (e) {
-				themeAccentColor = "#7852ee";
+				themeAccentColor = "#5B7083";
 				logger.error("无法获取主题色变量，使用默认值", e);
 			}
 		}
