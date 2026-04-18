@@ -3,42 +3,32 @@
  * 供frontend和obsidian包共同使用，确保类型一致性和IDE导航
  */
 
-// 共享的基础数据类型
-export interface BasicTemplateKit {
-	basicInfo: {
-		id: string;
-		name: string;
-		description: string;
-		author?: string;
-		version?: string;
-		tags?: string[];
-		previewImage?: string;
-	};
-	styleConfig?: {
-		theme?: string;
-		codeHighlight?: string;
-		enableCustomThemeColor?: boolean;
-		customThemeColor?: string;
-	};
-	templateConfig?: {
-		templateFileName?: string;
-		useTemplate?: boolean;
-	};
-	pluginConfig?: {
-		enabledMarkdownPlugins?: string[];
-		enabledHtmlPlugins?: string[];
-		pluginSettings?: Record<string, any>;
-	};
-}
-
-export interface BasicTemplateKitInfo {
+// 简化的模板类型 - 扁平化设计，替代原有嵌套的 TemplateKit
+export interface Template {
 	id: string;
 	name: string;
 	description: string;
-	author?: string;
-	version?: string;
-	tags?: string[];
+	author: string;
+	version: string;
+	tags: string[];
+	builtIn?: boolean;
+	// 核心样式配置
+	theme: string;
+	codeHighlight: string;
+	customThemeColor?: string;
+	// 可选 HTML 布局模板
+	htmlLayout?: string;
 }
+
+// 模板集合文件格式
+export interface TemplateCollection {
+	version: string;
+	templates: Template[];
+}
+
+// 兼容别名
+export type BasicTemplateKit = Template;
+export type BasicTemplateKitInfo = Pick<Template, 'id' | 'name' | 'description' | 'author' | 'version' | 'tags'>;
 
 export interface AvatarConfig {
 	type: 'default' | 'uploaded' | 'initials';
@@ -145,33 +135,15 @@ export interface PersistentStorageAPI {
 	exportAllData: () => Promise<any>;
 }
 
-// 模板套装相关API
+// 模板相关API
 export interface TemplateKitAPI {
-	/**
-	 * 加载所有模板套装
-	 * @implementation @packages/obsidian/services/ReactAPIService.ts#loadTemplateKits
-	 */
-	loadTemplateKits: () => Promise<BasicTemplateKit[]>;
-	/**
-	 * 加载所有模板
-	 * @implementation @packages/obsidian/services/ReactAPIService.ts#loadTemplates
-	 */
+	loadTemplateKits: () => Promise<Template[]>;
 	loadTemplates: () => Promise<string[]>;
-	/**
-	 * 应用指定的套装
-	 * @implementation @packages/obsidian/note-preview-external.tsx#handleKitApply
-	 */
 	onKitApply: (kitId: string) => Promise<void>;
-	/**
-	 * 创建新的套装
-	 * @implementation @packages/obsidian/note-preview-external.tsx#handleKitCreate
-	 */
 	onKitCreate: (basicInfo: BasicTemplateKitInfo) => Promise<void>;
-	/**
-	 * 删除指定的套装
-	 * @implementation @packages/obsidian/note-preview-external.tsx#handleKitDelete
-	 */
 	onKitDelete: (kitId: string) => Promise<void>;
+	onKitExport?: (kitId: string) => Promise<Template | null>;
+	onKitImport?: (template: Template) => Promise<void>;
 }
 
 // 设置相关API

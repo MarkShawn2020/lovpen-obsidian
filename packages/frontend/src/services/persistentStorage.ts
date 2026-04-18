@@ -347,16 +347,16 @@ export class PersistentStorageService {
 	// Template Kit Management
 	async saveTemplateKit(kitData: TemplateKit, customName?: string): Promise<PersistentTemplateKit> {
 		const id = this.generateId();
-		const name = customName || kitData.basicInfo.name;
+		const name = customName || kitData.name;
 
 		try {
 			const persistentKit: PersistentTemplateKit = {
 				id,
 				name,
-				description: kitData.basicInfo.description,
-				author: kitData.basicInfo.author,
-				version: kitData.basicInfo.version,
-				tags: kitData.basicInfo.tags,
+				description: kitData.description,
+				author: kitData.author,
+				version: kitData.version,
+				tags: kitData.tags,
 				configData: kitData,
 				createdAt: new Date().toISOString(),
 				lastUsed: new Date().toISOString()

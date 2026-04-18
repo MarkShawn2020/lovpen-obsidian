@@ -467,6 +467,8 @@ if (rootElement) {
     },
     loadTemplateKits: async () => [],
     loadTemplates: async () => [],
+    onKitExport: async () => null,
+    onKitImport: async () => {},
     persistentStorage: webAdapter.persistentStorage as any,
     requestUrl: webAdapter.requestUrl,
   }

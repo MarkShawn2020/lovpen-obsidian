@@ -1,4 +1,6 @@
-import {TemplateKit, TemplateKitBasicInfo} from "../template-kit-types";
+import type {Template} from "@lovpen/shared";
+import type {TemplateKitBasicInfo} from "../template-kit-types";
+type TemplateKit = Template;
 import {PersistentStorageAPI, RequestUrlFunction, SettingsAPI, TemplateKitAPI, CodeBlockImageResult} from "@lovpen/shared";
 import {CloudStorageSettings} from "../settings";
 
@@ -191,6 +193,8 @@ export interface GlobalReactAPI {
 	onKitApply: (kitId: string) => Promise<void>;
 	onKitCreate: (basicInfo: TemplateKitBasicInfo) => Promise<void>;
 	onKitDelete: (kitId: string) => Promise<void>;
+	onKitExport?: (kitId: string) => Promise<TemplateKit | null>;
+	onKitImport?: (template: TemplateKit) => Promise<void>;
 
 	// 设置相关API (更具体的类型)
 	onSettingsChange: (settingsUpdate: Partial<ReactSettings>) => void;

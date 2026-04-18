@@ -3,7 +3,8 @@ import {App, Notice} from 'obsidian';
 import {Marked} from 'marked';
 
 import {logger} from "../shared/src/logger";
-import {TemplateKit, TemplateKitOperationResult} from './template-kit-types';
+import type {Template as TemplateConfig} from '@lovpen/shared';
+import type {TemplateKitOperationResult} from './template-kit-types';
 import TemplateKitManager from "./template-kit-manager";
 
 // 定义模板数据类型
@@ -11,11 +12,11 @@ export interface TemplateData {
 	epigraph?: string[];
 	content?: string;
 
-	// 注意：索引类型必须包含所有特定属性类型
 	[key: string]: string | string[] | number | boolean | object | undefined;
 }
 
-export interface Template {
+// HTML 布局模板文件
+export interface HtmlTemplate {
 	name: string;
 	path: string;
 	content: string;
@@ -24,7 +25,7 @@ export interface Template {
 export default class TemplateManager {
 	private static instance: TemplateManager;
 	private app: App;
-	private templates: Map<string, Template> = new Map();
+	private templates: Map<string, HtmlTemplate> = new Map();
 	private templateDir: string;
 
 	private constructor() {
@@ -183,7 +184,7 @@ export default class TemplateManager {
 	/**
 	 * 获取所有可用的模板套装
 	 */
-	public async getAvailableKits(): Promise<TemplateKit[]> {
+	public async getAvailableKits(): Promise<TemplateConfig[]> {
 		try {
 			const kitManager = this.getTemplateKitManager();
 			if (!kitManager) {

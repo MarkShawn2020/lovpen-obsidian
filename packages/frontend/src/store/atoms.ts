@@ -51,7 +51,7 @@ export const defaultSettings: ViteReactSettings = {
 	useTemplate: false,
 	lastSelectedTemplate: '',
 	enableThemeColor: false,
-	themeColor: '#7852ee',
+	themeColor: '#5B7083',
 	useCustomCss: false,
 	authKey: '',
 	wxInfo: [],

@@ -42,33 +42,9 @@ export interface AIModel {
 	recommended?: boolean;
 }
 
-// Template Kit types
-export interface TemplateKit {
-	basicInfo: {
-		id: string;
-		name: string;
-		description: string;
-		author: string;
-		version: string;
-		tags: string[];
-		previewImage?: string;
-	};
-	styleConfig: {
-		theme: string;
-		codeHighlight: string;
-		enableCustomThemeColor: boolean;
-		customThemeColor?: string;
-	};
-	templateConfig: {
-		templateFileName: string;
-		useTemplate: boolean;
-	};
-	pluginConfig: {
-		enabledMarkdownPlugins: string[];
-		enabledHtmlPlugins: string[];
-		pluginSettings: Record<string, any>;
-	};
-}
+// Template types (simplified)
+export type {Template} from '@lovpen/shared';
+export type {Template as TemplateKit} from '@lovpen/shared';
 
 
 // Cloud Storage Settings (Qiniu)
@@ -227,7 +203,7 @@ export interface PersistentTemplateKit {
 	author: string;
 	version: string;
 	tags: string[];
-	configData: TemplateKit;
+	configData: any;
 	createdAt: string;
 	lastUsed: string;
 }
