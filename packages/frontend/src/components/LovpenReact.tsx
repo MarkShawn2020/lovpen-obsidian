@@ -61,7 +61,23 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			return false;
 		}
 	});
+
+	// Toolbar 宽度（可拖动调整，持久化到 localStorage）
+	const TOOLBAR_WIDTH_MIN = 328;
+	const TOOLBAR_WIDTH_MAX = 800;
+	const TOOLBAR_WIDTH_DEFAULT = 432;
+	const [toolbarWidth, setToolbarWidth] = useState<number>(() => {
+		try {
+			const stored = localStorage.getItem('lovpen-toolbar-width');
+			if (stored) {
+				const n = parseInt(stored, 10);
+				if (!Number.isNaN(n)) return Math.min(TOOLBAR_WIDTH_MAX, Math.max(TOOLBAR_WIDTH_MIN, n));
+			}
+		} catch {}
+		return TOOLBAR_WIDTH_DEFAULT;
+	});
 	const containerRef = useRef<HTMLDivElement>(null);
+	const isResizingRef = useRef<boolean>(false);
 
 	// Toolbar 当前 tab 状态（用于头像点击切换到设置）
 	const [toolbarActiveTab, setToolbarActiveTab] = useState<string | undefined>(undefined);
@@ -172,6 +188,45 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		});
 	}, []);
 
+	// 工具栏宽度拖动：mousedown 在 resizer 上启动，全局 mousemove/mouseup 更新并结束
+	const startToolbarResize = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		isResizingRef.current = true;
+		const container = containerRef.current;
+		if (!container) return;
+		const containerRect = container.getBoundingClientRect();
+		// 根据布局方向：工具栏在右时，宽度 = containerRight - mouseX；工具栏在左时，宽度 = mouseX - containerLeft
+		const toolbarOnLeft = getComputedStyle(container).flexDirection === 'row-reverse';
+
+		const onMove = (ev: MouseEvent) => {
+			if (!isResizingRef.current) return;
+			const raw = toolbarOnLeft
+				? ev.clientX - containerRect.left
+				: containerRect.right - ev.clientX;
+			const clamped = Math.min(TOOLBAR_WIDTH_MAX, Math.max(TOOLBAR_WIDTH_MIN, raw));
+			setToolbarWidth(clamped);
+		};
+		const onUp = () => {
+			if (!isResizingRef.current) return;
+			isResizingRef.current = false;
+			document.body.style.cursor = '';
+			document.body.style.userSelect = '';
+			window.removeEventListener('mousemove', onMove);
+			window.removeEventListener('mouseup', onUp);
+		};
+		document.body.style.cursor = 'col-resize';
+		document.body.style.userSelect = 'none';
+		window.addEventListener('mousemove', onMove);
+		window.addEventListener('mouseup', onUp);
+	}, []);
+
+	// toolbarWidth 变更时持久化
+	useEffect(() => {
+		try {
+			localStorage.setItem('lovpen-toolbar-width', String(toolbarWidth));
+		} catch {}
+	}, [toolbarWidth]);
+
 	// 提取 Toolbar props，避免重复代码
 	const toolbarProps = {
 		settings,
@@ -233,9 +288,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 					position: "relative", // 为绝对定位的复制按钮提供定位上下文
 					display: "flex",
 					flexDirection: "column",
-					// 🔑 直接设置背景色，防止 Obsidian CSS 变量穿透
-					backgroundColor: "#ffffff",
-					color: "#1a1a1a"
+					// 背景色和文字色由主题CSS控制（.lovpen-renderer选择器）
 				}}
 			>
 				{/* 内容容器 */}
@@ -337,12 +390,31 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			</ScrollContainer>
 
 
-			{/* 工具栏容器 - 仅在显示时显示，宽度由内部内容决定 */}
+			{/* 拖拽分隔条 - 位于 ScrollContainer 和 Toolbar 之间 */}
+			{!isToolbarHidden && (
+				<div
+					onMouseDown={startToolbarResize}
+					title="拖动调整工具栏宽度"
+					style={{
+						width: 4,
+						cursor: "col-resize",
+						flexShrink: 0,
+						backgroundColor: "transparent",
+						transition: "background-color 0.15s ease",
+						position: "relative",
+						zIndex: 10
+					}}
+					onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#D97757'; }}
+					onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+				/>
+			)}
+
+			{/* 工具栏容器 - 仅在显示时显示，宽度可拖动调整 */}
 			{!isToolbarHidden && (
 				<div
 					className="toolbar-container"
 					style={{
-						width: "fit-content",
+						width: toolbarWidth,
 						height: "100%",
 						overflowY: "auto",
 						overflowX: "hidden",

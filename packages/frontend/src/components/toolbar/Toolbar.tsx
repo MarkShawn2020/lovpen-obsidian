@@ -988,7 +988,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 	const navItems: {key: typeof activeSection; label: string; icon: React.ElementType; colorFrom: string; colorTo: string; group: 'content' | 'settings'}[] = [
 		{key: 'article', label: '文章信息', icon: FileText, colorFrom: '#CC785C', colorTo: '#B86A4E', group: 'content'},
 		{key: 'cover', label: '封面设计', icon: Palette, colorFrom: '#B49FD8', colorTo: '#8B7CB8', group: 'content'},
-		{key: 'kits', label: '模板套装', icon: Package, colorFrom: '#629A90', colorTo: '#4A7A70', group: 'content'},
+		{key: 'kits', label: '模板', icon: Palette, colorFrom: '#629A90', colorTo: '#4A7A70', group: 'content'},
 		{key: 'plugins', label: '插件管理', icon: Plug, colorFrom: '#97B5D5', colorTo: '#7095B5', group: 'content'},
 		{key: 'playground', label: '实验室', icon: ImagePlus, colorFrom: '#E8A87C', colorTo: '#C8885C', group: 'content'},
 		{key: 'logs', label: 'AI 日志', icon: FileText, colorFrom: '#87867F', colorTo: '#6A6A63', group: 'content'},
@@ -1118,7 +1118,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				</div>
 
 				{/* 右侧内容区 - 固定宽度，菜单切换时不变 */}
-				<div id="lovpen-toolbar-content" className="overflow-y-auto bg-[#F9F9F7] relative" style={{ width: 372 }}>
+				<div id="lovpen-toolbar-content" className="overflow-y-auto bg-[#F9F9F7] relative flex-1 min-w-0">
 					<div className="p-4 sm:p-5">
 						{/* 文章信息 */}
 						{activeSection === 'article' && (
@@ -1147,9 +1147,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 							</SectionLayout>
 						)}
 
-						{/* 模板套装 */}
+						{/* 模板 */}
 						{activeSection === 'kits' && (
-							<SectionLayout title="模板套装">
+							<SectionLayout title="模板">
 								<TemplateKitSelector
 									settings={settings}
 									onKitApply={onKitApply}
