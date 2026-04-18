@@ -88,18 +88,28 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          # 获取上一个标签
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
-          
-          if [ -z "$PREV_TAG" ]; then
-            CHANGELOG="Initial release"
-          else
-            CHANGELOG=$(git log --pretty=format:"- %s" $PREV_TAG..HEAD | head -20)
+          VERSION="${{ steps.get_version.outputs.version }}"
+          CHANGELOG=""
+          if [ -f CHANGELOG.md ]; then
+            CHANGELOG=$(awk -v ver="[$VERSION]" '
+              /^## / {
+                if (found) exit
+                if (index($0, ver) > 0) { found=1; next }
+              }
+              found { print }
+            ' CHANGELOG.md)
           fi
-          
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          if [ -z "$CHANGELOG" ]; then
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+            if [ -z "$PREV_TAG" ]; then
+              CHANGELOG="Initial release"
+            else
+              CHANGELOG=$(git log --pretty=format:"- %s" $PREV_TAG..HEAD | head -20)
+            fi
+          fi
+          echo "changelog<<CHANGELOG_EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "CHANGELOG_EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
