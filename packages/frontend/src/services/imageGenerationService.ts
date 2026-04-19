@@ -11,6 +11,8 @@ export interface ImageGenerationParams {
 	height?: number;
 	settings?: ViteReactSettings;
 	useNanoBananaPro?: boolean; // 使用 Nano Banana Pro 模型
+	// 参考图（仅 Nano Banana Pro 生效）：data: URL 或 http(s) URL
+	referenceImages?: string[];
 	// Vertex AI generationConfig 参数
 	temperature?: number;
 	topP?: number;
@@ -85,9 +87,10 @@ export class ImageGenerationService {
 		// 从 HTML 提取纯文本
 		const parser = new DOMParser();
 		const doc = parser.parseFromString(articleHTML, 'text/html');
-		const textContent = doc.body.textContent || '';
-		// 截取前 2000 字符作为分析内容
-		const truncatedContent = textContent.substring(0, 2000);
+		const textContent = (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+
+		// 扩大取样：头/中/尾三段拼接，覆盖全文结构
+		const sampledContent = this.sampleArticleContent(textContent, 3500);
 
 		const styleDescMap: Record<string, string> = {
 			realistic: 'photorealistic, 8k, highly detailed',
@@ -98,23 +101,25 @@ export class ImageGenerationService {
 		};
 		const styleDesc = styleDescMap[style] || 'best quality, masterpiece';
 
-		const systemPrompt = `You are an expert prompt engineer for image generation. Analyze the article content and generate an optimized prompt for creating a cover image.
+		const systemPrompt = `You are an expert editorial art director. Your task is a two-step reasoning: first distill the article's core idea, then translate it into a concrete visual scene for a cover image.
 
-Output format (respond with ONLY the JSON, no extra text):
+Output format (respond with ONLY the JSON, no extra text, no markdown fences):
 {
-  "positivePrompt": "detailed description with style descriptors and quality tags",
+  "keyIdea": "one-sentence distillation of the article's central thesis or core insight (not just the topic)",
+  "visualMetaphor": "one-sentence concrete visual metaphor or symbolic scene that embodies the keyIdea — describe an actual scene, not an abstract concept",
+  "positivePrompt": "detailed image-generation prompt based on visualMetaphor, with style and quality tags",
   "negativePrompt": "elements to avoid"
 }
 
-Guidelines:
-1. The positive prompt should describe a visually appealing cover that captures the article's theme
-2. Include style: ${styleDesc}
-3. Add quality tags: best quality, masterpiece, ultra high res
-4. Focus on visual elements, not text
-5. Keep the prompt concise but descriptive (under 200 words)
-6. The negative prompt should exclude: nsfw, lowres, bad anatomy, text, watermark, blurry`;
+Rules:
+1. keyIdea must capture the SPECIFIC argument/insight/story the author is making — not a generic topic label. E.g. bad: "about AI"; good: "AI agents are crossing from tools into collaborators, reshaping how humans define expertise".
+2. visualMetaphor must be a concrete, photographable/paintable scene that a viewer, seeing only the image, could reasonably guess relates to the keyIdea. Avoid cliché (no lightbulbs, no brain gears, no generic handshakes).
+3. positivePrompt expands visualMetaphor with: subject details, environment, lighting, composition, mood. Append style: ${styleDesc}. Append quality tags: best quality, masterpiece, ultra high res.
+4. NO text, letters, or typography in the image. NO watermarks.
+5. Keep positivePrompt under 200 words.
+6. negativePrompt excludes: nsfw, lowres, bad anatomy, text, watermark, blurry, generic stock-photo composition.`;
 
-		const userPrompt = `Generate a cover image prompt for this article:\n\n${truncatedContent}`;
+		const userPrompt = `Analyze this article and produce the JSON. The excerpt below is sampled from the beginning, middle, and end of the article to give you full coverage — treat all sections as equally important for identifying the core thesis:\n\n${sampledContent}`;
 
 		// 记录日志，包含完整的输入 prompt
 		const logId = aiLogService.addLog({
@@ -128,7 +133,7 @@ Guidelines:
 
 		try {
 			logger.info('[ImageGenerationService] 生成封面提示词', {
-				contentLength: truncatedContent.length,
+				contentLength: sampledContent.length,
 				style,
 				model: settings.zenmuxModel
 			});
@@ -147,7 +152,7 @@ Guidelines:
 						{role: 'system', content: systemPrompt},
 						{role: 'user', content: userPrompt}
 					],
-					max_tokens: 500
+					max_tokens: 900
 				})
 			});
 
@@ -163,9 +168,13 @@ Guidelines:
 			const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
 			if (jsonMatch) {
 				const parsed = JSON.parse(jsonMatch[0]);
+				logger.info('[ImageGenerationService] 提炼结果', {
+					keyIdea: parsed.keyIdea,
+					visualMetaphor: parsed.visualMetaphor
+				});
 				aiLogService.updateLog(logId, {
 					status: 'completed',
-					message: '提示词生成成功',
+					message: `提示词生成成功 | 主旨: ${parsed.keyIdea || ''}`,
 					generatedPrompt: parsed.positivePrompt,
 					negativePrompt: parsed.negativePrompt
 				});
@@ -208,7 +217,7 @@ Guidelines:
 
 			// Nano Banana Pro 使用 VertexAI 格式
 			if (useNanoBananaPro) {
-				return await this.generateWithNanoBananaPro(prompt, negativePrompt, settings, requestUrl, {temperature, topP, seed, aspectRatio});
+				return await this.generateWithNanoBananaPro(prompt, negativePrompt, settings, requestUrl, {temperature, topP, seed, aspectRatio, referenceImages: params.referenceImages});
 			}
 
 			// 旧模型使用 OpenAI 兼容格式
@@ -283,12 +292,18 @@ Guidelines:
 		negativePrompt: string | undefined,
 		settings: ViteReactSettings,
 		requestUrl: typeof window.lovpenReactAPI.requestUrl,
-		config?: {temperature?: number; topP?: number; seed?: number; aspectRatio?: string}
+		config?: {temperature?: number; topP?: number; seed?: number; aspectRatio?: string; referenceImages?: string[]}
 	): Promise<ImageGenerationResult> {
 		const negPrompt = negativePrompt || 'nsfw, lowres, bad anatomy, text, watermark, blurry';
 		// 在 prompt 中加入比例要求
 		const aspectDesc = config?.aspectRatio ? `\n\nAspect ratio: ${config.aspectRatio}` : '';
-		const fullPrompt = `${prompt}${aspectDesc}\n\nNegative: ${negPrompt}`;
+
+		// 参考图仅用于风格迁移：引用其艺术风格/调色/笔触/质感，但**不要复用主体、构图或物体**
+		const hasRef = !!config?.referenceImages?.length;
+		const refPrefix = hasRef
+			? `STYLE REFERENCE ONLY: The attached image(s) are provided purely as a STYLE/AESTHETIC reference. Extract only the artistic style, color palette, lighting, texture, mood, and rendering technique from them. DO NOT copy or reuse any subject matter, objects, characters, scenes, or composition from the reference. The subject and content of the output MUST be generated solely from the description below.\n\nSUBJECT (what to draw):\n`
+			: '';
+		const fullPrompt = `${refPrefix}${prompt}${aspectDesc}\n\nNegative: ${negPrompt}`;
 
 		const temperature = config?.temperature ?? 1.0;
 		const topP = config?.topP ?? 0.95;
@@ -298,7 +313,8 @@ Guidelines:
 			aspectRatio: config?.aspectRatio,
 			temperature,
 			topP,
-			seed: config?.seed
+			seed: config?.seed,
+			referenceImageCount: config?.referenceImages?.length || 0
 		});
 
 		const logId = aiLogService.addLog({
@@ -321,6 +337,18 @@ Guidelines:
 			generationConfig.seed = config.seed;
 		}
 
+		// 构建 parts：先放参考图，再放文本
+		const parts: Array<Record<string, unknown>> = [];
+		if (config?.referenceImages?.length) {
+			for (const refUrl of config.referenceImages) {
+				const inline = await this.urlToInlineData(refUrl);
+				if (inline) {
+					parts.push({inlineData: inline});
+				}
+			}
+		}
+		parts.push({text: fullPrompt});
+
 		// 使用 Vertex AI 协议 (ZenMux 官方文档要求)
 		const response = await requestUrl({
 			url: 'https://zenmux.ai/api/vertex-ai/v1/models/google/gemini-3-pro-image-preview:generateContent',
@@ -333,7 +361,7 @@ Guidelines:
 				contents: [
 					{
 						role: 'user',
-						parts: [{text: fullPrompt}]
+						parts
 					}
 				],
 				generationConfig
@@ -376,6 +404,44 @@ Guidelines:
 			error: '响应格式异常'
 		});
 		throw new Error('Nano Banana Pro 未返回图片数据');
+	}
+
+	// 头/中/尾三段采样，覆盖全文结构；总长受 maxTotal 限制
+	private sampleArticleContent(text: string, maxTotal: number): string {
+		if (text.length <= maxTotal) return text;
+
+		const headLen = Math.floor(maxTotal * 0.45);
+		const midLen = Math.floor(maxTotal * 0.30);
+		const tailLen = maxTotal - headLen - midLen;
+
+		const head = text.substring(0, headLen);
+		const midStart = Math.floor((text.length - midLen) / 2);
+		const mid = text.substring(midStart, midStart + midLen);
+		const tail = text.substring(text.length - tailLen);
+
+		return `[HEAD]\n${head}\n\n[MIDDLE]\n${mid}\n\n[END]\n${tail}`;
+	}
+
+	// 将图片 URL（data: / http(s) / blob:）转为 Vertex AI inlineData 格式
+	private async urlToInlineData(url: string): Promise<{mimeType: string; data: string} | null> {
+		try {
+			if (url.startsWith('data:')) {
+				const match = url.match(/^data:([^;]+);base64,(.+)$/);
+				if (!match) return null;
+				return {mimeType: match[1], data: match[2]};
+			}
+			const response = await fetch(url);
+			const blob = await response.blob();
+			const mimeType = blob.type || 'image/png';
+			const buffer = await blob.arrayBuffer();
+			const bytes = new Uint8Array(buffer);
+			let binary = '';
+			for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+			return {mimeType, data: btoa(binary)};
+		} catch (error) {
+			logger.warn('[ImageGenerationService] 参考图转 inlineData 失败', {url: url.substring(0, 80), error});
+			return null;
+		}
 	}
 
 	private generateMockImage(params: ImageGenerationParams): ImageGenerationResult {

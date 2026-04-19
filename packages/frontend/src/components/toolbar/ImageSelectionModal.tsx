@@ -7,6 +7,12 @@ import {CropArea, ImageCropModal} from './ImageCropModal';
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from './cover/types';
 import {Image as ImageIcon, Palette, Sparkles, Settings} from 'lucide-react';
 import {imageGenerationService} from '@/services/imageGenerationService';
+import {
+	getUploadedImages,
+	isCloudConfigComplete,
+	saveUploadedImages,
+	uploadToQiniu,
+} from '@/services/qiniuUpload';
 import {logger} from '../../../../shared/src/logger';
 import {ViteReactSettings, UploadedImage} from '../../types';
 import {useShadowRoot} from '../../providers/ShadowRootProvider';
@@ -22,6 +28,9 @@ interface ImageSelectionModalProps {
 	settings?: ViteReactSettings;
 	onOpenAISettings?: () => void;
 	uploadedImages?: UploadedImage[];
+	// 跳过裁切与 AI 生成标签，用于参考图选择等场景
+	skipCrop?: boolean;
+	title?: string;
 }
 
 export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
@@ -34,7 +43,9 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 																			getDimensions,
 																			settings,
 																			onOpenAISettings,
-																			uploadedImages = []
+																			uploadedImages = [],
+																			skipCrop = false,
+																			title
 																		}) => {
 	const [activeTab, setActiveTab] = useState<CoverImageSource>('article');
 	const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
@@ -44,6 +55,36 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	const [imageToProcess, setImageToProcess] = useState<string>('');
 	const [croppedImageUrl, setCroppedImageUrl] = useState<string>('');
 	const [selectedFileName, setSelectedFileName] = useState<string>(''); // 档案库图片原始文件名
+
+	// 档案库上传状态
+	const [isUploading, setIsUploading] = useState(false);
+	const cloudSettings = settings?.cloudStorage;
+	const canUploadToLibrary = isCloudConfigComplete(cloudSettings);
+
+	const handleLibraryUpload = useCallback(async (files: FileList) => {
+		if (!canUploadToLibrary || !cloudSettings) return;
+		const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+		if (imageFiles.length === 0) return;
+
+		setIsUploading(true);
+		try {
+			const newImages: UploadedImage[] = [];
+			for (const file of imageFiles) {
+				try {
+					const uploaded = await uploadToQiniu(file, cloudSettings);
+					newImages.push(uploaded);
+				} catch (error) {
+					logger.error('[ImageSelectionModal] 上传失败:', error);
+				}
+			}
+			if (newImages.length > 0) {
+				const existing = getUploadedImages();
+				saveUploadedImages([...newImages, ...existing]);
+			}
+		} finally {
+			setIsUploading(false);
+		}
+	}, [canUploadToLibrary, cloudSettings]);
 
 	// AI 生成相关状态
 	const [aiPrompt, setAiPrompt] = useState<string>('');
@@ -69,9 +110,14 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 	}, [isOpen]);
 
 	const handleImageSelect = (imageUrl: string, fileName?: string) => {
-		logger.info('[ImageSelectionModal] handleImageSelect', {imageUrl: imageUrl.substring(0, 80), fileName});
+		logger.info('[ImageSelectionModal] handleImageSelect', {imageUrl: imageUrl.substring(0, 80), fileName, skipCrop});
 		setImageToProcess(imageUrl);
 		setSelectedFileName(fileName || '');
+		if (skipCrop) {
+			// 跳过裁切，直接标记已选中
+			setSelectedImageUrl(imageUrl);
+			return;
+		}
 		setShowCropModal(true);
 	};
 
@@ -211,7 +257,7 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 								<div className="shrink-0 px-3 pt-2 pb-1">
 									<div className="mx-auto mb-2 h-1 w-10 rounded-full bg-muted-foreground/40"/>
 									<div className="flex items-center justify-between">
-										<span className="text-sm font-serif font-medium text-foreground">封面{coverNumber}</span>
+										<span className="text-sm font-serif font-medium text-foreground">{title || `封面${coverNumber}`}</span>
 										<div className="flex items-center gap-2">
 											{selectedImageUrl && (
 												<img src={selectedImageUrl} alt="选中" className="w-8 h-8 object-cover rounded-lg border border-border"/>
@@ -257,24 +303,19 @@ export const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
 
 								<TabsContent value="library" className="flex-1 min-h-0 relative">
 									<div className="absolute inset-0 overflow-y-auto" data-vaul-no-drag>
-										{uploadedImages.length > 0 ? (
-											<ImageGrid
-												images={uploadedImages.map(img => img.url)}
-												selectedImage={selectedImageUrl}
-												onImageSelect={(url) => {
-													// 根据URL找到对应的文件名
-													const img = uploadedImages.find(i => i.url === url);
-													handleImageSelect(url, img?.name);
-												}}
-												emptyMessage="存储库中没有图片"
-											/>
-										) : (
-											<div className="text-center py-8 text-gray-500">
-												<Palette className="h-12 w-12 mx-auto mb-3 opacity-50"/>
-												<p className="text-sm">存储库中没有图片</p>
-												<p className="text-xs mt-1 text-gray-400">请先在"存储库"中上传图片</p>
-											</div>
-										)}
+										<ImageGrid
+											images={uploadedImages.map(img => img.url)}
+											selectedImage={selectedImageUrl}
+											onImageSelect={(url) => {
+												const img = uploadedImages.find(i => i.url === url);
+												handleImageSelect(url, img?.name);
+											}}
+											emptyMessage="存储库中没有图片"
+											onUpload={handleLibraryUpload}
+											uploadDisabled={!canUploadToLibrary}
+											uploadDisabledMessage="未配置云存储"
+											uploading={isUploading}
+										/>
 									</div>
 								</TabsContent>
 

@@ -82,6 +82,23 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 	// Toolbar 当前 tab 状态（用于头像点击切换到设置）
 	const [toolbarActiveTab, setToolbarActiveTab] = useState<string | undefined>(undefined);
 
+	// Toolbar 内容区隐藏状态（由 Toolbar 通过回调同步，用于动画外层容器宽度）
+	const [toolbarContentHidden, setToolbarContentHidden] = useState<boolean>(() => {
+		try {
+			return localStorage.getItem('lovpen-content-hidden') === 'true';
+		} catch {
+			return false;
+		}
+	});
+	// 折叠时外层 toolbar 的宽度 = 当前 sidebar 宽度（展开 160 / 收起 44），由 Toolbar 同步
+	const [toolbarSidebarWidth, setToolbarSidebarWidth] = useState<number>(() => {
+		try {
+			return localStorage.getItem('lovpen-sidebar-expanded') === 'false' ? 44 : 160;
+		} catch {
+			return 160;
+		}
+	});
+
 	// 代码块缩放预览的恢复函数
 	const codeBlockScaleRestoreRef = useRef<(() => void) | null>(null);
 	// 内容容器的 ref
@@ -177,17 +194,6 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		};
 	}, [onWidthChange]);
 
-	// 切换 Toolbar 显示/隐藏
-	const toggleToolbar = useCallback(() => {
-		setIsToolbarHidden(prev => {
-			const newVal = !prev;
-			try {
-				localStorage.setItem('lovpen-toolbar-hidden', String(newVal));
-			} catch {}
-			return newVal;
-		});
-	}, []);
-
 	// 工具栏宽度拖动：mousedown 在 resizer 上启动，全局 mousemove/mouseup 更新并结束
 	const startToolbarResize = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -251,6 +257,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 		// 外部控制 tab 切换
 		activeTab: toolbarActiveTab,
 		onActiveTabChange: setToolbarActiveTab,
+		onContentHiddenChange: setToolbarContentHidden,
+		onSidebarWidthChange: setToolbarSidebarWidth,
+		toolbarOuterWidth: toolbarWidth,
 	};
 
 	// 工具栏位置：优先从 atom 读取（响应式更新），fallback 到 props
@@ -293,7 +302,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			>
 				{/* 内容容器 */}
 				<div ref={contentContainerRef} className="lovpen-content-container" style={{ position: "relative" }}>
-					{/* 复制按钮和工具栏切换按钮容器 - sticky 置顶区域 */}
+					{/* 复制按钮和头像 - sticky 置顶区域 */}
 					<div style={{
 						position: 'sticky',
 						top: 0,
@@ -302,76 +311,29 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 						display: 'flex',
 						gap: '8px',
 						alignItems: 'center',
-						justifyContent: 'space-between',
+						justifyContent: 'flex-end',
 						padding: '12px 16px',
 						backgroundColor: '#F9F9F7',
 						borderBottom: '1px solid #E8E6DC',
 						backdropFilter: 'blur(8px)'
 					}}>
-						{/* 工具栏展开/收起切换按钮 */}
-						<button
-							onClick={toggleToolbar}
-							title={isToolbarHidden ? '展开工具栏' : '收起工具栏'}
-							style={{
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								width: '32px',
-								height: '32px',
-								borderRadius: '8px',
-								border: '1px solid #E8E6DC',
-								backgroundColor: '#fff',
-								cursor: 'pointer',
-								transition: 'all 0.2s ease'
+						<CopySplitButton
+							onCopy={(option: CopyOption) => {
+								console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
+								onCopy(option.id);
 							}}
-							onMouseEnter={e => {
-								e.currentTarget.style.backgroundColor = '#F9F9F7';
-								e.currentTarget.style.borderColor = '#D97757';
-							}}
-							onMouseLeave={e => {
-								e.currentTarget.style.backgroundColor = '#fff';
-								e.currentTarget.style.borderColor = '#E8E6DC';
-							}}
+						/>
+
+						{/* 头像 - 点击切换到设置 tab */}
+						<div
+							onClick={() => setToolbarActiveTab('settings')}
+							className="cursor-pointer transition-all hover:scale-105"
 						>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="#87867F"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								style={{
-									transform: isToolbarHidden ? 'rotate(180deg)' : 'rotate(0deg)',
-									transition: 'transform 0.2s ease'
-								}}
-							>
-								<rect x="3" y="3" width="18" height="18" rx="2" />
-								<path d="M15 3v18" />
-							</svg>
-						</button>
-
-						{/* 右侧按钮组 */}
-						<div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-							<CopySplitButton
-								onCopy={(option: CopyOption) => {
-									console.log('🎯 [LovpenReact] onCopy called with option:', option, 'id:', option.id);
-									onCopy(option.id);
-								}}
+							<AvatarPreview
+								config={articleInfo.authorAvatar}
+								userName={articleInfo.author || settings?.personalInfo?.name}
+								size="xs"
 							/>
-
-							{/* 头像 - 点击切换到设置 tab */}
-							<div
-								onClick={() => setToolbarActiveTab('settings')}
-								className="cursor-pointer transition-all hover:scale-105"
-							>
-								<AvatarPreview
-									config={articleInfo.authorAvatar}
-									userName={articleInfo.author || settings?.personalInfo?.name}
-									size="xs"
-								/>
-							</div>
 						</div>
 					</div>
 					{/* 动态样式：来自主题和高亮 */}
@@ -391,7 +353,7 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 
 
 			{/* 拖拽分隔条 - 位于 ScrollContainer 和 Toolbar 之间 */}
-			{!isToolbarHidden && (
+			{!isToolbarHidden && !toolbarContentHidden && (
 				<div
 					onMouseDown={startToolbarResize}
 					title="拖动调整工具栏宽度"
@@ -412,9 +374,9 @@ export const LovpenReact: React.FC<LovpenReactProps> = (props) => {
 			{/* 工具栏容器 - 仅在显示时显示，宽度可拖动调整 */}
 			{!isToolbarHidden && (
 				<div
-					className="toolbar-container"
+					className="toolbar-container transition-[width] duration-200"
 					style={{
-						width: toolbarWidth,
+						width: toolbarContentHidden ? toolbarSidebarWidth : toolbarWidth,
 						height: "100%",
 						overflowY: "auto",
 						overflowX: "hidden",

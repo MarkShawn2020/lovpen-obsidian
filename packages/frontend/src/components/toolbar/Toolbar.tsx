@@ -13,6 +13,12 @@ import {PersonalInfo, UnifiedPluginData, ViteReactSettings, CloudStorageSettings
 import {CoverData} from "@/components/toolbar/CoverData";
 import {logger} from "../../../../shared/src/logger";
 import {FileText, Package, Plug, Zap, User, Bot, Globe, PanelLeft, PanelRight, Image, Palette, Menu, ChevronsLeft, Cloud, Eye, EyeOff, AlertCircle, ChevronDown, CheckCircle2, XCircle, Loader2, Upload, Trash2, Copy, ExternalLink, ImagePlus, Heading1} from "lucide-react";
+import {
+	getUploadedImages,
+	saveUploadedImages,
+	uploadToQiniu as qiniuUpload,
+	isCloudConfigComplete,
+} from "../../services/qiniuUpload";
 
 const LovpenLogo: React.FC<{className?: string}> = ({className}) => (
 	<svg viewBox="-127 -80 1240 1240" className={className} fill="currentColor">
@@ -299,82 +305,6 @@ const CloudStorageSettingsSection: React.FC<{
 	);
 };
 
-// 七牛云上传区域配置
-const QINIU_UPLOAD_HOSTS: Record<CloudStorageSettings['qiniu']['region'], string> = {
-	'z0': 'https://up.qiniup.com',
-	'z1': 'https://up-z1.qiniup.com',
-	'z2': 'https://up-z2.qiniup.com',
-	'na0': 'https://up-na0.qiniup.com',
-	'as0': 'https://up-as0.qiniup.com',
-};
-
-// 本地存储键名
-const UPLOADED_IMAGES_STORAGE_KEY = 'lovpen-uploaded-images';
-
-// 获取已上传图片列表
-const getUploadedImages = (): UploadedImage[] => {
-	try {
-		const data = localStorage.getItem(UPLOADED_IMAGES_STORAGE_KEY);
-		return data ? JSON.parse(data) : [];
-	} catch {
-		return [];
-	}
-};
-
-// 保存已上传图片列表
-const saveUploadedImages = (images: UploadedImage[]) => {
-	localStorage.setItem(UPLOADED_IMAGES_STORAGE_KEY, JSON.stringify(images));
-};
-
-// 生成文件 key（七牛云存储路径）
-const generateFileKey = (file: File): string => {
-	const ext = file.name.split('.').pop() || 'jpg';
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	return `lovpen/${timestamp}-${random}.${ext}`;
-};
-
-// Base64 URL 编码
-const base64UrlEncode = (str: string): string => {
-	return btoa(str).replace(/\+/g, '-').replace(/\//g, '_');
-};
-
-// HMAC-SHA1 签名
-const hmacSha1 = async (key: string, message: string): Promise<string> => {
-	const encoder = new TextEncoder();
-	const keyData = encoder.encode(key);
-	const messageData = encoder.encode(message);
-
-	const cryptoKey = await crypto.subtle.importKey(
-		'raw',
-		keyData,
-		{name: 'HMAC', hash: 'SHA-1'},
-		false,
-		['sign']
-	);
-
-	const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
-	const base64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
-	return base64.replace(/\+/g, '-').replace(/\//g, '_');
-};
-
-// 生成七牛云上传 Token
-const generateUploadToken = async (
-	accessKey: string,
-	secretKey: string,
-	bucket: string,
-	key: string
-): Promise<string> => {
-	const deadline = Math.floor(Date.now() / 1000) + 3600; // 1小时有效期
-	const putPolicy = {
-		scope: `${bucket}:${key}`,
-		deadline,
-	};
-	const encodedPolicy = base64UrlEncode(JSON.stringify(putPolicy));
-	const sign = await hmacSha1(secretKey, encodedPolicy);
-	return `${accessKey}:${sign}:${encodedPolicy}`;
-};
-
 // 云存储面板组件（内容部分，不含标题）
 const CloudStoragePanelContent: React.FC<{
 	cloudSettings: CloudStorageSettings;
@@ -399,59 +329,7 @@ const CloudStoragePanelContent: React.FC<{
 		};
 	}, []);
 
-	const isConfigComplete = cloudSettings.enabled &&
-		cloudSettings.qiniu.accessKey &&
-		cloudSettings.qiniu.secretKey &&
-		cloudSettings.qiniu.bucket &&
-		cloudSettings.qiniu.domain;
-
-	// 上传文件到七牛云
-	const uploadToQiniu = async (file: File): Promise<UploadedImage | null> => {
-		if (!isConfigComplete) return null;
-
-		const key = generateFileKey(file);
-		const token = await generateUploadToken(
-			cloudSettings.qiniu.accessKey,
-			cloudSettings.qiniu.secretKey,
-			cloudSettings.qiniu.bucket,
-			key
-		);
-
-		const formData = new FormData();
-		formData.append('file', file);
-		formData.append('token', token);
-		formData.append('key', key);
-
-		const uploadHost = QINIU_UPLOAD_HOSTS[cloudSettings.qiniu.region];
-
-		const response = await fetch(uploadHost, {
-			method: 'POST',
-			body: formData,
-		});
-
-		if (!response.ok) {
-			throw new Error(`上传失败: ${response.status}`);
-		}
-
-		const result = await response.json();
-		let domain = cloudSettings.qiniu.domain.trim();
-		if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
-			domain = 'https://' + domain;
-		}
-		domain = domain.replace(/\/$/, '');
-
-		const uploadedImage: UploadedImage = {
-			id: crypto.randomUUID(),
-			name: file.name,
-			url: `${domain}/${result.key}`,
-			key: result.key,
-			size: file.size,
-			type: file.type,
-			uploadedAt: new Date().toISOString(),
-		};
-
-		return uploadedImage;
-	};
+	const isConfigComplete = isCloudConfigComplete(cloudSettings);
 
 	// 处理文件上传
 	const handleUpload = async (files: FileList | File[]) => {
@@ -472,10 +350,8 @@ const CloudStoragePanelContent: React.FC<{
 		const newImages: UploadedImage[] = [];
 		for (let i = 0; i < imageFiles.length; i++) {
 			try {
-				const image = await uploadToQiniu(imageFiles[i]);
-				if (image) {
-					newImages.push(image);
-				}
+				const image = await qiniuUpload(imageFiles[i], cloudSettings);
+				newImages.push(image);
 			} catch (error) {
 				console.error('上传失败:', error);
 			}
@@ -687,6 +563,10 @@ interface ToolbarProps {
 	onKitApply?: (kitId: string) => void;
 	onKitCreate?: (basicInfo: any) => void;
 	onKitDelete?: (kitId: string) => void;
+	onContentHiddenChange?: (hidden: boolean) => void;
+	onSidebarWidthChange?: (width: number) => void;
+	// 外层 toolbar 实际分配的总宽度（包含 sidebar），用于 content 区固定宽度避免 toggle 动画抖动
+	toolbarOuterWidth?: number;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -708,6 +588,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 													onKitApply,
 													onKitCreate,
 													onKitDelete,
+													onContentHiddenChange,
+													onSidebarWidthChange,
+													toolbarOuterWidth,
 												}) => {
 
 	// 使用 useSettings hook 获取设置更新方法
@@ -725,7 +608,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 	});
 
 	const handleSectionChange = (section: NavSection) => {
+		if (section === activeSection) {
+			// 再次点击当前选中的菜单：toggle 右侧内容区
+			const newHidden = !contentHidden;
+			setContentHidden(newHidden);
+			try {
+				localStorage.setItem('lovpen-content-hidden', String(newHidden));
+			} catch {}
+			return;
+		}
 		setActiveSection(section);
+		// 切换到不同菜单时确保内容区可见
+		if (contentHidden) {
+			setContentHidden(false);
+			try {
+				localStorage.setItem('lovpen-content-hidden', 'false');
+			} catch {}
+		}
 		try {
 			localStorage.setItem('lovpen-toolbar-section', section);
 		} catch {}
@@ -765,6 +664,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 			localStorage.setItem('lovpen-content-hidden', String(newValue));
 		} catch {}
 	};
+
+	useEffect(() => {
+		onContentHiddenChange?.(contentHidden);
+	}, [contentHidden, onContentHiddenChange]);
+
+	useEffect(() => {
+		onSidebarWidthChange?.(sidebarExpanded ? 160 : 44);
+	}, [sidebarExpanded, onSidebarWidthChange]);
 
 	// 插件管理中的子tab状态
 	const [pluginTab, setPluginTab] = useState<string>(() => {
@@ -985,13 +892,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 	};
 
 	// 导航菜单配置
-	const navItems: {key: typeof activeSection; label: string; icon: React.ElementType; colorFrom: string; colorTo: string; group: 'content' | 'settings'}[] = [
+	const navItems: {key: typeof activeSection; label: string; icon: React.ElementType; colorFrom: string; colorTo: string; group: 'content' | 'advanced' | 'settings'}[] = [
 		{key: 'article', label: '文章信息', icon: FileText, colorFrom: '#CC785C', colorTo: '#B86A4E', group: 'content'},
 		{key: 'cover', label: '封面设计', icon: Palette, colorFrom: '#B49FD8', colorTo: '#8B7CB8', group: 'content'},
 		{key: 'kits', label: '模板', icon: Palette, colorFrom: '#629A90', colorTo: '#4A7A70', group: 'content'},
 		{key: 'plugins', label: '插件管理', icon: Plug, colorFrom: '#97B5D5', colorTo: '#7095B5', group: 'content'},
-		{key: 'playground', label: '实验室', icon: ImagePlus, colorFrom: '#E8A87C', colorTo: '#C8885C', group: 'content'},
-		{key: 'logs', label: 'AI 日志', icon: FileText, colorFrom: '#87867F', colorTo: '#6A6A63', group: 'content'},
+		{key: 'playground', label: '实验室', icon: ImagePlus, colorFrom: '#E8A87C', colorTo: '#C8885C', group: 'advanced'},
+		{key: 'logs', label: 'AI 日志', icon: FileText, colorFrom: '#87867F', colorTo: '#6A6A63', group: 'advanced'},
 		{key: 'cloud', label: '云存储', icon: Cloud, colorFrom: '#97B5D5', colorTo: '#7095B5', group: 'settings'},
 		{key: 'personal', label: '个人信息', icon: User, colorFrom: '#C2C07D', colorTo: '#A2A05D', group: 'settings'},
 		{key: 'ai', label: 'AI 设置', icon: Bot, colorFrom: '#CC785C', colorTo: '#AC583C', group: 'settings'},
@@ -1004,7 +911,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 				id="lovpen-toolbar-container"
 				className="h-full flex bg-[#F9F9F7] relative"
 				style={{
-					minWidth: '328px',
+					minWidth: contentHidden ? 0 : '328px',
 					width: '100%',
 					maxWidth: '100%',
 					overflow: 'hidden',
@@ -1044,7 +951,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										key={key}
 										onClick={() => handleSectionChange(key)}
 										title={!sidebarExpanded ? label : undefined}
-										className={`w-full flex items-center h-9 gap-2 px-1.5 rounded-md transition-colors ${
+										className={`w-full flex items-center h-9 gap-2 rounded-md transition-colors ${
+											sidebarExpanded ? 'px-1.5' : 'px-0 justify-center'
+										} ${
 											sidebarExpanded
 												? activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'
 												: 'text-[#3d3d3d]'
@@ -1061,13 +970,55 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										>
 											<Icon className="h-3.5 w-3.5" style={{ color: '#fff' }}/>
 										</div>
-										<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
-										{key === 'plugins' && plugins.length > 0 && (
-											<span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-												activeSection === key ? 'bg-white/25 text-white' : 'bg-[#E8E6DC] text-[#87867F]'
-											}`}>
-												{plugins.length}
-											</span>
+										{sidebarExpanded && (
+											<>
+												<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
+												{key === 'plugins' && plugins.length > 0 && (
+													<span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+														activeSection === key ? 'bg-white/25 text-white' : 'bg-[#E8E6DC] text-[#87867F]'
+													}`}>
+														{plugins.length}
+													</span>
+												)}
+											</>
+										)}
+									</button>
+								))}
+							</nav>
+						</div>
+
+						{/* 高级分组 */}
+						<div className="mb-3">
+							<div className="h-4 mb-1.5 overflow-hidden">
+								<p className="text-[10px] text-[#87867F] uppercase tracking-wider font-medium whitespace-nowrap px-1.5">Advanced</p>
+							</div>
+							<nav className="space-y-1">
+								{navItems.filter(item => item.group === 'advanced').map(({key, label, icon: Icon, colorFrom, colorTo}) => (
+									<button
+										key={key}
+										onClick={() => handleSectionChange(key)}
+										title={!sidebarExpanded ? label : undefined}
+										className={`w-full flex items-center h-9 gap-2 rounded-md transition-colors ${
+											sidebarExpanded ? 'px-1.5' : 'px-0 justify-center'
+										} ${
+											sidebarExpanded
+												? activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'
+												: 'text-[#3d3d3d]'
+										}`}
+									>
+										<div
+											className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
+												!sidebarExpanded && activeSection === key ? 'scale-110' : ''
+											}`}
+											style={{
+												...gradientStyle(colorFrom, colorTo),
+												boxShadow: !sidebarExpanded && activeSection === key ? '0 0 0 2px rgba(204,120,92,0.6)' : 'none'
+											}}
+										>
+											<Icon className="h-3.5 w-3.5" style={{ color: '#fff' }}/>
+										</div>
+										{sidebarExpanded && (
+											<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
 										)}
 									</button>
 								))}
@@ -1085,7 +1036,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										key={key}
 										onClick={() => handleSectionChange(key)}
 										title={!sidebarExpanded ? label : undefined}
-										className={`w-full flex items-center h-9 gap-2 px-1.5 rounded-md transition-colors ${
+										className={`w-full flex items-center h-9 gap-2 rounded-md transition-colors ${
+											sidebarExpanded ? 'px-1.5' : 'px-0 justify-center'
+										} ${
 											sidebarExpanded
 												? activeSection === key ? 'bg-[#CC785C] text-white shadow-sm' : 'text-[#3d3d3d] hover:bg-[#E8E6DC]/80'
 												: 'text-[#3d3d3d]'
@@ -1102,7 +1055,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 										>
 											<Icon className="h-3.5 w-3.5" style={{ color: '#fff' }}/>
 										</div>
-										<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
+										{sidebarExpanded && (
+											<span className="text-sm font-medium whitespace-nowrap flex-1 text-left">{label}</span>
+										)}
 									</button>
 								))}
 							</nav>
@@ -1117,8 +1072,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 					</div>
 				</div>
 
-				{/* 右侧内容区 - 固定宽度，菜单切换时不变 */}
-				<div id="lovpen-toolbar-content" className="overflow-y-auto bg-[#F9F9F7] relative flex-1 min-w-0">
+				{/* 右侧内容区 - toggle 时宽度保持不变（由外层容器裁剪） */}
+				<div
+					id="lovpen-toolbar-content"
+					className="overflow-y-auto bg-[#F9F9F7] relative min-w-0"
+					style={{
+						flex: 'none',
+						width: toolbarOuterWidth
+							? Math.max(0, toolbarOuterWidth - (sidebarExpanded ? 160 : 44))
+							: undefined,
+						...(toolbarOuterWidth ? {} : { flex: '1 1 0%' }),
+						pointerEvents: contentHidden ? 'none' : 'auto'
+					}}
+				>
 					<div className="p-4 sm:p-5">
 						{/* 文章信息 */}
 						{activeSection === 'article' && (

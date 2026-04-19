@@ -1,5 +1,5 @@
-import React from 'react';
-import {Check} from 'lucide-react';
+import React, {useRef} from 'react';
+import {Check, Plus, Loader2} from 'lucide-react';
 
 interface ImageGridProps {
 	images: string[];
@@ -8,6 +8,11 @@ interface ImageGridProps {
 	loading?: boolean;
 	emptyMessage?: string;
 	maxHeight?: string;
+	// 传入后，第一个格子变为"新增图片"入口；disabled 时格子置灰并显示提示
+	onUpload?: (files: FileList) => void | Promise<void>;
+	uploadDisabled?: boolean;
+	uploadDisabledMessage?: string;
+	uploading?: boolean;
 }
 
 export const ImageGrid: React.FC<ImageGridProps> = ({
@@ -15,8 +20,28 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 														selectedImage,
 														onImageSelect,
 														loading = false,
-														emptyMessage = "暂无图片"
+														emptyMessage = "暂无图片",
+														onUpload,
+														uploadDisabled = false,
+														uploadDisabledMessage,
+														uploading = false
 													}) => {
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const handleUploadClick = () => {
+		if (uploadDisabled || uploading) return;
+		fileInputRef.current?.click();
+	};
+
+	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = e.target.files;
+		if (files && files.length > 0 && onUpload) {
+			await onUpload(files);
+		}
+		// 重置 input 以支持同一文件再次选择
+		if (e.target) e.target.value = '';
+	};
+
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center py-12">
@@ -25,7 +50,8 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 		);
 	}
 
-	if (images.length === 0) {
+	// 无图 + 无上传入口时显示空状态
+	if (images.length === 0 && !onUpload) {
 		return (
 			<div className="flex items-center justify-center py-12 text-gray-500">
 				<span className="text-sm">{emptyMessage}</span>
@@ -35,6 +61,42 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
 
 	return (
 		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 py-4">
+			{onUpload && (
+				<>
+					<input
+						ref={fileInputRef}
+						type="file"
+						accept="image/*"
+						multiple
+						onChange={handleFileChange}
+						className="hidden"
+					/>
+					<button
+						type="button"
+						onClick={handleUploadClick}
+						disabled={uploadDisabled || uploading}
+						title={uploadDisabled ? uploadDisabledMessage : '上传新图片'}
+						className={`
+							relative aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1.5 transition-all duration-200
+							${uploadDisabled
+								? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+								: uploading
+									? 'border-primary bg-primary/5 text-primary cursor-wait'
+									: 'border-gray-300 text-gray-500 hover:border-primary hover:text-primary hover:bg-primary/5 cursor-pointer'
+							}
+						`}
+					>
+						{uploading ? (
+							<Loader2 className="h-6 w-6 animate-spin"/>
+						) : (
+							<Plus className="h-6 w-6"/>
+						)}
+						<span className="text-xs px-1 text-center leading-tight">
+							{uploading ? '上传中...' : uploadDisabled ? (uploadDisabledMessage || '不可用') : '新增图片'}
+						</span>
+					</button>
+				</>
+			)}
 			{images.map((imageUrl, index) => (
 				<div
 					key={index}

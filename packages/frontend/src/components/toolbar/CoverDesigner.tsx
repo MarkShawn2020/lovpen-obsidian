@@ -4,7 +4,7 @@ import {CoverCard} from "@/components/toolbar/CoverCard";
 import {ImageSelectionModal} from "@/components/toolbar/ImageSelectionModal";
 import {CoverAspectRatio, CoverImageSource, ExtractedImage, GenerationStatus} from "@/components/toolbar/cover/types";
 import {logger} from "../../../../shared/src/logger";
-import {Download, RotateCcw, Sparkles, Settings, Eye, X, Check, Copy} from "lucide-react";
+import {Download, RotateCcw, Sparkles, Settings, Eye, X, Check, Copy, Plus} from "lucide-react";
 import {persistentStorageService} from '../../services/persistentStorage';
 import {imageGenerationService} from '../../services/imageGenerationService';
 import {ViteReactSettings, UploadedImage} from '../../types';
@@ -126,6 +126,9 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 	const [aiTargetCover, setAiTargetCover] = useState<1 | 2>(() => getAIGenerationState().aiTargetCover || 1);
 	// 预览的图片 ID（改为存 fileId 以便获取元数据）
 	const [previewImageId, setPreviewImageId] = useState<string | null>(null);
+	// 参考图（仅 Nano Banana Pro 生效）
+	const [referenceImage, setReferenceImage] = useState<string | null>(null);
+	const [showReferencePicker, setShowReferencePicker] = useState(false);
 
 	// 监听 storage 变化刷新上传图片列表
 	useEffect(() => {
@@ -701,7 +704,8 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 					width: dimensions.width,
 					height: dimensions.height,
 					settings,
-					useNanoBananaPro: aiModel === 'nano-banana-pro'
+					useNanoBananaPro: aiModel === 'nano-banana-pro',
+					referenceImages: aiModel === 'nano-banana-pro' && referenceImage ? [referenceImage] : undefined
 				});
 
 				if (result.success && result.imageUrl) {
@@ -744,7 +748,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 			setIsGeneratingImage(false);
 			setPendingSkeletons(0); // 确保清空骨架屏
 		}
-	}, [articleHTML, aiStyle, aiModel, aiTargetCover, aiBatchCount, settings, isAIAvailable, getDimensions]);
+	}, [articleHTML, aiStyle, aiModel, aiTargetCover, aiBatchCount, settings, isAIAvailable, getDimensions, referenceImage]);
 
 	// 选择 AI 生成的图片作为封面
 	const handleSelectAiImage = useCallback(async (fileId: string) => {
@@ -852,6 +856,7 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 								onChange={(e) => setAiStyle(e.target.value)}
 								className="px-2 py-1.5 text-xs border border-input rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
 							>
+								<option value="">无风格</option>
 								<option value="illustration">插画风格</option>
 								<option value="realistic">写实风格</option>
 								<option value="minimalist">简约风格</option>
@@ -880,6 +885,41 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 								</SelectContent>
 							</Select>
 						</div>
+
+						{/* 参考图（仅 Nano Banana Pro 生效） */}
+						{aiModel === 'nano-banana-pro' && (
+							<div className="flex items-center gap-2">
+								<span className="text-xs text-muted-foreground shrink-0">参考图</span>
+								{referenceImage ? (
+									<div className="relative group">
+										<img
+											src={referenceImage}
+											alt="参考图"
+											className="h-12 w-12 object-cover rounded-lg border border-border cursor-pointer"
+											onClick={() => setShowReferencePicker(true)}
+										/>
+										<button
+											onClick={() => setReferenceImage(null)}
+											className="absolute -top-1.5 -right-1.5 p-0.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+											title="移除参考图"
+										>
+											<X className="h-3 w-3"/>
+										</button>
+									</div>
+								) : (
+									<button
+										onClick={() => setShowReferencePicker(true)}
+										className="h-12 w-12 flex items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+										title="添加参考图"
+									>
+										<Plus className="h-4 w-4"/>
+									</button>
+								)}
+								<span className="text-xs text-muted-foreground">
+									{referenceImage ? '风格/构图将参考此图' : '可选，影响生成风格'}
+								</span>
+							</div>
+						)}
 
 						{/* 一键生成按钮 */}
 						<button
@@ -966,6 +1006,27 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 				/>
 			)}
 
+			{/* 参考图选择模态框 */}
+			{showReferencePicker && (
+				<ImageSelectionModal
+					isOpen={showReferencePicker}
+					onClose={() => setShowReferencePicker(false)}
+					onImageSelect={(imageUrl) => {
+						setReferenceImage(imageUrl);
+						setShowReferencePicker(false);
+					}}
+					coverNumber={aiTargetCover}
+					aspectRatio={aiTargetCover === 1 ? '2.25:1' : '1:1'}
+					selectedImages={selectedImages}
+					getDimensions={() => getDimensions(aiTargetCover)}
+					settings={settings}
+					onOpenAISettings={onOpenAISettings}
+					uploadedImages={uploadedImages}
+					skipCrop={true}
+					title="选择参考图"
+				/>
+			)}
+
 			{/* AI 生成图片预览弹窗 */}
 			{previewImageId && (() => {
 				const previewUrl = aiImageUrlMap.get(previewImageId);
@@ -1001,9 +1062,11 @@ export const CoverDesigner: React.FC<CoverDesignerProps> = ({
 									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
 										{AI_IMAGE_MODELS.find(m => m.value === previewMeta.model)?.label || previewMeta.model}
 									</span>
-									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
-										{styleLabels[previewMeta.style] || previewMeta.style}
-									</span>
+									{previewMeta.style && (
+										<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
+											{styleLabels[previewMeta.style] || previewMeta.style}
+										</span>
+									)}
 									<span className="px-2 py-1 text-xs bg-black/60 text-white rounded-md">
 										{previewMeta.aspectRatio}
 									</span>

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.0] - 2026-04-19
+
+- 封面提示词升级为两步推理（keyIdea 提炼文章主旨 → visualMetaphor 视觉隐喻 → positivePrompt），取样范围扩大到头/中/尾三段拼接
+- 封面生成支持参考图（仅 Nano Banana Pro 生效）：从已上传图库选择一张作为视觉参考
+- 重构：七牛云上传逻辑从 Toolbar.tsx 抽取到独立 qiniuUpload 服务
+
 ## [0.24.0] - 2026-04-19
 
 - 工具栏支持拖拽调整宽度（328-800px，localStorage 持久化）
