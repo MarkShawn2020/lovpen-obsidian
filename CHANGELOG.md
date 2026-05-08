@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.25.4] - 2026-05-09
+
+- 支持 Obsidian wiki link 格式 `[[Page]]`、`[[Page|Alias]]`、`[[Page#Heading]]` 的格式化
+- 外部 URL 形式的 wiki link 会复用现有链接脚注处理链路
+
 ## [0.25.3] - 2026-05-09
 
 - 修复 BRAT 安装后点击模板套装提示“主题资源未下载”的问题
