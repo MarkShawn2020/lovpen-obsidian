@@ -7,6 +7,7 @@ import type {Template as TemplateConfig} from '@lovpen/shared';
 import type {TemplateKitOperationResult} from './template-kit-types';
 import TemplateKitManager from "./template-kit-manager";
 import {getLovpenPluginDir} from "./utils";
+import {BUILTIN_HTML_TEMPLATES} from "./builtin-assets";
 
 // 定义模板数据类型
 export interface TemplateData {
@@ -27,6 +28,7 @@ export default class TemplateManager {
 	private static instance: TemplateManager;
 	private app: App;
 	private templates: Map<string, HtmlTemplate> = new Map();
+	private assetsDir: string;
 	private templateDir: string;
 
 	private constructor() {
@@ -41,8 +43,30 @@ export default class TemplateManager {
 
 	public setup(app: App, manifest?: PluginManifest): void {
 		this.app = app;
-		this.templateDir = `${getLovpenPluginDir(this.app, manifest)}/assets/templates/`;
+		const pluginDir = getLovpenPluginDir(this.app, manifest);
+		this.assetsDir = `${pluginDir}/assets/`;
+		this.templateDir = `${this.assetsDir}templates/`;
 		logger.info('模板目录:', this.templateDir);
+	}
+
+	private async ensureBundledTemplateFiles(): Promise<void> {
+		const adapter = this.app.vault.adapter;
+
+		if (!await adapter.exists(this.assetsDir)) {
+			await adapter.mkdir(this.assetsDir);
+		}
+
+		if (!await adapter.exists(this.templateDir)) {
+			logger.warn('[TemplateManager] 模板目录不存在，正在写入内置模板:', this.templateDir);
+			await adapter.mkdir(this.templateDir);
+		}
+
+		for (const [templateName, content] of Object.entries(BUILTIN_HTML_TEMPLATES)) {
+			const templatePath = `${this.templateDir}${templateName}.html`;
+			if (!await adapter.exists(templatePath)) {
+				await adapter.write(templatePath, content);
+			}
+		}
 	}
 
 	// 加载所有模板
@@ -50,12 +74,7 @@ export default class TemplateManager {
 		try {
 			const adapter = this.app.vault.adapter;
 			logger.info('[TemplateManager] 检查模板目录:', this.templateDir);
-			const templateExists = await adapter.exists(this.templateDir);
-
-			if (!templateExists) {
-				logger.warn('[TemplateManager] 模板目录不存在，尝试创建:', this.templateDir);
-				await adapter.mkdir(this.templateDir);
-			}
+			await this.ensureBundledTemplateFiles();
 
 			const files = await adapter.list(this.templateDir);
 			logger.info('[TemplateManager] 发现文件:', files.files);

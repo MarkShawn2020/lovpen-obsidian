@@ -3,6 +3,7 @@ import {logger} from '../shared/src/logger';
 import LovpenPlugin from './main';
 import TemplateManager from './template-manager';
 import {getLovpenPluginDir} from './utils';
+import {BUILTIN_TEMPLATE_KITS} from './builtin-assets';
 import type {Template, TemplateCollection} from '@lovpen/shared';
 import type {
 	TemplateKitApplyOptions,
@@ -170,6 +171,7 @@ export default class TemplateKitManager extends Component {
 		try {
 			const pluginDir = getLovpenPluginDir(this.app, this.plugin.manifest);
 			const kitsFile = `${pluginDir}/assets/${this.KITS_FILE_NAME}`;
+			await this.ensureBundledKitsFile(pluginDir, kitsFile);
 			const content = await this.app.vault.adapter.read(kitsFile);
 			const parsed = JSON.parse(content);
 
@@ -183,10 +185,39 @@ export default class TemplateKitManager extends Component {
 			} else {
 				this.collection = parsed;
 			}
+
+			if (this.ensureBuiltInKitsPresent()) {
+				await this.saveKits();
+			}
 		} catch (error) {
 			logger.warn('[TemplateKitManager] Could not load kits:', error);
 			this.collection = {version: '2.0.0', templates: []};
 		}
+	}
+
+	private async ensureBundledKitsFile(pluginDir: string, kitsFile: string): Promise<void> {
+		const adapter = this.app.vault.adapter;
+		const kitsDir = `${pluginDir}/assets`;
+
+		if (!await adapter.exists(kitsDir)) {
+			await adapter.mkdir(kitsDir);
+		}
+
+		if (!await adapter.exists(kitsFile)) {
+			await adapter.write(kitsFile, JSON.stringify(BUILTIN_TEMPLATE_KITS, null, '\t'));
+		}
+	}
+
+	private ensureBuiltInKitsPresent(): boolean {
+		const existingIds = new Set(this.collection.templates.map(template => template.id));
+		const missingBuiltIns = BUILTIN_TEMPLATE_KITS.templates.filter(template => !existingIds.has(template.id));
+
+		if (missingBuiltIns.length === 0) {
+			return false;
+		}
+
+		this.collection.templates = [...missingBuiltIns, ...this.collection.templates];
+		return true;
 	}
 
 	private migrateV1Kit(kit: any): Template {

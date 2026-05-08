@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.2] - 2026-05-09
+
+- 修复 BRAT 安装后模板套装列表为空的问题
+- 将内置模板套装和 HTML 模板打包进插件主文件，缺失资源时自动补齐
+- 为 BRAT 三件套安装场景补齐 `template-kits.json` 与 `assets/templates/*.html`
+
 ## [0.25.1] - 2026-05-09
 
 - 支持通过 BRAT 从 GitHub Release 安装 LovPen 插件
