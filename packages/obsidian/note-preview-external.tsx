@@ -11,7 +11,7 @@ import {UnifiedPluginManager} from "./shared/plugin/unified-plugin-system";
 import {NMPSettings} from "./settings";
 import TemplateManager from "./template-manager";
 import {ReactAPIService} from "./services/ReactAPIService";
-import {uevent} from "./utils";
+import {getLovpenPluginDir, uevent} from "./utils";
 import {persistentStorageService} from "@/services/persistentStorage";
 import {logger, findScreenshotElement, applyCodeBlockScale} from "@lovpen/shared";
 import {domToPng} from "modern-screenshot";
@@ -28,6 +28,9 @@ import {
 	ReactSettings
 } from "./types/react-api-types";
 import {TemplateKitBasicInfo} from "./template-kit-types";
+
+declare const __LOVPEN_REACT_IIFE__: string;
+declare const __LOVPEN_REACT_CSS__: string;
 
 export class NotePreviewExternal extends ItemView implements MDRendererCallback {
 	container: Element;
@@ -977,6 +980,10 @@ ${customCSS}`;
 	// 🔑 启用 Shadow DOM 实现样式隔离，确保 Obsidian 端效果与 Web 端一致
 	private readonly USE_SHADOW_DOM = true;
 
+	private getBundledReactCSS(): string {
+		return __LOVPEN_REACT_CSS__;
+	}
+
 	async buildUI() {
 		this.container = this.containerEl.children[1];
 		this.container.empty();
@@ -1040,17 +1047,11 @@ ${customCSS}`;
 			const viteDevServerUrl = (window as any).__LOVPEN_HMR_URL__ || 'http://localhost:5173';
 			const ok = await this.loadHMRCSSToShadowRoot(viteDevServerUrl);
 			if (!ok) {
-				const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
-				if (pluginDir) {
-					await this.loadExternalCSS(pluginDir);
-				}
+				await this.loadExternalCSS(getLovpenPluginDir(this.app));
 			}
 		} else {
 			// 生产模式：从插件目录加载打包的 CSS
-			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
-			if (pluginDir) {
-				await this.loadExternalCSS(pluginDir);
-			}
+			await this.loadExternalCSS(getLovpenPluginDir(this.app));
 		}
 	}
 
@@ -1151,12 +1152,14 @@ ${customCSS}`;
 				delete (window as any).__LOVPEN_COMPILED_CSS__;
 			}
 			
-			// Fall back to bundled version (production mode or dev server not available)
 			const adapter = this.app.vault.adapter;
-			const pluginDir = (this.app as any).plugins.plugins["lovpen"].manifest.dir;
+			const pluginDir = getLovpenPluginDir(this.app);
 			const scriptPath = `${pluginDir}/frontend/lovpen-react.iife.js`;
 
-			const scriptContent = await adapter.read(scriptPath);
+			let scriptContent = __LOVPEN_REACT_IIFE__;
+			if (!scriptContent) {
+				scriptContent = await adapter.read(scriptPath);
+			}
 
 			// 创建script标签并执行
 			const script = document.createElement('script');
@@ -1272,7 +1275,10 @@ ${customCSS}`;
 
 			const cssPath = `${pluginDir}/frontend/style.css`;
 			const adapter = this.app.vault.adapter;
-			const cssContent = await adapter.read(cssPath);
+			let cssContent = this.getBundledReactCSS();
+			if (!cssContent) {
+				cssContent = await adapter.read(cssPath);
+			}
 
 			// 🔑 将 CSS 注入到 Shadow Root 内，而不是 document.head
 			// 检查是否已经有这个CSS
@@ -1299,15 +1305,14 @@ ${customCSS}`;
 	 */
 	private async loadExternalCSSToHead() {
 		try {
-			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
-			if (!pluginDir) {
-				console.warn("[LovPen] 无法获取插件目录");
-				return;
-			}
+			const pluginDir = getLovpenPluginDir(this.app);
 
 			const cssPath = `${pluginDir}/frontend/style.css`;
 			const adapter = this.app.vault.adapter;
-			const cssContent = await adapter.read(cssPath);
+			let cssContent = this.getBundledReactCSS();
+			if (!cssContent) {
+				cssContent = await adapter.read(cssPath);
+			}
 
 			// 检查是否已经有这个CSS
 			const existingStyle = document.head.querySelector('style[data-lovpen-react]');

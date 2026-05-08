@@ -1,11 +1,12 @@
 import Handlebars from 'handlebars';
-import {App, Notice} from 'obsidian';
+import {App, Notice, PluginManifest} from 'obsidian';
 import {Marked} from 'marked';
 
 import {logger} from "../shared/src/logger";
 import type {Template as TemplateConfig} from '@lovpen/shared';
 import type {TemplateKitOperationResult} from './template-kit-types';
 import TemplateKitManager from "./template-kit-manager";
+import {getLovpenPluginDir} from "./utils";
 
 // 定义模板数据类型
 export interface TemplateData {
@@ -38,9 +39,9 @@ export default class TemplateManager {
 		return TemplateManager.instance;
 	}
 
-	public setup(app: App): void {
+	public setup(app: App, manifest?: PluginManifest): void {
 		this.app = app;
-		this.templateDir = `${this.app.vault.configDir}/plugins/obsidian-lovpen/assets/templates/`;
+		this.templateDir = `${getLovpenPluginDir(this.app, manifest)}/assets/templates/`;
 		logger.info('模板目录:', this.templateDir);
 	}
 

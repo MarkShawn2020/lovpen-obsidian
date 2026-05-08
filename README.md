@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/markshawn2020/lovpen/releases"><img src="https://img.shields.io/github/v/release/markshawn2020/lovpen" alt="GitHub release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/markshawn2020/lovpen" alt="License"></a>
-  <a href="https://github.com/markshawn2020/lovpen/releases"><img src="https://img.shields.io/github/downloads/markshawn2020/lovpen/total" alt="Downloads"></a>
+  <a href="https://github.com/markshawn2020/lovpen-obsidian/releases"><img src="https://img.shields.io/github/v/release/markshawn2020/lovpen-obsidian" alt="GitHub release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/markshawn2020/lovpen-obsidian" alt="License"></a>
+  <a href="https://github.com/markshawn2020/lovpen-obsidian/releases"><img src="https://img.shields.io/github/downloads/markshawn2020/lovpen-obsidian/total" alt="Downloads"></a>
 </p>
 
 ---
@@ -49,6 +49,13 @@ LovPen transforms your Obsidian markdown notes into professionally formatted con
 
 ## Installation
 
+### BRAT Installation
+Add this repository in BRAT:
+
+```text
+markshawn2020/lovpen-obsidian
+```
+
 ### Manual Installation
 ```bash
 curl -L https://github.com/markshawn2020/lovpen-obsidian/releases/latest/download/obsidian-lovpen.zip -o obsidian-lovpen.zip
@@ -57,7 +64,7 @@ unzip obsidian-lovpen.zip -d /path/to/vault/.obsidian/plugins/
 
 ### Development
 ```bash
-git clone https://github.com/markshawn2020/lovpen
+git clone https://github.com/markshawn2020/lovpen-obsidian
 cd lovpen-obsidian
 pnpm install
 pnpm build
@@ -158,8 +165,8 @@ pnpm check                # Type checking
 
 ## Support
 
-- [GitHub Issues](https://github.com/markshawn2020/lovpen/issues)
-- [GitHub Discussions](https://github.com/markshawn2020/lovpen/discussions)
+- [GitHub Issues](https://github.com/markshawn2020/lovpen-obsidian/issues)
+- [GitHub Discussions](https://github.com/markshawn2020/lovpen-obsidian/discussions)
 
 ## License
 

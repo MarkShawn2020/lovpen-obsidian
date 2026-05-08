@@ -4,6 +4,7 @@ import {cleanMathCache} from "./markdown-plugins/math";
 import {LinkDescriptionMode, NMPSettings} from "./settings";
 import TemplateManager from "./template-manager";
 import {PlatformType} from "./types";
+import {getLovpenPluginDir} from "./utils";
 
 import {logger} from "../shared/src/logger";
 
@@ -251,7 +252,7 @@ export class LovpenSettingTab extends PluginSettingTab {
 						const path = require("path");
 						const adapter = this.app.vault.adapter as FileSystemAdapter;
 						const vaultRoot = adapter.getBasePath();
-						const templatesPath = `${this.app.vault.configDir}/plugins/obsidian-lovpen/templates/`;
+						const templatesPath = `${getLovpenPluginDir(this.app, this.plugin.manifest)}/assets/templates/`;
 						const dst = path.join(vaultRoot, templatesPath);
 						shell.openPath(dst);
 					} catch (error) {

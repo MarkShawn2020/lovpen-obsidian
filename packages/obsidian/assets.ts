@@ -3,6 +3,7 @@ import {App, FileSystemAdapter, Notice, PluginManifest, requestUrl, TAbstractFil
 import DefaultHighlight from "./default-highlight";
 import DefaultTheme from "./default-theme";
 import {logger} from "../shared/src/logger";
+import {getLovpenPluginDir} from "./utils";
 
 
 export interface Theme {
@@ -171,7 +172,7 @@ export default class AssetsManager {
 	}
 
 	getThemeURL() {
-		return `https://github.com/markshawn2020/lovpen/releases/download/1.1.3/assets.zip`;
+		return `https://github.com/markshawn2020/lovpen-obsidian/releases/download/v${this.manifest.version}/assets.zip`;
 	}
 
 	async downloadThemes() {
@@ -332,7 +333,8 @@ export default class AssetsManager {
 	private _setup(app: App, manifest: PluginManifest) {
 		this.app = app;
 		this.manifest = manifest;
-		this.assetsPath = this.app.vault.configDir + '/plugins/obsidian-lovpen/assets/';
+		const pluginDir = getLovpenPluginDir(this.app, manifest);
+		this.assetsPath = `${pluginDir}/assets/`;
 		this.themesPath = this.assetsPath + 'themes/';
 		this.hilightPath = this.assetsPath + 'highlights/';
 		this.themeCfg = this.assetsPath + 'themes.json';

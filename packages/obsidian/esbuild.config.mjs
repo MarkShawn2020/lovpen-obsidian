@@ -2,7 +2,7 @@ import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
 import {copy} from "esbuild-plugin-copy";
-import {existsSync, mkdirSync, watch, writeFileSync} from "fs";
+import {existsSync, mkdirSync, readFileSync, watch} from "fs";
 import path from "path";
 import {execSync} from "child_process";
 
@@ -15,8 +15,19 @@ if you want to view the source, please visit the github repository of this plugi
 
 const prod = process.env.NODE_ENV === "production";
 const obsidianVaultPath = process.env.OBSIDIAN_VAULT_PATH;
-const obsidianPluginPath = obsidianVaultPath ? path.join(obsidianVaultPath, '.obsidian', 'plugins', 'obsidian-lovpen') : process.env.OBSIDIAN_PLUGIN_PATH;
+const obsidianPluginPath = obsidianVaultPath ? path.join(obsidianVaultPath, '.obsidian', 'plugins', 'lovpen') : process.env.OBSIDIAN_PLUGIN_PATH;
 console.log({obsidianVaultPath, obsidianPluginPath});
+
+const readFrontendDistFile = (fileName) => {
+	const filePath = path.resolve("../frontend/dist", fileName);
+	if (!existsSync(filePath)) {
+		if (prod) {
+			throw new Error(`Missing frontend dist file: ${filePath}`);
+		}
+		return "";
+	}
+	return readFileSync(filePath, "utf8");
+};
 
 
 // 自动同步到 Obsidian 插件目录的函数
@@ -88,13 +99,18 @@ const context = await esbuild.context({
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "dist/main.js",
+	define: {
+		__LOVPEN_REACT_IIFE__: JSON.stringify(prod ? readFrontendDistFile("lovpen-react.iife.js") : ""),
+		__LOVPEN_REACT_CSS__: JSON.stringify(prod ? readFrontendDistFile("style.css") : ""),
+	},
 	plugins: [
 		nativeNodeModulesPlugin,
 		copy({
 			// 复制以下资源到 dist/assets 目录
 			assets: [
 				// 复制插件所需的其他文件到 dist 目录
-				{from: ['./manifest.json'], to: ['./manifest.json'], outDir: './dist'},
+				{from: ['../../manifest.json'], to: ['./manifest.json'], outDir: './dist'},
+				{from: ['./styles.css'], to: ['./styles.css'], outDir: './dist'},
 				{from: ['../assets/**/*'], to: ['./assets/'], outDir: './dist'},
 				{from: ['../frontend/dist/**/*'], to: ['./frontend/'], outDir: './dist'},
 			],

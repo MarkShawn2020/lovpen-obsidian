@@ -1,5 +1,6 @@
 import {App} from "obsidian";
 import {logger} from "../shared/src/logger";
+import {getLovpenPluginDir} from "./utils";
 
 /**
  * 样式加载器 - 负责动态加载和管理组件样式
@@ -37,7 +38,7 @@ export class StyleLoader {
 				return this.getInlineAdmonitionStyles();
 			}
 			
-			const pluginDir = `${this.app.vault.configDir}/plugins/${manifest.id}`;
+			const pluginDir = getLovpenPluginDir(this.app, manifest);
 			const admonitionStylePath = `${pluginDir}/assets/styles/components/admonition.css`;
 			
 			// 尝试读取样式文件
@@ -74,7 +75,7 @@ export class StyleLoader {
 				return '';
 			}
 			
-			const pluginDir = `${this.app.vault.configDir}/plugins/${manifest.id}`;
+			const pluginDir = getLovpenPluginDir(this.app, manifest);
 			const themeStylePath = `${pluginDir}/assets/styles/themes/${theme}/admonition.css`;
 			
 			if (await this.app.vault.adapter.exists(themeStylePath)) {

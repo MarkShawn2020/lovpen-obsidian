@@ -31,7 +31,7 @@ export default class LovpenPlugin extends Plugin {
 
 		// 初始化模板管理器
 		const templateManager = TemplateManager.getInstance();
-		templateManager.setup(this.app);
+		templateManager.setup(this.app, this.manifest);
 		await templateManager.loadTemplates();
 
 		// 初始化模板套装管理器

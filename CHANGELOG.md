@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.1] - 2026-05-09
+
+- 支持通过 BRAT 从 GitHub Release 安装 LovPen 插件
+- 发布资产新增 `main.js`、`manifest.json`、`styles.css` 和 `assets.zip`
+- 修复插件资源路径硬编码，兼容 BRAT 的 `lovpen` 插件目录
+
 ## [0.25.0] - 2026-04-19
 
 - 封面提示词升级为两步推理（keyIdea 提炼文章主旨 → visualMetaphor 视觉隐喻 → positivePrompt），取样范围扩大到头/中/尾三段拼接

@@ -2,7 +2,7 @@ import {App, Component, Notice} from 'obsidian';
 import {logger} from '../shared/src/logger';
 import LovpenPlugin from './main';
 import TemplateManager from './template-manager';
-import {NMPSettings} from './settings';
+import {getLovpenPluginDir} from './utils';
 import type {Template, TemplateCollection} from '@lovpen/shared';
 import type {
 	TemplateKitApplyOptions,
@@ -168,11 +168,7 @@ export default class TemplateKitManager extends Component {
 
 	private async loadKits(): Promise<void> {
 		try {
-			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
-			if (!pluginDir) {
-				this.collection = {version: '2.0.0', templates: []};
-				return;
-			}
+			const pluginDir = getLovpenPluginDir(this.app, this.plugin.manifest);
 			const kitsFile = `${pluginDir}/assets/${this.KITS_FILE_NAME}`;
 			const content = await this.app.vault.adapter.read(kitsFile);
 			const parsed = JSON.parse(content);
@@ -211,8 +207,7 @@ export default class TemplateKitManager extends Component {
 
 	private async saveKits(): Promise<void> {
 		try {
-			const pluginDir = (this.app as any).plugins.plugins["lovpen"]?.manifest?.dir;
-			if (!pluginDir) return;
+			const pluginDir = getLovpenPluginDir(this.app, this.plugin.manifest);
 			const kitsDir = `${pluginDir}/assets`;
 			if (!await this.app.vault.adapter.exists(kitsDir)) {
 				await this.app.vault.adapter.mkdir(kitsDir);

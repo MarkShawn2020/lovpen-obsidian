@@ -30,9 +30,8 @@ jobs:
           node-version: '20'
           
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
           run_install: false
 
       - name: Get pnpm store directory
@@ -55,15 +54,6 @@ jobs:
           # 确保 workspace 依赖被正确链接
           pnpm install
 
-      - name: Type check
-        run: pnpm check
-
-      - name: Build project
-        run: pnpm build
-
-      - name: Download highlights
-        run: pnpm download-highlights
-
       - name: Get version from tag or input
         id: get_version
         run: |
@@ -75,15 +65,54 @@ jobs:
             echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Sync workflow dispatch version
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          node <<'NODE'
+          const {readFileSync, writeFileSync} = require('fs');
+          const version = process.env.RELEASE_VERSION;
+          const files = [
+            'package.json',
+            'manifest.json',
+            'packages/obsidian/manifest.json',
+            'packages/obsidian/package.json',
+            'packages/frontend/package.json',
+          ];
+          for (const file of files) {
+            const json = JSON.parse(readFileSync(file, 'utf8'));
+            json.version = version;
+            writeFileSync(file, JSON.stringify(json, null, '\t') + '\n');
+          }
+          NODE
+
+      - name: Type check
+        run: pnpm check
+
+      - name: Download highlights
+        run: pnpm download-highlights
+
+      - name: Build project
+        run: pnpm build
+
       - name: Prepare release files
         run: |
           # 创建完整插件包，直接复制 dist 目录内容
-          mkdir -p obsidian-lovpen
-          cp -r packages/obsidian/dist/* obsidian-lovpen/
+          mkdir -p lovpen
+          cp -r packages/obsidian/dist/* lovpen/
 
           # 创建压缩包（固定文件名，便于 curl 安装）
           mkdir -p release-files
-          zip -r release-files/obsidian-lovpen.zip obsidian-lovpen/
+          zip -r release-files/obsidian-lovpen.zip lovpen/
+
+          # BRAT 直接读取这些 release assets
+          cp packages/obsidian/dist/main.js release-files/main.js
+          cp packages/obsidian/dist/manifest.json release-files/manifest.json
+          cp packages/obsidian/dist/styles.css release-files/styles.css
+
+          # 插件设置页下载的主题/模板资源包
+          (cd packages/obsidian/dist/assets && zip -r "$GITHUB_WORKSPACE/release-files/assets.zip" .)
 
       - name: Generate changelog
         id: changelog
@@ -129,7 +158,7 @@ jobs:
             3. 在 Obsidian 设置中启用 LovPen 插件
             
             ### 方法二：BRAT 插件安装
-            在 BRAT 插件中添加仓库地址：`markshawn2020/lovpen`
+            在 BRAT 插件中添加仓库地址：`markshawn2020/lovpen-obsidian`
             
             ## 主要特性
             - 🚀 一键将 Obsidian 笔记发布到微信公众号、知乎、小红书、Twitter
@@ -138,6 +167,10 @@ jobs:
             - 🔗 智能链接处理，针对微信公众号优化
             - 📝 模板系统，自定义内容渲染
           files: |
+            release-files/main.js
+            release-files/manifest.json
+            release-files/styles.css
+            release-files/assets.zip
             release-files/obsidian-lovpen.zip
           draft: false
           prerelease: false

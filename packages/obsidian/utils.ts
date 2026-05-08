@@ -1,9 +1,15 @@
-import {Platform, requestUrl} from "obsidian";
+import {Platform, requestUrl, type App, type PluginManifest} from "obsidian";
 
 import {logger} from "../shared/src/logger";
 
 let PluginVersion = "0.0.0";
 let PlugPlatform = "obsidian";
+export const LOVPEN_PLUGIN_ID = "lovpen";
+
+export function getLovpenPluginDir(app: App, manifest?: PluginManifest) {
+	const pluginManifest = manifest ?? (app as any).plugins?.plugins?.[LOVPEN_PLUGIN_ID]?.manifest;
+	return pluginManifest?.dir ?? `${app.vault.configDir}/plugins/${pluginManifest?.id ?? LOVPEN_PLUGIN_ID}`;
+}
 
 export function setVersion(version: string) {
 	PluginVersion = version;
@@ -225,4 +231,3 @@ export function uevent(name: string) {
 			console.error("Failed to send event: " + url, error);
 		});
 }
-
