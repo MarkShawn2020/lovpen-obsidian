@@ -97,6 +97,7 @@ const context = await esbuild.context({
 	target: "es2018",
 	logLevel: "info",
 	loader: {
+		".css": "text",
 		".html": "text",
 	},
 	sourcemap: prod ? false : "inline",

@@ -4,6 +4,12 @@ import DefaultHighlight from "./default-highlight";
 import DefaultTheme from "./default-theme";
 import {logger} from "../shared/src/logger";
 import {getLovpenPluginDir} from "./utils";
+import {
+	BUILTIN_HIGHLIGHT_CSS,
+	BUILTIN_HIGHLIGHTS_CONFIG,
+	BUILTIN_THEME_CSS,
+	BUILTIN_THEMES_CONFIG,
+} from "./builtin-assets";
 
 
 export interface Theme {
@@ -54,9 +60,39 @@ export default class AssetsManager {
 	}
 
 	async loadAssets() {
+		await this.ensureBundledAssets();
 		await this.loadThemes();
 		await this.loadHighlights();
 		await this.loadCustomCSS();
+	}
+
+	private async ensureDir(path: string): Promise<void> {
+		if (!await this.app.vault.adapter.exists(path)) {
+			await this.app.vault.adapter.mkdir(path);
+		}
+	}
+
+	private async writeTextIfMissing(path: string, content: string): Promise<void> {
+		if (!await this.app.vault.adapter.exists(path)) {
+			await this.app.vault.adapter.write(path, content);
+		}
+	}
+
+	private async ensureBundledAssets(): Promise<void> {
+		await this.ensureDir(this.assetsPath);
+		await this.ensureDir(this.themesPath);
+		await this.ensureDir(this.hilightPath);
+
+		await this.writeTextIfMissing(this.themeCfg, JSON.stringify(BUILTIN_THEMES_CONFIG, null, '\t'));
+		await this.writeTextIfMissing(this.hilightCfg, JSON.stringify(BUILTIN_HIGHLIGHTS_CONFIG, null, '\t'));
+
+		for (const [themeName, css] of Object.entries(BUILTIN_THEME_CSS)) {
+			await this.writeTextIfMissing(`${this.themesPath}${themeName}.css`, css);
+		}
+
+		for (const [highlightName, css] of Object.entries(BUILTIN_HIGHLIGHT_CSS)) {
+			await this.writeTextIfMissing(`${this.hilightPath}${highlightName}.css`, css);
+		}
 	}
 
 	async loadThemes() {
